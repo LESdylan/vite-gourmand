@@ -1,0 +1,79 @@
+{
+  "name": "Menu",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Titre du menu"
+    },
+    "description": {
+      "type": "string",
+      "description": "Pr\u00e9sentation du menu"
+    },
+    "theme": {
+      "type": "string",
+      "enum": [
+        "noel",
+        "paques",
+        "classique",
+        "evenement"
+      ],
+      "description": "Th\u00e8me du menu"
+    },
+    "regime": {
+      "type": "string",
+      "enum": [
+        "classique",
+        "vegetarien",
+        "vegan",
+        "sans_gluten",
+        "halal"
+      ],
+      "description": "R\u00e9gime alimentaire"
+    },
+    "min_persons": {
+      "type": "number",
+      "description": "Nombre de personnes minimum"
+    },
+    "base_price": {
+      "type": "number",
+      "description": "Prix pour le nombre minimum de personnes"
+    },
+    "price_per_person": {
+      "type": "number",
+      "description": "Prix par personne suppl\u00e9mentaire"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URLs des images de la galerie"
+    },
+    "conditions": {
+      "type": "string",
+      "description": "Conditions du menu (d\u00e9lai de commande, stockage, etc.)"
+    },
+    "advance_days": {
+      "type": "number",
+      "description": "Nombre de jours de commande \u00e0 l'avance requis"
+    },
+    "stock": {
+      "type": "number",
+      "description": "Stock disponible (nombre de commandes possibles)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Menu actif ou non"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "theme",
+    "regime",
+    "min_persons",
+    "base_price"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "Review",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID de l'utilisateur"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Nom de l'utilisateur"
+    },
+    "order_id": {
+      "type": "string",
+      "description": "ID de la commande associ\u00e9e"
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Note de 1 \u00e0 5"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Commentaire"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "en_attente",
+        "approuve",
+        "refuse"
+      ],
+      "default": "en_attente",
+      "description": "Statut de validation"
+    }
+  },
+  "required": [
+    "user_id",
+    "order_id",
+    "rating"
+  ]
+}
