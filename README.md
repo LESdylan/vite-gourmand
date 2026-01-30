@@ -1,3 +1,51 @@
-## RESSOURCES
+# Vite & Gourmand - A Modern Education Restaurant Webpage (DRAFT)
 
+*This project was created as part of the Studi curriculum by dylan lesieur*
+
+> A from scratch web page designed to be hackable, observable and pleasant to use.
+
+---
+
+## What Is This Project ?
+Vite & Gourmand is a company constituted of two people Julie and José. To overcome the stream flow of client and new opportuntities both of them had the idea to create a webpage that make their webpage more visible.
+They chose to hire a tenary company that would provide the service of building this webpage for them.
+
+`FastDev` is the name of the company and chosen to lead teh project as soon as possible. 
+Delivering a quick and efficient prototype but also appealing enouh and accessile are rules that make this task harder..
+
+From this `30/01/2026`. I've got around two weeks to come with a solution and make it both operational, and practical.
+
+The main purpose of this webpage is to show the menus and give the possibility to the user to order their dishes..
+
+[clik here to access the requirements](docs/requirements.md)
+
+## Quick Start
+
+
+## Why This Project ?
+This project is my ECF alias continual formation assesment from my other school studi that I applied to pass the title of webd eveloper full stack.
+
+The project gives a certain amount of freedoms and requirements that I need follow along the way I'm doing the webpage.
+
+## Current State of the project
+
+- **01/30/2026** | Now working on docs and automations
+	1.	understand deeply the subject
+	2.	chose format, lint, tester, debugger tools to improve workflow and quality of integrations.
+
+## References & Documentations
 - [RGAA](https://accessibilite.numerique.gouv.fr/)
+
+## Use Of AI
+**Documentation & Research** - Used to clarify ambiguities in edge cases where conventions differ and to research complex topics not detailed in standard textbooks, ensuring realistic solutinos within the project's scope.
+
+**Concept explanation** - Served as a study aid to solidify the understanding of abstract functionalities and architectural requirements necessary for building a 
+webpage
+
+**Code Generation** - Not used for logic implementation; limited to clarifcation stufy
+
+
+## ❤️ Why I Loved Working On It
+- It's a genuine, real-world project I could reason about
+- it rewards careful thought about APIs, ownership, and semantics
+- It's fun to see it get closer and closer to real project that we could use daily
