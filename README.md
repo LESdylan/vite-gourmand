@@ -5,6 +5,7 @@
 > A from scratch web page designed to be hackable, observable and pleasant to use.
 
 ---
+## Quick Start
 
 ## What Is This Project ?
 Vite & Gourmand is a company constituted of two people Julie and José. To overcome the stream flow of client and new opportuntities both of them had the idea to create a webpage that make their webpage more visible.
@@ -19,7 +20,11 @@ The main purpose of this webpage is to show the menus and give the possibility t
 
 [clik here to access the requirements](docs/requirements.md)
 
-## Quick Start
+## Architecture of this webpage
+
+### Database
+The firs things we're very sure about is how the datas has to be treated as the school gave us how to implement them throught a diagram UML.
+
 
 
 ## Why This Project ?
@@ -35,6 +40,12 @@ The project gives a certain amount of freedoms and requirements that I need foll
 
 ## References & Documentations
 - [RGAA](https://accessibilite.numerique.gouv.fr/)
+- [Glossay](docs/glossary.md)
+- [Uml](https://www.geeksforgeeks.org/system-design/unified-modeling-language-uml-introduction/)
+- [Github project](https://github.com/users/LESdylan/projects/3)
+- [convert md to pdf with dillinger.io](https://dillinger.io/) || [convert md to pdf with markdowntopdf](https://markdowntopdf.com/)
+- [Git workflow](https://danielkummer.github.io/git-flow-cheatsheet/index.es_ES.html)
+- [docker Docs](https://docs.docker.com/compose/gettingstarted)
 
 ## Use Of AI
 **Documentation & Research** - Used to clarify ambiguities in edge cases where conventions differ and to research complex topics not detailed in standard textbooks, ensuring realistic solutinos within the project's scope.
