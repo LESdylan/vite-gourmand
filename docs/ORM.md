@@ -45,4 +45,15 @@ This snippet above, will automatically run the SQL behind the scenes
 SELECT * FROM users WHERE id = 1;
 ```
 
-## 
+Prisma can do everything PDO does, and even more, but in a Typescript-friendly way. Let me break it down:
+
+| Feature                                         	| PDO	     | Prisma                     		     |
+|---------------------------------------------------|------------|---------------------------------------|
+| Connects to a database                          	|✅          |	✅                        		  |
+| Lets you write SQL queries                      	|✅          |	⚠️ (optional via raw SQL) 		   |
+| Executes queries safely with prepared statements	|✅          |	✅                        		  |
+| Returns raw results                             	|✅          |	⚠️ (returns objects, raw optional) |
+| Handles type-safe queries                         |❌          |	✅       						  |
+| Supports raw SQL                                  |✅          |	✅       						  |
+| Handles migrations                                |❌          |	✅       						  |
+| Auto-generates a client for code use            	|❌          |	✅       						  |

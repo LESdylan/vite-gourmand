@@ -34,9 +34,7 @@ The project gives a certain amount of freedoms and requirements that I need foll
 
 ## Current State of the project
 
-- **01/30/2026** | Now working on docs and automations
-	1.	understand deeply the subject
-	2.	chose format, lint, tester, debugger tools to improve workflow and quality of integrations.
+
 
 ## References & Documentations
 - [RGAA](https://accessibilite.numerique.gouv.fr/)

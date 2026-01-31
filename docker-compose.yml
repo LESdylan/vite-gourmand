@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vite_gourmand_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: vite_gourmand
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./server/vite-gourmand-api
+      dockerfile: Dockerfile
+    container_name: vite_gourmand_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/vite_gourmand
+    depends_on:
+      - postgres
+    command: sh -c "npx prisma migrate deploy && node dist/main.js"
+    volumes:
+      - ./server/vite-gourmand-api/src:/app/src # Optional dev hot-reload
+      - ./server/vite-gourmand-api/prisma:/app/prisma
+
+volumes:
+  db_data:

@@ -21,3 +21,5 @@ npm install @prisma/client prisma --legacy-peer-deps
 
 `npm run start dev` --> inside the folder
 
+# To diagnose if the .env is recognized or not
+node -e "require('dotenv').config({ path: '../../.env' }); console.log(process.env.DATABASE_URL)"
