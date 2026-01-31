@@ -46,6 +46,9 @@ The project gives a certain amount of freedoms and requirements that I need foll
 - [convert md to pdf with dillinger.io](https://dillinger.io/) || [convert md to pdf with markdowntopdf](https://markdowntopdf.com/)
 - [Git workflow](https://danielkummer.github.io/git-flow-cheatsheet/index.es_ES.html)
 - [docker Docs](https://docs.docker.com/compose/gettingstarted)
+- [opinion about using TS on both side back and front](https://www.reddit.com/r/typescript/comments/uqzkuh/how_popular_is_typescript_in_backend_development/)
+- [Zod 4](https://ts-rest.com/)
+- [Powershell docs](https://learn.microsoft.com/en-us/powershell/)
 
 ## Use Of AI
 **Documentation & Research** - Used to clarify ambiguities in edge cases where conventions differ and to research complex topics not detailed in standard textbooks, ensuring realistic solutinos within the project's scope.
