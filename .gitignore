@@ -19,4 +19,4 @@ server/vite-gourmand-api/node_modules/
 server/vite-gourmand-api/test/*.ts
 server/vite-gourmand-api/.env
 setting.json
-vendor/scripts                               
+vendor/scripts

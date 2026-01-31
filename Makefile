@@ -17,7 +17,10 @@ REMOTE_SCRIPT := https://github.com/Univers42/scripts.git
 all : vendor
 
 vendor : set_scripts
+diagnostic: 
 
+
+#Third part library to help hanlding our application
 set_scripts:
 	git clone $(REMOTE_SCRIPT) $(VENDOR_DIR)/scripts
 
