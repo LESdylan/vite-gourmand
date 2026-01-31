@@ -1,108 +1,60 @@
-# =====================================================
-# Makefile – Cross-platform (Windows + Linux/macOS)
-# =====================================================
+API_DIR := vite-gourmand-api
+NPM := npm
 
-# Paths & URLs
-VENDOR_DIR := ./vendor
-REMOTE_SCRIPT := https://github.com/Univers42/scripts.git
-COMPOSE_FILE := docker-compose.yml
-RM_NODE := node -e "const fs = require('fs'); fs.rmSync(process.argv[1], { recursive: true, force: true });"
+.PHONY: install dev build start lint test prisma-generate prisma-migrate prisma-push db-init
 
-# =====================================================
-# Default target
-# =====================================================
-all: check-env vendor up
+install:
+	@cd $(API_DIR) && $(NPM) install
 
-# =====================================================
-# Environment check
-# Works on Linux/macOS and Windows (PowerShell)
-# =====================================================
-check-env:
-	@echo "Checking environment..."
-	@node -e "try { require('child_process').execSync('node -v', { stdio: 'inherit' }) } catch(e){ console.error('Node.js not found'); process.exit(1) }"
-	@node -e "try { require('child_process').execSync('docker -v', { stdio: 'inherit' }) } catch(e){ console.error('Docker not found'); process.exit(1) }"
-	@node -e "const fs = require('fs'); if (fs.existsSync('.env')) { console.log('.env found ✅') } else { console.error('.env missing ❌'); process.exit(1) }"
+dev:
+	@cd $(API_DIR) && $(NPM) run start:dev
 
-# =====================================================
-# Vendor scripts
-# =====================================================
-vendor: set_scripts
-
-VENDOR_DIR := ./vendor
-REMOTE_SCRIPT := https://github.com/Univers42/scripts.git
-
-set_scripts:
-	@echo "Setting up vendor scripts..."
-	@node -e "\
-		const fs = require('fs'); \
-		const { execSync } = require('child_process'); \
-		if (!fs.existsSync('$(VENDOR_DIR)/scripts')) { \
-			console.log('Cloning vendor scripts...'); \
-			fs.mkdirSync('$(VENDOR_DIR)', { recursive: true }); \
-			execSync('git clone $(REMOTE_SCRIPT) $(VENDOR_DIR)/scripts', { stdio: 'inherit' }); \
-		} else { \
-			console.log('Vendor scripts already exist, pulling latest...'); \
-			execSync('git -C $(VENDOR_DIR)/scripts pull', { stdio: 'inherit' }); \
-		} \
-	"
-
-
-# =====================================================
-# Docker targets
-# =====================================================
 build:
-	@echo "Building Docker containers..."
-	docker-compose -f $(COMPOSE_FILE) build
+	@cd $(API_DIR) && $(NPM) run build
 
-up:
-	@echo "Starting Docker containers..."
-	docker-compose -f $(COMPOSE_FILE) up -d
+start:
+	@cd $(API_DIR) && $(NPM) run start:prod
 
-down:
-	@echo "Stopping Docker containers..."
-	docker-compose -f $(COMPOSE_FILE) down
+lint:
+	@cd $(API_DIR) && $(NPM) run lint
 
-restart: down up
-
-logs:
-	@echo "Tailing Docker logs..."
-	docker-compose -f $(COMPOSE_FILE) logs -f
-
-ps:
-	@echo "Showing running containers..."
-	docker-compose -f $(COMPOSE_FILE) ps
-
-# =====================================================
-# Clean targets
-# =====================================================
-clean: fclean
-
-fclean:
-	@echo "Cleaning vendor scripts..."
-	$(RM_NODE) $(VENDOR_DIR)
-	@echo "Stopping and removing Docker containers and volumes..."
-	docker-compose -f $(COMPOSE_FILE) down -v --rmi all
-
-re: fclean all
-
-# =====================================================
-# Diagnostics
-# =====================================================
-diagnostic:
-	@echo "Docker version:"; docker --version
-	@echo "Docker Compose version:"; docker-compose --version
-	@echo "Running containers:"; docker ps
-	@if [ -d "$(VENDOR_DIR)/scripts" ]; then echo "Vendor scripts present ✅"; else echo "Vendor scripts missing ❌"; fi
-
-# =====================================================
-# Prisma targets (optional)
-# =====================================================
-prisma-migrate:
-	@echo "Running Prisma migrate..."
-	@node -r dotenv/config -e "require('child_process').execSync('npx prisma migrate dev --name init', { stdio: 'inherit' })"
+test:
+	@cd $(API_DIR) && $(NPM) test
 
 prisma-generate:
-	@echo "Generating Prisma client..."
-	@node -r dotenv/config -e "require('child_process').execSync('npx prisma generate', { stdio: 'inherit' })"
+	@cd $(API_DIR) && npx prisma generate --schema=prisma/schema.prisma
 
-.PHONY: all check-env vendor set_scripts build up down restart logs ps clean fclean re diagnostic prisma-migrate prisma-generate
+prisma-migrate:
+	@cd $(API_DIR) && npx prisma migrate dev --schema=prisma/schema.prisma
+
+prisma-push:
+	@cd $(API_DIR) && npx prisma db push --schema=prisma/schema.prisma
+
+# Run the SQL init script against the DB referenced by the environment variable DATABASE_URL.
+# Use double $$ so Make passes a literal $ to the shell.
+db-init:
+	@echo "Applying prisma/init.sql via psql (requires psql client and DATABASE_URL set)"
+	@PSQL_CMD="$$(which psql 2>/dev/null || true)"; \
+	if [ -z "$$PSQL_CMD" ]; then echo "psql not found in PATH"; exit 1; fi; \
+	PSQL="$$PSQL_CMD"; \
+	[ -z "$$DATABASE_URL" ] && echo "set DATABASE_URL environment variable (e.g. export DATABASE_URL='postgres://postgres:postgres@localhost:5432/vite_gourmand')" && exit 1; \
+	$$PSQL "$$DATABASE_URL" -f vite-gourmand-api/prisma/init.sql
+
+DOCKER_COMPOSE := docker-compose -f docker-compose.yml
+DEFAULT_NPM := npm
+
+.DEFAULT_GOAL := compose-up
+
+.PHONY: compose-up compose-down compose-logs db-init
+
+compose-up:
+	$(DOCKER_COMPOSE) up -d --remove-orphans
+	@echo "Waiting for postgres to be ready..."
+	@until $(DOCKER_COMPOSE) exec -T postgres pg_isready -U postgres -d vite_gourmand >/dev/null 2>&1; do sleep 1; done
+	@echo "Postgres is ready."
+
+compose-down:
+	$(DOCKER_COMPOSE) down --volumes
+
+compose-logs:
+	$(DOCKER_COMPOSE) logs -f

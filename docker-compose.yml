@@ -1,35 +1,57 @@
-version: "3.9"
+version: '3.8'
 
 services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vite_gourmand
+    volumes:
+      - vite_gourmand_db_data:/var/lib/postgresql/data
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/vite_gourmand"
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    command: ["node", "dist/main"]
+
+volumes:
+  vite_gourmand_db_data:
+
   postgres:
-    image: postgres:16-alpine
-    container_name: vite_gourmand_postgres
+    image: postgres:15-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: vite_gourmand
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
-
-  backend:
-    build:
-      context: ./server/vite-gourmand-api
-      dockerfile: Dockerfile
-    container_name: vite_gourmand_backend
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://user:password@postgres:5432/vite_gourmand
-    depends_on:
-      - postgres
-    command: sh -c "npx prisma migrate deploy && node dist/main.js"
-    volumes:
-      - ./server/vite-gourmand-api/src:/app/src # Optional dev hot-reload
-      - ./server/vite-gourmand-api/prisma:/app/prisma
+      - postgres-data:/var/lib/postgresql/data
+      # run init script on first container start
+      - ./vite-gourmand-api/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vite_gourmand"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
 volumes:
-  db_data:
+  postgres-data:
