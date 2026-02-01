@@ -98,9 +98,31 @@ reload:  ## Reload PostgreSQL container and update the database schema (DANGER: 
 	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate dev --name reload --schema=prisma/schema.prisma --create-only
 	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate reset --force --schema=prisma/schema.prisma
 
+.PHONY: seed_db_playground
+seed_db_playground: wait-for-db  ## Seed database with playground data (bcrypt-hashed passwords)
+	@echo "🌱 Seeding database with playground data..."
+	docker exec -i $(POSTGRES_SERVICE) psql -U postgres -d vite_gourmand < ./data/samples/seed_playground.sql
+	@echo "✅ Playground data seeded successfully!"
+	@echo "📋 Login credentials:"
+	@echo "   Admin:   admin@vitegourmand.fr / Admin123!"
+	@echo "   Manager: manager@vitegourmand.fr / Manager123!"
+	@echo "   Client:  alice.dupont@email.fr / Client123!"
+
 .PHONY: diagnostic
-diagnostic:  ## Run the diagnostic script
+diagnostic:  ## Run the diagnostic script (interactive REPL)
 	bash ./scripts/diagnostic.sh
+
+.PHONY: diagnostic-routines
+diagnostic-routines:  ## Check backend routines configuration
+	bash ./scripts/diagnostic.sh routines
+
+.PHONY: diagnostic-rgpd
+diagnostic-rgpd:  ## Check RGPD compliance
+	bash ./scripts/diagnostic.sh rgpd
+
+.PHONY: diagnostic-all
+diagnostic-all:  ## Run all diagnostics
+	bash ./scripts/diagnostic.sh all
 
 .PHONY: clean
 clean:  ## Remove all containers, networks, and images (keep db volume)
@@ -144,7 +166,11 @@ help:  ## Show this help message
 	@echo "  migrate        Run Prisma migrations on the database"
 	@echo "  reset          Reset the database and load schema using Prisma (WARNING: destroys data)"
 	@echo "  reload         Reload PostgreSQL container and reset DB schema (DANGER: destroys all data!)"
-	@echo "  diagnostic     Run the diagnostic script"
+	@echo "  seed_db_playground  Seed database with playground data (bcrypt-hashed passwords)"
+	@echo "  diagnostic     Run the diagnostic script (interactive REPL)"
+	@echo "  diagnostic-routines  Check backend routines configuration"
+	@echo "  diagnostic-rgpd      Check RGPD compliance"
+	@echo "  diagnostic-all       Run all diagnostics"
 	@echo "  clean          Remove all containers, networks, and images (keep db volume)"
 	@echo "  fclean         Remove all containers and images (keep volumes)"
 	@echo "  prune          Remove all containers, networks, images, and volumes (including db)"

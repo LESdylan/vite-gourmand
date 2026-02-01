@@ -16,8 +16,8 @@ model WorkingHours {
 }
 
 model User {
-  id               Int      @id @default(autoincrement())
-  email            String   @unique
+  id               Int       @id @default(autoincrement())
+  email            String    @unique
   password         String
   first_name       String
   telephone_number String
@@ -25,9 +25,19 @@ model User {
   country          String
   postal_address   String
   roleId           Int?
-  role             Role?    @relation(fields: [roleId], references: [id])
+  role             Role?     @relation(fields: [roleId], references: [id])
   publishes        Publish[]
   orders           Order[]
+  
+  // RGPD Consent tracking
+  gdprConsent      Boolean   @default(false)
+  gdprConsentDate  DateTime?
+  marketingConsent Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now()) @updatedAt
+
+  @@index([roleId])
+  @@index([email])
 }
 
 model Role {
@@ -42,7 +52,7 @@ model Publish {
   description String
   status      String
   userId      Int
-  user        User   @relation(fields: [userId], references: [id])
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Order {
@@ -58,8 +68,12 @@ model Order {
   material_lending Boolean
   get_back_material Boolean
   userId           Int
-  user             User     @relation(fields: [userId], references: [id])
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   menus            Menu[]   @relation("OrderMenus")
+
+  @@index([userId])
+  @@index([status])
+  @@index([order_date])
 }
 
 model Menu {
@@ -75,6 +89,10 @@ model Menu {
   remaining_qty    Int
   orders           Order[]  @relation("OrderMenus")
   dishes           Dish[]
+
+  @@index([dietId])
+  @@index([themeId])
+  @@index([title])
 }
 
 model Diet {
@@ -96,6 +114,8 @@ model Dish {
   menuId     Int?
   menu       Menu?     @relation(fields: [menuId], references: [id])
   allergens  Allergen[] @relation("DishAllergens")
+
+  @@index([menuId])
 }
 
 model Allergen {

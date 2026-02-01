@@ -1,0 +1,1584 @@
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    VITE GOURMAND DIAGNOSTIC - VERBOSE LOG                    ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Date: 2026-02-01 18:10:58                                                     ║
+║  User: dlesieur                                                                   ║
+║  PWD:  /home/dlesieur/Documents/vite-gourmand
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  POSTGRESQL DATABASE CHECK
+├──────────────────────────────────────────────────────────────────────────────┤
+    Container status: running
+    Health status: healthy
+    ✅ PASS: PostgreSQL container is running and healthy
+
+  ▶ Databases
+  ─────────────────────────────────────────────────
+    │ postgres
+vite_gourmand
+
+  ▶ Tables in vite_gourmand
+  ─────────────────────────────────────────────────
+    │                List of relations
+    │  Schema |        Name        | Type  |  Owner   
+    │ --------+--------------------+-------+----------
+    │  public | Allergen           | table | postgres
+    │  public | Diet               | table | postgres
+    │  public | Dish               | table | postgres
+    │  public | Menu               | table | postgres
+    │  public | Order              | table | postgres
+    │  public | Publish            | table | postgres
+    │  public | Role               | table | postgres
+    │  public | Theme              | table | postgres
+    │  public | User               | table | postgres
+    │  public | WorkingHours       | table | postgres
+    │  public | _DishAllergens     | table | postgres
+    │  public | _OrderMenus        | table | postgres
+    │  public | _prisma_migrations | table | postgres
+    │ (13 rows)
+
+  ▶ Sample User Data (RGPD Verification - Password Hashing)
+  ─────────────────────────────────────────────────
+    │ ERROR:  column "createdAt" does not exist
+    │ LINE 1: ... LEFT(password, 30) || '...' as password_preview, "createdAt...
+    │                                                              ^
+    ⚠️  WARN: No bcrypt hashes found (table may be empty or passwords not hashed)
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  MONGODB DATABASE CHECK
+├──────────────────────────────────────────────────────────────────────────────┤
+    Container status: running
+    ✅ PASS: MongoDB container is running
+
+  ▶ Collections
+  ─────────────────────────────────────────────────
+    │ [
+  'user_activity_logs',
+  'dashboard_stats',
+  'order_snapshots',
+  'audit_logs',
+  'search_analytics',
+  'menu_analytics'
+]
+
+  ▶ Sample Audit Logs (RGPD Traceability)
+  ─────────────────────────────────────────────────
+    Total audit log entries: 0
+    │ []
+
+  ▶ Sample Analytics Data
+  ─────────────────────────────────────────────────
+    Total menu analytics entries: 0
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  BACKEND ROUTINES DIAGNOSTIC
+├──────────────────────────────────────────────────────────────────────────────┤
+
+  ▶ 1. Authentication Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: AuthModule exists
+    File: ./backend/src/auth/auth.module.ts
+    Content preview:
+    │ import { Module } from '@nestjs/common';
+    │ import { JwtModule } from '@nestjs/jwt';
+    │ import { ConfigModule, ConfigService } from '@nestjs/config';
+    │ import { AuthService } from './auth.service';
+    │ import { AuthController } from './auth.controller';
+    │ import { JwtStrategy } from './strategies/jwt.strategy';
+    │ import { PrismaModule } from '../prisma/prisma.module';
+    │ 
+    │ @Module({
+    │   imports: [
+    │     PrismaModule,
+    │     JwtModule.registerAsync({
+    │       imports: [ConfigModule],
+    │       inject: [ConfigService],
+    │       useFactory: (configService: ConfigService) => ({
+    │         secret: configService.get<string>('JWT_SECRET') || 'default-secret',
+    │         signOptions: {
+    │           expiresIn: '15m',
+    │         },
+    │       }),
+    ✅ PASS: AuthService exists
+    Checking bcrypt usage in AuthService...
+    ✅ PASS: bcrypt import found
+    │ 9:import * as bcrypt from 'bcrypt';
+    │ 39:    const hashedPassword = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
+    │ 105:    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    Checking password hashing method...
+    │ 39:    const hashedPassword = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
+    │ 57:        password: hashedPassword,
+    │ 105:    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    ✅ PASS: Password hashing/comparison methods found
+    ✅ PASS: AuthController exists
+
+  ▶ 2. Guard Routine (JWT + Roles)
+  ─────────────────────────────────────────────────
+    ✅ PASS: JwtAuthGuard exists
+    JwtAuthGuard implementation:
+    │ import {
+    │   Injectable,
+    │   CanActivate,
+    │   ExecutionContext,
+    │   UnauthorizedException,
+    │ } from '@nestjs/common';
+    │ import { Reflector } from '@nestjs/core';
+    │ import { JwtService } from '@nestjs/jwt';
+    │ import { ConfigService } from '@nestjs/config';
+    │ import { Request } from 'express';
+    │ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+    │ import { UserPayload } from '../decorators/current-user.decorator';
+    │ import { MESSAGES } from '../constants';
+    │ 
+    │ /**
+    │  * JWT Authentication Guard
+    │  * Validates JWT tokens on all routes except those marked with @Public()
+    │  */
+    │ @Injectable()
+    │ export class JwtAuthGuard implements CanActivate {
+    │   constructor(
+    │     private reflector: Reflector,
+    │     private jwtService: JwtService,
+    │     private configService: ConfigService,
+    │   ) {}
+    │ 
+    │   async canActivate(context: ExecutionContext): Promise<boolean> {
+    │     // Check if route is public
+    │     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+    │       context.getHandler(),
+    │       context.getClass(),
+    │     ]);
+    │ 
+    │     if (isPublic) {
+    │       return true;
+    │     }
+    │ 
+    │     const request = context.switchToHttp().getRequest<Request>();
+    │     const token = this.extractTokenFromHeader(request);
+    │ 
+    │     if (!token) {
+    │       throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
+    │     }
+    │ 
+    │     try {
+    │       const payload = await this.jwtService.verifyAsync<UserPayload>(token, {
+    │         secret: this.configService.get<string>('JWT_SECRET'),
+    │       });
+    │ 
+    │       // Attach user to request
+    │       request['user'] = payload;
+    │     } catch (error) {
+    │       if (error?.name === 'TokenExpiredError') {
+    │         throw new UnauthorizedException(MESSAGES.TOKEN_EXPIRED);
+    │       }
+    │       throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
+    │     }
+    │ 
+    │     return true;
+    │   }
+    │ 
+    │   private extractTokenFromHeader(request: Request): string | undefined {
+    │     const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    │     return type === 'Bearer' ? token : undefined;
+    │   }
+    │ }
+    ✅ PASS: RolesGuard exists
+    RolesGuard implementation:
+    │ import {
+    │   Injectable,
+    │   CanActivate,
+    │   ExecutionContext,
+    │   ForbiddenException,
+    │ } from '@nestjs/common';
+    │ import { Reflector } from '@nestjs/core';
+    │ import { ROLES_KEY } from '../decorators/roles.decorator';
+    │ import { Role, MESSAGES } from '../constants';
+    │ 
+    │ /**
+    │  * Roles Guard
+    │  * Checks if the current user has the required role(s) to access a route
+    │  * Must be used after JwtAuthGuard
+    │  */
+    │ @Injectable()
+    │ export class RolesGuard implements CanActivate {
+    │   constructor(private reflector: Reflector) {}
+    │ 
+    │   canActivate(context: ExecutionContext): boolean {
+    │     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+    │       context.getHandler(),
+    │       context.getClass(),
+    │     ]);
+    │ 
+    │     // No roles required = public access
+    │     if (!requiredRoles || requiredRoles.length === 0) {
+    │       return true;
+    │     }
+    │ 
+    │     const request = context.switchToHttp().getRequest();
+    │     const user = request.user;
+    │ 
+    │     if (!user) {
+    │       throw new ForbiddenException(MESSAGES.FORBIDDEN);
+    │     }
+    │ 
+    │     const hasRole = requiredRoles.some((role) => user.role === role);
+    │ 
+    │     if (!hasRole) {
+    │       throw new ForbiddenException(MESSAGES.FORBIDDEN);
+    │     }
+    │ 
+    │     return true;
+    │   }
+    │ }
+
+  ▶ 3. Validation Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: CustomValidationPipe exists
+    ValidationPipe implementation:
+    │ import {
+    │   PipeTransform,
+    │   Injectable,
+    │   ArgumentMetadata,
+    │   BadRequestException,
+    │ } from '@nestjs/common';
+    │ import { validate, ValidationError } from 'class-validator';
+    │ import { plainToInstance } from 'class-transformer';
+    │ import { MESSAGES } from '../constants';
+    │ 
+    │ /**
+    │  * Global Validation Pipe
+    │  * Validates all incoming request DTOs using class-validator decorators
+    │  */
+    │ @Injectable()
+    │ export class CustomValidationPipe implements PipeTransform<unknown> {
+    │   async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
+    │     const { metatype } = metadata;
+    │ 
+    │     // Skip validation for primitives
+    │     if (!metatype || !this.toValidate(metatype)) {
+    │       return value;
+    │     }
+    │ 
+    │     // Transform plain object to class instance
+    │     const object = plainToInstance(metatype, value);
+    │ 
+    │     // Validate
+    │     const errors = await validate(object, {
+    │       whitelist: true,           // Strip properties not in DTO
+    │       forbidNonWhitelisted: true, // Throw error on extra properties
+    │       transform: true,           // Auto-transform types
+    │       validationError: {
+    │         target: false,           // Don't include target in error (security)
+    │         value: false,            // Don't include value in error (security)
+    │       },
+    │     });
+    │ 
+    │     if (errors.length > 0) {
+    │       const messages = this.formatErrors(errors);
+    │       throw new BadRequestException({
+    │         message: messages,
+    │         error: MESSAGES.VALIDATION_ERROR,
+    │       });
+    │     }
+    │ 
+    │     return object;
+    │   }
+    │ 
+    │   private toValidate(metatype: unknown): boolean {
+    │     const types = [String, Boolean, Number, Array, Object];
+    │     return !types.includes(metatype as typeof String);
+    │   }
+    │ 
+    │   /**
+    │    * Formats validation errors into readable messages
+    │    * Recursively handles nested objects
+    │    */
+    │   private formatErrors(errors: ValidationError[]): string[] {
+    │     const messages: string[] = [];
+    │ 
+    │     for (const error of errors) {
+    │       if (error.constraints) {
+    │         messages.push(...Object.values(error.constraints));
+    │       }
+    │ 
+    │       // Handle nested validation errors
+    │       if (error.children && error.children.length > 0) {
+    │         const nestedMessages = this.formatErrors(error.children);
+    │         messages.push(...nestedMessages.map((msg) => `${error.property}.${msg}`));
+    │       }
+    │     }
+    │ 
+    │     return messages;
+    │   }
+    │ }
+    ✅ PASS: class-validator installed
+    Version: "class-validator": "^0.14.3"
+    ✅ PASS: class-transformer installed
+    Version: "class-transformer": "^0.5.1"
+
+  ▶ 4. Error Handling Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: HttpExceptionFilter exists
+    HttpExceptionFilter implementation:
+    │ import {
+    │   ExceptionFilter,
+    │   Catch,
+    │   ArgumentsHost,
+    │   HttpException,
+    │   HttpStatus,
+    │   Logger,
+    │ } from '@nestjs/common';
+    │ import { Request, Response } from 'express';
+    │ import { ApiResponse } from '../dto/api-response.dto';
+    │ 
+    │ /**
+    │  * Global HTTP Exception Filter
+    │  * Catches all HttpExceptions and formats them consistently
+    │  */
+    │ @Catch(HttpException)
+    │ export class HttpExceptionFilter implements ExceptionFilter {
+    │   private readonly logger = new Logger(HttpExceptionFilter.name);
+    │ 
+    │   catch(exception: HttpException, host: ArgumentsHost) {
+    │     const ctx = host.switchToHttp();
+    │     const response = ctx.getResponse<Response>();
+    │     const request = ctx.getRequest<Request>();
+    │     const status = exception.getStatus();
+    │     const exceptionResponse = exception.getResponse();
+    │ 
+    │     // Extract message from exception
+    │     let message: string | string[];
+    │     let error: string;
+    │ 
+    │     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+    │       const responseObj = exceptionResponse as Record<string, unknown>;
+    │       message = (responseObj.message as string | string[]) || exception.message;
+    │       error = (responseObj.error as string) || exception.name;
+    │     } else {
+    │       message = exception.message;
+    │       error = exception.name;
+    │     }
+    │ 
+    │     // Log error (for debugging and RGPD traceability)
+    │     this.logger.warn(
+    │       `HTTP ${status} - ${request.method} ${request.url} - ${JSON.stringify(message)}`,
+    │     );
+    │ 
+    │     const errorResponse: ApiResponse<null> = {
+    │       success: false,
+    │       statusCode: status,
+    │       message: Array.isArray(message) ? message.join(', ') : message,
+    │       error,
+    │       timestamp: new Date().toISOString(),
+    │       path: request.url,
+    │     };
+    │ 
+    │     response.status(status).json(errorResponse);
+    │   }
+    │ }
+    ✅ PASS: AllExceptionsFilter exists
+    AllExceptionsFilter implementation (checking for internal error masking):
+    │ import {
+    │   ExceptionFilter,
+    │   Catch,
+    │   ArgumentsHost,
+    │   HttpException,
+    │   HttpStatus,
+    │   Logger,
+    │ } from '@nestjs/common';
+    │ import { Request, Response } from 'express';
+    │ import { ApiResponse } from '../dto/api-response.dto';
+    │ import { MESSAGES } from '../constants';
+    │ 
+    │ /**
+    │  * Global All Exceptions Filter
+    │  * Catches ALL exceptions (including non-HTTP ones) and formats them consistently
+    │  * This is the last line of defense for unhandled errors
+    │  */
+    │ @Catch()
+    │ export class AllExceptionsFilter implements ExceptionFilter {
+    │   private readonly logger = new Logger(AllExceptionsFilter.name);
+    │ 
+    │   catch(exception: unknown, host: ArgumentsHost) {
+    │     const ctx = host.switchToHttp();
+    │     const response = ctx.getResponse<Response>();
+    │     const request = ctx.getRequest<Request>();
+    │ 
+    │     let status: number;
+    │     let message: string;
+    │     let error: string;
+    │ 
+    │     if (exception instanceof HttpException) {
+    │       status = exception.getStatus();
+    │       const exceptionResponse = exception.getResponse();
+    │ 
+    │       if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+    │         const responseObj = exceptionResponse as Record<string, unknown>;
+    │         message = (responseObj.message as string) || exception.message;
+    │         error = (responseObj.error as string) || exception.name;
+    │       } else {
+    │         message = exception.message;
+    │         error = exception.name;
+    │       }
+    │     } else if (exception instanceof Error) {
+    │       status = HttpStatus.INTERNAL_SERVER_ERROR;
+    │       message = MESSAGES.INTERNAL_ERROR;
+    │       error = 'InternalServerError';
+    │ 
+    │       // Log the full error for debugging (but don't expose to client)
+    │       this.logger.error(
+    │         `Unhandled error: ${exception.message}`,
+    │         exception.stack,
+    │       );
+    │     } else {
+    │       status = HttpStatus.INTERNAL_SERVER_ERROR;
+    │       message = MESSAGES.INTERNAL_ERROR;
+    │       error = 'UnknownError';
+    │ 
+    │       this.logger.error(`Unknown error type: ${JSON.stringify(exception)}`);
+    │     }
+    │ 
+    │     // Log for RGPD traceability
+    │     this.logger.error(
+    │       `HTTP ${status} - ${request.method} ${request.url} - ${message}`,
+    │     );
+    │ 
+    │     const errorResponse: ApiResponse<null> = {
+    │       success: false,
+    │       statusCode: status,
+    │       message,
+    │       error,
+    │       timestamp: new Date().toISOString(),
+    │       path: request.url,
+    │     };
+    │ 
+    │     response.status(status).json(errorResponse);
+    │   }
+    │ }
+    ✅ PASS: Internal errors are masked from clients (RGPD compliant)
+
+  ▶ 5. Logging & Transform Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: LoggingInterceptor exists
+    LoggingInterceptor implementation:
+    │ import {
+    │   Injectable,
+    │   NestInterceptor,
+    │   ExecutionContext,
+    │   CallHandler,
+    │   Logger,
+    │ } from '@nestjs/common';
+    │ import { Observable } from 'rxjs';
+    │ import { tap } from 'rxjs/operators';
+    │ import { Request, Response } from 'express';
+    │ 
+    │ /**
+    │  * Logging Interceptor
+    │  * Logs all incoming requests and their response times
+    │  * Essential for debugging and RGPD traceability
+    │  */
+    │ @Injectable()
+    │ export class LoggingInterceptor implements NestInterceptor {
+    │   private readonly logger = new Logger('HTTP');
+    │ 
+    │   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    │     const ctx = context.switchToHttp();
+    │     const request = ctx.getRequest<Request>();
+    │     const response = ctx.getResponse<Response>();
+    │ 
+    │     const { method, url, ip } = request;
+    │     const userAgent = request.get('user-agent') || '';
+    │     const userId = (request['user'] as { id?: number })?.id || 'anonymous';
+    │ 
+    │     const now = Date.now();
+    │ 
+    │     return next.handle().pipe(
+    │       tap({
+    │         next: () => {
+    │           const responseTime = Date.now() - now;
+    │           this.logger.log(
+    │             `${method} ${url} ${response.statusCode} - ${responseTime}ms - User: ${userId} - IP: ${ip} - UA: ${userAgent}`,
+    │           );
+    │         },
+    │         error: (error) => {
+    │           const responseTime = Date.now() - now;
+    │           this.logger.error(
+    │             `${method} ${url} ${error.status || 500} - ${responseTime}ms - User: ${userId} - IP: ${ip} - Error: ${error.message}`,
+    │           );
+    │         },
+    │       }),
+    │     );
+    │   }
+    │ }
+    ✅ PASS: TransformInterceptor exists
+    TransformInterceptor implementation:
+    │ import {
+    │   Injectable,
+    │   NestInterceptor,
+    │   ExecutionContext,
+    │   CallHandler,
+    │ } from '@nestjs/common';
+    │ import { Observable } from 'rxjs';
+    │ import { map } from 'rxjs/operators';
+    │ import { ApiResponse } from '../dto/api-response.dto';
+    │ import { Request } from 'express';
+    │ 
+    │ /**
+    │  * Transform Interceptor
+    │  * Wraps all successful responses in a consistent ApiResponse format
+    │  */
+    │ @Injectable()
+    │ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+    │   intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
+    │     const request = context.switchToHttp().getRequest<Request>();
+    │     const response = context.switchToHttp().getResponse();
+    │ 
+    │     return next.handle().pipe(
+    │       map((data) => {
+    │         // Don't wrap if already wrapped
+    │         if (data instanceof ApiResponse) {
+    │           return data;
+    │         }
+    │ 
+    │         // Skip transform for file downloads or streams
+    │         if (data && typeof data.pipe === 'function') {
+    │           return data;
+    │         }
+    │ 
+    │         return {
+    │           success: true,
+    │           statusCode: response.statusCode,
+    │           message: 'Success',
+    │           data,
+    │           timestamp: new Date().toISOString(),
+    │           path: request.url,
+    │         };
+    │       }),
+    │     );
+    │   }
+    │ }
+
+  ▶ 6. Decorator Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: @Public() decorator exists
+    Implementation:
+    │ import { SetMetadata } from '@nestjs/common';
+    │ import { METADATA_KEYS } from '../constants';
+    │ 
+    │ /**
+    │  * Marks a route as public (no authentication required)
+    │  * Use @Public() decorator on controller methods to skip JWT auth
+    │  */
+    │ export const IS_PUBLIC_KEY = METADATA_KEYS.IS_PUBLIC;
+    │ export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+    ✅ PASS: @Roles() decorator exists
+    ✅ PASS: @CurrentUser() decorator exists
+
+  ▶ 7. Environment Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: .env file exists
+    ✅ PASS: DATABASE_URL configured
+    DATABASE_URL (masked): DATABASE_URL=postgresql:*****@...
+    ✅ PASS: JWT_SECRET configured
+    JWT_SECRET length: 47 characters
+    ✅ PASS: JWT_SECRET length is adequate
+    ✅ PASS: MONGODB_URI configured
+    ✅ PASS: @nestjs/config installed
+
+  ▶ 8. Database Access Routine (Prisma)
+  ─────────────────────────────────────────────────
+    ✅ PASS: PrismaModule exists
+    ✅ PASS: PrismaService exists
+    PrismaService implementation:
+    │ import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+    │ import { PrismaClient } from '../generated/prisma/client';
+    │ 
+    │ @Injectable()
+    │ export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+    │   private readonly logger = new Logger(PrismaService.name);
+    │ 
+    │   async onModuleInit() {
+    │     await this.$connect();
+    │     this.logger.log('Connected to PostgreSQL database');
+    │   }
+    │ 
+    │   async onModuleDestroy() {
+    │     await this.$disconnect();
+    │     this.logger.log('Disconnected from PostgreSQL database');
+    │   }
+    │ }
+
+  ▶ 9. API Response Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: ApiResponse DTO exists
+    ApiResponse DTO structure:
+    │ /**
+    │  * Standard API Response DTO
+    │  * All API responses follow this format for consistency
+    │  */
+    │ export class ApiResponse<T> {
+    │   success: boolean;
+    │   statusCode: number;
+    │   message: string;
+    │   data?: T;
+    │   error?: string;
+    │   timestamp: string;
+    │   path?: string;
+    │ 
+    │   constructor(partial: Partial<ApiResponse<T>>) {
+    │     Object.assign(this, partial);
+    │   }
+    │ 
+    │   static success<T>(data: T, message = 'Success', statusCode = 200): ApiResponse<T> {
+    │     return new ApiResponse({
+    │       success: true,
+    │       statusCode,
+    │       message,
+    │       data,
+    │       timestamp: new Date().toISOString(),
+    │     });
+    │   }
+    │ 
+    │   static created<T>(data: T, message = 'Created'): ApiResponse<T> {
+    │     return ApiResponse.success(data, message, 201);
+    │   }
+    │ 
+    │   static error(message: string, statusCode = 400, error?: string): ApiResponse<null> {
+    │     return new ApiResponse({
+    │       success: false,
+    │       statusCode,
+    │       message,
+    │       error,
+    │       timestamp: new Date().toISOString(),
+    │     });
+    │   }
+    │ }
+    │ 
+    │ /**
+    │  * Paginated response wrapper
+    │  */
+    │ export class PaginatedResponse<T> {
+    │   items: T[];
+    │   total: number;
+    │   page: number;
+    │   limit: number;
+    │   totalPages: number;
+    │ 
+    │   constructor(items: T[], total: number, page: number, limit: number) {
+    │     this.items = items;
+    │     this.total = total;
+    │     this.page = page;
+    │     this.limit = limit;
+    │     this.totalPages = Math.ceil(total / limit);
+    │   }
+    │ }
+    │ 
+    │ /**
+    │  * Pagination query DTO
+    │  */
+    │ export class PaginationDto {
+    │   page?: number = 1;
+    │   limit?: number = 10;
+    │ }
+    ✅ PASS: Constants file exists
+
+  ▶ 10. Global Registration in AppModule
+  ─────────────────────────────────────────────────
+    AppModule providers section:
+    │   providers: [
+    │     AppService,
+    │     // Global Guards (order matters: Auth first, then Roles)
+    │     {
+    │       provide: APP_GUARD,
+    │       useClass: JwtAuthGuard,
+    │     },
+    │     {
+    │       provide: APP_GUARD,
+    │       useClass: RolesGuard,
+    │     },
+    │     // Global Filters (AllExceptions is fallback, HttpException is specific)
+    │     {
+    │       provide: APP_FILTER,
+    │       useClass: AllExceptionsFilter,
+    │     },
+    │     {
+    │       provide: APP_FILTER,
+    │       useClass: HttpExceptionFilter,
+    │     },
+    │     // Global Interceptors
+    │     {
+    │       provide: APP_INTERCEPTOR,
+    │       useClass: LoggingInterceptor,
+    │     },
+    │     {
+    │       provide: APP_INTERCEPTOR,
+    │       useClass: TransformInterceptor,
+    │     },
+    │     // Global Pipes
+    │     {
+    │       provide: APP_PIPE,
+    │       useClass: CustomValidationPipe,
+    │     },
+    │   ],
+    │ })
+    │ export class AppModule {}
+    ✅ PASS: Guards registered globally (APP_GUARD)
+    ✅ PASS: Filters registered globally (APP_FILTER)
+    ✅ PASS: Interceptors registered globally (APP_INTERCEPTOR)
+    ✅ PASS: Pipes registered globally (APP_PIPE)
+    ✅ PASS: ALL ROUTINES CONFIGURED CORRECTLY!
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  RGPD COMPLIANCE CHECK
+├──────────────────────────────────────────────────────────────────────────────┤
+
+  ▶ 1. Password Security (bcrypt)
+  ─────────────────────────────────────────────────
+    ✅ PASS: bcrypt installed
+    Version: "bcrypt": "^6.0.0"
+    Checking bcrypt usage in codebase...
+    ✅ PASS: bcrypt is actively used in codebase:
+    │ ./backend/src/auth/auth.service.ts:import * as bcrypt from 'bcrypt';
+    │ ./backend/src/auth/auth.service.ts:    const hashedPassword = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
+    │ ./backend/src/auth/auth.service.ts:    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    
+    Verifying password hashing in database...
+    ⚠️  WARN: No users in database yet - cannot verify hashing
+
+  ▶ 2. Audit Logging (Data Traceability)
+  ─────────────────────────────────────────────────
+    ✅ PASS: AuditLog schema exists
+    AuditLog schema fields:
+    │ export interface AuditLog {
+    │   _id?: string;
+    │   
+    │   // Who
+    │   userId?: number;
+    │   userEmail?: string;
+    │   userRole?: string;
+    │   
+    │   // What
+    │   action: 'create' | 'update' | 'delete' | 'login' | 'logout' | 'permission_change';
+    │   entityType: 'user' | 'order' | 'menu' | 'dish' | 'role' | 'publish';
+    │   entityId: number;
+    │   
+    │   // Changes
+    │   previousState?: Record<string, unknown>;
+    │   newState?: Record<string, unknown>;
+    │   changedFields?: string[];
+    │   
+    │   // Context
+    │   ipAddress?: string;
+    │   userAgent?: string;
+    │ --
+    │   AUDIT_LOGS: 'audit_logs',
+    │   SEARCH_ANALYTICS: 'search_analytics',
+    │ } as const;
+    
+    Checking audit logs in MongoDB...
+    Total audit log entries: 0
+    ⚠️  WARN: No audit logs yet - will be populated when API is used
+    ✅ PASS: LoggingInterceptor registered
+
+  ▶ 3. Data Validation (Input Sanitization)
+  ─────────────────────────────────────────────────
+    ✅ PASS: Validation pipe registered
+    Checking DTO validation decorators...
+    ✅ PASS: Validation decorators found in DTOs:
+    │ ./backend/src/auth/dto/login.dto.ts:  @IsEmail({}, { message: 'Please provide a valid email address' })
+    │ ./backend/src/auth/dto/login.dto.ts:  @IsString()
+    │ ./backend/src/auth/dto/login.dto.ts:  @MinLength(VALIDATION.PASSWORD_MIN_LENGTH, {
+    │ ./backend/src/auth/dto/login.dto.ts:  @MaxLength(VALIDATION.PASSWORD_MAX_LENGTH, {
+    │ ./backend/src/auth/dto/register.dto.ts:  @IsEmail({}, { message: 'Please provide a valid email address' })
+    │ ./backend/src/auth/dto/register.dto.ts:  @IsString()
+    │ ./backend/src/auth/dto/register.dto.ts:  @MinLength(VALIDATION.PASSWORD_MIN_LENGTH, {
+    │ ./backend/src/auth/dto/register.dto.ts:  @MaxLength(VALIDATION.PASSWORD_MAX_LENGTH, {
+    │ ./backend/src/auth/dto/register.dto.ts:  @IsString()
+    │ ./backend/src/auth/dto/register.dto.ts:  @MinLength(VALIDATION.NAME_MIN_LENGTH, {
+
+  ▶ 4. Error Handling (Preventing Data Leakage)
+  ─────────────────────────────────────────────────
+    ✅ PASS: Internal errors are masked from clients
+    Error masking implementation:
+    │     } else if (exception instanceof Error) {
+    │       status = HttpStatus.INTERNAL_SERVER_ERROR;
+    │       message = MESSAGES.INTERNAL_ERROR;
+    │       error = 'InternalServerError';
+    │ 
+    │ --
+    │     } else {
+    │       status = HttpStatus.INTERNAL_SERVER_ERROR;
+    │       message = MESSAGES.INTERNAL_ERROR;
+    │       error = 'UnknownError';
+    │ 
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  RGAA COMPLIANCE CHECK
+├──────────────────────────────────────────────────────────────────────────────┤
+    RGAA is primarily a frontend concern. Backend provides:
+
+  ▶ 1. Clear Error Messages
+  ─────────────────────────────────────────────────
+    ✅ PASS: Consistent API response format
+    API Response structure:
+    │ /**
+    │  * Standard API Response DTO
+    │  * All API responses follow this format for consistency
+    │  */
+    │ export class ApiResponse<T> {
+    │   success: boolean;
+    │   statusCode: number;
+    │   message: string;
+    │   data?: T;
+    │   error?: string;
+    │   timestamp: string;
+    │   path?: string;
+    │ 
+    │   constructor(partial: Partial<ApiResponse<T>>) {
+    │     Object.assign(this, partial);
+    │   }
+    │ 
+    │   static success<T>(data: T, message = 'Success', statusCode = 200): ApiResponse<T> {
+    │     return new ApiResponse({
+    │       success: true,
+    │       statusCode,
+    │       message,
+    │       data,
+    │       timestamp: new Date().toISOString(),
+    │     });
+    │   }
+    │ 
+    │   static created<T>(data: T, message = 'Created'): ApiResponse<T> {
+    │     return ApiResponse.success(data, message, 201);
+    │   }
+    │ 
+    │   static error(message: string, statusCode = 400, error?: string): ApiResponse<null> {
+    │     return new ApiResponse({
+    │       success: false,
+    │       statusCode,
+    │       message,
+    │       error,
+    │       timestamp: new Date().toISOString(),
+    │     });
+    │   }
+    │ }
+    │ 
+    │ /**
+    │  * Paginated response wrapper
+    │  */
+    │ export class PaginatedResponse<T> {
+    │   items: T[];
+    │   total: number;
+    │   page: number;
+    │   limit: number;
+    │   totalPages: number;
+    │ 
+    │   constructor(items: T[], total: number, page: number, limit: number) {
+    │     this.items = items;
+    │     this.total = total;
+    │     this.page = page;
+    │     this.limit = limit;
+    │     this.totalPages = Math.ceil(total / limit);
+    │   }
+    │ }
+    │ 
+    │ /**
+    │  * Pagination query DTO
+    │  */
+    │ export class PaginationDto {
+    │   page?: number = 1;
+    │   limit?: number = 10;
+    │ }
+
+  ▶ 2. Custom Validation Messages
+  ─────────────────────────────────────────────────
+    ✅ PASS: Custom validation messages exist
+    Sample validation messages:
+    │ ./backend/src/auth/dto/login.dto.ts:  @IsEmail({}, { message: 'Please provide a valid email address' })
+    │ ./backend/src/auth/dto/login.dto.ts:    message: `Password must be at least ${VALIDATION.PASSWORD_MIN_LENGTH} characters`,
+    │ ./backend/src/auth/dto/login.dto.ts:    message: `Password must not exceed ${VALIDATION.PASSWORD_MAX_LENGTH} characters`,
+    │ ./backend/src/auth/dto/register.dto.ts:  @IsEmail({}, { message: 'Please provide a valid email address' })
+    │ ./backend/src/auth/dto/register.dto.ts:    message: `Password must be at least ${VALIDATION.PASSWORD_MIN_LENGTH} characters`,
+    │ ./backend/src/auth/dto/register.dto.ts:    message: `Password must not exceed ${VALIDATION.PASSWORD_MAX_LENGTH} characters`,
+    │ ./backend/src/auth/dto/register.dto.ts:    message: `First name must be at least ${VALIDATION.NAME_MIN_LENGTH} characters`,
+    │ ./backend/src/auth/dto/register.dto.ts:    message: `First name must not exceed ${VALIDATION.NAME_MAX_LENGTH} characters`,
+    │ ./backend/src/auth/dto/register.dto.ts:    message: 'Please provide a valid French phone number',
+    │ ./backend/src/auth/dto/refresh-token.dto.ts:  @IsNotEmpty({ message: 'Refresh token is required' })
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    VITE GOURMAND DIAGNOSTIC - VERBOSE LOG                    ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Date: 2026-02-01 18:11:31                                                     ║
+║  User: dlesieur                                                                   ║
+║  PWD:  /home/dlesieur/Documents/vite-gourmand
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  POSTGRESQL DATABASE CHECK
+├──────────────────────────────────────────────────────────────────────────────┤
+    Container status: running
+    Health status: healthy
+    ✅ PASS: PostgreSQL container is running and healthy
+
+  ▶ Databases
+  ─────────────────────────────────────────────────
+    │ postgres
+vite_gourmand
+
+  ▶ Tables in vite_gourmand
+  ─────────────────────────────────────────────────
+    │                List of relations
+    │  Schema |        Name        | Type  |  Owner   
+    │ --------+--------------------+-------+----------
+    │  public | Allergen           | table | postgres
+    │  public | Diet               | table | postgres
+    │  public | Dish               | table | postgres
+    │  public | Menu               | table | postgres
+    │  public | Order              | table | postgres
+    │  public | Publish            | table | postgres
+    │  public | Role               | table | postgres
+    │  public | Theme              | table | postgres
+    │  public | User               | table | postgres
+    │  public | WorkingHours       | table | postgres
+    │  public | _DishAllergens     | table | postgres
+    │  public | _OrderMenus        | table | postgres
+    │  public | _prisma_migrations | table | postgres
+    │ (13 rows)
+
+  ▶ Sample User Data (RGPD Verification - Password Hashing)
+  ─────────────────────────────────────────────────
+    │  id | email | password_preview 
+    │ ----+-------+------------------
+    │ (0 rows)
+    ⚠️  WARN: No users in database yet - cannot verify hashing
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    VITE GOURMAND DIAGNOSTIC - VERBOSE LOG                    ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Date: 2026-02-01 18:26:01                                                     ║
+║  User: dlesieur                                                                   ║
+║  PWD:  /home/dlesieur/Documents/vite-gourmand
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  POSTGRESQL DATABASE CHECK
+├──────────────────────────────────────────────────────────────────────────────┤
+    Container status: running
+    Health status: healthy
+    ✅ PASS: PostgreSQL container is running and healthy
+
+  ▶ Databases
+  ─────────────────────────────────────────────────
+    │ postgres
+vite_gourmand
+
+  ▶ Tables in vite_gourmand
+  ─────────────────────────────────────────────────
+    │                List of relations
+    │  Schema |        Name        | Type  |  Owner   
+    │ --------+--------------------+-------+----------
+    │  public | Allergen           | table | postgres
+    │  public | Diet               | table | postgres
+    │  public | Dish               | table | postgres
+    │  public | Menu               | table | postgres
+    │  public | Order              | table | postgres
+    │  public | Publish            | table | postgres
+    │  public | Role               | table | postgres
+    │  public | Theme              | table | postgres
+    │  public | User               | table | postgres
+    │  public | WorkingHours       | table | postgres
+    │  public | _DishAllergens     | table | postgres
+    │  public | _OrderMenus        | table | postgres
+    │  public | _prisma_migrations | table | postgres
+    │ (13 rows)
+
+  ▶ Sample User Data (RGPD Verification - Password Hashing)
+  ─────────────────────────────────────────────────
+    │  id |           email            |         password_preview          
+    │ ----+----------------------------+-----------------------------------
+    │   1 | admin@vitegourmand.fr      | $2b$10$AWWJqO5FU2yVy0wR0FcOoOD...
+    │   2 | superadmin@vitegourmand.fr | $2b$10$0rL3BLE0x6z4NfCyiKVs2eU...
+    │   3 | manager@vitegourmand.fr    | $2b$10$Vgq/kE7vCeflnOWWyKKThec...
+    │ (3 rows)
+    ✅ PASS: Passwords are bcrypt hashed (starts with $2a$, $2b$, or $2y$)
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    VITE GOURMAND DIAGNOSTIC - VERBOSE LOG                    ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Date: 2026-02-01 18:56:12                                                     ║
+║  User: dlesieur                                                                   ║
+║  PWD:  /home/dlesieur/Documents/vite-gourmand
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  BACKEND ROUTINES DIAGNOSTIC
+├──────────────────────────────────────────────────────────────────────────────┤
+
+  ▶ 1. Authentication Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: AuthModule exists
+    ✅ PASS: AuthService exists
+    Checking bcrypt usage...
+    ✅ PASS: bcrypt import found
+    │ 9:import * as bcrypt from 'bcrypt';
+    │ 39:    const hashedPassword = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
+    │ 105:    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    ✅ PASS: AuthController exists
+    ✅ PASS: JwtStrategy exists
+    JWT Strategy implementation:
+    │ import { Injectable, UnauthorizedException } from '@nestjs/common';
+    │ import { PassportStrategy } from '@nestjs/passport';
+    │ import { ExtractJwt, Strategy } from 'passport-jwt';
+    │ import { ConfigService } from '@nestjs/config';
+    │ import { AuthService } from '../auth.service';
+    │ import { TokenPayload } from '../dto';
+    │ 
+    │ @Injectable()
+    │ export class JwtStrategy extends PassportStrategy(Strategy) {
+    │   constructor(
+    │     private configService: ConfigService,
+    │     private authService: AuthService,
+    │   ) {
+    │     const secret = configService.get<string>('JWT_SECRET') || 'default-secret';
+    │     super({
+    │       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    │       ignoreExpiration: false,
+    │       secretOrKey: secret,
+    │     });
+    │   }
+    │ 
+    │   async validate(payload: TokenPayload) {
+    │     const user = await this.authService.validateUser(payload.id);
+    │ 
+    │     if (!user) {
+    │       throw new UnauthorizedException();
+    │     }
+    │ 
+    │     return user;
+    │   }
+    ✅ PASS: LoginDTO exists
+    ✅ PASS: RegisterDTO exists
+
+  ▶ 2. Guard Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: JwtAuthGuard exists
+    JwtAuthGuard implementation:
+    │ import {
+    │   Injectable,
+    │   CanActivate,
+    │   ExecutionContext,
+    │   UnauthorizedException,
+    │ } from '@nestjs/common';
+    │ import { Reflector } from '@nestjs/core';
+    │ import { JwtService } from '@nestjs/jwt';
+    │ import { ConfigService } from '@nestjs/config';
+    │ import { Request } from 'express';
+    │ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+    │ import { UserPayload } from '../decorators/current-user.decorator';
+    │ import { MESSAGES } from '../constants';
+    │ 
+    │ /**
+    │  * JWT Authentication Guard
+    │  * Validates JWT tokens on all routes except those marked with @Public()
+    │  */
+    │ @Injectable()
+    │ export class JwtAuthGuard implements CanActivate {
+    │   constructor(
+    │     private reflector: Reflector,
+    │     private jwtService: JwtService,
+    │     private configService: ConfigService,
+    │   ) {}
+    │ 
+    │   async canActivate(context: ExecutionContext): Promise<boolean> {
+    │     // Check if route is public
+    │     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+    │       context.getHandler(),
+    │       context.getClass(),
+    │     ]);
+    │ 
+    │     if (isPublic) {
+    │       return true;
+    │     }
+    │ 
+    │     const request = context.switchToHttp().getRequest<Request>();
+    │     const token = this.extractTokenFromHeader(request);
+    │ 
+    │     if (!token) {
+    │       throw new UnauthorizedException(MESSAGES.UNAUTHORIZED);
+    │     }
+    │ 
+    │     try {
+    │       const payload = await this.jwtService.verifyAsync<UserPayload>(token, {
+    │         secret: this.configService.get<string>('JWT_SECRET'),
+    │       });
+    │ 
+    │       // Attach user to request
+    ✅ PASS: RolesGuard exists
+    RolesGuard implementation:
+    │ import {
+    │   Injectable,
+    │   CanActivate,
+    │   ExecutionContext,
+    │   ForbiddenException,
+    │ } from '@nestjs/common';
+    │ import { Reflector } from '@nestjs/core';
+    │ import { ROLES_KEY } from '../decorators/roles.decorator';
+    │ import { Role, MESSAGES } from '../constants';
+    │ 
+    │ /**
+    │  * Roles Guard
+    │  * Checks if the current user has the required role(s) to access a route
+    │  * Must be used after JwtAuthGuard
+    │  */
+    │ @Injectable()
+    │ export class RolesGuard implements CanActivate {
+    │   constructor(private reflector: Reflector) {}
+    │ 
+    │   canActivate(context: ExecutionContext): boolean {
+    │     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+    │       context.getHandler(),
+    │       context.getClass(),
+    │     ]);
+    │ 
+    │     // No roles required = public access
+    │     if (!requiredRoles || requiredRoles.length === 0) {
+    │       return true;
+    │     }
+    │ 
+    │     const request = context.switchToHttp().getRequest();
+    │     const user = request.user;
+    │ 
+    │     if (!user) {
+    │       throw new ForbiddenException(MESSAGES.FORBIDDEN);
+    │     }
+    │ 
+    │     const hasRole = requiredRoles.some((role) => user.role === role);
+    │ 
+    │     if (!hasRole) {
+    │       throw new ForbiddenException(MESSAGES.FORBIDDEN);
+    │     }
+    │ 
+    │     return true;
+    │   }
+    │ }
+
+  ▶ 3. Validation Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: CustomValidationPipe exists
+    │ import {
+    │   PipeTransform,
+    │   Injectable,
+    │   ArgumentMetadata,
+    │   BadRequestException,
+    │ } from '@nestjs/common';
+    │ import { validate, ValidationError } from 'class-validator';
+    │ import { plainToInstance } from 'class-transformer';
+    │ import { MESSAGES } from '../constants';
+    │ 
+    │ /**
+    │  * Global Validation Pipe
+    │  * Validates all incoming request DTOs using class-validator decorators
+    │  */
+    │ @Injectable()
+    │ export class CustomValidationPipe implements PipeTransform<unknown> {
+    │   async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
+    │     const { metatype } = metadata;
+    │ 
+    │     // Skip validation for primitives
+    │     if (!metatype || !this.toValidate(metatype)) {
+    │       return value;
+    │     }
+    │ 
+    │     // Transform plain object to class instance
+    │     const object = plainToInstance(metatype, value);
+    │ 
+    │     // Validate
+    │     const errors = await validate(object, {
+    │       whitelist: true,           // Strip properties not in DTO
+    │       forbidNonWhitelisted: true, // Throw error on extra properties
+    │       transform: true,           // Auto-transform types
+    │       validationError: {
+    │         target: false,           // Don't include target in error (security)
+    │         value: false,            // Don't include value in error (security)
+    │       },
+    │     });
+    │ 
+    │     if (errors.length > 0) {
+    │       const messages = this.formatErrors(errors);
+    │       throw new BadRequestException({
+    │         message: messages,
+    │         error: MESSAGES.VALIDATION_ERROR,
+    │       });
+    │     }
+    │ 
+    │     return object;
+    │   }
+    │ 
+    │   private toValidate(metatype: unknown): boolean {
+    ✅ PASS: class-validator installed
+    Version: "class-validator": "^0.14.3"
+    ✅ PASS: class-transformer installed
+    Version: "class-transformer": "^0.5.1"
+
+  ▶ 4. Error Handling Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: HttpExceptionFilter exists
+    │ import {
+    │   ExceptionFilter,
+    │   Catch,
+    │   ArgumentsHost,
+    │   HttpException,
+    │   HttpStatus,
+    │   Logger,
+    │ } from '@nestjs/common';
+    │ import { Request, Response } from 'express';
+    │ import { ApiResponse } from '../dto/api-response.dto';
+    │ 
+    │ /**
+    │  * Global HTTP Exception Filter
+    │  * Catches all HttpExceptions and formats them consistently
+    │  */
+    │ @Catch(HttpException)
+    │ export class HttpExceptionFilter implements ExceptionFilter {
+    │   private readonly logger = new Logger(HttpExceptionFilter.name);
+    │ 
+    │   catch(exception: HttpException, host: ArgumentsHost) {
+    │     const ctx = host.switchToHttp();
+    │     const response = ctx.getResponse<Response>();
+    │     const request = ctx.getRequest<Request>();
+    │     const status = exception.getStatus();
+    │     const exceptionResponse = exception.getResponse();
+    │ 
+    │     // Extract message from exception
+    │     let message: string | string[];
+    │     let error: string;
+    │ 
+    │     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+    │       const responseObj = exceptionResponse as Record<string, unknown>;
+    │       message = (responseObj.message as string | string[]) || exception.message;
+    │       error = (responseObj.error as string) || exception.name;
+    │     } else {
+    │       message = exception.message;
+    │       error = exception.name;
+    │     }
+    │ 
+    │     // Log error (for debugging and RGPD traceability)
+    │     this.logger.warn(
+    │       `HTTP ${status} - ${request.method} ${request.url} - ${JSON.stringify(message)}`,
+    │     );
+    │ 
+    │     const errorResponse: ApiResponse<null> = {
+    │       success: false,
+    │       statusCode: status,
+    │       message: Array.isArray(message) ? message.join(', ') : message,
+    │       error,
+    │       timestamp: new Date().toISOString(),
+    ✅ PASS: AllExceptionsFilter exists
+    │ import {
+    │   ExceptionFilter,
+    │   Catch,
+    │   ArgumentsHost,
+    │   HttpException,
+    │   HttpStatus,
+    │   Logger,
+    │ } from '@nestjs/common';
+    │ import { Request, Response } from 'express';
+    │ import { ApiResponse } from '../dto/api-response.dto';
+    │ import { MESSAGES } from '../constants';
+    │ 
+    │ /**
+    │  * Global All Exceptions Filter
+    │  * Catches ALL exceptions (including non-HTTP ones) and formats them consistently
+    │  * This is the last line of defense for unhandled errors
+    │  */
+    │ @Catch()
+    │ export class AllExceptionsFilter implements ExceptionFilter {
+    │   private readonly logger = new Logger(AllExceptionsFilter.name);
+    │ 
+    │   catch(exception: unknown, host: ArgumentsHost) {
+    │     const ctx = host.switchToHttp();
+    │     const response = ctx.getResponse<Response>();
+    │     const request = ctx.getRequest<Request>();
+    │ 
+    │     let status: number;
+    │     let message: string;
+    │     let error: string;
+    │ 
+    │     if (exception instanceof HttpException) {
+    │       status = exception.getStatus();
+    │       const exceptionResponse = exception.getResponse();
+    │ 
+    │       if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+    │         const responseObj = exceptionResponse as Record<string, unknown>;
+    │         message = (responseObj.message as string) || exception.message;
+    │         error = (responseObj.error as string) || exception.name;
+    │       } else {
+    │         message = exception.message;
+    │         error = exception.name;
+    │       }
+    │     } else if (exception instanceof Error) {
+    │       status = HttpStatus.INTERNAL_SERVER_ERROR;
+    │       message = MESSAGES.INTERNAL_ERROR;
+    │       error = 'InternalServerError';
+    │ 
+    │       // Log the full error for debugging (but don't expose to client)
+    │       this.logger.error(
+    │         `Unhandled error: ${exception.message}`,
+    ✅ PASS: Internal errors are masked from clients
+
+  ▶ 5. Interceptors Routine
+  ─────────────────────────────────────────────────
+    ✅ PASS: LoggingInterceptor exists
+    │ import {
+    │   Injectable,
+    │   NestInterceptor,
+    │   ExecutionContext,
+    │   CallHandler,
+    │   Logger,
+    │ } from '@nestjs/common';
+    │ import { Observable } from 'rxjs';
+    │ import { tap } from 'rxjs/operators';
+    │ import { Request, Response } from 'express';
+    │ 
+    │ /**
+    │  * Logging Interceptor
+    │  * Logs all incoming requests and their response times
+    │  * Essential for debugging and RGPD traceability
+    │  */
+    │ @Injectable()
+    │ export class LoggingInterceptor implements NestInterceptor {
+    │   private readonly logger = new Logger('HTTP');
+    │ 
+    │   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    │     const ctx = context.switchToHttp();
+    │     const request = ctx.getRequest<Request>();
+    │     const response = ctx.getResponse<Response>();
+    │ 
+    │     const { method, url, ip } = request;
+    │     const userAgent = request.get('user-agent') || '';
+    │     const userId = (request['user'] as { id?: number })?.id || 'anonymous';
+    │ 
+    │     const now = Date.now();
+    │ 
+    │     return next.handle().pipe(
+    │       tap({
+    │         next: () => {
+    │           const responseTime = Date.now() - now;
+    │           this.logger.log(
+    │             `${method} ${url} ${response.statusCode} - ${responseTime}ms - User: ${userId} - IP: ${ip} - UA: ${userAgent}`,
+    │           );
+    │         },
+    │         error: (error) => {
+    │           const responseTime = Date.now() - now;
+    │           this.logger.error(
+    │             `${method} ${url} ${error.status || 500} - ${responseTime}ms - User: ${userId} - IP: ${ip} - Error: ${error.message}`,
+    │           );
+    │         },
+    │       }),
+    │     );
+    │   }
+    │ }
+    ✅ PASS: TransformInterceptor exists
+    │ import {
+    │   Injectable,
+    │   NestInterceptor,
+    │   ExecutionContext,
+    │   CallHandler,
+    │ } from '@nestjs/common';
+    │ import { Observable } from 'rxjs';
+    │ import { map } from 'rxjs/operators';
+    │ import { ApiResponse } from '../dto/api-response.dto';
+    │ import { Request } from 'express';
+    │ 
+    │ /**
+    │  * Transform Interceptor
+    │  * Wraps all successful responses in a consistent ApiResponse format
+    │  */
+    │ @Injectable()
+    │ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+    │   intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
+    │     const request = context.switchToHttp().getRequest<Request>();
+    │     const response = context.switchToHttp().getResponse();
+    │ 
+    │     return next.handle().pipe(
+    │       map((data) => {
+    │         // Don't wrap if already wrapped
+    │         if (data instanceof ApiResponse) {
+    │           return data;
+    │         }
+    │ 
+    │         // Skip transform for file downloads or streams
+    │         if (data && typeof data.pipe === 'function') {
+    │           return data;
+    │         }
+    │ 
+    │         return {
+    │           success: true,
+    │           statusCode: response.statusCode,
+    │           message: 'Success',
+    │           data,
+    │           timestamp: new Date().toISOString(),
+    │           path: request.url,
+    │         };
+    │       }),
+    │     );
+    │   }
+    │ }
+
+  ▶ 6. Custom Decorators
+  ─────────────────────────────────────────────────
+    ✅ PASS: @Public() decorator exists
+    ✅ PASS: @Roles() decorator exists
+    ✅ PASS: @CurrentUser() decorator exists
+
+  ▶ 7. Environment Configuration
+  ─────────────────────────────────────────────────
+    ✅ PASS: .env file exists
+    ✅ PASS: DATABASE_URL configured
+    ✅ PASS: JWT_SECRET configured
+    JWT_SECRET length: 47 characters
+    ✅ PASS: MONGODB_URI configured
+    ✅ PASS: @nestjs/config installed
+    Version: "@nestjs/config": "^4.0.2"
+
+  ▶ 8. Prisma ORM
+  ─────────────────────────────────────────────────
+    ✅ PASS: PrismaModule exists
+    ✅ PASS: PrismaService exists
+    │ import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+    │ import { PrismaClient } from '../generated/prisma/client';
+    │ 
+    │ @Injectable()
+    │ export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+    │   private readonly logger = new Logger(PrismaService.name);
+    │ 
+    │   async onModuleInit() {
+    │     await this.$connect();
+    │     this.logger.log('Connected to PostgreSQL database');
+    │   }
+    │ 
+    │   async onModuleDestroy() {
+    │     await this.$disconnect();
+    │     this.logger.log('Disconnected from PostgreSQL database');
+    │   }
+    │ }
+    ✅ PASS: Prisma Schema exists
+
+  ▶ 9. API Response Standardization
+  ─────────────────────────────────────────────────
+    ✅ PASS: ApiResponse DTO exists
+    │ /**
+    │  * Standard API Response DTO
+    │  * All API responses follow this format for consistency
+    │  */
+    │ export class ApiResponse<T> {
+    │   success!: boolean;
+    │   statusCode!: number;
+    │   message!: string;
+    │   data?: T;
+    │   error?: string;
+    │   timestamp!: string;
+    │   path?: string;
+    │ 
+    │   constructor(partial: Partial<ApiResponse<T>>) {
+    │     Object.assign(this, partial);
+    │   }
+    │ 
+    │   static success<T>(data: T, message = 'Success', statusCode = 200): ApiResponse<T> {
+    │     return new ApiResponse({
+    │       success: true,
+    │       statusCode,
+    │       message,
+    │       data,
+    │       timestamp: new Date().toISOString(),
+    │     });
+    │   }
+    │ 
+    │   static created<T>(data: T, message = 'Created'): ApiResponse<T> {
+    │     return ApiResponse.success(data, message, 201);
+    │   }
+    │ 
+    │   static error(message: string, statusCode = 400, error?: string): ApiResponse<null> {
+    │     return new ApiResponse({
+    │       success: false,
+    │       statusCode,
+    │       message,
+    │       error,
+    │       timestamp: new Date().toISOString(),
+    │     });
+    │   }
+    │ }
+    │ 
+    │ /**
+    │  * Paginated response wrapper
+    │  */
+    │ export class PaginatedResponse<T> {
+    │   items: T[];
+    │   total: number;
+    │   page: number;
+    │   limit: number;
+    ✅ PASS: Constants file exists
+
+  ▶ 10. AppModule Global Registration
+  ─────────────────────────────────────────────────
+    AppModule providers section:
+    │   providers: [
+    │     AppService,
+    │     // Global Guards (order matters: Throttler first, then Auth, then Roles)
+    │     {
+    │       provide: APP_GUARD,
+    │       useClass: ThrottlerGuard,
+    │     },
+    │     {
+    │       provide: APP_GUARD,
+    │       useClass: JwtAuthGuard,
+    │     },
+    │     {
+    │       provide: APP_GUARD,
+    │       useClass: RolesGuard,
+    │     },
+    │     // Global Filters (AllExceptions is fallback, HttpException is specific)
+    │     {
+    │       provide: APP_FILTER,
+    │       useClass: AllExceptionsFilter,
+    │     },
+    │     {
+    │       provide: APP_FILTER,
+    │       useClass: HttpExceptionFilter,
+    │     },
+    │     // Global Interceptors
+    │     {
+    │       provide: APP_INTERCEPTOR,
+    │       useClass: LoggingInterceptor,
+    │     },
+    │     {
+    │       provide: APP_INTERCEPTOR,
+    │       useClass: TransformInterceptor,
+    │     },
+    │     // Global Pipes
+    │     {
+    │       provide: APP_PIPE,
+    │       useClass: CustomValidationPipe,
+    │     },
+    │   ],
+    │ })
+    │ export class AppModule {}
+    ✅ PASS: Guards registered globally
+    ✅ PASS: Filters registered globally
+    ✅ PASS: Interceptors registered globally
+    ✅ PASS: Pipes registered globally
+    ❌ FAIL: Some routines are missing or misconfigured
+└──────────────────────────────────────────────────────────────────────────────┘

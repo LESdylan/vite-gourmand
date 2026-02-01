@@ -12,16 +12,16 @@ import {
 
 @Injectable()
 export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
-  private client: MongoClient;
-  private db: Db;
+  private client!: MongoClient;
+  private db!: Db;
 
   // Collections
-  private menuAnalytics: Collection<MenuAnalytics>;
-  private userActivityLogs: Collection<UserActivityLog>;
-  private orderSnapshots: Collection<OrderSnapshot>;
-  private dashboardStats: Collection<DashboardStats>;
-  private auditLogs: Collection<AuditLog>;
-  private searchAnalytics: Collection<SearchAnalytics>;
+  private menuAnalytics!: Collection<MenuAnalytics>;
+  private userActivityLogs!: Collection<UserActivityLog>;
+  private orderSnapshots!: Collection<OrderSnapshot>;
+  private dashboardStats!: Collection<DashboardStats>;
+  private auditLogs!: Collection<AuditLog>;
+  private searchAnalytics!: Collection<SearchAnalytics>;
 
   async onModuleInit() {
     const uri = process.env.MONGODB_URI || 'mongodb://root:example@localhost:27017/vite_gourmand?authSource=admin';

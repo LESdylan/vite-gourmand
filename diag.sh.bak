@@ -1,0 +1,515 @@
+#!/bin/bash
+
+shopt -s nocasematch
+
+POSTGRES_CONTAINER="vite-gourmand-db-1"
+MONGO_CONTAINER="vite-gourmand-mongo-1"
+BACKEND_PATH="./backend"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+function print_ok() {
+	echo -e "${GREEN}✅ $1${NC}"
+}
+
+function print_error() {
+	echo -e "${RED}❌ $1${NC}"
+}
+
+function print_warn() {
+	echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+function print_info() {
+	echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+function check_load_db() {
+	echo "Checking PostgreSQL container status..."
+	status=$(docker inspect -f '{{.State.Status}}' "$POSTGRES_CONTAINER" 2>/dev/null)
+	if [[ "$status" == "running" ]]; then
+		health=$(docker inspect -f '{{.State.Health.Status}}' "$POSTGRES_CONTAINER" 2>/dev/null)
+		if [[ "$health" == "healthy" ]]; then
+			print_ok "PostgreSQL container is running and healthy"
+			echo "--- Databases: ---"
+			docker exec -e PGPASSWORD=postgres "$POSTGRES_CONTAINER" psql -U postgres -tAc "SELECT datname FROM pg_database WHERE datistemplate = false;"
+			echo "--- Tables in vite_gourmand: ---"
+			docker exec -e PGPASSWORD=postgres "$POSTGRES_CONTAINER" psql -U postgres -d vite_gourmand -c "\dt"
+		else
+			print_warn "PostgreSQL container is running but not healthy: $health"
+		fi
+	else
+		print_error "PostgreSQL container is not running"
+	fi
+}
+
+function check_mongo() {
+	echo "Checking MongoDB container status..."
+	status=$(docker inspect -f '{{.State.Status}}' "$MONGO_CONTAINER" 2>/dev/null)
+	if [[ "$status" == "running" ]]; then
+		print_ok "MongoDB container is running"
+		echo "--- Collections in vite_gourmand: ---"
+		docker exec "$MONGO_CONTAINER" mongosh -u root -p example --authenticationDatabase admin vite_gourmand --eval "db.getCollectionNames()" --quiet
+	else
+		print_error "MongoDB container is not running"
+	fi
+}
+
+function check_routines() {
+	echo ""
+	echo "=========================================="
+	echo "🔍 BACKEND ROUTINES DIAGNOSTIC"
+	echo "=========================================="
+	echo ""
+
+	local all_ok=true
+
+	# 1. Check Auth Module
+	echo "1️⃣  Authentication Routine"
+	if [[ -f "$BACKEND_PATH/src/auth/auth.module.ts" ]]; then
+		print_ok "AuthModule exists"
+	else
+		print_error "AuthModule missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/auth/auth.service.ts" ]]; then
+		print_ok "AuthService exists"
+	else
+		print_error "AuthService missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/auth/auth.controller.ts" ]]; then
+		print_ok "AuthController exists"
+	else
+		print_error "AuthController missing"
+		all_ok=false
+	fi
+	echo ""
+
+	# 2. Check Guards
+	echo "2️⃣  Guard Routine (JWT + Roles)"
+	if [[ -f "$BACKEND_PATH/src/common/guards/jwt-auth.guard.ts" ]]; then
+		print_ok "JwtAuthGuard exists"
+	else
+		print_error "JwtAuthGuard missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/common/guards/roles.guard.ts" ]]; then
+		print_ok "RolesGuard exists"
+	else
+		print_error "RolesGuard missing"
+		all_ok=false
+	fi
+	echo ""
+
+	# 3. Check Validation
+	echo "3️⃣  Validation Routine"
+	if [[ -f "$BACKEND_PATH/src/common/pipes/validation.pipe.ts" ]]; then
+		print_ok "CustomValidationPipe exists"
+	else
+		print_error "CustomValidationPipe missing"
+		all_ok=false
+	fi
+
+	if grep -q "class-validator" "$BACKEND_PATH/package.json" 2>/dev/null; then
+		print_ok "class-validator installed"
+	else
+		print_error "class-validator not installed"
+		all_ok=false
+	fi
+
+	if grep -q "class-transformer" "$BACKEND_PATH/package.json" 2>/dev/null; then
+		print_ok "class-transformer installed"
+	else
+		print_error "class-transformer not installed"
+		all_ok=false
+	fi
+	echo ""
+
+	# 4. Check Exception Filters
+	echo "4️⃣  Error Handling Routine"
+	if [[ -f "$BACKEND_PATH/src/common/filters/http-exception.filter.ts" ]]; then
+		print_ok "HttpExceptionFilter exists"
+	else
+		print_error "HttpExceptionFilter missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/common/filters/all-exceptions.filter.ts" ]]; then
+		print_ok "AllExceptionsFilter exists"
+	else
+		print_error "AllExceptionsFilter missing"
+		all_ok=false
+	fi
+	echo ""
+
+	# 5. Check Interceptors
+	echo "5️⃣  Logging & Transform Routine"
+	if [[ -f "$BACKEND_PATH/src/common/interceptors/logging.interceptor.ts" ]]; then
+		print_ok "LoggingInterceptor exists"
+	else
+		print_error "LoggingInterceptor missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/common/interceptors/transform.interceptor.ts" ]]; then
+		print_ok "TransformInterceptor exists"
+	else
+		print_error "TransformInterceptor missing"
+		all_ok=false
+	fi
+	echo ""
+
+	# 6. Check Decorators
+	echo "6️⃣  Decorator Routine"
+	if [[ -f "$BACKEND_PATH/src/common/decorators/public.decorator.ts" ]]; then
+		print_ok "@Public() decorator exists"
+	else
+		print_error "@Public() decorator missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/common/decorators/roles.decorator.ts" ]]; then
+		print_ok "@Roles() decorator exists"
+	else
+		print_error "@Roles() decorator missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/common/decorators/current-user.decorator.ts" ]]; then
+		print_ok "@CurrentUser() decorator exists"
+	else
+		print_error "@CurrentUser() decorator missing"
+		all_ok=false
+	fi
+	echo ""
+
+	# 7. Check Environment
+	echo "7️⃣  Environment Routine"
+	if [[ -f "$BACKEND_PATH/.env" ]]; then
+		print_ok ".env file exists"
+
+		if grep -q "DATABASE_URL" "$BACKEND_PATH/.env" 2>/dev/null; then
+			print_ok "DATABASE_URL configured"
+		else
+			print_error "DATABASE_URL missing in .env"
+			all_ok=false
+		fi
+
+		if grep -q "JWT_SECRET" "$BACKEND_PATH/.env" 2>/dev/null; then
+			print_ok "JWT_SECRET configured"
+		else
+			print_error "JWT_SECRET missing in .env"
+			all_ok=false
+		fi
+
+		if grep -q "MONGODB_URI" "$BACKEND_PATH/.env" 2>/dev/null; then
+			print_ok "MONGODB_URI configured"
+		else
+			print_warn "MONGODB_URI missing in .env (optional)"
+		fi
+	else
+		print_error ".env file missing"
+		all_ok=false
+	fi
+
+	if grep -q "@nestjs/config" "$BACKEND_PATH/package.json" 2>/dev/null; then
+		print_ok "@nestjs/config installed"
+	else
+		print_error "@nestjs/config not installed"
+		all_ok=false
+	fi
+	echo ""
+
+	# 8. Check Prisma (Database access routine)
+	echo "8️⃣  Database Access Routine"
+	if [[ -f "$BACKEND_PATH/src/prisma/prisma.module.ts" ]]; then
+		print_ok "PrismaModule exists"
+	else
+		print_error "PrismaModule missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/prisma/prisma.service.ts" ]]; then
+		print_ok "PrismaService exists"
+	else
+		print_error "PrismaService missing"
+		all_ok=false
+	fi
+	echo ""
+
+	# 9. Check API Response DTO
+	echo "9️⃣  API Response Routine"
+	if [[ -f "$BACKEND_PATH/src/common/dto/api-response.dto.ts" ]]; then
+		print_ok "ApiResponse DTO exists"
+	else
+		print_error "ApiResponse DTO missing"
+		all_ok=false
+	fi
+
+	if [[ -f "$BACKEND_PATH/src/common/constants/index.ts" ]]; then
+		print_ok "Constants file exists"
+	else
+		print_error "Constants file missing"
+		all_ok=false
+	fi
+	echo ""
+
+	# 10. Check Global Registration in AppModule
+	echo "🔟 Global Registration Check"
+	if grep -q "APP_GUARD" "$BACKEND_PATH/src/app.module.ts" 2>/dev/null; then
+		print_ok "Guards registered globally"
+	else
+		print_error "Guards not registered globally"
+		all_ok=false
+	fi
+
+	if grep -q "APP_FILTER" "$BACKEND_PATH/src/app.module.ts" 2>/dev/null; then
+		print_ok "Filters registered globally"
+	else
+		print_error "Filters not registered globally"
+		all_ok=false
+	fi
+
+	if grep -q "APP_INTERCEPTOR" "$BACKEND_PATH/src/app.module.ts" 2>/dev/null; then
+		print_ok "Interceptors registered globally"
+	else
+		print_error "Interceptors not registered globally"
+		all_ok=false
+	fi
+
+	if grep -q "APP_PIPE" "$BACKEND_PATH/src/app.module.ts" 2>/dev/null; then
+		print_ok "Pipes registered globally"
+	else
+		print_error "Pipes not registered globally"
+		all_ok=false
+	fi
+	echo ""
+
+	# Summary
+	echo "=========================================="
+	if $all_ok; then
+		print_ok "ALL ROUTINES CONFIGURED CORRECTLY! 🎉"
+	else
+		print_error "Some routines are missing or misconfigured"
+	fi
+	echo "=========================================="
+}
+
+function check_rgpd() {
+	echo ""
+	echo "=========================================="
+	echo "🔐 RGPD COMPLIANCE CHECK"
+	echo "=========================================="
+	echo ""
+
+	# Check password hashing
+	echo "1️⃣  Password Security"
+	if grep -q "bcrypt" "$BACKEND_PATH/package.json" 2>/dev/null; then
+		print_ok "bcrypt installed (password hashing)"
+	else
+		print_error "bcrypt not installed - passwords may not be hashed!"
+	fi
+	echo ""
+
+	# Check audit logging
+	echo "2️⃣  Audit Logging"
+	if [[ -f "$BACKEND_PATH/src/mongo/schemas.ts" ]] && grep -q "AuditLog" "$BACKEND_PATH/src/mongo/schemas.ts" 2>/dev/null; then
+		print_ok "AuditLog schema exists (data traceability)"
+	else
+		print_warn "AuditLog schema missing - consider adding for RGPD compliance"
+	fi
+
+	if grep -q "LoggingInterceptor" "$BACKEND_PATH/src/app.module.ts" 2>/dev/null; then
+		print_ok "LoggingInterceptor registered (request logging)"
+	else
+		print_warn "LoggingInterceptor not registered"
+	fi
+	echo ""
+
+	# Check data validation
+	echo "3️⃣  Data Validation"
+	if grep -q "ValidationPipe\|CustomValidationPipe" "$BACKEND_PATH/src/app.module.ts" 2>/dev/null; then
+		print_ok "Validation pipe registered (data integrity)"
+	else
+		print_error "Validation pipe not registered"
+	fi
+	echo ""
+
+	# Check error handling (no data leakage)
+	echo "4️⃣  Error Handling (No Data Leakage)"
+	if [[ -f "$BACKEND_PATH/src/common/filters/all-exceptions.filter.ts" ]]; then
+		if grep -q "INTERNAL_ERROR" "$BACKEND_PATH/src/common/filters/all-exceptions.filter.ts" 2>/dev/null; then
+			print_ok "Internal errors are masked from clients"
+		else
+			print_warn "Check that internal errors don't leak sensitive data"
+		fi
+	fi
+	echo ""
+
+	echo "=========================================="
+}
+
+function check_rgaa() {
+	echo ""
+	echo "=========================================="
+	echo "♿ RGAA COMPLIANCE CHECK (Backend API)"
+	echo "=========================================="
+	echo ""
+	print_info "RGAA is primarily a frontend concern."
+	print_info "Backend should provide:"
+	echo ""
+
+	# Check API returns proper error messages
+	echo "1️⃣  Clear Error Messages"
+	if [[ -f "$BACKEND_PATH/src/common/dto/api-response.dto.ts" ]]; then
+		print_ok "Consistent API response format"
+	else
+		print_warn "No consistent API response format"
+	fi
+	echo ""
+
+	# Check validation messages
+	echo "2️⃣  Validation Messages"
+	if grep -q "message:" "$BACKEND_PATH/src/auth/dto/login.dto.ts" 2>/dev/null; then
+		print_ok "Custom validation messages exist"
+	else
+		print_warn "Consider adding custom validation messages for better UX"
+	fi
+	echo ""
+
+	echo "=========================================="
+}
+
+function run_tests() {
+	echo ""
+	echo "=========================================="
+	echo "🧪 RUNNING BACKEND TESTS"
+	echo "=========================================="
+	echo ""
+
+	if [[ -d "$BACKEND_PATH/node_modules" ]]; then
+		cd "$BACKEND_PATH" && npm run test 2>&1 | tail -30
+		cd - > /dev/null
+	else
+		print_error "Backend dependencies not installed. Run 'make install-backend' first."
+	fi
+}
+
+function show_help() {
+	echo ""
+	echo "=========================================="
+	echo "📋 DIAGNOSTIC COMMANDS"
+	echo "=========================================="
+	echo ""
+	echo "  load_db    - Check PostgreSQL status and tables"
+	echo "  mongo      - Check MongoDB status and collections"
+	echo "  routines   - Check backend routines configuration"
+	echo "  rgpd       - Check RGPD compliance"
+	echo "  rgaa       - Check RGAA compliance (backend API)"
+	echo "  test       - Run backend unit tests"
+	echo "  all        - Run all checks"
+	echo "  help       - Show this help"
+	echo "  exit/quit  - Exit diagnostic"
+	echo ""
+}
+
+# Main REPL
+echo ""
+echo "=========================================="
+echo "🔧 VITE GOURMAND DIAGNOSTIC TOOL"
+echo "=========================================="
+
+# Check if command passed as argument
+if [[ -n "$1" ]]; then
+	case "$1" in
+		load_db)
+			check_load_db
+			;;
+		mongo)
+			check_mongo
+			;;
+		routines)
+			check_routines
+			;;
+		rgpd)
+			check_rgpd
+			;;
+		rgaa)
+			check_rgaa
+			;;
+		test)
+			run_tests
+			;;
+		all)
+			check_load_db
+			check_mongo
+			check_routines
+			check_rgpd
+			check_rgaa
+			;;
+		help)
+			show_help
+			;;
+		*)
+			echo "Unknown command: $1"
+			show_help
+			;;
+	esac
+	exit 0
+fi
+
+echo "Type 'help' for available commands"
+echo ""
+
+while true; do
+	read -rp "diag> " cmd
+	case "$cmd" in
+		load_db)
+			check_load_db
+			;;
+		mongo)
+			check_mongo
+			;;
+		routines)
+			check_routines
+			;;
+		rgpd)
+			check_rgpd
+			;;
+		rgaa)
+			check_rgaa
+			;;
+		test)
+			run_tests
+			;;
+		all)
+			check_load_db
+			check_mongo
+			check_routines
+			check_rgpd
+			check_rgaa
+			;;
+		help)
+			show_help
+			;;
+		exit|quit)
+			echo "Exiting diagnostic REPL."
+			break
+			;;
+		"")
+			# Empty command, just continue
+			;;
+		*)
+			echo "Unknown command: $cmd (type 'help' for available commands)"
+			;;
+	esac
+done
