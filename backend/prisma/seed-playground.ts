@@ -8,12 +8,10 @@
  * Or via Makefile: make seed_db_playground
  */
 
-import { PrismaClient } from '../src/generated/prisma/client';
+import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
-// Prisma 7 generated client - using type assertion for compatibility
-// @ts-expect-error - Prisma 7 type signature is complex
-const prisma: PrismaClient = new PrismaClient({});
+const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
 async function hashPassword(password: string): Promise<string> {

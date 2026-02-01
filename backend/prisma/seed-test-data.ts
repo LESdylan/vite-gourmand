@@ -9,11 +9,10 @@
  * Or via: npm run seed:test
  */
 
-import { PrismaClient } from '../src/generated/prisma/client';
+import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
-// @ts-expect-error - Prisma 7 type signature
-const prisma: PrismaClient = new PrismaClient({});
+const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
 // Order statuses for testing
