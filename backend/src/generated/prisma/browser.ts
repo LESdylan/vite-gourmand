@@ -67,3 +67,8 @@ export type Dish = Prisma.DishModel
  * 
  */
 export type Allergen = Prisma.AllergenModel
+/**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel

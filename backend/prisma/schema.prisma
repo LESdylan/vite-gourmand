@@ -28,6 +28,7 @@ model User {
   role             Role?     @relation(fields: [roleId], references: [id])
   publishes        Publish[]
   orders           Order[]
+  passwordResetTokens PasswordResetToken[]
   
   // RGPD Consent tracking
   gdprConsent      Boolean   @default(false)
@@ -122,4 +123,17 @@ model Allergen {
   id      Int    @id @default(autoincrement())
   libelle String
   dishes  Dish[] @relation("DishAllergens")
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
 }

@@ -2,14 +2,29 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { LoginDto, RegisterDto, AuthResponseDto, TokenPayload } from './dto';
+import {
+  LoginDto,
+  RegisterDto,
+  AuthResponseDto,
+  TokenPayload,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  ChangePasswordDto,
+} from './dto';
 import { MESSAGES } from '../common/constants';
+import {
+  generateResetToken,
+  hashToken,
+  calculateExpiryDate,
+  isTokenValid,
+} from './password-reset.helpers';
 
 @Injectable()
 export class AuthService {
@@ -186,6 +201,147 @@ export class AuthService {
       firstName: user.first_name,
       role: user.role?.libelle || 'client',
     };
+  }
+
+  /**
+   * Request password reset - generates token
+   */
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; token?: string }> {
+    const user = await this.findUserByEmail(dto.email);
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return this.getPasswordResetSuccessMessage();
+    }
+
+    await this.invalidateExistingTokens(user.id);
+    const token = await this.createResetToken(user.id);
+
+    this.logger.log(`Password reset requested for: ${dto.email}`);
+
+    // In production, send email instead of returning token
+    return this.getPasswordResetSuccessMessage(token);
+  }
+
+  /**
+   * Reset password using token
+   */
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    const tokenRecord = await this.findAndValidateToken(dto.token);
+    await this.updateUserPassword(tokenRecord.userId, dto.newPassword);
+    await this.markTokenAsUsed(tokenRecord.id);
+
+    this.logger.log(`Password reset completed for user ID: ${tokenRecord.userId}`);
+
+    return { message: 'Password has been reset successfully' };
+  }
+
+  /**
+   * Change password while logged in
+   */
+  async changePassword(userId: number, dto: ChangePasswordDto): Promise<{ message: string }> {
+    const user = await this.findUserById(userId);
+    await this.verifyCurrentPassword(dto.currentPassword, user.password);
+    this.ensureNewPasswordIsDifferent(dto.currentPassword, dto.newPassword);
+    await this.updateUserPassword(userId, dto.newPassword);
+
+    this.logger.log(`Password changed for user ID: ${userId}`);
+
+    return { message: 'Password changed successfully' };
+  }
+
+  // ============================================
+  // Password Reset Private Helpers
+  // ============================================
+
+  private async findUserByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
+  private async findUserById(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
+  }
+
+  private async invalidateExistingTokens(userId: number): Promise<void> {
+    await this.prisma.passwordResetToken.updateMany({
+      where: { userId, used: false },
+      data: { used: true },
+    });
+  }
+
+  private async createResetToken(userId: number): Promise<string> {
+    const plainToken = generateResetToken();
+    const hashedToken = hashToken(plainToken);
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        token: hashedToken,
+        userId,
+        expiresAt: calculateExpiryDate(),
+      },
+    });
+
+    return plainToken;
+  }
+
+  private getPasswordResetSuccessMessage(token?: string) {
+    const message = 'If your email is registered, you will receive a password reset link';
+    // In development, return token for testing
+    if (process.env.NODE_ENV !== 'production' && token) {
+      return { message, token };
+    }
+    return { message };
+  }
+
+  private async findAndValidateToken(plainToken: string) {
+    const hashedToken = hashToken(plainToken);
+
+    const tokenRecord = await this.prisma.passwordResetToken.findUnique({
+      where: { token: hashedToken },
+    });
+
+    if (!tokenRecord) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    if (!isTokenValid(tokenRecord)) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    return tokenRecord;
+  }
+
+  private async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    const hashedPassword = await bcrypt.hash(newPassword, this.SALT_ROUNDS);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+  }
+
+  private async markTokenAsUsed(tokenId: number): Promise<void> {
+    await this.prisma.passwordResetToken.update({
+      where: { id: tokenId },
+      data: { used: true },
+    });
+  }
+
+  private async verifyCurrentPassword(currentPassword: string, storedHash: string): Promise<void> {
+    const isValid = await bcrypt.compare(currentPassword, storedHash);
+    if (!isValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+  }
+
+  private ensureNewPasswordIsDifferent(currentPassword: string, newPassword: string): void {
+    if (currentPassword === newPassword) {
+      throw new BadRequestException('New password must be different from current password');
+    }
   }
 
   /**

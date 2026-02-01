@@ -5,9 +5,18 @@ import {
   HttpCode,
   HttpStatus,
   Get,
+  Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, RefreshTokenDto, AuthResponseDto } from './dto';
+import {
+  LoginDto,
+  RegisterDto,
+  RefreshTokenDto,
+  AuthResponseDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  ChangePasswordDto,
+} from './dto';
 import { Public, CurrentUser } from '../common';
 import type { UserPayload } from '../common/decorators/current-user.decorator';
 
@@ -45,6 +54,41 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Body() dto: RefreshTokenDto): Promise<{ accessToken: string }> {
     return this.authService.refreshToken(dto.refreshToken);
+  }
+
+  /**
+   * POST /auth/forgot-password
+   * Request password reset email
+   */
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  /**
+   * POST /auth/reset-password
+   * Reset password using token
+   */
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
+  }
+
+  /**
+   * PUT /auth/change-password
+   * Change password while logged in
+   */
+  @Put('change-password')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @CurrentUser() user: UserPayload,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(user.id, dto);
   }
 
   /**

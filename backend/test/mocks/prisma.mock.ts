@@ -16,7 +16,8 @@ let roles: any[] = [
 let orders: any[] = [];
 let menus: any[] = [];
 let publishes: any[] = [];
-let idCounters = { user: 1, order: 1, menu: 1, publish: 1 };
+let passwordResetTokens: any[] = [];
+let idCounters = { user: 1, order: 1, menu: 1, publish: 1, passwordResetToken: 1 };
 
 // Helper to reset data
 export const resetMockData = () => {
@@ -24,7 +25,8 @@ export const resetMockData = () => {
   orders = [];
   menus = [];
   publishes = [];
-  idCounters = { user: 1, order: 1, menu: 1, publish: 1 };
+  passwordResetTokens = [];
+  idCounters = { user: 1, order: 1, menu: 1, publish: 1, passwordResetToken: 1 };
 };
 
 // Create model mock with real behavior
@@ -219,6 +221,67 @@ const createPublishMock = () => ({
   }),
 });
 
+const createPasswordResetTokenMock = () => ({
+  findUnique: jest.fn().mockImplementation(async ({ where }) => {
+    return passwordResetTokens.find(t => t.id === where.id || t.token === where.token) || null;
+  }),
+  findFirst: jest.fn().mockImplementation(async ({ where }) => {
+    return passwordResetTokens.find(t => {
+      if (where?.token) return t.token === where.token;
+      if (where?.userId) return t.userId === where.userId;
+      return true;
+    }) || null;
+  }),
+  findMany: jest.fn().mockImplementation(async ({ where } = {}) => {
+    if (!where) return passwordResetTokens;
+    return passwordResetTokens.filter(t => {
+      if (where.userId && t.userId !== where.userId) return false;
+      if (where.used !== undefined && t.used !== where.used) return false;
+      return true;
+    });
+  }),
+  create: jest.fn().mockImplementation(async ({ data }) => {
+    const token = { 
+      ...data, 
+      id: idCounters.passwordResetToken++,
+      createdAt: new Date(),
+    };
+    passwordResetTokens.push(token);
+    return token;
+  }),
+  update: jest.fn().mockImplementation(async ({ where, data }) => {
+    const idx = passwordResetTokens.findIndex(t => t.id === where.id || t.token === where.token);
+    if (idx >= 0) {
+      passwordResetTokens[idx] = { ...passwordResetTokens[idx], ...data };
+      return passwordResetTokens[idx];
+    }
+    return null;
+  }),
+  updateMany: jest.fn().mockImplementation(async ({ where, data }) => {
+    let count = 0;
+    passwordResetTokens.forEach((t, idx) => {
+      if (where.userId && t.userId !== where.userId) return;
+      if (where.used !== undefined && t.used !== where.used) return;
+      passwordResetTokens[idx] = { ...t, ...data };
+      count++;
+    });
+    return { count };
+  }),
+  delete: jest.fn().mockImplementation(async ({ where }) => {
+    const idx = passwordResetTokens.findIndex(t => t.id === where.id || t.token === where.token);
+    if (idx >= 0) return passwordResetTokens.splice(idx, 1)[0];
+    return null;
+  }),
+  deleteMany: jest.fn().mockImplementation(async ({ where }) => {
+    const before = passwordResetTokens.length;
+    passwordResetTokens = passwordResetTokens.filter(t => {
+      if (where?.userId && t.userId === where.userId) return false;
+      return true;
+    });
+    return { count: before - passwordResetTokens.length };
+  }),
+});
+
 const createGenericMock = () => ({
   findUnique: jest.fn().mockResolvedValue(null),
   findFirst: jest.fn().mockResolvedValue(null),
@@ -238,6 +301,7 @@ export class PrismaClient {
   order = createOrderMock();
   menu = createMenuMock();
   publish = createPublishMock();
+  passwordResetToken = createPasswordResetTokenMock();
   dish = createGenericMock();
   diet = createGenericMock();
   theme = createGenericMock();
@@ -280,5 +344,13 @@ export type Role = { id: number; libelle: string };
 export type Order = { id: number; status: string; userId: number };
 export type Menu = { id: number; title: string };
 export type Publish = { id: number; status: string; userId: number };
+export type PasswordResetToken = { 
+  id: number; 
+  token: string; 
+  userId: number; 
+  expiresAt: Date; 
+  used: boolean;
+  createdAt: Date;
+};
 
 export default { PrismaClient, resetMockData };
