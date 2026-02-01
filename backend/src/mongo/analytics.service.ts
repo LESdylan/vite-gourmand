@@ -37,7 +37,9 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
     this.auditLogs = this.db.collection(MONGO_COLLECTIONS.AUDIT_LOGS);
     this.searchAnalytics = this.db.collection(MONGO_COLLECTIONS.SEARCH_ANALYTICS);
 
-    console.log('✅ MongoDB Analytics Service connected');
+    if (process.env.NODE_ENV !== 'test') {
+      console.log('✅ MongoDB Analytics Service connected');
+    }
   }
 
   async onModuleDestroy() {

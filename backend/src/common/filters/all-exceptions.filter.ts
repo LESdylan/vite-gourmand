@@ -58,10 +58,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.error(`Unknown error type: ${JSON.stringify(exception)}`);
     }
 
-    // Log for RGPD traceability
-    this.logger.error(
-      `HTTP ${status} - ${request.method} ${request.url} - ${message}`,
-    );
+    // Log for RGPD traceability (skip 4xx in test mode for cleaner output)
+    const isTestEnv = process.env.NODE_ENV === 'test';
+    const isClientError = status >= 400 && status < 500;
+    
+    if (!isTestEnv || !isClientError) {
+      this.logger.error(
+        `HTTP ${status} - ${request.method} ${request.url} - ${message}`,
+      );
+    }
 
     const errorResponse: ApiResponse<null> = {
       success: false,

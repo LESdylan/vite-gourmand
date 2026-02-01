@@ -22,7 +22,7 @@ const mockThrottlerGuard: CanActivate = {
 };
 
 /**
- * Creates a test application with throttling disabled
+ * Creates a test application with throttling disabled and silent logging
  */
 export async function createTestApp(): Promise<INestApplication> {
   const builder: TestingModuleBuilder = Test.createTestingModule({
@@ -34,7 +34,10 @@ export async function createTestApp(): Promise<INestApplication> {
 
   const moduleFixture: TestingModule = await builder.compile();
 
-  const app = moduleFixture.createNestApplication();
+  // Create app with silent logger for cleaner test output
+  const app = moduleFixture.createNestApplication({
+    logger: ['error'], // Only log fatal errors, not expected 400/401 responses
+  });
   app.setGlobalPrefix('api');
   app.enableCors(); // Enable CORS for tests
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
