@@ -25,3 +25,4 @@ backend/dist
 backend/.env
 node_modules/
 data/postgres
+data/mongo
