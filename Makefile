@@ -108,6 +108,36 @@ seed_db_playground: wait-for-db  ## Seed database with playground data (bcrypt-h
 	@echo "   Manager: manager@vitegourmand.fr / Manager123!"
 	@echo "   Client:  alice.dupont@email.fr / Client123!"
 
+.PHONY: test_backend
+test_backend: wait-for-db  ## Run all backend tests (unit + e2e)
+	@echo "🧪 Running backend tests..."
+	cd $(BACKEND_PATH) && npm run test
+	@echo "✅ Unit tests completed!"
+
+.PHONY: test_backend_e2e
+test_backend_e2e: wait-for-db  ## Run backend E2E tests only
+	@echo "🧪 Running backend E2E tests..."
+	cd $(BACKEND_PATH) && npm run test:e2e
+	@echo "✅ E2E tests completed!"
+
+.PHONY: test_backend_orders
+test_backend_orders: wait-for-db  ## Run order lifecycle tests
+	@echo "🧪 Running order lifecycle tests..."
+	cd $(BACKEND_PATH) && npm run test:orders
+	@echo "✅ Order tests completed!"
+
+.PHONY: test_backend_flows
+test_backend_flows: wait-for-db  ## Run API flow simulation tests
+	@echo "🧪 Running API flow tests..."
+	cd $(BACKEND_PATH) && npm run test:flows
+	@echo "✅ Flow tests completed!"
+
+.PHONY: seed_test_data
+seed_test_data: wait-for-db  ## Seed database with test data (all order statuses)
+	@echo "🌱 Seeding database with test data..."
+	cd $(BACKEND_PATH) && npm run seed:test
+	@echo "✅ Test data seeded successfully!"
+
 .PHONY: diagnostic
 diagnostic:  ## Run the diagnostic script (interactive REPL)
 	bash ./scripts/diagnostic.sh

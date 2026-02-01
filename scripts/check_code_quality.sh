@@ -14,12 +14,10 @@ function check_code_quality() {
     echo ""
     echo "1️⃣  ESLint Configuration"
     log_subsection "1. Linting"
-    
     if [[ -f "$BACKEND_PATH/eslint.config.mjs" ]] || [[ -f "$BACKEND_PATH/.eslintrc.js" ]] || [[ -f "$BACKEND_PATH/.eslintrc.json" ]]; then
         print_ok "ESLint configured"
         log_pass "ESLint configuration found"
         count_pass
-        
         if grep -q "\"lint\"" "$BACKEND_PATH/package.json" 2>/dev/null; then
             print_ok "Lint script in package.json"
             log_pass "Lint script exists"
