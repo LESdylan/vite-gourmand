@@ -17,7 +17,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:orders": "jest --config ./test/jest-e2e.json --testPathPattern=order",
+    "test:flows": "jest --config ./test/jest-e2e.json --testPathPattern=api-flows",
+    "test:all": "jest --config ./test/jest-e2e.json --runInBand",
+    "seed": "npx tsx prisma/seed-playground.ts",
+    "seed:test": "npx tsx prisma/seed-test-data.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.0",

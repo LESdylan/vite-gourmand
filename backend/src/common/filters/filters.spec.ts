@@ -1,6 +1,10 @@
 import { HttpExceptionFilter } from './http-exception.filter';
 import { AllExceptionsFilter } from './all-exceptions.filter';
-import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
+
+// Silence logger during tests (the ERROR/WARN messages are expected behavior)
+jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => {});
 
 describe('Exception Filters', () => {
   const mockJson = jest.fn();

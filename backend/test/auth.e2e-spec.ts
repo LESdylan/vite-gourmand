@@ -1,20 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { createTestApp } from './test-utils';
 
 describe('Auth Routines (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.setGlobalPrefix('api');
-    app.useGlobalPipes(new ValidationPipe());
-    await app.init();
+    app = await createTestApp();
   });
 
   afterAll(async () => {
@@ -67,18 +59,26 @@ describe('Auth Routines (e2e)', () => {
   });
 
   describe('POST /api/auth/login', () => {
-    const testEmail = `login-test-${Date.now()}@example.com`;
+    let testEmail: string;
     const testPassword = 'SecurePassword123!';
 
     beforeAll(async () => {
+      // Generate unique email inside beforeAll
+      testEmail = `login-test-${Date.now()}@example.com`;
+      
       // Register a user first
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post('/api/auth/register')
         .send({
           email: testEmail,
           password: testPassword,
           firstName: 'Login Test',
         });
+      
+      // Ensure registration succeeded
+      if (response.status !== 201) {
+        console.error('Registration failed:', response.body);
+      }
     });
 
     it('should login with valid credentials', async () => {
