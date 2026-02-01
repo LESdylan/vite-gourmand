@@ -1,9 +1,16 @@
-MIGRATIONS_PATH = $(BACKEND_PATH)/prisma/migrations
-
 # Default target: build images, start services, wait for db, migrate
 .PHONY: all
 all: up wait-for-db reset
 all: up wait-for-db init-migration reset
+
+.PHONY: reload
+reload:  ## Reload PostgreSQL container and update the database schema (DANGER: destroys all data!)
+	$(DOCKER_COMPOSE) restart db
+	$(MAKE) wait-for-db
+	cd $(BACKEND_PATH) && $(PRISMA) migrate dev --name reload --schema=prisma/schema.prisma --create-only
+	cd $(BACKEND_PATH) && $(PRISMA) migrate reset --force --schema=prisma/schema.prisma
+
+MIGRATIONS_PATH = $(BACKEND_PATH)/prisma/migrations
 
 .PHONY: init-migration
 init-migration:
@@ -59,6 +66,7 @@ help:
 	@echo "  destroy    Remove all containers, images, and volumes (everything)"
 	@echo "  diagnostic Run the diagnostic REPL script"
 	@echo "  init-migration Create and apply initial migration if none exist"
+	@echo "  reload      Reload and update the database schema (DANGER: destroys all data!)"
 
 .PHONY: up
 up:  ## Start all containers in detached mode

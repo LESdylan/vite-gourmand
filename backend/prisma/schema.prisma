@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -14,18 +8,98 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
-  posts Post[]
+model WorkingHours {
+  id      Int    @id @default(autoincrement())
+  day     String
+  opening String
+  closing String
 }
 
-model Post {
-  id        Int      @default(autoincrement()) @id
-  title     String
-  content   String?
-  published Boolean? @default(false)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  Int?
+model User {
+  id               Int      @id @default(autoincrement())
+  email            String   @unique
+  password         String
+  first_name       String
+  telephone_number String
+  city             String
+  country          String
+  postal_address   String
+  roleId           Int?
+  role             Role?    @relation(fields: [roleId], references: [id])
+  publishes        Publish[]
+  orders           Order[]
+}
+
+model Role {
+  id      Int    @id @default(autoincrement())
+  libelle String
+  users   User[]
+}
+
+model Publish {
+  id          Int    @id @default(autoincrement())
+  note        String
+  description String
+  status      String
+  userId      Int
+  user        User   @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id               Int      @id @default(autoincrement())
+  order_number     String
+  order_date       DateTime
+  prestation_date  DateTime
+  delivery_hour    String
+  menu_price       Float
+  person_number    Int
+  delivery_price   Float
+  status           String
+  material_lending Boolean
+  get_back_material Boolean
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id])
+  menus            Menu[]   @relation("OrderMenus")
+}
+
+model Menu {
+  id               Int      @id @default(autoincrement())
+  title            String
+  person_min       Int
+  price_per_person Float
+  dietId           Int?
+  diet             Diet?    @relation(fields: [dietId], references: [id])
+  themeId          Int?
+  theme            Theme?   @relation(fields: [themeId], references: [id])
+  description      String
+  remaining_qty    Int
+  orders           Order[]  @relation("OrderMenus")
+  dishes           Dish[]
+}
+
+model Diet {
+  id      Int    @id @default(autoincrement())
+  libelle String
+  menus   Menu[]
+}
+
+model Theme {
+  id      Int    @id @default(autoincrement())
+  libelle String
+  menus   Menu[]
+}
+
+model Dish {
+  id        Int        @id @default(autoincrement())
+  title_dish String
+  photo      String
+  menuId     Int?
+  menu       Menu?     @relation(fields: [menuId], references: [id])
+  allergens  Allergen[] @relation("DishAllergens")
+}
+
+model Allergen {
+  id      Int    @id @default(autoincrement())
+  libelle String
+  dishes  Dish[] @relation("DishAllergens")
 }
