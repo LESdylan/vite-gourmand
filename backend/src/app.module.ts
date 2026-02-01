@@ -10,6 +10,16 @@ import { AppService } from './app.service';
 import { AnalyticsModule } from './mongo';
 import { PrismaModule } from './prisma';
 import { AuthModule } from './auth';
+import { MenuModule } from './menu';
+import { OrderModule } from './order';
+import { DishModule } from './dish';
+import { UserModule } from './user';
+import { AdminModule } from './admin';
+import { WorkingHoursModule } from './working-hours';
+import { ReviewModule } from './review';
+import { DietModule } from './diet';
+import { ThemeModule } from './theme';
+import { AllergenModule } from './allergen';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -72,6 +82,16 @@ import {
     AnalyticsModule,
     // Features
     AuthModule,
+    MenuModule,
+    OrderModule,
+    DishModule,
+    UserModule,
+    AdminModule,
+    WorkingHoursModule,
+    ReviewModule,
+    DietModule,
+    ThemeModule,
+    AllergenModule,
   ],
   controllers: [AppController],
   providers: [

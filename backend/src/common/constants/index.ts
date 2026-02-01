@@ -6,6 +6,8 @@
 // Role constants
 export const ROLES = {
   ADMIN: 'admin',
+  EMPLOYEE: 'employee',
+  MANAGER: 'manager',
   CLIENT: 'client',
   CHEF: 'chef',
 } as const;

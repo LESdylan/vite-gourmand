@@ -98,7 +98,12 @@ export const UserScalarFieldEnum = {
   city: 'city',
   country: 'country',
   postal_address: 'postal_address',
-  roleId: 'roleId'
+  roleId: 'roleId',
+  gdprConsent: 'gdprConsent',
+  gdprConsentDate: 'gdprConsentDate',
+  marketingConsent: 'marketingConsent',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]

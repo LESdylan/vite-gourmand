@@ -46,6 +46,11 @@ export type UserMinAggregateOutputType = {
   country: string | null
   postal_address: string | null
   roleId: number | null
+  gdprConsent: boolean | null
+  gdprConsentDate: Date | null
+  marketingConsent: boolean | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -58,6 +63,11 @@ export type UserMaxAggregateOutputType = {
   country: string | null
   postal_address: string | null
   roleId: number | null
+  gdprConsent: boolean | null
+  gdprConsentDate: Date | null
+  marketingConsent: boolean | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -70,6 +80,11 @@ export type UserCountAggregateOutputType = {
   country: number
   postal_address: number
   roleId: number
+  gdprConsent: number
+  gdprConsentDate: number
+  marketingConsent: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -94,6 +109,11 @@ export type UserMinAggregateInputType = {
   country?: true
   postal_address?: true
   roleId?: true
+  gdprConsent?: true
+  gdprConsentDate?: true
+  marketingConsent?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -106,6 +126,11 @@ export type UserMaxAggregateInputType = {
   country?: true
   postal_address?: true
   roleId?: true
+  gdprConsent?: true
+  gdprConsentDate?: true
+  marketingConsent?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -118,6 +143,11 @@ export type UserCountAggregateInputType = {
   country?: true
   postal_address?: true
   roleId?: true
+  gdprConsent?: true
+  gdprConsentDate?: true
+  marketingConsent?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -217,6 +247,11 @@ export type UserGroupByOutputType = {
   country: string
   postal_address: string
   roleId: number | null
+  gdprConsent: boolean
+  gdprConsentDate: Date | null
+  marketingConsent: boolean
+  createdAt: Date
+  updatedAt: Date
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -252,6 +287,11 @@ export type UserWhereInput = {
   country?: Prisma.StringFilter<"User"> | string
   postal_address?: Prisma.StringFilter<"User"> | string
   roleId?: Prisma.IntNullableFilter<"User"> | number | null
+  gdprConsent?: Prisma.BoolFilter<"User"> | boolean
+  gdprConsentDate?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  marketingConsent?: Prisma.BoolFilter<"User"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   role?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
   publishes?: Prisma.PublishListRelationFilter
   orders?: Prisma.OrderListRelationFilter
@@ -267,6 +307,11 @@ export type UserOrderByWithRelationInput = {
   country?: Prisma.SortOrder
   postal_address?: Prisma.SortOrder
   roleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  gdprConsent?: Prisma.SortOrder
+  gdprConsentDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  marketingConsent?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   role?: Prisma.RoleOrderByWithRelationInput
   publishes?: Prisma.PublishOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
@@ -285,6 +330,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   country?: Prisma.StringFilter<"User"> | string
   postal_address?: Prisma.StringFilter<"User"> | string
   roleId?: Prisma.IntNullableFilter<"User"> | number | null
+  gdprConsent?: Prisma.BoolFilter<"User"> | boolean
+  gdprConsentDate?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  marketingConsent?: Prisma.BoolFilter<"User"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   role?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
   publishes?: Prisma.PublishListRelationFilter
   orders?: Prisma.OrderListRelationFilter
@@ -300,6 +350,11 @@ export type UserOrderByWithAggregationInput = {
   country?: Prisma.SortOrder
   postal_address?: Prisma.SortOrder
   roleId?: Prisma.SortOrderInput | Prisma.SortOrder
+  gdprConsent?: Prisma.SortOrder
+  gdprConsentDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  marketingConsent?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -320,6 +375,11 @@ export type UserScalarWhereWithAggregatesInput = {
   country?: Prisma.StringWithAggregatesFilter<"User"> | string
   postal_address?: Prisma.StringWithAggregatesFilter<"User"> | string
   roleId?: Prisma.IntNullableWithAggregatesFilter<"User"> | number | null
+  gdprConsent?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  gdprConsentDate?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  marketingConsent?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
 
 export type UserCreateInput = {
@@ -330,6 +390,11 @@ export type UserCreateInput = {
   city: string
   country: string
   postal_address: string
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   publishes?: Prisma.PublishCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
@@ -345,6 +410,11 @@ export type UserUncheckedCreateInput = {
   country: string
   postal_address: string
   roleId?: number | null
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   publishes?: Prisma.PublishUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
 }
@@ -357,6 +427,11 @@ export type UserUpdateInput = {
   city?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   publishes?: Prisma.PublishUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
@@ -372,6 +447,11 @@ export type UserUncheckedUpdateInput = {
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishes?: Prisma.PublishUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -386,6 +466,11 @@ export type UserCreateManyInput = {
   country: string
   postal_address: string
   roleId?: number | null
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type UserUpdateManyMutationInput = {
@@ -396,6 +481,11 @@ export type UserUpdateManyMutationInput = {
   city?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -408,6 +498,11 @@ export type UserUncheckedUpdateManyInput = {
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -420,6 +515,11 @@ export type UserCountOrderByAggregateInput = {
   country?: Prisma.SortOrder
   postal_address?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
+  gdprConsent?: Prisma.SortOrder
+  gdprConsentDate?: Prisma.SortOrder
+  marketingConsent?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -437,6 +537,11 @@ export type UserMaxOrderByAggregateInput = {
   country?: Prisma.SortOrder
   postal_address?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
+  gdprConsent?: Prisma.SortOrder
+  gdprConsentDate?: Prisma.SortOrder
+  marketingConsent?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -449,6 +554,11 @@ export type UserMinOrderByAggregateInput = {
   country?: Prisma.SortOrder
   postal_address?: Prisma.SortOrder
   roleId?: Prisma.SortOrder
+  gdprConsent?: Prisma.SortOrder
+  gdprConsentDate?: Prisma.SortOrder
+  marketingConsent?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -469,6 +579,18 @@ export type UserOrderByRelationAggregateInput = {
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
 }
 
 export type NullableIntFieldUpdateOperationsInput = {
@@ -557,6 +679,11 @@ export type UserCreateWithoutRoleInput = {
   city: string
   country: string
   postal_address: string
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   publishes?: Prisma.PublishCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
 }
@@ -570,6 +697,11 @@ export type UserUncheckedCreateWithoutRoleInput = {
   city: string
   country: string
   postal_address: string
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   publishes?: Prisma.PublishUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
 }
@@ -613,6 +745,11 @@ export type UserScalarWhereInput = {
   country?: Prisma.StringFilter<"User"> | string
   postal_address?: Prisma.StringFilter<"User"> | string
   roleId?: Prisma.IntNullableFilter<"User"> | number | null
+  gdprConsent?: Prisma.BoolFilter<"User"> | boolean
+  gdprConsentDate?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  marketingConsent?: Prisma.BoolFilter<"User"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
 }
 
 export type UserCreateWithoutPublishesInput = {
@@ -623,6 +760,11 @@ export type UserCreateWithoutPublishesInput = {
   city: string
   country: string
   postal_address: string
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   orders?: Prisma.OrderCreateNestedManyWithoutUserInput
 }
@@ -637,6 +779,11 @@ export type UserUncheckedCreateWithoutPublishesInput = {
   country: string
   postal_address: string
   roleId?: number | null
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -664,6 +811,11 @@ export type UserUpdateWithoutPublishesInput = {
   city?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
 }
@@ -678,6 +830,11 @@ export type UserUncheckedUpdateWithoutPublishesInput = {
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -689,6 +846,11 @@ export type UserCreateWithoutOrdersInput = {
   city: string
   country: string
   postal_address: string
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
   publishes?: Prisma.PublishCreateNestedManyWithoutUserInput
 }
@@ -703,6 +865,11 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   country: string
   postal_address: string
   roleId?: number | null
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   publishes?: Prisma.PublishUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -730,6 +897,11 @@ export type UserUpdateWithoutOrdersInput = {
   city?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   publishes?: Prisma.PublishUpdateManyWithoutUserNestedInput
 }
@@ -744,6 +916,11 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
   roleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishes?: Prisma.PublishUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -756,6 +933,11 @@ export type UserCreateManyRoleInput = {
   city: string
   country: string
   postal_address: string
+  gdprConsent?: boolean
+  gdprConsentDate?: Date | string | null
+  marketingConsent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type UserUpdateWithoutRoleInput = {
@@ -766,6 +948,11 @@ export type UserUpdateWithoutRoleInput = {
   city?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishes?: Prisma.PublishUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutUserNestedInput
 }
@@ -779,6 +966,11 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   city?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   publishes?: Prisma.PublishUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -792,6 +984,11 @@ export type UserUncheckedUpdateManyWithoutRoleInput = {
   city?: Prisma.StringFieldUpdateOperationsInput | string
   country?: Prisma.StringFieldUpdateOperationsInput | string
   postal_address?: Prisma.StringFieldUpdateOperationsInput | string
+  gdprConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gdprConsentDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketingConsent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -844,6 +1041,11 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   country?: boolean
   postal_address?: boolean
   roleId?: boolean
+  gdprConsent?: boolean
+  gdprConsentDate?: boolean
+  marketingConsent?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
   publishes?: boolean | Prisma.User$publishesArgs<ExtArgs>
   orders?: boolean | Prisma.User$ordersArgs<ExtArgs>
@@ -860,6 +1062,11 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   country?: boolean
   postal_address?: boolean
   roleId?: boolean
+  gdprConsent?: boolean
+  gdprConsentDate?: boolean
+  marketingConsent?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -873,6 +1080,11 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   country?: boolean
   postal_address?: boolean
   roleId?: boolean
+  gdprConsent?: boolean
+  gdprConsentDate?: boolean
+  marketingConsent?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -886,9 +1098,14 @@ export type UserSelectScalar = {
   country?: boolean
   postal_address?: boolean
   roleId?: boolean
+  gdprConsent?: boolean
+  gdprConsentDate?: boolean
+  marketingConsent?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password" | "first_name" | "telephone_number" | "city" | "country" | "postal_address" | "roleId", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "password" | "first_name" | "telephone_number" | "city" | "country" | "postal_address" | "roleId" | "gdprConsent" | "gdprConsentDate" | "marketingConsent" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
   publishes?: boolean | Prisma.User$publishesArgs<ExtArgs>
@@ -919,6 +1136,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     country: string
     postal_address: string
     roleId: number | null
+    gdprConsent: boolean
+    gdprConsentDate: Date | null
+    marketingConsent: boolean
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1354,6 +1576,11 @@ export interface UserFieldRefs {
   readonly country: Prisma.FieldRef<"User", 'String'>
   readonly postal_address: Prisma.FieldRef<"User", 'String'>
   readonly roleId: Prisma.FieldRef<"User", 'Int'>
+  readonly gdprConsent: Prisma.FieldRef<"User", 'Boolean'>
+  readonly gdprConsentDate: Prisma.FieldRef<"User", 'DateTime'>
+  readonly marketingConsent: Prisma.FieldRef<"User", 'Boolean'>
+  readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 
