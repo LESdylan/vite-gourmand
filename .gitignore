@@ -20,3 +20,8 @@ server/vite-gourmand-api/test/*.ts
 server/vite-gourmand-api/.env
 setting.json
 vendor/scripts
+backend/node_modules
+backend/dist
+backend/.env
+node_modules/
+data/postgres

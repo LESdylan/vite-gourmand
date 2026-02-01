@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   db:
@@ -8,8 +8,8 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: vite_gourmand
     volumes:
-      - vite_gourmand_db_data:/var/lib/postgresql/data
-      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./data/postgres:/var/lib/postgresql/data
+      # Remove invalid init.sql mount (no such file or directory)
     ports:
       - "5432:5432"
     healthcheck:
@@ -17,41 +17,3 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
-  api:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    depends_on:
-      - db
-    environment:
-      DATABASE_URL: "postgresql://postgres:postgres@db:5432/vite_gourmand"
-      NODE_ENV: production
-    ports:
-      - "3000:3000"
-    command: ["node", "dist/main"]
-
-volumes:
-  vite_gourmand_db_data:
-
-  postgres:
-    image: postgres:15-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: vite_gourmand
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      # run init script on first container start
-      - ./vite-gourmand-api/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d vite_gourmand"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-volumes:
-  postgres-data:
