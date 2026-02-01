@@ -19,6 +19,9 @@ export type {
   ApiEndpoint 
 } from './types';
 
+// Manual Testing Dashboard
+export { ManualTestDashboard, InteractiveTestDashboard } from './manual';
+
 // Utilities
 export * from './utils';
 
