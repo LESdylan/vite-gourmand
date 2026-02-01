@@ -1,32 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `name` on the `User` table. All the data in the column will be lost.
-  - You are about to drop the `Post` table. If the table is not empty, all the data it contains will be lost.
-  - Added the required column `city` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `country` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `first_name` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `password` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `postal_address` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `telephone_number` to the `User` table without a default value. This is not possible if the table is not empty.
-
-*/
--- DropForeignKey
-ALTER TABLE "Post" DROP CONSTRAINT "Post_authorId_fkey";
-
--- AlterTable
-ALTER TABLE "User" DROP COLUMN "name",
-ADD COLUMN     "city" TEXT NOT NULL,
-ADD COLUMN     "country" TEXT NOT NULL,
-ADD COLUMN     "first_name" TEXT NOT NULL,
-ADD COLUMN     "password" TEXT NOT NULL,
-ADD COLUMN     "postal_address" TEXT NOT NULL,
-ADD COLUMN     "roleId" INTEGER,
-ADD COLUMN     "telephone_number" TEXT NOT NULL;
-
--- DropTable
-DROP TABLE "Post";
-
 -- CreateTable
 CREATE TABLE "WorkingHours" (
     "id" SERIAL NOT NULL,
@@ -35,6 +6,21 @@ CREATE TABLE "WorkingHours" (
     "closing" TEXT NOT NULL,
 
     CONSTRAINT "WorkingHours_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "first_name" TEXT NOT NULL,
+    "telephone_number" TEXT NOT NULL,
+    "city" TEXT NOT NULL,
+    "country" TEXT NOT NULL,
+    "postal_address" TEXT NOT NULL,
+    "roleId" INTEGER,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -137,6 +123,9 @@ CREATE TABLE "_DishAllergens" (
 
     CONSTRAINT "_DishAllergens_AB_pkey" PRIMARY KEY ("A","B")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE INDEX "_OrderMenus_B_index" ON "_OrderMenus"("B");
