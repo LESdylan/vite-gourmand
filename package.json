@@ -13,11 +13,11 @@
 		"npm": ">=10.0.0"
 	},
 	"dependencies": {
-		 "vue": "*",
-		 "axios": "*"
+		"axios": "*",
+		"vue": "*"
 	},
 	"devDependencies": {
-		 "vite": "*",
-		 "eslint": "*"
+		"eslint": "*",
+		"vite": "*"
 	}
 }
