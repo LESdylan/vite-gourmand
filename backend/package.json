@@ -37,18 +37,23 @@
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "@types/compression": "^1.8.1",
+    "@types/passport-google-oauth20": "^2.0.17",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.2.8",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "compression": "^1.8.1",
+    "google-auth-library": "^10.5.0",
     "helmet": "^8.1.0",
     "mongodb": "^7.0.0",
     "nestjs-i18n": "^10.6.0",
+    "nodemailer": "^7.0.13",
     "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.18.0",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.9.1",
     "rxjs": "^7.8.1",
     "uuid": "^13.0.0"
   },
@@ -62,6 +67,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
+    "@types/nodemailer": "^7.0.9",
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.16.0",
     "@types/supertest": "^6.0.2",
@@ -100,7 +106,10 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "testEnvironmentOptions": {
-      "customExportConditions": ["node", "node-addons"]
+      "customExportConditions": [
+        "node",
+        "node-addons"
+      ]
     }
   }
 }

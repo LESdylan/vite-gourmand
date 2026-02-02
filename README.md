@@ -48,7 +48,7 @@ The project gives a certain amount of freedoms and requirements that I need foll
 - [Zod 4](https://ts-rest.com/)
 - [Powershell docs](https://learn.microsoft.com/en-us/powershell/)
 - [lear how to use prisma with nestjs](https://docs.nestjs.com/recipes/prisma)
-
+- [manage OAuth app breanding ](https://support.google.com/cloud/answer/15549049?hl=fr&visit_id=639056608802274595-2425559031&rd=1#publishing-status)
 ## Use Of AI
 **Documentation & Research** - Used to clarify ambiguities in edge cases where conventions differ and to research complex topics not detailed in standard textbooks, ensuring realistic solutinos within the project's scope.
 

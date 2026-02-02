@@ -10,7 +10,11 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   // Security headers with Helmet
-  app.use(helmet());
+  // Configured to allow Google Identity Services (popup-based OAuth)
+  app.use(helmet({
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow Google OAuth popup
+    crossOriginEmbedderPolicy: false, // Disable for Google scripts
+  }));
 
   // Response compression for better performance
   app.use(compression());

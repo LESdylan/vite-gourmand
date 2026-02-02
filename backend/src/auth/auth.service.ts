@@ -8,7 +8,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import {
   LoginDto,
   RegisterDto,
@@ -30,12 +32,76 @@ import {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly SALT_ROUNDS = 12;
+  private googleClient: OAuth2Client | null = null;
 
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+    private mailService: MailService,
+  ) {
+    // Initialize Google OAuth client if credentials are configured
+    const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
+    if (clientId && clientId !== 'your-google-client-id') {
+      this.googleClient = new OAuth2Client(clientId);
+      this.logger.log('Google OAuth client initialized');
+    } else {
+      this.logger.warn('Google OAuth not configured - GOOGLE_CLIENT_ID missing or placeholder');
+    }
+  }
+
+  /**
+   * Get Google Client ID for frontend
+   */
+  getGoogleClientId(): string | null {
+    const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
+    if (clientId && clientId !== 'your-google-client-id') {
+      return clientId;
+    }
+    return null;
+  }
+
+  /**
+   * Verify Google ID token and login/register user
+   */
+  async verifyGoogleToken(credential: string): Promise<AuthResponseDto> {
+    if (!this.googleClient) {
+      throw new BadRequestException('Google Sign-In is not configured on this server');
+    }
+
+    try {
+      // Verify the token with Google
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: credential,
+        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload) {
+        throw new UnauthorizedException('Invalid Google token');
+      }
+
+      const { email, given_name, family_name, sub: googleId } = payload;
+
+      if (!email) {
+        throw new BadRequestException('Email not provided by Google');
+      }
+
+      // Use the existing googleLogin method
+      return this.googleLogin({
+        email,
+        firstName: given_name || 'Google User',
+        lastName: family_name,
+        googleId: googleId || '',
+      });
+    } catch (error) {
+      if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
+        throw error;
+      }
+      this.logger.error('Google token verification failed', error);
+      throw new UnauthorizedException('Failed to verify Google token');
+    }
+  }
 
   /**
    * Register a new user
@@ -204,7 +270,7 @@ export class AuthService {
   }
 
   /**
-   * Request password reset - generates token
+   * Request password reset - generates token and sends email
    */
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; token?: string }> {
     const user = await this.findUserByEmail(dto.email);
@@ -219,8 +285,21 @@ export class AuthService {
 
     this.logger.log(`Password reset requested for: ${dto.email}`);
 
-    // In production, send email instead of returning token
-    return this.getPasswordResetSuccessMessage(token);
+    // Send password reset email
+    const emailSent = await this.mailService.sendPasswordResetEmail(
+      user.email,
+      token,
+      user.first_name,
+    );
+
+    if (emailSent) {
+      this.logger.log(`Password reset email sent to: ${dto.email}`);
+      return this.getPasswordResetSuccessMessage();
+    } else {
+      // In dev mode without email config, return token for testing
+      this.logger.warn(`Email not configured, returning token for dev testing`);
+      return this.getPasswordResetSuccessMessage(token);
+    }
   }
 
   /**
@@ -363,5 +442,77 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  /**
+   * Handle Google OAuth login/registration
+   */
+  async googleLogin(googleUser: {
+    email: string;
+    firstName: string;
+    lastName?: string;
+    googleId: string;
+  }): Promise<AuthResponseDto> {
+    // Try to find existing user
+    let user = await this.prisma.user.findUnique({
+      where: { email: googleUser.email },
+      include: { role: true },
+    });
+
+    if (!user) {
+      // Get default role (client)
+      let role = await this.prisma.role.findFirst({
+        where: { libelle: 'client' },
+      });
+
+      if (!role) {
+        role = await this.prisma.role.create({
+          data: { libelle: 'client' },
+        });
+      }
+
+      // Create new user from Google data
+      // Generate a random password since Google users authenticate via OAuth
+      const randomPassword = await bcrypt.hash(
+        `google_${googleUser.googleId}_${Date.now()}`,
+        this.SALT_ROUNDS,
+      );
+
+      user = await this.prisma.user.create({
+        data: {
+          email: googleUser.email,
+          password: randomPassword,
+          first_name: googleUser.firstName,
+          telephone_number: '',
+          city: '',
+          country: 'France',
+          postal_address: '',
+          roleId: role.id,
+        },
+        include: { role: true },
+      });
+
+      this.logger.log(`New user registered via Google: ${user.email}`);
+    } else {
+      this.logger.log(`Existing user logged in via Google: ${user.email}`);
+    }
+
+    // Generate tokens
+    const tokens = await this.generateTokens({
+      id: user.id,
+      email: user.email,
+      role: user.role?.libelle || 'client',
+      firstName: user.first_name,
+    });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        role: user.role?.libelle || 'client',
+      },
+      ...tokens,
+    };
   }
 }

@@ -20,6 +20,8 @@ import { ReviewModule } from './review';
 import { DietModule } from './diet';
 import { ThemeModule } from './theme';
 import { AllergenModule } from './allergen';
+import { CrudModule } from './crud/crud.module';
+import { MailModule } from './mail';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -92,6 +94,8 @@ import {
     DietModule,
     ThemeModule,
     AllergenModule,
+    CrudModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
