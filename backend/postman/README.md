@@ -2,130 +2,189 @@
 
 This directory contains Postman collections for testing the Vite Gourmand API independently from the frontend.
 
-## Collections
+## 🔄 Workflow: Design in UI, Run via CLI
 
-| File | Description |
-|------|-------------|
-| `auth.json` | Authentication endpoints (register, login, refresh, profile) |
-| `orders.json` | Order lifecycle management (create, status updates, queries) |
-| `admin.json` | Admin operations (user management, review moderation, stats) |
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     POSTMAN WORKFLOW (Official CLI)                 │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│   POSTMAN UI (Design/Debug)                                         │
+│   ─────────────────────────                                         │
+│   • Create/edit tests visually                                      │
+│   • Debug with console output                                        │
+│   • Changes sync automatically to Cloud                             │
+│            │                                                         │
+│            ▼                                                         │
+│   ┌────────────────────────────────────────────────────────┐       │
+│   │              POSTMAN CLOUD (Auto-Sync)                  │       │
+│   │   Collections, Environments, Test Results               │       │
+│   └───────────────────────┬────────────────────────────────┘       │
+│                           │                                          │
+│                           ▼                                          │
+│   ┌────────────────────────────────────────────────────────┐       │
+│   │              POSTMAN CLI (Official)                     │       │
+│   │   postman collection run <collection-id>                │       │
+│   └───────────────────────┬────────────────────────────────┘       │
+│                           │                                          │
+│                           ▼                                          │
+│   ┌────────────────────────────────────────────────────────┐       │
+│   │   CI/CD Pipeline (GitHub Actions, GitLab CI, etc.)     │       │
+│   │   Results pushed back to Postman Cloud!                 │       │
+│   └────────────────────────────────────────────────────────┘       │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-## Quick Start
+## 📁 Local Collections (Backup/Reference)
 
-### 1. Import Collections
+| File              | Description                                                  |
+| ----------------- | ------------------------------------------------------------ |
+| `auth.json`       | Authentication endpoints (register, login, refresh, profile) |
+| `orders.json`     | Order lifecycle management (create, status updates, queries) |
+| `admin.json`      | Admin operations (user management, review moderation, stats) |
+| `env.docker.json` | Environment variables for local/Docker runs                  |
 
-1. Open Postman
-2. Click **Import** (top left)
-3. Drag and drop all `.json` files from this folder
-4. Collections appear in sidebar
+---
 
-### 2. Set Base URL
+## 🚀 Quick Start with Postman CLI (Recommended)
 
-Each collection has a `baseUrl` variable set to `http://localhost:3000/api`.
-Change it if your backend runs on a different port.
+### Step 1: Install Postman CLI
 
-### 3. Login First
+```bash
+# Using our script
+./scripts/postman-cli.sh install
 
-Before using protected endpoints:
+# Or manually (Linux)
+curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
 
-1. Open **Auth** collection
-2. Run "Login" request with credentials:
-   - Admin: `admin@vitegourmand.fr` / `Admin123!`
-   - Manager: `manager@vitegourmand.fr` / `Manager123!`
-   - Client: `alice.dupont@email.fr` / `Client123!`
-3. Token is automatically saved to collection variables
+# Verify
+postman --version
+```
 
-## Test Credentials
+### Step 2: Login to Postman
+
+```bash
+./scripts/postman-cli.sh login
+# Opens browser for authentication
+```
+
+### Step 3: Create/Edit Tests in Postman UI
+
+1. Open [Postman App](https://www.postman.com/downloads/) or [Web](https://go.postman.co)
+2. Create a new Collection or import from `backend/postman/*.json`
+3. Add requests and tests visually
+4. **Changes sync automatically!**
+
+### Step 4: Get Collection ID
+
+1. Open your collection in Postman
+2. Click **Info** tab (ℹ️ icon)
+3. Copy the **Collection ID** (UUID format)
+
+### Step 5: Run from CLI
+
+```bash
+# Run collection (results sync to Postman Cloud!)
+./scripts/postman-cli.sh run YOUR_COLLECTION_ID
+
+# Or directly with postman command
+postman collection run YOUR_COLLECTION_ID
+
+# With environment
+postman collection run YOUR_COLLECTION_ID -e YOUR_ENV_ID
+
+# Run local file (for offline/backup)
+./scripts/postman-cli.sh run-local backend/postman/auth.json
+```
+
+---
+
+## 🛠️ Makefile Commands
+
+```bash
+make postman-install   # Install Postman CLI
+make postman-login     # Login to Postman (browser)
+make postman-list      # List your cloud collections
+make postman-run ID=x  # Run collection by ID
+make postman-local     # Run local auth.json file
+```
+
+---
+
+## ☁️ CI/CD Integration (GitHub Actions)
+
+```yaml
+# .github/workflows/api-tests.yml
+name: API Tests
+
+on: [push, pull_request]
+
+jobs:
+  postman-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Postman CLI
+        run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+
+      - name: Login with API Key
+        run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+
+      - name: Start API
+        run: |
+          docker compose up -d
+          sleep 15
+
+      - name: Run Collection
+        run: |
+          postman collection run ${{ secrets.POSTMAN_COLLECTION_ID }} \
+            --global-var "baseUrl=http://localhost:3000/api"
+
+      # Results automatically sync to Postman Cloud!
+```
+
+### Setting Up CI/CD
+
+1. **Get API Key**: [Postman Settings → API Keys](https://go.postman.co/settings/me/api-keys)
+2. **Add to GitHub Secrets**:
+   - `POSTMAN_API_KEY`: Your API key
+   - `POSTMAN_COLLECTION_ID`: Collection UUID
+3. **Push and watch results in Postman Cloud!**
+
+---
+
+## 🔑 Test Credentials
 
 After running `npm run seed` or `npm run seed:test`:
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@vitegourmand.fr | Admin123! |
+| Role    | Email                   | Password    |
+| ------- | ----------------------- | ----------- |
+| Admin   | admin@vitegourmand.fr   | Admin123!   |
 | Manager | manager@vitegourmand.fr | Manager123! |
-| Client | alice.dupont@email.fr | Client123! |
-| Test Admin | test.admin@test.com | Test123! |
-| Test Manager | test.manager@test.com | Test123! |
-| Test Client | test.client@test.com | Test123! |
+| Client  | alice.dupont@email.fr   | Client123!  |
 
-## Order Lifecycle
+---
 
-The **Orders** collection simulates the complete order workflow:
+## 📊 View Results in Postman
 
-```
-pending → confirmed → preparing → ready → delivering → delivered → completed
-                                                      ↘ cancelled
-```
+After running via CLI:
 
-Use the **Order Lifecycle** folder and run requests in sequence.
+1. Open Postman
+2. Go to **History** or **Runs** tab
+3. See all test results with timing, assertions, and failures
+4. Share reports with team!
 
-## Collection Runner
+---
 
-To run all tests automatically:
+## 🆚 Postman CLI vs Newman
 
-1. Click on collection name
-2. Click **Run** button
-3. Select requests to include
-4. Click **Run Collection**
+| Feature          | Postman CLI (New) | Newman (Legacy) |
+| ---------------- | ----------------- | --------------- |
+| Official Support | ✅ Active         | ⚠️ Maintenance  |
+| Cloud Sync       | ✅ Automatic      | ❌ Manual       |
+| Results in UI    | ✅ Yes            | ❌ No           |
+| Dependencies     | ✅ None           | ⚠️ npm packages |
+| Security Updates | ✅ Regular        | ⚠️ Deprecated   |
 
-Results show pass/fail for each test script.
-
-## Environment Variables
-
-Collections use these variables:
-
-| Variable | Description |
-|----------|-------------|
-| `baseUrl` | API base URL |
-| `accessToken` | JWT access token (auto-saved) |
-| `refreshToken` | JWT refresh token (auto-saved) |
-| `orderId` | Current order ID |
-| `userId` | Current user ID |
-
-## Simulated Events
-
-These collections simulate real user actions:
-
-### User Events
-- User registration
-- User login
-- Profile view
-- Token refresh
-
-### Order Events
-- Place order
-- Accept order (employee)
-- Start preparing (kitchen)
-- Ready for delivery
-- Out for delivery
-- Delivered
-- Order completed
-- Cancel order
-
-### Admin Events
-- Create employee
-- Update user role
-- Moderate reviews
-- View statistics
-
-## Tips
-
-1. **Run in order**: Order lifecycle tests depend on previous steps
-2. **Check variables**: After login, verify `accessToken` is set
-3. **Reset data**: Run `npm run seed:test` to reset test data
-4. **View logs**: Check Postman console for request/response details
-
-## Integration with Jest
-
-These same flows are also tested programmatically in:
-
-- `test/order-lifecycle.e2e-spec.ts`
-- `test/api-flows.e2e-spec.ts`
-- `test/order.service.spec.ts`
-
-Run with:
-```bash
-npm run test:orders    # Order tests only
-npm run test:flows     # API flow tests
-npm run test:e2e       # All E2E tests
-```
+**Recommendation**: Use Postman CLI for all new projects!
