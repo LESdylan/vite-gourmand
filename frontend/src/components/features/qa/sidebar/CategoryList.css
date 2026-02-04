@@ -1,0 +1,68 @@
+/**
+ * CategoryList styles
+ * Professional navigation list - Bordeaux theme
+ */
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Section label */
+.category-list::before {
+  content: 'Test Categories';
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+/* Tablet - Compact */
+@media (max-width: 1024px) {
+  .category-list {
+    padding: var(--space-3);
+    gap: var(--space-1);
+  }
+
+  .category-list::before {
+    font-size: 0.65rem;
+    padding: var(--space-1) var(--space-3);
+  }
+}
+
+/* Mobile - Horizontal bottom nav */
+@media (max-width: 768px) {
+  .category-list {
+    flex-direction: row;
+    padding: 0;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .category-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-list::before {
+    display: none;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .category-list {
+    justify-content: space-around;
+  }
+}

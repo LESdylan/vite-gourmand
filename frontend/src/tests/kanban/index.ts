@@ -1,0 +1,1 @@
+export { KanbanTestPage } from './KanbanTestPage';

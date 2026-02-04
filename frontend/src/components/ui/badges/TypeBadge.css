@@ -1,0 +1,57 @@
+/**
+ * TypeBadge Styles
+ * Uses ONLY CSS variables from graphical_chart.css
+ */
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+}
+
+/* Sizes */
+.type-badge-sm {
+  height: var(--badge-height-sm);
+  padding: 0 var(--badge-padding-x);
+  font-size: var(--font-size-xs);
+}
+
+.type-badge-md {
+  height: var(--badge-height-md);
+  padding: 0 var(--space-3);
+  font-size: var(--badge-font-size);
+}
+
+/* Type variants */
+.type-badge-automatic {
+  background: var(--color-primary-600);
+  color: var(--color-text-primary);
+}
+
+.type-badge-manual {
+  background: var(--color-secondary-600);
+  color: var(--color-text-primary);
+}
+
+.type-badge-api {
+  background: var(--color-success-600);
+  color: var(--color-text-primary);
+}
+
+.type-badge-database {
+  background: var(--color-warning-600);
+  color: var(--color-text-inverse);
+}
+
+.type-badge-security {
+  background: var(--color-danger-600);
+  color: var(--color-text-primary);
+}
+
+.type-badge-icon {
+  font-size: 0.9em;
+}

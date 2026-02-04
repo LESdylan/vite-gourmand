@@ -1,0 +1,62 @@
+/**
+ * TestCardItem - Individual test card display
+ * Shows test name, status, type, and actions
+ */
+
+import { useNavigate } from 'react-router-dom';
+import type { TestItem } from './types';
+import { StatusBadge } from '../../../ui/badges/StatusBadge';
+import { TypeBadge } from '../../../ui/badges/TypeBadge';
+import { IconButton } from '../../../helpers/IconButton';
+import './TestCardItem.css';
+
+interface TestCardItemProps {
+  test: TestItem;
+  onRun?: () => void;
+  onView?: () => void;
+}
+
+export function TestCardItem({ test, onRun, onView }: TestCardItemProps) {
+  const navigate = useNavigate();
+  const isRunning = test.status === 'running';
+
+  const handleRunTest = () => {
+    if (test.testPath) {
+      navigate(test.testPath);
+    } else if (onRun) {
+      onRun();
+    }
+  };
+
+  return (
+    <article className="test-card-item">
+      <header className="test-card-item-header">
+        <h3 className="test-card-item-name">{test.name}</h3>
+        <div className="test-card-item-badges">
+          <StatusBadge status={test.status} />
+          <TypeBadge type={test.type} />
+        </div>
+      </header>
+
+      {test.description && (
+        <p className="test-card-item-description">{test.description}</p>
+      )}
+
+      <footer className="test-card-item-footer">
+        <span className="test-card-item-meta">
+          {test.duration && `${test.duration}ms`}
+        </span>
+        <div className="test-card-item-actions">
+          <button 
+            className="test-card-run-btn" 
+            onClick={handleRunTest} 
+            disabled={isRunning}
+          >
+            {test.testPath ? '🧪 Lancer le test' : '▶ Run'}
+          </button>
+          {onView && <IconButton icon="👁" ariaLabel="View details" onClick={onView} variant="subtle" />}
+        </div>
+      </footer>
+    </article>
+  );
+}

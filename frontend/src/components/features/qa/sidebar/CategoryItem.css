@@ -1,0 +1,176 @@
+/**
+ * CategoryItem Styles
+ * Bordeaux theme - Professional navigation items
+ */
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.category-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: var(--color-primary-500);
+  border-radius: 0 2px 2px 0;
+  transition: height var(--transition-fast);
+}
+
+.category-item:hover {
+  background: rgba(61, 55, 51, 0.5);
+  color: var(--color-text-primary);
+}
+
+.category-item:hover::before {
+  height: 50%;
+}
+
+.category-item-active {
+  background: linear-gradient(135deg, rgba(114, 47, 55, 0.25), rgba(201, 162, 39, 0.15));
+  color: var(--color-text-primary);
+  border: 1px solid rgba(114, 47, 55, 0.4);
+}
+
+.category-item-active::before {
+  height: 60%;
+  background: linear-gradient(180deg, var(--color-primary-500), var(--color-secondary-500));
+}
+
+.category-item-active:hover {
+  background: linear-gradient(135deg, rgba(114, 47, 55, 0.3), rgba(201, 162, 39, 0.2));
+}
+
+.category-icon {
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.category-label {
+  flex: 1;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-count {
+  min-width: 1.75rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  background: rgba(61, 55, 51, 0.6);
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-mono);
+}
+
+.category-item-active .category-count {
+  background: rgba(114, 47, 55, 0.4);
+  color: var(--color-primary-300);
+}
+
+/* Tablet - Compact */
+@media (max-width: 1024px) {
+  .category-item {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+    font-size: var(--font-size-xs);
+  }
+
+  .category-icon {
+    font-size: var(--font-size-base);
+    width: 20px;
+  }
+
+  .category-count {
+    min-width: 1.5rem;
+    height: 1.25rem;
+    font-size: 0.65rem;
+  }
+}
+
+/* Mobile - Bottom nav icons */
+@media (max-width: 768px) {
+  .category-item {
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-2);
+    border-radius: 0;
+    min-width: 64px;
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .category-item::before {
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    border-radius: 0 0 2px 2px;
+  }
+
+  .category-item:hover::before {
+    width: 50%;
+    height: 3px;
+  }
+
+  .category-item-active::before {
+    width: 60%;
+    height: 3px;
+  }
+
+  .category-icon {
+    font-size: 1.25rem;
+    width: auto;
+  }
+
+  .category-label {
+    font-size: 0.65rem;
+    flex: none;
+  }
+
+  .category-count {
+    display: none;
+  }
+}
+
+/* Small phones - Icons only */
+@media (max-width: 480px) {
+  .category-item {
+    min-width: 48px;
+    padding: var(--space-2);
+  }
+
+  .category-icon {
+    font-size: 1.1rem;
+  }
+
+  .category-label {
+    font-size: 0.6rem;
+  }
+}

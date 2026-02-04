@@ -1,0 +1,65 @@
+/**
+ * StatusBadge Styles
+ * Uses ONLY CSS variables from graphical_chart.css
+ */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+/* Sizes */
+.status-badge-sm {
+  height: var(--badge-height-sm);
+  padding: 0 var(--badge-padding-x);
+  font-size: var(--font-size-xs);
+}
+
+.status-badge-md {
+  height: var(--badge-height-md);
+  padding: 0 var(--space-3);
+  font-size: var(--badge-font-size);
+}
+
+/* Status variants */
+.status-badge-idle {
+  background: var(--color-neutral-700);
+  color: var(--color-neutral-300);
+}
+
+.status-badge-running {
+  background: var(--color-warning-600);
+  color: var(--color-text-primary);
+}
+
+.status-badge-running .status-badge-icon {
+  animation: spin 1s linear infinite;
+}
+
+.status-badge-success {
+  background: var(--color-success-600);
+  color: var(--color-text-primary);
+}
+
+.status-badge-failed {
+  background: var(--color-danger-600);
+  color: var(--color-text-primary);
+}
+
+.status-badge-pending {
+  background: var(--color-secondary-600);
+  color: var(--color-text-primary);
+}
+
+.status-badge-icon {
+  font-size: 1em;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

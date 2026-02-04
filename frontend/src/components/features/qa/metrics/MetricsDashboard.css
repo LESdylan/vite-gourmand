@@ -1,0 +1,58 @@
+/**
+ * MetricsDashboard styles
+ * Bordeaux theme - Responsive grid
+ */
+
+.metrics-dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+}
+
+/* Large screens */
+@media (max-width: 1400px) {
+  .metrics-dashboard {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+/* Tablet landscape */
+@media (max-width: 1200px) {
+  .metrics-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet portrait */
+@media (max-width: 900px) {
+  .metrics-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+/* Mobile - Stack cards horizontally, scroll */
+@media (max-width: 640px) {
+  .metrics-dashboard {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}
+
+/* Alternative: Horizontal scroll on mobile */
+@media (max-width: 480px) {
+  .metrics-dashboard {
+    display: flex;
+    overflow-x: auto;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .metrics-dashboard > * {
+    flex: 0 0 85%;
+    scroll-snap-align: start;
+  }
+}

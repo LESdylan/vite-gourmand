@@ -1,0 +1,39 @@
+/**
+ * TestCardGrid styles
+ * Responsive grid layout for test cards
+ */
+
+.test-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-4);
+}
+
+.test-card-grid-empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: var(--color-text-tertiary);
+  font-size: var(--text-base);
+  background: rgba(31, 27, 25, 0.3);
+  border: 2px dashed rgba(61, 55, 51, 0.4);
+  border-radius: var(--radius-lg);
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .test-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-3);
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .test-card-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}

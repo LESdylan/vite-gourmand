@@ -1,0 +1,67 @@
+/**
+ * IconButton Styles
+ * Bordeaux theme - Professional icon buttons
+ */
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Sizes */
+.icon-btn-sm { width: 2rem; height: 2rem; font-size: 0.875rem; }
+.icon-btn-md { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+.icon-btn-lg { width: 3rem; height: 3rem; font-size: 1.25rem; }
+
+/* Variants - Bordeaux theme */
+.icon-btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.icon-btn-ghost:hover:not(:disabled) {
+  background: rgba(114, 47, 55, 0.2);
+  color: var(--color-primary-300);
+  border-color: rgba(114, 47, 55, 0.4);
+  transform: scale(1.05);
+}
+
+.icon-btn-subtle {
+  background: rgba(61, 55, 51, 0.5);
+  color: var(--color-text-secondary);
+  border-color: rgba(61, 55, 51, 0.4);
+}
+
+.icon-btn-subtle:hover:not(:disabled) {
+  background: rgba(114, 47, 55, 0.25);
+  color: var(--color-primary-300);
+  border-color: rgba(114, 47, 55, 0.4);
+  transform: scale(1.05);
+}
+
+.icon-btn-danger {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.icon-btn-danger:hover:not(:disabled) {
+  background: rgba(169, 30, 44, 0.25);
+  color: var(--color-danger-500);
+  border-color: rgba(169, 30, 44, 0.4);
+  transform: scale(1.05);
+}

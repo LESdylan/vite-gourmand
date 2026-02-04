@@ -1,0 +1,80 @@
+/**
+ * DevBoard Design System - Foundation Variables
+ * Bordeaux/Wine theme for Vite Gourmand - Traiteur Bordelais
+ */
+
+:root {
+  /* ═══════════════ COLOR SYSTEM ═══════════════ */
+  
+  /* Primary Brand - Bordeaux Wine */
+  --color-primary-50: #fdf2f4;
+  --color-primary-100: #fce4e8;
+  --color-primary-200: #facdd5;
+  --color-primary-300: #f5a3b3;
+  --color-primary-400: #ed6b84;
+  --color-primary-500: #722f37;
+  --color-primary-600: #5c252c;
+  --color-primary-700: #4a1e24;
+  --color-primary-800: #3d191e;
+  --color-primary-900: #2d1216;
+
+  /* Secondary - Gold/Champagne */
+  --color-secondary-500: #c9a227;
+  --color-secondary-600: #a68621;
+  --color-secondary-700: #85691a;
+
+  /* Accent - Deep Burgundy */
+  --color-accent-500: #800020;
+  --color-accent-600: #660019;
+  --color-accent-700: #4d0013;
+
+  /* Success - Olive/Green */
+  --color-success-50: #f4f7ed;
+  --color-success-500: #6b8e23;
+  --color-success-600: #567219;
+  --color-success-700: #415612;
+
+  /* Warning - Amber/Terracotta */
+  --color-warning-50: #fdf6e8;
+  --color-warning-500: #d4a574;
+  --color-warning-600: #c08552;
+
+  /* Danger - Deep Red */
+  --color-danger-50: #fef2f2;
+  --color-danger-500: #a91e2c;
+  --color-danger-600: #8b1824;
+  --color-danger-700: #6d121b;
+
+  /* Neutral - Charcoal/Slate */
+  --color-neutral-50: #f7f6f5;
+  --color-neutral-100: #ece9e6;
+  --color-neutral-200: #d9d4ce;
+  --color-neutral-300: #c2bab2;
+  --color-neutral-400: #9a9087;
+  --color-neutral-500: #706760;
+  --color-neutral-600: #524a45;
+  --color-neutral-700: #3d3733;
+  --color-neutral-800: #282422;
+  --color-neutral-900: #1a1715;
+
+  /* Backgrounds - Dark elegant */
+  --color-bg-primary: #0d0a09;
+  --color-bg-secondary: #1a1614;
+  --color-bg-tertiary: #2a2421;
+  --color-bg-card: #1f1b19;
+  --color-bg-card-hover: #2a2421;
+  --color-bg-input: #0d0a09;
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Text */
+  --color-text-primary: #f5f2ef;
+  --color-text-secondary: #b8b0a8;
+  --color-text-tertiary: #8a827a;
+  --color-text-disabled: #5a534d;
+  --color-text-inverse: #0d0a09;
+
+  /* Borders */
+  --color-border-primary: #3d3733;
+  --color-border-secondary: #524a45;
+  --color-border-focus: var(--color-primary-500);
+}

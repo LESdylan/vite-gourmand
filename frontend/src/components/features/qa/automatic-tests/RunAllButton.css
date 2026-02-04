@@ -1,0 +1,48 @@
+/**
+ * RunAllButton styles
+ * Bordeaux theme - Professional action button
+ */
+
+.run-all-button {
+  display: inline-flex;
+}
+
+.run-all-button button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-accent-500));
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(114, 47, 55, 0.4);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.run-all-button button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(114, 47, 55, 0.5);
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-500));
+}
+
+.run-all-button button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.run-all-button button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .run-all-button button {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-xs);
+  }
+}
