@@ -6,11 +6,19 @@ POSTGRES_VOLUME = pgdata
 PRISMA = npx prisma
 BACKEND_PATH = ./backend
 MIGRATIONS_PATH = $(BACKEND_PATH)/prisma/migrations
+SCRIPTS_PATH = ./scripts
 
-# Load DATABASE_URL from backend/.env
+# Load environment variables from backend/.env
 -include $(BACKEND_PATH)/.env
 export DATABASE_URL
+export DIRECT_URL
 export MONGODB_URI
+export SUPABASE_URL
+export SUPABASE_ANON_KEY
+export DB_MODE
+
+# Detect database mode (local or supabase)
+DB_MODE ?= local
 
 all: up wait-for-db wait-for-mongo install-backend generate-prisma init-migration reset
 
@@ -174,6 +182,31 @@ help:  ## Show this help message
 	@echo "  diagnostic-routines  Check backend routines configuration"
 	@echo "  diagnostic-rgpd      Check RGPD compliance"
 	@echo "  diagnostic-all       Run all diagnostics"
+	@echo ""
+	@echo "Supabase (PostgreSQL):"
+	@echo "  setup-supabase       Configure project to use Supabase (interactive)"
+	@echo "  setup-supabase-full  Full Supabase setup (configure + migrate + seed)"
+	@echo "  setup-local          Configure project to use local Docker database"
+	@echo "  supabase-migrate     Deploy migrations to Supabase"
+	@echo "  supabase-push        Push schema to Supabase (no migration history)"
+	@echo "  supabase-seed        Seed Supabase database"
+	@echo "  supabase-pull        Pull/introspect schema from Supabase"
+	@echo "  supabase-studio      Open Prisma Studio for Supabase"
+	@echo "  supabase-test        Test Supabase connection"
+	@echo ""
+	@echo "MongoDB Atlas:"
+	@echo "  mongo-atlas-test     Test MongoDB Atlas connection"
+	@echo "  mongo-atlas-stats    Show storage statistics (size, collections)"
+	@echo "  mongo-atlas-cleanup  Run storage cleanup (respects retention policy)"
+	@echo "  mongo-atlas-emergency Run emergency cleanup (halves retention)"
+	@echo "  mongo-atlas-init     Initialize collections and TTL indexes"
+	@echo ""
+	@echo "Quick Start:"
+	@echo "  quick-start-local    Full setup with local Docker (new developers)"
+	@echo "  quick-start-supabase Full setup with Supabase + Atlas"
+	@echo "  quick-start-cloud    Full cloud setup (Supabase + MongoDB Atlas)"
+	@echo ""
+	@echo "Cleanup:"
 	@echo "  clean          Remove all containers, networks, and images (keep db volume)"
 	@echo "  fclean         Remove all containers and images (keep volumes)"
 	@echo "  prune          Remove all containers, networks, images, and volumes (including db)"
@@ -210,4 +243,131 @@ postman-local-all:  ## Run all local collection files
 	./scripts/postman-cli.sh run-local backend/postman/orders.json
 	./scripts/postman-cli.sh run-local backend/postman/admin.json
 
-.PHONY: help restore destroy prune fclean clean diagnostic-all diagnostic-rgpd diagnostic diagnostic-routines seed-test-data test_backend test_backend_flows all up down restart logs psql wait-for-db wait-for-mongo mongo-init mongosh install-backend generate-prisma init-migration migrate reset reload seed_db_playground seed_playground seed_test_data test_backend test_backend_e2e test_backend_orders test_backend_flows postman-install postman-login postman-list postman-run postman-local postman-local-all
+# ==========================================
+# SUPABASE CONFIGURATION TARGETS
+# ==========================================
+
+setup-env:  ## Create .env from template if it doesn't exist
+	@if [ ! -f "$(BACKEND_PATH)/.env" ]; then \
+		echo "📋 Creating .env from template..."; \
+		cp $(BACKEND_PATH)/.env.example $(BACKEND_PATH)/.env; \
+		echo "✅ Created .env - please edit with your credentials"; \
+	else \
+		echo "ℹ️  .env already exists"; \
+	fi
+
+setup-supabase:  ## Configure project to use Supabase (interactive)
+	@chmod +x $(SCRIPTS_PATH)/setup-supabase.sh
+	$(SCRIPTS_PATH)/setup-supabase.sh --supabase
+
+setup-supabase-full:  ## Full Supabase setup (configure + migrate + seed)
+	@chmod +x $(SCRIPTS_PATH)/setup-supabase.sh
+	$(SCRIPTS_PATH)/setup-supabase.sh --full
+
+setup-local:  ## Configure project to use local Docker database
+	@chmod +x $(SCRIPTS_PATH)/setup-supabase.sh
+	$(SCRIPTS_PATH)/setup-supabase.sh --local
+
+supabase-migrate:  ## Run migrations on Supabase
+	@echo "🔄 Running migrations on Supabase..."
+	cd $(BACKEND_PATH) && $(PRISMA) migrate deploy --schema=prisma/schema.prisma
+	@echo "✅ Migrations deployed to Supabase!"
+
+supabase-push:  ## Push schema to Supabase (no migration history)
+	@echo "🔄 Pushing schema to Supabase..."
+	cd $(BACKEND_PATH) && $(PRISMA) db push --schema=prisma/schema.prisma
+	@echo "✅ Schema pushed to Supabase!"
+
+supabase-seed:  ## Seed Supabase database with playground data
+	@echo "🌱 Seeding Supabase database..."
+	cd $(BACKEND_PATH) && npm run seed
+	@echo "✅ Supabase database seeded!"
+
+supabase-pull:  ## Pull schema from Supabase (introspect)
+	@echo "🔍 Pulling schema from Supabase..."
+	cd $(BACKEND_PATH) && $(PRISMA) db pull --schema=prisma/schema.prisma
+	@echo "✅ Schema pulled from Supabase!"
+
+supabase-studio:  ## Open Prisma Studio for Supabase
+	@echo "🎨 Opening Prisma Studio..."
+	cd $(BACKEND_PATH) && $(PRISMA) studio --schema=prisma/schema.prisma
+
+supabase-test:  ## Test Supabase connection
+	@echo "🔌 Testing Supabase connection..."
+	@chmod +x $(SCRIPTS_PATH)/setup-supabase.sh
+	$(SCRIPTS_PATH)/setup-supabase.sh --test
+
+# ==========================================
+# MONGODB ATLAS TARGETS
+# ==========================================
+
+mongo-atlas-test:  ## Test MongoDB Atlas connection
+	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
+	$(SCRIPTS_PATH)/mongo-atlas.sh test
+
+mongo-atlas-stats:  ## Show MongoDB Atlas storage statistics
+	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
+	$(SCRIPTS_PATH)/mongo-atlas.sh stats
+
+mongo-atlas-cleanup:  ## Run MongoDB storage cleanup (respects retention policy)
+	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
+	$(SCRIPTS_PATH)/mongo-atlas.sh cleanup
+
+mongo-atlas-emergency:  ## Run emergency cleanup (halves retention periods)
+	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
+	$(SCRIPTS_PATH)/mongo-atlas.sh emergency
+
+mongo-atlas-init:  ## Initialize MongoDB Atlas collections and indexes
+	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
+	$(SCRIPTS_PATH)/mongo-atlas.sh init
+
+# ==========================================
+# QUICK START TARGETS
+# ==========================================
+
+quick-start-local:  ## Quick start with local Docker (for new developers)
+	@echo "🚀 Quick Start - Local Development"
+	@echo "=================================="
+	$(MAKE) setup-env
+	$(MAKE) setup-local
+	$(MAKE) up
+	$(MAKE) wait-for-db
+	$(MAKE) wait-for-mongo
+	$(MAKE) install-backend
+	$(MAKE) generate-prisma
+	$(MAKE) migrate
+	$(MAKE) seed_db_playground
+	@echo ""
+	@echo "✅ Setup complete! Run 'cd backend && npm run start:dev' to start the server"
+
+quick-start-supabase:  ## Quick start with Supabase + Atlas (staging/production)
+	@echo "🚀 Quick Start - Supabase + MongoDB Atlas"
+	@echo "=========================================="
+	$(MAKE) setup-env
+	$(MAKE) setup-supabase
+	$(MAKE) install-backend
+	$(MAKE) generate-prisma
+	$(MAKE) supabase-migrate
+	$(MAKE) supabase-seed
+	$(MAKE) mongo-atlas-init
+	@echo ""
+	@echo "✅ Setup complete! Run 'cd backend && npm run start:dev' to start the server"
+
+quick-start-cloud:  ## Full cloud setup (Supabase + MongoDB Atlas)
+	@echo "☁️  Quick Start - Full Cloud Setup"
+	@echo "==================================="
+	$(MAKE) setup-env
+	$(MAKE) install-backend
+	$(MAKE) generate-prisma
+	$(MAKE) supabase-migrate
+	$(MAKE) supabase-seed
+	$(MAKE) mongo-atlas-init
+	$(MAKE) mongo-atlas-test
+	@echo ""
+	@echo "✅ Full cloud setup complete!"
+	@echo "   PostgreSQL: Supabase"
+	@echo "   MongoDB: Atlas"
+	@echo ""
+	@echo "Run 'cd backend && npm run start:dev' to start the server"
+
+.PHONY: help restore destroy prune fclean clean diagnostic-all diagnostic-rgpd diagnostic diagnostic-routines seed-test-data test_backend test_backend_flows all up down restart logs psql wait-for-db wait-for-mongo mongo-init mongosh install-backend generate-prisma init-migration migrate reset reload seed_db_playground seed_playground seed_test_data test_backend test_backend_e2e test_backend_orders test_backend_flows postman-install postman-login postman-list postman-run postman-local postman-local-all setup-env setup-supabase setup-supabase-full setup-local supabase-migrate supabase-push supabase-seed supabase-pull supabase-studio supabase-test mongo-atlas-test mongo-atlas-stats mongo-atlas-cleanup mongo-atlas-emergency mongo-atlas-init quick-start-local quick-start-supabase quick-start-cloud

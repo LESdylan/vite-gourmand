@@ -1,5 +1,5 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { MongoClient, Db, Collection } from 'mongodb';
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import { MongoClient, Db, Collection, ServerApiVersion } from 'mongodb';
 import {
   MenuAnalytics,
   UserActivityLog,
@@ -10,10 +10,53 @@ import {
   MONGO_COLLECTIONS,
 } from './schemas';
 
+/**
+ * Storage Management Configuration
+ * - Atlas free tier has 512MB limit
+ * - We set cleanup threshold at 85% to proactively manage space
+ * - Data is prioritized by relevance (recent data > old data)
+ */
+interface StorageStats {
+  totalSizeMB: number;
+  usedPercentage: number;
+  collections: Record<string, { count: number; sizeMB: number }>;
+}
+
+/**
+ * Data Retention Policy (days)
+ * Lower = less relevant, cleaned first
+ */
+const RETENTION_POLICY = {
+  [MONGO_COLLECTIONS.USER_ACTIVITY]: 30,      // Activity logs: 30 days
+  [MONGO_COLLECTIONS.SEARCH_ANALYTICS]: 30,   // Search analytics: 30 days  
+  [MONGO_COLLECTIONS.AUDIT_LOGS]: 90,         // Audit logs: 90 days (compliance)
+  [MONGO_COLLECTIONS.ORDER_SNAPSHOTS]: 180,   // Order history: 6 months
+  [MONGO_COLLECTIONS.MENU_ANALYTICS]: 365,    // Menu analytics: 1 year
+  [MONGO_COLLECTIONS.DASHBOARD_STATS]: 365,   // Dashboard stats: 1 year
+} as const;
+
+/**
+ * Cleanup priority (lower = cleaned first when storage is critical)
+ */
+const CLEANUP_PRIORITY = [
+  MONGO_COLLECTIONS.USER_ACTIVITY,      // Least critical - session data
+  MONGO_COLLECTIONS.SEARCH_ANALYTICS,   // Search patterns - can be regenerated
+  MONGO_COLLECTIONS.AUDIT_LOGS,         // Important but older ones less relevant
+  MONGO_COLLECTIONS.ORDER_SNAPSHOTS,    // Historical orders
+  MONGO_COLLECTIONS.MENU_ANALYTICS,     // Business insights - keep longer
+  MONGO_COLLECTIONS.DASHBOARD_STATS,    // Pre-computed stats - most valuable
+];
+
 @Injectable()
 export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(AnalyticsService.name);
   private client!: MongoClient;
   private db!: Db;
+  private isConnected = false;
+
+  // Storage limits from environment
+  private readonly maxStorageMB = parseInt(process.env.MONGODB_MAX_STORAGE_MB || '450', 10);
+  private readonly cleanupThreshold = parseInt(process.env.MONGODB_CLEANUP_THRESHOLD_PERCENT || '85', 10);
 
   // Collections
   private menuAnalytics!: Collection<MenuAnalytics>;
@@ -24,26 +67,218 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   private searchAnalytics!: Collection<SearchAnalytics>;
 
   async onModuleInit() {
+    await this.connect();
+  }
+
+  async connect(): Promise<void> {
+    if (this.isConnected) return;
+
     const uri = process.env.MONGODB_URI || 'mongodb://root:example@localhost:27017/vite_gourmand?authSource=admin';
-    this.client = new MongoClient(uri);
-    await this.client.connect();
-    this.db = this.client.db('vite_gourmand');
+    const isAtlas = uri.includes('mongodb+srv') || uri.includes('mongodb.net');
 
-    // Initialize collections
-    this.menuAnalytics = this.db.collection(MONGO_COLLECTIONS.MENU_ANALYTICS);
-    this.userActivityLogs = this.db.collection(MONGO_COLLECTIONS.USER_ACTIVITY);
-    this.orderSnapshots = this.db.collection(MONGO_COLLECTIONS.ORDER_SNAPSHOTS);
-    this.dashboardStats = this.db.collection(MONGO_COLLECTIONS.DASHBOARD_STATS);
-    this.auditLogs = this.db.collection(MONGO_COLLECTIONS.AUDIT_LOGS);
-    this.searchAnalytics = this.db.collection(MONGO_COLLECTIONS.SEARCH_ANALYTICS);
+    try {
+      // Configure client for Atlas or local
+      const clientOptions = isAtlas ? {
+        serverApi: {
+          version: ServerApiVersion.v1,
+          strict: true,
+          deprecationErrors: true,
+        },
+        maxPoolSize: 10,
+        minPoolSize: 1,
+        retryWrites: true,
+        retryReads: true,
+      } : {};
 
-    if (process.env.NODE_ENV !== 'test') {
-      console.log('✅ MongoDB Analytics Service connected');
+      this.client = new MongoClient(uri, clientOptions);
+      await this.client.connect();
+      
+      // Ping to confirm connection
+      await this.client.db('admin').command({ ping: 1 });
+      
+      this.db = this.client.db('vite_gourmand');
+      this.isConnected = true;
+
+      // Initialize collections
+      this.menuAnalytics = this.db.collection(MONGO_COLLECTIONS.MENU_ANALYTICS);
+      this.userActivityLogs = this.db.collection(MONGO_COLLECTIONS.USER_ACTIVITY);
+      this.orderSnapshots = this.db.collection(MONGO_COLLECTIONS.ORDER_SNAPSHOTS);
+      this.dashboardStats = this.db.collection(MONGO_COLLECTIONS.DASHBOARD_STATS);
+      this.auditLogs = this.db.collection(MONGO_COLLECTIONS.AUDIT_LOGS);
+      this.searchAnalytics = this.db.collection(MONGO_COLLECTIONS.SEARCH_ANALYTICS);
+
+      // Create TTL indexes for automatic cleanup
+      await this.ensureIndexes();
+
+      if (process.env.NODE_ENV !== 'test') {
+        const connectionType = isAtlas ? 'MongoDB Atlas' : 'Local MongoDB';
+        this.logger.log(`✅ ${connectionType} connected successfully`);
+        
+        // Check storage on startup
+        await this.checkAndCleanupStorage();
+      }
+    } catch (error) {
+      this.logger.error('❌ MongoDB connection failed:', error);
+      throw error;
     }
   }
 
   async onModuleDestroy() {
-    await this.client.close();
+    if (this.client) {
+      await this.client.close();
+      this.isConnected = false;
+    }
+  }
+
+  // ============================================
+  // STORAGE MANAGEMENT
+  // ============================================
+
+  /**
+   * Ensure TTL indexes exist for automatic data expiration
+   */
+  private async ensureIndexes(): Promise<void> {
+    try {
+      // TTL index for user activity (30 days)
+      await this.userActivityLogs.createIndex(
+        { timestamp: 1 },
+        { expireAfterSeconds: RETENTION_POLICY[MONGO_COLLECTIONS.USER_ACTIVITY] * 86400 }
+      );
+
+      // TTL index for search analytics (30 days)
+      await this.searchAnalytics.createIndex(
+        { timestamp: 1 },
+        { expireAfterSeconds: RETENTION_POLICY[MONGO_COLLECTIONS.SEARCH_ANALYTICS] * 86400 }
+      );
+
+      // TTL index for audit logs (90 days)
+      await this.auditLogs.createIndex(
+        { timestamp: 1 },
+        { expireAfterSeconds: RETENTION_POLICY[MONGO_COLLECTIONS.AUDIT_LOGS] * 86400 }
+      );
+
+      // Regular indexes for performance
+      await this.menuAnalytics.createIndex({ menuId: 1, period: 1 }, { unique: true });
+      await this.orderSnapshots.createIndex({ orderId: 1 }, { unique: true });
+      await this.orderSnapshots.createIndex({ 'user.id': 1 });
+      await this.dashboardStats.createIndex({ date: 1, type: 1 }, { unique: true });
+
+      this.logger.log('✅ MongoDB indexes created/verified');
+    } catch (error) {
+      this.logger.warn('⚠️ Some indexes may already exist:', error);
+    }
+  }
+
+  /**
+   * Get current storage statistics
+   */
+  async getStorageStats(): Promise<StorageStats> {
+    const stats = await this.db.stats();
+    const totalSizeMB = stats.dataSize / (1024 * 1024);
+    const usedPercentage = (totalSizeMB / this.maxStorageMB) * 100;
+
+    const collections: Record<string, { count: number; sizeMB: number }> = {};
+    
+    for (const collName of Object.values(MONGO_COLLECTIONS)) {
+      try {
+        const collStats = await this.db.command({ collStats: collName });
+        collections[collName] = {
+          count: collStats.count || 0,
+          sizeMB: (collStats.size || 0) / (1024 * 1024),
+        };
+      } catch {
+        collections[collName] = { count: 0, sizeMB: 0 };
+      }
+    }
+
+    return { totalSizeMB, usedPercentage, collections };
+  }
+
+  /**
+   * Check storage and cleanup if threshold exceeded
+   */
+  async checkAndCleanupStorage(): Promise<{ cleaned: boolean; deletedCount: number; freedMB: number }> {
+    const stats = await this.getStorageStats();
+    
+    this.logger.log(`📊 Storage: ${stats.totalSizeMB.toFixed(2)}MB / ${this.maxStorageMB}MB (${stats.usedPercentage.toFixed(1)}%)`);
+
+    if (stats.usedPercentage < this.cleanupThreshold) {
+      return { cleaned: false, deletedCount: 0, freedMB: 0 };
+    }
+
+    this.logger.warn(`⚠️ Storage threshold exceeded (${this.cleanupThreshold}%), starting cleanup...`);
+    
+    let totalDeleted = 0;
+    const startSize = stats.totalSizeMB;
+
+    // Clean collections in priority order until we're under 70%
+    for (const collName of CLEANUP_PRIORITY) {
+      const currentStats = await this.getStorageStats();
+      if (currentStats.usedPercentage < 70) break;
+
+      const deleted = await this.cleanupCollection(collName);
+      totalDeleted += deleted;
+      this.logger.log(`🗑️ Cleaned ${deleted} documents from ${collName}`);
+    }
+
+    const endStats = await this.getStorageStats();
+    const freedMB = startSize - endStats.totalSizeMB;
+
+    this.logger.log(`✅ Cleanup complete: ${totalDeleted} documents removed, ${freedMB.toFixed(2)}MB freed`);
+
+    return { cleaned: true, deletedCount: totalDeleted, freedMB };
+  }
+
+  /**
+   * Clean old data from a specific collection
+   */
+  private async cleanupCollection(collName: string): Promise<number> {
+    const retentionDays = RETENTION_POLICY[collName as keyof typeof RETENTION_POLICY] || 30;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+
+    const collection = this.db.collection(collName);
+    
+    // Different timestamp field names per collection
+    const timestampField = collName === MONGO_COLLECTIONS.ORDER_SNAPSHOTS ? 'createdAt' : 'timestamp';
+    
+    const result = await collection.deleteMany({
+      [timestampField]: { $lt: cutoffDate },
+    });
+
+    return result.deletedCount;
+  }
+
+  /**
+   * Aggressive cleanup - reduce retention by half when critically low on space
+   */
+  async emergencyCleanup(): Promise<{ deletedCount: number; freedMB: number }> {
+    this.logger.warn('🚨 Emergency cleanup initiated - halving retention periods');
+    
+    const startStats = await this.getStorageStats();
+    let totalDeleted = 0;
+
+    for (const collName of CLEANUP_PRIORITY) {
+      const normalRetention = RETENTION_POLICY[collName as keyof typeof RETENTION_POLICY] || 30;
+      const emergencyRetention = Math.max(7, Math.floor(normalRetention / 2)); // At least 7 days
+      
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - emergencyRetention);
+
+      const collection = this.db.collection(collName);
+      const timestampField = collName === MONGO_COLLECTIONS.ORDER_SNAPSHOTS ? 'createdAt' : 'timestamp';
+      
+      const result = await collection.deleteMany({
+        [timestampField]: { $lt: cutoffDate },
+      });
+
+      totalDeleted += result.deletedCount;
+    }
+
+    const endStats = await this.getStorageStats();
+    const freedMB = startStats.totalSizeMB - endStats.totalSizeMB;
+
+    return { deletedCount: totalDeleted, freedMB };
   }
 
   // ============================================

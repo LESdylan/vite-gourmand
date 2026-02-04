@@ -7,6 +7,36 @@
 ---
 ## Quick Start
 
+### Option 1: Local Development (Docker)
+```bash
+# Clone the repository
+git clone <repository-url>
+cd vite-gourmand
+
+# Full automatic setup (Docker + PostgreSQL + MongoDB + seed data)
+make quick-start-local
+```
+
+### Option 2: Supabase (Production/Staging)
+```bash
+# Clone the repository
+git clone <repository-url>
+cd vite-gourmand
+
+# Interactive setup with Supabase
+make quick-start-supabase
+```
+
+### Available Make Commands
+```bash
+make help                  # Show all available commands
+make setup-supabase        # Configure Supabase connection
+make setup-local           # Configure local Docker database
+make supabase-migrate      # Deploy migrations to Supabase
+make supabase-seed         # Seed Supabase database
+```
+
+---
 ## What Is This Project ?
 Vite & Gourmand is a company constituted of two people Julie and José. To overcome the stream flow of client and new opportuntities both of them had the idea to create a webpage that make their webpage more visible.
 They chose to hire a tenary company that would provide the service of building this webpage for them.
