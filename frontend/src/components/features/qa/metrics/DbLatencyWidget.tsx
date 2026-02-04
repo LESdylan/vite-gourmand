@@ -4,7 +4,6 @@
  */
 
 import { MetricWidget } from './MetricWidget';
-import type { MetricData } from './types';
 
 interface DbLatencyWidgetProps {
   avgMs: number;
@@ -13,14 +12,13 @@ interface DbLatencyWidgetProps {
 }
 
 export function DbLatencyWidget({ avgMs, trend, changePercent }: DbLatencyWidgetProps) {
-  const metric: MetricData = {
-    id: 'db-latency',
-    label: 'DB Latency',
-    value: avgMs,
-    unit: 'ms',
-    trend,
-    change: changePercent,
-  };
-
-  return <MetricWidget metric={metric} />;
+  return (
+    <MetricWidget
+      label="DB Latency"
+      value={avgMs}
+      unit="ms"
+      trend={trend}
+      change={changePercent}
+    />
+  );
 }

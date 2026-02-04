@@ -9,7 +9,7 @@ import type { TestCategory } from '../features/qa/sidebar';
 
 export function useDevBoard() {
   const [state, setState] = useState<DevBoardState>({
-    activeCategory: 'api',
+    activeCategory: 'overview',
     viewMode: 'grid',
     isSidebarCollapsed: false,
   });

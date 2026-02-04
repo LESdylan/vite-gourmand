@@ -1,6 +1,6 @@
 /**
  * AutoTestList - List of automatic tests
- * Renders all automatic test rows with header
+ * Fly.io-style table with proper semantic markup
  */
 
 import type { AutoTest } from './types';
@@ -14,22 +14,29 @@ interface AutoTestListProps {
 
 export function AutoTestList({ tests, onRunTest }: AutoTestListProps) {
   return (
-    <div className="auto-test-list">
-      <header className="auto-test-list-header">
-        <span>Test Name</span>
-        <span>Suite</span>
-        <span>Status</span>
-        <span>Duration</span>
-        <span>Action</span>
-      </header>
-      <div className="auto-test-list-body">
-        {tests.map((test) => (
-          <AutoTestRow
-            key={test.id}
-            test={test}
-            onRun={onRunTest ? () => onRunTest(test.id) : undefined}
-          />
-        ))}
+    <div className="fly-card">
+      <div className="fly-table-wrapper">
+        <table className="fly-table">
+          <thead className="fly-table-header">
+            <tr>
+              <th scope="col">Test Name</th>
+              <th scope="col">Suite</th>
+              <th scope="col">Status</th>
+              <th scope="col">Duration</th>
+              <th scope="col" className="fly-table-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="fly-table-body">
+            {tests.map((test, index) => (
+              <AutoTestRow
+                key={test.id}
+                test={test}
+                onRun={onRunTest ? () => onRunTest(test.id) : undefined}
+                isEven={index % 2 === 1}
+              />
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

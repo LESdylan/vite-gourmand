@@ -1,14 +1,14 @@
 /**
  * DevBoardContent - Main content area
- * Renders metrics and category-specific content
+ * Renders metrics and category-specific content - Fly.io style
  */
 
 import { MetricsDashboard } from '../features/qa/metrics';
 import { TestCardGrid } from '../features/qa/test-cards';
 import { AutoTestList, RunAllButton } from '../features/qa/automatic-tests';
 import type { TestCategory } from '../features/qa/sidebar';
-import { DEFAULT_METRICS } from './constants';
 import { useMockData } from './useMockData';
+import { useTestRunner } from './useTestRunner';
 import './DevBoardContent.css';
 
 interface DevBoardContentProps {
@@ -16,41 +16,51 @@ interface DevBoardContentProps {
 }
 
 const categoryLabels: Record<TestCategory, string> = {
-  performance: '⚡ Performance',
-  api: '🔌 API',
-  database: '🗄️ Database',
-  security: '🔒 Security',
-  regression: '🔄 Regression',
-  manual: '✋ Manual Validation',
+  overview: 'Overview',
+  'test-automatics': 'Tests Automatiques',
+  scenarios: 'Scénarios',
+  settings: 'Settings',
+  logs: 'Logs & Errors',
+  metrics: 'Metrics',
+  activity: 'Activity',
 };
 
 export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
-  const { tests, autoTests } = useMockData(activeCategory);
+  const { tests } = useMockData(activeCategory);
+  const { autoTests, metrics, isRunning, runAll } = useTestRunner();
 
   return (
     <main className="devboard-content">
       <section className="devboard-content-metrics">
-        <MetricsDashboard {...DEFAULT_METRICS} />
+        <MetricsDashboard 
+          totalTests={metrics.total}
+          passedTests={metrics.passed}
+          failedTests={metrics.failed}
+          passRate={metrics.passRate}
+        />
       </section>
 
       <section className="devboard-content-main">
         <header className="devboard-content-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <h2 className="devboard-content-title">
-              {categoryLabels[activeCategory]} Tests
-            </h2>
-            <span className="devboard-live-badge">Live</span>
-          </div>
-          {activeCategory !== 'manual' && (
-            <RunAllButton count={autoTests.length} />
+          <h2 className="devboard-content-title">
+            {categoryLabels[activeCategory]}
+          </h2>
+          {activeCategory !== 'scenarios' && activeCategory !== 'settings' && (
+            <RunAllButton 
+              count={autoTests.length} 
+              onRun={runAll}
+              isRunning={isRunning}
+            />
           )}
         </header>
 
-        {activeCategory === 'manual' ? (
-          <TestCardGrid tests={tests} />
-        ) : (
-          <AutoTestList tests={autoTests} />
-        )}
+        <div className="devboard-cards-container">
+          {activeCategory === 'scenarios' ? (
+            <TestCardGrid tests={tests} />
+          ) : (
+            <AutoTestList tests={autoTests} />
+          )}
+        </div>
       </section>
     </main>
   );

@@ -3,7 +3,7 @@
  */
 
 export type TestStatus = 'idle' | 'running' | 'success' | 'failed' | 'pending';
-export type TestType = 'automatic' | 'manual' | 'api' | 'database' | 'security';
+export type TestType = 'automatic' | 'manual' | 'api' | 'database' | 'security' | 'scenario';
 
 export interface TestItem {
   id: string;

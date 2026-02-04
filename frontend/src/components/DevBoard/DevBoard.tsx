@@ -1,37 +1,36 @@
 /**
  * DevBoard - Main QA Dashboard component
- * Composes header, sidebar, and content
+ * Full-screen layout with header, sidebar, and content
  */
 
+import { useState } from 'react';
 import { useDevBoard } from './useDevBoard';
 import { DevBoardHeader } from './DevBoardHeader';
 import { DevBoardSidebar } from './DevBoardSidebar';
 import { DevBoardContent } from './DevBoardContent';
 import { SettingsModal } from '../features/qa/settings';
 import { CATEGORIES } from './constants';
+import type { NavSection } from '../layout/Header/Header';
 import './DevBoard.css';
 
 export function DevBoard() {
+  const [activeSection, setActiveSection] = useState<NavSection>('dashboard');
   const {
     activeCategory,
     isSidebarCollapsed,
     isSettingsOpen,
-    isRefreshing,
     selectCategory,
     toggleSidebar,
-    openSettings,
     closeSettings,
-    refresh,
   } = useDevBoard();
 
   return (
     <div className="devboard">
       <DevBoardHeader 
-        onRefresh={refresh} 
-        onSettings={openSettings}
-        isRefreshing={isRefreshing}
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
       />
-      <div className="devboard-body">
+      <section className="devboard-body">
         <DevBoardSidebar
           categories={CATEGORIES}
           activeCategory={activeCategory}
@@ -40,7 +39,7 @@ export function DevBoard() {
           onToggleCollapse={toggleSidebar}
         />
         <DevBoardContent activeCategory={activeCategory} />
-      </div>
+      </section>
       <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
     </div>
   );

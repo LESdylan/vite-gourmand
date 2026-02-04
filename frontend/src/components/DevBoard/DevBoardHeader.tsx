@@ -1,39 +1,20 @@
 /**
- * DevBoardHeader - Top header of DevBoard
- * Title and global actions with refresh/settings
+ * DevBoardHeader - Top navigation with 4 main sections
+ * Dashboard, Docs, Resources, Account
  */
 
-import { Header } from '../layout/Header';
-import { IconButton } from '../helpers/IconButton';
+import { Header, type NavSection } from '../layout/Header/Header';
 
 interface DevBoardHeaderProps {
-  onRefresh?: () => void;
-  onSettings?: () => void;
-  isRefreshing?: boolean;
+  activeSection?: NavSection;
+  onSectionChange?: (section: NavSection) => void;
 }
 
-export function DevBoardHeader({ onRefresh, onSettings, isRefreshing }: DevBoardHeaderProps) {
+export function DevBoardHeader({ activeSection = 'dashboard', onSectionChange }: DevBoardHeaderProps) {
   return (
     <Header
-      title="DevBoard"
-      subtitle="QA Dashboard"
-      actions={
-        <>
-          <IconButton 
-            icon={isRefreshing ? "⏳" : "🔄"} 
-            ariaLabel="Refresh" 
-            onClick={onRefresh ?? (() => {})} 
-            variant="subtle"
-            disabled={isRefreshing}
-          />
-          <IconButton 
-            icon="⚙️" 
-            ariaLabel="Settings" 
-            onClick={onSettings ?? (() => {})} 
-            variant="subtle" 
-          />
-        </>
-      }
+      activeSection={activeSection}
+      onSectionChange={onSectionChange}
     />
   );
 }

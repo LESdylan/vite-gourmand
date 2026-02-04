@@ -14,24 +14,24 @@ export function useMockData(category: TestCategory) {
       name: 'Validation Formulaire', 
       description: 'Test du formulaire de contact - validation, soumission', 
       status: 'pending', 
-      type: 'manual',
-      testPath: '/test/form'
+      type: 'scenario',
+      testPath: '/scenario/form'
     },
     { 
       id: '2', 
-      name: 'Temps Réel & Notifications', 
-      description: 'Test des mises à jour en direct et WebSocket', 
+      name: 'Minitalk Client-Pro', 
+      description: 'Communication en temps réel entre client et professionnel', 
       status: 'pending', 
-      type: 'manual',
-      testPath: '/test/realtime'
+      type: 'scenario',
+      testPath: '/scenario/minitalk'
     },
     { 
       id: '3', 
-      name: 'Kanban Drag & Drop', 
-      description: 'Test du drag-drop et gestion de tâches', 
+      name: 'Kanban Restaurant', 
+      description: 'Gestion des commandes avec Kanban professionnel', 
       status: 'pending', 
-      type: 'manual',
-      testPath: '/test/kanban'
+      type: 'scenario',
+      testPath: '/scenario/kanban'
     },
   ];
 

@@ -10,20 +10,20 @@ import './RunAllButton.css';
 interface RunAllButtonProps {
   count: number;
   isRunning?: boolean;
-  onClick?: () => void;
+  onRun?: () => void;
 }
 
-export function RunAllButton({ count, isRunning, onClick }: RunAllButtonProps) {
+export function RunAllButton({ count, isRunning, onRun }: RunAllButtonProps) {
   return (
     <div className="run-all-button">
-      <PrimaryButton onClick={onClick} disabled={isRunning || count === 0}>
+      <PrimaryButton onClick={onRun} disabled={isRunning || count === 0}>
         {isRunning ? (
           <>
             <Spinner size="sm" />
             <span>Running...</span>
           </>
         ) : (
-          <span>Run All ({count})</span>
+          <span>▶ Run All ({count})</span>
         )}
       </PrimaryButton>
     </div>

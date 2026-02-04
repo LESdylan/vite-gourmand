@@ -4,7 +4,6 @@
  */
 
 import { MetricWidget } from './MetricWidget';
-import type { MetricData } from './types';
 
 interface CoverageWidgetProps {
   coveragePercent: number;
@@ -13,14 +12,13 @@ interface CoverageWidgetProps {
 }
 
 export function CoverageWidget({ coveragePercent, trend, changePercent }: CoverageWidgetProps) {
-  const metric: MetricData = {
-    id: 'coverage',
-    label: 'Test Coverage',
-    value: coveragePercent,
-    unit: '%',
-    trend,
-    change: changePercent,
-  };
-
-  return <MetricWidget metric={metric} />;
+  return (
+    <MetricWidget
+      label="Test Coverage"
+      value={coveragePercent}
+      unit="%"
+      trend={trend}
+      change={changePercent}
+    />
+  );
 }

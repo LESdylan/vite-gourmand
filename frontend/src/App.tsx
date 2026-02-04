@@ -5,10 +5,10 @@ import './App.css'
 // Lazy load DevBoard
 const DevBoard = lazy(() => import('./components/DevBoard').then(m => ({ default: m.DevBoard })));
 
-// Lazy load test pages
+// Lazy load scenario pages
 const FormTestPage = lazy(() => import('./tests/form').then(m => ({ default: m.FormTestPage })));
-const RealTimeTestPage = lazy(() => import('./tests/real_time').then(m => ({ default: m.RealTimeTestPage })));
-const KanbanTestPage = lazy(() => import('./tests/kanban').then(m => ({ default: m.KanbanTestPage })));
+const KanbanScenario = lazy(() => import('./scenarios/kanban').then(m => ({ default: m.KanbanScenario })));
+const MinitalkScenario = lazy(() => import('./scenarios/minitalk').then(m => ({ default: m.MinitalkScenario })));
 
 function LoadingSpinner() {
   return (
@@ -17,8 +17,8 @@ function LoadingSpinner() {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      background: '#0d0a09',
-      color: '#f5f2ef',
+      background: '#f9f9fd',
+      color: 'rgba(40, 25, 80, 0.75)',
       fontSize: '18px'
     }}>
       ⏳ Chargement...
@@ -32,9 +32,9 @@ function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<DevBoard />} />
-          <Route path="/test/form" element={<FormTestPage />} />
-          <Route path="/test/realtime" element={<RealTimeTestPage />} />
-          <Route path="/test/kanban" element={<KanbanTestPage />} />
+          <Route path="/scenario/form" element={<FormTestPage />} />
+          <Route path="/scenario/kanban" element={<KanbanScenario />} />
+          <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

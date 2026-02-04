@@ -5,7 +5,7 @@
 
 import './TypeBadge.css';
 
-export type TestTypeVariant = 'automatic' | 'manual' | 'api' | 'database' | 'security';
+export type TestTypeVariant = 'automatic' | 'manual' | 'api' | 'database' | 'security' | 'scenario';
 
 interface TypeBadgeProps {
   type: TestTypeVariant;
@@ -18,6 +18,7 @@ const TYPE_CONFIG: Record<TestTypeVariant, { label: string; icon: string }> = {
   api: { label: 'API', icon: '🔌' },
   database: { label: 'BDD', icon: '💾' },
   security: { label: 'Sécurité', icon: '🔒' },
+  scenario: { label: 'Scénario', icon: '🎬' },
 };
 
 export function TypeBadge({ type, size = 'md' }: TypeBadgeProps) {

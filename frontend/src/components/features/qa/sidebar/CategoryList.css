@@ -1,68 +1,47 @@
 /**
  * CategoryList styles
- * Professional navigation list - Bordeaux theme
+ * Transparent sidebar with section dividers
  */
 
 .category-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
   padding: var(--space-4);
   flex: 1;
   overflow-y: auto;
 }
 
-/* Section label */
-.category-list::before {
-  content: 'Test Categories';
-  display: block;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: var(--space-2) var(--space-4);
-  margin-bottom: var(--space-2);
+/* Category section group */
+.category-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
-/* Tablet - Compact */
+/* Section divider line */
+.category-divider {
+  border: none;
+  height: 1px;
+  background: var(--color-border-primary);
+  margin: var(--space-4) var(--space-2);
+}
+
+/* Tablet */
 @media (max-width: 1024px) {
   .category-list {
     padding: var(--space-3);
     gap: var(--space-1);
   }
-
-  .category-list::before {
-    font-size: 0.65rem;
-    padding: var(--space-1) var(--space-3);
+  
+  .category-divider {
+    margin: var(--space-3) var(--space-2);
   }
 }
 
-/* Mobile - Horizontal bottom nav */
+/* Mobile */
 @media (max-width: 768px) {
   .category-list {
-    flex-direction: row;
-    padding: 0;
-    gap: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    flex: 1;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .category-list::-webkit-scrollbar {
     display: none;
-  }
-
-  .category-list::before {
-    display: none;
-  }
-}
-
-/* Small phones */
-@media (max-width: 480px) {
-  .category-list {
-    justify-content: space-around;
   }
 }

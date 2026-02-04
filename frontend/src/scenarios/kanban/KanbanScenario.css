@@ -1,0 +1,241 @@
+/**
+ * KanbanScenario Styles
+ * Bordeaux wine theme - Professional restaurant Kanban
+ */
+
+.kanban-scenario {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(145deg, #0d0a09 0%, #120808 50%, #0d0a09 100%);
+  color: #f5f2ef;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.kanban-header {
+  padding: 1.25rem 1.5rem;
+  background: rgba(31, 27, 25, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(61, 55, 51, 0.6);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: #8a827a;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(61, 55, 51, 0.3);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.back-link:hover {
+  background: rgba(114, 47, 55, 0.3);
+  color: #ed6b84;
+}
+
+.header-content {
+  flex: 1;
+  min-width: 200px;
+}
+
+.kanban-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #ed6b84, #c9a227);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-description {
+  margin: 0;
+  color: #8a827a;
+  font-size: 0.85rem;
+}
+
+.header-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: rgba(114, 47, 55, 0.15);
+  border: 1px solid rgba(114, 47, 55, 0.3);
+  border-radius: 10px;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ed6b84;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #8a827a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Kanban Board */
+.kanban-board-wrapper {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kanban-board-wrapper::-webkit-scrollbar {
+  height: 10px;
+}
+
+.kanban-board-wrapper::-webkit-scrollbar-track {
+  background: rgba(13, 10, 9, 0.5);
+  border-radius: 5px;
+}
+
+.kanban-board-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(114, 47, 55, 0.5);
+  border-radius: 5px;
+}
+
+.kanban-board-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(114, 47, 55, 0.7);
+}
+
+.kanban-board {
+  display: flex;
+  gap: 1.25rem;
+  min-height: calc(100vh - 280px);
+  padding-bottom: 1rem;
+}
+
+/* Footer / Legend */
+.kanban-footer {
+  padding: 1rem 1.5rem;
+  background: rgba(31, 27, 25, 0.8);
+  border-top: 1px solid rgba(61, 55, 51, 0.5);
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.legend h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  color: #8a827a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.legend-item {
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.legend-item.priority-urgent {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.legend-item.priority-high {
+  background: rgba(169, 30, 44, 0.15);
+  color: #ed6b84;
+}
+
+.legend-item.priority-medium {
+  background: rgba(201, 162, 39, 0.15);
+  color: #c9a227;
+}
+
+.legend-item.priority-low {
+  background: rgba(107, 142, 35, 0.15);
+  color: #6b8e23;
+}
+
+.legend-tag {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .kanban-header {
+    padding: 1rem;
+  }
+
+  .header-stats {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .kanban-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .back-link {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.625rem;
+  }
+
+  .kanban-board-wrapper {
+    padding: 1rem;
+  }
+
+  .kanban-board {
+    gap: 1rem;
+    min-height: calc(100vh - 320px);
+  }
+
+  .kanban-footer {
+    padding: 0.875rem 1rem;
+    gap: 1rem;
+  }
+
+  .legend h4 {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    order: -1;
+    width: 100%;
+  }
+
+  .stat-item {
+    padding: 0.375rem 0.625rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+}

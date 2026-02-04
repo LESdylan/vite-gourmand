@@ -1,0 +1,136 @@
+/**
+ * OrderCard Styles
+ */
+
+.order-card {
+  position: relative;
+  background: rgba(26, 22, 20, 0.9);
+  border: 1px solid rgba(61, 55, 51, 0.5);
+  border-left: 4px solid #722f37;
+  border-radius: 10px;
+  padding: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: rgba(114, 47, 55, 0.5);
+}
+
+.order-card.selected {
+  border-color: #c9a227;
+  background: rgba(114, 47, 55, 0.15);
+}
+
+/* Badges */
+.order-badge {
+  position: absolute;
+  top: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.order-badge.unread {
+  right: -8px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  animation: pulse-badge 2s infinite;
+}
+
+.order-badge.return {
+  right: 18px;
+  background: linear-gradient(135deg, #c9a227, #d4a81b);
+  font-size: 0.65rem;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Header */
+.order-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.625rem;
+}
+
+.order-number {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f5f2ef;
+}
+
+.order-status {
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+/* Client */
+.order-client {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.625rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(61, 55, 51, 0.3);
+}
+
+.client-name {
+  font-size: 0.8rem;
+  color: #b8b0a8;
+}
+
+.order-time {
+  font-size: 0.7rem;
+  color: #5a534d;
+}
+
+/* Items */
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.625rem;
+}
+
+.order-item {
+  font-size: 0.75rem;
+  color: #8a827a;
+}
+
+.order-item.more {
+  color: #5a534d;
+  font-style: italic;
+}
+
+/* Total */
+.order-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(61, 55, 51, 0.3);
+}
+
+.total-label {
+  font-size: 0.75rem;
+  color: #5a534d;
+}
+
+.total-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #c9a227;
+}

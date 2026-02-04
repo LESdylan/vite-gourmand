@@ -1,6 +1,6 @@
 /**
  * SidebarHeader Styles
- * Bordeaux theme - Professional sidebar header
+ * Fly.io-inspired light glassmorphism theme
  */
 
 .sidebar-header {
@@ -8,8 +8,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-5) var(--space-4);
-  border-bottom: 1px solid rgba(61, 55, 51, 0.5);
-  background: rgba(13, 10, 9, 0.4);
+  border-bottom: 1px solid var(--color-border-primary);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .sidebar-logo {
@@ -25,13 +25,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-secondary-500));
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-accent-500));
   border-radius: var(--radius-lg);
+  color: white;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
 }
 
 .sidebar-logo-text {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
@@ -42,17 +44,18 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  background: rgba(61, 55, 51, 0.5);
-  border: none;
-  color: var(--color-text-tertiary);
+  background: var(--icon-gradient);
+  border: 1px solid var(--glass-border);
+  color: var(--color-neutral-600);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.08);
 }
 
 .sidebar-toggle:hover {
-  background: rgba(114, 47, 55, 0.3);
-  color: var(--color-primary-300);
+  background: var(--icon-gradient-active);
+  color: var(--color-primary-600);
   transform: scale(1.05);
 }
 

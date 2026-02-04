@@ -1,80 +1,97 @@
 /**
  * DevBoard Design System - Foundation Variables
- * Bordeaux/Wine theme for Vite Gourmand - Traiteur Bordelais
+ * Fly.io-inspired Light Theme with Violet Accents
  */
 
 :root {
   /* ═══════════════ COLOR SYSTEM ═══════════════ */
   
-  /* Primary Brand - Bordeaux Wine */
-  --color-primary-50: #fdf2f4;
-  --color-primary-100: #fce4e8;
-  --color-primary-200: #facdd5;
-  --color-primary-300: #f5a3b3;
-  --color-primary-400: #ed6b84;
-  --color-primary-500: #722f37;
-  --color-primary-600: #5c252c;
-  --color-primary-700: #4a1e24;
-  --color-primary-800: #3d191e;
-  --color-primary-900: #2d1216;
+  /* Primary Brand - Violet/Purple (Fly.io inspired) */
+  --color-primary-50: #faf5ff;
+  --color-primary-100: #f3e8ff;
+  --color-primary-200: #e9d5ff;
+  --color-primary-300: #d8b4fe;
+  --color-primary-400: #c084fc;
+  --color-primary-500: #a855f7;
+  --color-primary-600: #9333ea;
+  --color-primary-700: #7c3aed;
+  --color-primary-800: #6b21a8;
+  --color-primary-900: #581c87;
 
-  /* Secondary - Gold/Champagne */
-  --color-secondary-500: #c9a227;
-  --color-secondary-600: #a68621;
-  --color-secondary-700: #85691a;
+  /* Secondary - Navy/Indigo */
+  --color-secondary-50: #f9f9fd;
+  --color-secondary-100: #eef2ff;
+  --color-secondary-200: #e0e7ff;
+  --color-secondary-500: #6366f1;
+  --color-secondary-600: #4f46e5;
+  --color-secondary-700: #4338ca;
 
-  /* Accent - Deep Burgundy */
-  --color-accent-500: #800020;
-  --color-accent-600: #660019;
-  --color-accent-700: #4d0013;
+  /* Accent - Cyan/Teal */
+  --color-accent-400: #22d3ee;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+  --color-accent-700: #0e7490;
 
-  /* Success - Olive/Green */
-  --color-success-50: #f4f7ed;
-  --color-success-500: #6b8e23;
-  --color-success-600: #567219;
-  --color-success-700: #415612;
+  /* Success - Emerald */
+  --color-success-50: #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
 
-  /* Warning - Amber/Terracotta */
-  --color-warning-50: #fdf6e8;
-  --color-warning-500: #d4a574;
-  --color-warning-600: #c08552;
+  /* Warning - Amber */
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
 
-  /* Danger - Deep Red */
-  --color-danger-50: #fef2f2;
-  --color-danger-500: #a91e2c;
-  --color-danger-600: #8b1824;
-  --color-danger-700: #6d121b;
+  /* Danger - Rose */
+  --color-danger-50: #fff1f2;
+  --color-danger-100: #ffe4e6;
+  --color-danger-500: #f43f5e;
+  --color-danger-600: #e11d48;
+  --color-danger-700: #be123c;
 
-  /* Neutral - Charcoal/Slate */
-  --color-neutral-50: #f7f6f5;
-  --color-neutral-100: #ece9e6;
-  --color-neutral-200: #d9d4ce;
-  --color-neutral-300: #c2bab2;
-  --color-neutral-400: #9a9087;
-  --color-neutral-500: #706760;
-  --color-neutral-600: #524a45;
-  --color-neutral-700: #3d3733;
-  --color-neutral-800: #282422;
-  --color-neutral-900: #1a1715;
+  /* Neutral - Slate/Navy */
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
 
-  /* Backgrounds - Dark elegant */
-  --color-bg-primary: #0d0a09;
-  --color-bg-secondary: #1a1614;
-  --color-bg-tertiary: #2a2421;
-  --color-bg-card: #1f1b19;
-  --color-bg-card-hover: #2a2421;
-  --color-bg-input: #0d0a09;
-  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+  /* Backgrounds - Light elegant (Fly.io style) */
+  --color-bg-primary: #f9f9fd;
+  --color-bg-secondary: #ffffff;
+  --color-bg-tertiary: #f3f4f6;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #faf5ff;
+  --color-bg-input: #ffffff;
+  --color-bg-overlay: rgba(15, 23, 42, 0.5);
 
-  /* Text */
-  --color-text-primary: #f5f2ef;
-  --color-text-secondary: #b8b0a8;
-  --color-text-tertiary: #8a827a;
-  --color-text-disabled: #5a534d;
-  --color-text-inverse: #0d0a09;
+  /* Text - Dark on light */
+  --color-text-primary: rgba(40, 25, 80, 0.9);
+  --color-text-secondary: rgba(40, 25, 80, 0.65);
+  --color-text-tertiary: rgba(40, 25, 80, 0.45);
+  --color-text-disabled: rgba(40, 25, 80, 0.3);
+  --color-text-inverse: #ffffff;
 
-  /* Borders */
-  --color-border-primary: #3d3733;
-  --color-border-secondary: #524a45;
+  /* Borders - Fly.io style ring borders */
+  --color-border-primary: rgb(231, 230, 244);
+  --color-border-secondary: rgba(124, 58, 237, 0.15);
   --color-border-focus: var(--color-primary-500);
+  
+  /* Glassmorphism - Fly.io style */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(124, 58, 237, 0.1);
+  --glass-shadow: 0 4px 24px rgba(124, 58, 237, 0.08);
+  --glass-shadow-lg: 0 8px 32px rgba(124, 58, 237, 0.12);
+  
+  /* Icon container gradients */
+  --icon-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(243, 232, 255, 0.8));
+  --icon-gradient-active: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
 }

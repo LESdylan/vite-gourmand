@@ -1,87 +1,45 @@
 /**
  * Sidebar Styles
- * Bordeaux wine theme - Desktop sidebar, Mobile bottom nav
+ * Transparent sidebar with category groups separated by lines
  */
 
 .layout-sidebar {
   width: var(--sidebar-width);
+  min-width: 11rem;
   height: 100%;
-  background: rgba(31, 27, 25, 0.85);
-  backdrop-filter: blur(16px);
-  border-right: 1px solid rgba(61, 55, 51, 0.6);
+  background: transparent;
   display: flex;
   flex-direction: column;
-  transition: all var(--transition-normal);
+  transition: all 0.25s ease;
   overflow: hidden;
   flex-shrink: 0;
   position: relative;
-}
-
-/* Bordeaux gradient accent */
-.layout-sidebar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 100%;
-  background: linear-gradient(180deg, 
-    var(--color-primary-500) 0%, 
-    var(--color-secondary-500) 50%,
-    var(--color-accent-500) 100%
-  );
-  opacity: 0.9;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  padding: var(--space-4) 0;
 }
 
 .layout-sidebar-collapsed {
   width: var(--sidebar-width-collapsed);
+  min-width: auto;
 }
 
-/* Tablet - Collapsible sidebar drawer */
+/* Tablet */
 @media (max-width: 1024px) {
   .layout-sidebar {
-    width: 240px;
+    width: 180px;
+    min-width: auto;
   }
   
   .layout-sidebar-collapsed {
-    width: 64px;
+    width: 56px;
   }
 }
 
-/* Mobile - Transform to bottom navigation */
+/* Mobile - Hidden */
 @media (max-width: 768px) {
   .layout-sidebar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: auto;
-    width: 100%;
-    height: auto;
-    max-height: 72px;
-    flex-direction: row;
-    border-right: none;
-    border-top: 1px solid rgba(61, 55, 51, 0.6);
-    z-index: var(--z-modal);
-    transform: translateY(0);
-    padding: 0;
-    background: rgba(26, 22, 20, 0.95);
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
-  }
-
-  .layout-sidebar::before {
     display: none;
-  }
-
-  .layout-sidebar-collapsed {
-    transform: translateY(0);
-    width: 100%;
-  }
-}
-
-/* Small phones */
-@media (max-width: 480px) {
-  .layout-sidebar {
-    max-height: 64px;
   }
 }

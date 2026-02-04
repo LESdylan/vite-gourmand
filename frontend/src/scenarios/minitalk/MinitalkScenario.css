@@ -1,0 +1,233 @@
+/**
+ * MinitalkScenario Styles
+ * Split-screen responsive layout
+ */
+
+.minitalk-scenario {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(145deg, #0d0a09 0%, #120808 50%, #0d0a09 100%);
+  color: #f5f2ef;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.minitalk-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: rgba(31, 27, 25, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(61, 55, 51, 0.6);
+  flex-wrap: wrap;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: #8a827a;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(61, 55, 51, 0.3);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.back-link:hover {
+  background: rgba(114, 47, 55, 0.3);
+  color: #ed6b84;
+}
+
+.header-content {
+  flex: 1;
+  min-width: 200px;
+}
+
+.minitalk-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+  background: linear-gradient(135deg, #ed6b84, #c9a227);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-description {
+  margin: 0;
+  color: #8a827a;
+  font-size: 0.8rem;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 20px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse-live 2s infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.live-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #22c55e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Split View - Horizontal on desktop, vertical on mobile */
+.minitalk-split {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.split-panel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.professional-side {
+  border-right: 2px solid rgba(114, 47, 55, 0.4);
+}
+
+/* Footer */
+.minitalk-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: rgba(31, 27, 25, 0.8);
+  border-top: 1px solid rgba(61, 55, 51, 0.5);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-info,
+.footer-legend {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.info-item {
+  font-size: 0.75rem;
+  color: #8a827a;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.7rem;
+  color: #5a534d;
+}
+
+.badge-demo {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.6rem;
+  font-weight: 600;
+}
+
+.badge-demo.unread {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+}
+
+.badge-demo.read {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.badge-demo.return {
+  background: linear-gradient(135deg, #c9a227, #d4a81b);
+  font-size: 0.55rem;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 1024px) {
+  .minitalk-header {
+    padding: 0.875rem 1rem;
+    gap: 1rem;
+  }
+
+  .minitalk-header h1 {
+    font-size: 1.15rem;
+  }
+}
+
+/* Responsive - Mobile (vertical split) */
+@media (max-width: 768px) {
+  .minitalk-split {
+    flex-direction: column;
+  }
+
+  .split-panel {
+    flex: none;
+    height: 50%;
+  }
+
+  .professional-side {
+    border-right: none;
+    border-bottom: 2px solid rgba(114, 47, 55, 0.4);
+  }
+
+  .minitalk-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .header-content {
+    order: -1;
+    width: 100%;
+  }
+
+  .minitalk-header h1 {
+    font-size: 1rem;
+  }
+
+  .live-indicator {
+    padding: 0.375rem 0.75rem;
+  }
+
+  .minitalk-footer {
+    padding: 0.625rem 1rem;
+    justify-content: center;
+  }
+
+  .footer-info,
+  .footer-legend {
+    gap: 0.75rem;
+  }
+
+  .info-item {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-legend {
+    display: none;
+  }
+}

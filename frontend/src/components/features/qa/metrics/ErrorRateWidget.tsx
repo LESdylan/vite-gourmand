@@ -4,7 +4,6 @@
  */
 
 import { MetricWidget } from './MetricWidget';
-import type { MetricData } from './types';
 
 interface ErrorRateWidgetProps {
   errorPercent: number;
@@ -13,14 +12,13 @@ interface ErrorRateWidgetProps {
 }
 
 export function ErrorRateWidget({ errorPercent, trend, changePercent }: ErrorRateWidgetProps) {
-  const metric: MetricData = {
-    id: 'error-rate',
-    label: 'Error Rate',
-    value: errorPercent,
-    unit: '%',
-    trend,
-    change: changePercent,
-  };
-
-  return <MetricWidget metric={metric} />;
+  return (
+    <MetricWidget
+      label="Error Rate"
+      value={errorPercent}
+      unit="%"
+      trend={trend}
+      change={changePercent}
+    />
+  );
 }

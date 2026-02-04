@@ -4,7 +4,6 @@
  */
 
 import { MetricWidget } from './MetricWidget';
-import type { MetricData } from './types';
 
 interface ResponseTimeWidgetProps {
   avgMs: number;
@@ -13,14 +12,13 @@ interface ResponseTimeWidgetProps {
 }
 
 export function ResponseTimeWidget({ avgMs, trend, changePercent }: ResponseTimeWidgetProps) {
-  const metric: MetricData = {
-    id: 'response-time',
-    label: 'Avg Response Time',
-    value: avgMs,
-    unit: 'ms',
-    trend,
-    change: changePercent,
-  };
-
-  return <MetricWidget metric={metric} />;
+  return (
+    <MetricWidget 
+      label="Avg Response Time"
+      value={avgMs}
+      unit="ms"
+      trend={trend}
+      change={changePercent}
+    />
+  );
 }

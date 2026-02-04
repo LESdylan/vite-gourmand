@@ -1,28 +1,44 @@
 /**
  * MetricsDashboard - Grid of all metric widgets
- * Composes individual metrics into dashboard view
+ * Shows test results and performance metrics
  */
 
-import { ResponseTimeWidget } from './ResponseTimeWidget';
-import { ErrorRateWidget } from './ErrorRateWidget';
-import { DbLatencyWidget } from './DbLatencyWidget';
-import { CoverageWidget } from './CoverageWidget';
+import { MetricWidget } from './MetricWidget';
 import './MetricsDashboard.css';
 
 interface MetricsDashboardProps {
-  responseTime: { avgMs: number; trend: 'up' | 'down' | 'stable'; changePercent?: number };
-  errorRate: { errorPercent: number; trend: 'up' | 'down' | 'stable'; changePercent?: number };
-  dbLatency: { avgMs: number; trend: 'up' | 'down' | 'stable'; changePercent?: number };
-  coverage: { coveragePercent: number; trend: 'up' | 'down' | 'stable'; changePercent?: number };
+  totalTests: number;
+  passedTests: number;
+  failedTests: number;
+  passRate: number;
 }
 
-export function MetricsDashboard({ responseTime, errorRate, dbLatency, coverage }: MetricsDashboardProps) {
+export function MetricsDashboard({ totalTests, passedTests, failedTests, passRate }: MetricsDashboardProps) {
   return (
     <section className="metrics-dashboard">
-      <ResponseTimeWidget {...responseTime} />
-      <ErrorRateWidget {...errorRate} />
-      <DbLatencyWidget {...dbLatency} />
-      <CoverageWidget {...coverage} />
+      <MetricWidget 
+        label="Total Tests" 
+        value={totalTests} 
+        trend="stable"
+      />
+      <MetricWidget 
+        label="Passed" 
+        value={passedTests} 
+        trend={passedTests > 0 ? 'down' : 'stable'}
+        unit="✓"
+      />
+      <MetricWidget 
+        label="Failed" 
+        value={failedTests} 
+        trend={failedTests > 0 ? 'up' : 'stable'}
+        unit="✕"
+      />
+      <MetricWidget 
+        label="Pass Rate" 
+        value={passRate} 
+        unit="%"
+        trend={passRate >= 90 ? 'down' : passRate >= 70 ? 'stable' : 'up'}
+      />
     </section>
   );
 }
