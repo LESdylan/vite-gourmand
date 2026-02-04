@@ -1,10 +1,11 @@
 /**
  * Mail Service
- * Handles email sending using Resend (primary) or Nodemailer/Gmail (fallback)
+ * Handles email sending using multiple providers:
+ * - Titan (SMTP) - Custom domain email (primary for production)
+ * - Resend - Modern email API with better deliverability
+ * - Gmail - Fallback via Nodemailer
  * 
- * Resend: Modern email API with better deliverability
- * - Free tier: 3,000 emails/month
- * - Built-in email authentication (SPF, DKIM, DMARC)
+ * Priority: Titan > Resend > Gmail > None
  */
 
 import { Injectable, Logger } from '@nestjs/common';
@@ -19,23 +20,33 @@ export interface MailOptions {
   html?: string;
 }
 
-type MailProvider = 'resend' | 'gmail' | 'none';
+type MailProvider = 'titan' | 'resend' | 'gmail' | 'none';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private resend: Resend | null = null;
   private nodemailerTransporter: nodemailer.Transporter | null = null;
+  private titanTransporter: nodemailer.Transporter | null = null;
   private provider: MailProvider;
   private fromEmail: string;
   private gmailFromEmail: string | null = null;
 
   constructor(private configService: ConfigService) {
+    // Titan SMTP Configuration (Custom domain - highest priority)
+    const titanEmail = this.configService.get<string>('TITAN_EMAIL');
+    const titanPassword = this.configService.get<string>('TITAN_PASSWORD');
+    const titanHost = this.configService.get<string>('TITAN_SMTP_HOST') || 'smtp.titan.email';
+    const titanPort = parseInt(this.configService.get<string>('TITAN_SMTP_PORT') || '465', 10);
+
+    // Resend Configuration
     const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
+    
+    // Gmail Configuration (fallback)
     const gmailUser = this.configService.get<string>('MAIL');
     const gmailPassword = this.configService.get<string>('MAIL_APP_PASSWORD');
 
-    // Always configure Gmail as fallback if available
+    // Configure Gmail as fallback if available
     if (gmailUser && gmailPassword) {
       this.nodemailerTransporter = nodemailer.createTransport({
         service: 'gmail',
@@ -47,16 +58,33 @@ export class MailService {
       this.gmailFromEmail = gmailUser;
     }
 
-    // Priority: Resend > Gmail > None
+    // Configure Resend if available
     if (resendApiKey) {
       this.resend = new Resend(resendApiKey);
+    }
+
+    // Priority: Titan > Resend > Gmail > None
+    if (titanEmail && titanPassword) {
+      this.titanTransporter = nodemailer.createTransport({
+        host: titanHost,
+        port: titanPort,
+        secure: true, // Port 465 uses implicit TLS
+        auth: {
+          user: titanEmail,
+          pass: titanPassword,
+        },
+        tls: {
+          rejectUnauthorized: true, // Verify certificates
+        },
+      });
+      this.provider = 'titan';
+      this.fromEmail = titanEmail;
+      this.logger.log(`📧 Mail service configured with Titan SMTP (from: ${this.fromEmail})`);
+      this.logger.log(`📧 Using ${titanHost}:${titanPort} with SSL/TLS`);
+    } else if (resendApiKey) {
       this.provider = 'resend';
-      // Resend free tier requires using onboarding@resend.dev or your verified domain
       this.fromEmail = this.configService.get<string>('RESEND_FROM_EMAIL') || 'onboarding@resend.dev';
       this.logger.log(`📧 Mail service configured with Resend (from: ${this.fromEmail})`);
-      if (this.nodemailerTransporter) {
-        this.logger.log(`📧 Gmail configured as fallback (from: ${this.gmailFromEmail})`);
-      }
     } else if (gmailUser && gmailPassword) {
       this.provider = 'gmail';
       this.fromEmail = gmailUser;
@@ -65,7 +93,13 @@ export class MailService {
       this.provider = 'none';
       this.fromEmail = 'noreply@vitegourmand.local';
       this.logger.warn('⚠️ Mail service not configured.');
-      this.logger.warn('Set RESEND_API_KEY for Resend (recommended) or MAIL + MAIL_APP_PASSWORD for Gmail');
+      this.logger.warn('Set TITAN_EMAIL + TITAN_PASSWORD for custom domain (recommended)');
+      this.logger.warn('Or RESEND_API_KEY for Resend, or MAIL + MAIL_APP_PASSWORD for Gmail');
+    }
+
+    // Log fallback availability
+    if (this.provider !== 'gmail' && this.nodemailerTransporter) {
+      this.logger.log(`📧 Gmail configured as fallback (from: ${this.gmailFromEmail})`);
     }
   }
 
@@ -95,15 +129,48 @@ export class MailService {
     }
 
     try {
-      if (this.provider === 'resend') {
-        return await this.sendWithResend(options);
-      } else {
-        return await this.sendWithNodemailer(options);
+      switch (this.provider) {
+        case 'titan':
+          return await this.sendWithTitan(options);
+        case 'resend':
+          return await this.sendWithResend(options);
+        case 'gmail':
+          return await this.sendWithNodemailer(options);
+        default:
+          return false;
       }
     } catch (error) {
       this.logger.error(`❌ Failed to send email to ${options.to}:`, error);
+      
+      // Try Gmail fallback if available
+      if (this.provider !== 'gmail' && this.nodemailerTransporter) {
+        this.logger.log(`🔄 Primary mail failed, falling back to Gmail...`);
+        try {
+          return await this.sendWithNodemailer(options);
+        } catch (fallbackError) {
+          this.logger.error(`❌ Gmail fallback also failed:`, fallbackError);
+        }
+      }
+      
       return false;
     }
+  }
+
+  /**
+   * Send email using Titan SMTP
+   */
+  private async sendWithTitan(options: MailOptions): Promise<boolean> {
+    const info = await this.titanTransporter!.sendMail({
+      from: `"Vite Gourmand" <${this.fromEmail}>`,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+    });
+
+    this.logger.log(`✅ Email sent via Titan to: ${options.to}`);
+    this.logger.log(`📧 Message ID: ${info.messageId}`);
+    return true;
   }
 
   /**
@@ -129,15 +196,7 @@ export class MailService {
 
     if (error) {
       this.logger.error(`❌ Resend error:`, error);
-      
-      // If Resend fails with domain validation error (403), fall back to Gmail
-      const resendError = error as any;
-      if (resendError.statusCode === 403 && this.nodemailerTransporter) {
-        this.logger.log(`🔄 Resend requires domain verification, falling back to Gmail...`);
-        return await this.sendWithNodemailer(options);
-      }
-      
-      return false;
+      throw error; // Will trigger fallback
     }
 
     this.logger.log(`✅ Email sent via Resend to: ${options.to}`);
@@ -149,7 +208,6 @@ export class MailService {
    * Send email using Nodemailer (Gmail)
    */
   private async sendWithNodemailer(options: MailOptions): Promise<boolean> {
-    // Use gmailFromEmail when it's a fallback from Resend
     const senderEmail = this.gmailFromEmail || this.fromEmail;
     const info = await this.nodemailerTransporter!.sendMail({
       from: `"Vite Gourmand" <${senderEmail}>`,
@@ -161,9 +219,6 @@ export class MailService {
 
     this.logger.log(`✅ Email sent via Gmail to: ${options.to}`);
     this.logger.log(`📧 Message ID: ${info.messageId}`);
-    this.logger.log(`📧 Response: ${info.response}`);
-    this.logger.log(`📧 Accepted: ${JSON.stringify(info.accepted)}`);
-    this.logger.log(`📧 Rejected: ${JSON.stringify(info.rejected)}`);
     return true;
   }
 

@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  NotFoundException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -275,9 +276,11 @@ export class AuthService {
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; token?: string }> {
     const user = await this.findUserByEmail(dto.email);
 
-    // Always return success to prevent email enumeration
+    // Explicitly reject non-registered emails
+    // Note: This allows email enumeration but provides better UX
     if (!user) {
-      return this.getPasswordResetSuccessMessage();
+      this.logger.warn(`Password reset attempted for non-existent email: ${dto.email}`);
+      throw new NotFoundException('No account found with this email address. Please register first.');
     }
 
     await this.invalidateExistingTokens(user.id);
