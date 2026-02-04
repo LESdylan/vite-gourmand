@@ -66,6 +66,13 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   private auditLogs!: Collection<AuditLog>;
   private searchAnalytics!: Collection<SearchAnalytics>;
 
+  /**
+   * Check if MongoDB is available. Analytics features are optional.
+   */
+  isAvailable(): boolean {
+    return this.isConnected;
+  }
+
   async onModuleInit() {
     await this.connect();
   }
@@ -118,8 +125,10 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
         await this.checkAndCleanupStorage();
       }
     } catch (error) {
-      this.logger.error('❌ MongoDB connection failed:', error);
-      throw error;
+      this.logger.warn('⚠️ MongoDB connection failed - analytics features disabled');
+      this.logger.warn(`Reason: ${error instanceof Error ? error.message : String(error)}`);
+      this.isConnected = false;
+      // Don't throw - allow app to start without MongoDB
     }
   }
 
@@ -173,6 +182,9 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
    * Get current storage statistics
    */
   async getStorageStats(): Promise<StorageStats> {
+    if (!this.isConnected) {
+      return { totalSizeMB: 0, usedPercentage: 0, collections: {} };
+    }
     const stats = await this.db.stats();
     const totalSizeMB = stats.dataSize / (1024 * 1024);
     const usedPercentage = (totalSizeMB / this.maxStorageMB) * 100;
@@ -198,6 +210,9 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
    * Check storage and cleanup if threshold exceeded
    */
   async checkAndCleanupStorage(): Promise<{ cleaned: boolean; deletedCount: number; freedMB: number }> {
+    if (!this.isConnected) {
+      return { cleaned: false, deletedCount: 0, freedMB: 0 };
+    }
     const stats = await this.getStorageStats();
     
     this.logger.log(`📊 Storage: ${stats.totalSizeMB.toFixed(2)}MB / ${this.maxStorageMB}MB (${stats.usedPercentage.toFixed(1)}%)`);
@@ -253,6 +268,9 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
    * Aggressive cleanup - reduce retention by half when critically low on space
    */
   async emergencyCleanup(): Promise<{ deletedCount: number; freedMB: number }> {
+    if (!this.isConnected) {
+      return { deletedCount: 0, freedMB: 0 };
+    }
     this.logger.warn('🚨 Emergency cleanup initiated - halving retention periods');
     
     const startStats = await this.getStorageStats();
@@ -286,6 +304,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   // ============================================
 
   async logActivity(activity: Omit<UserActivityLog, '_id' | 'timestamp'>): Promise<void> {
+    if (!this.isConnected) return;
     await this.userActivityLogs.insertOne({
       ...activity,
       timestamp: new Date(),
@@ -293,6 +312,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async trackMenuView(userId: number, menuId: number, menuTitle: string, sessionId: string): Promise<void> {
+    if (!this.isConnected) return;
     await this.logActivity({
       userId,
       sessionId,
@@ -313,6 +333,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
     userId?: number,
     sessionId?: string,
   ): Promise<void> {
+    if (!this.isConnected) return;
     await this.searchAnalytics.insertOne({
       query,
       normalizedQuery: query.toLowerCase().trim(),
@@ -331,6 +352,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   // ============================================
 
   async incrementMenuViews(menuId: number, menuTitle: string): Promise<void> {
+    if (!this.isConnected) return;
     const period = this.getCurrentPeriod('daily');
     
     await this.menuAnalytics.updateOne(
@@ -360,6 +382,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
     diet?: string,
     theme?: string,
   ): Promise<void> {
+    if (!this.isConnected) return;
     const period = this.getCurrentPeriod('daily');
     const hour = new Date().getHours();
 
@@ -390,6 +413,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getTopMenus(limit = 10, periodType: 'daily' | 'weekly' | 'monthly' = 'monthly'): Promise<MenuAnalytics[]> {
+    if (!this.isConnected) return [];
     return this.menuAnalytics
       .find({ periodType })
       .sort({ orderCount: -1 })
@@ -402,6 +426,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   // ============================================
 
   async createOrderSnapshot(order: Omit<OrderSnapshot, '_id' | 'createdAt'>): Promise<void> {
+    if (!this.isConnected) return;
     await this.orderSnapshots.insertOne({
       ...order,
       createdAt: new Date(),
@@ -409,6 +434,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getOrderHistory(userId: number, limit = 50): Promise<OrderSnapshot[]> {
+    if (!this.isConnected) return [];
     return this.orderSnapshots
       .find({ 'user.id': userId })
       .sort({ orderDate: -1 })
@@ -417,6 +443,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getRecentOrders(limit = 100): Promise<OrderSnapshot[]> {
+    if (!this.isConnected) return [];
     return this.orderSnapshots
       .find({})
       .sort({ orderDate: -1 })
@@ -429,6 +456,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   // ============================================
 
   async updateDashboardStats(): Promise<void> {
+    if (!this.isConnected) return;
     const today = this.getCurrentPeriod('daily');
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -470,6 +498,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getDashboardStats(date?: string, type: 'daily' | 'weekly' | 'monthly' = 'daily'): Promise<DashboardStats | null> {
+    if (!this.isConnected) return null;
     const targetDate = date || this.getCurrentPeriod(type);
     return this.dashboardStats.findOne({ date: targetDate, type });
   }
@@ -479,6 +508,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   // ============================================
 
   async logAudit(audit: Omit<AuditLog, '_id' | 'timestamp'>): Promise<void> {
+    if (!this.isConnected) return;
     await this.auditLogs.insertOne({
       ...audit,
       timestamp: new Date(),
@@ -486,6 +516,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getAuditHistory(entityType: AuditLog['entityType'], entityId: number, limit = 50): Promise<AuditLog[]> {
+    if (!this.isConnected) return [];
     return this.auditLogs
       .find({ entityType, entityId })
       .sort({ timestamp: -1 })
@@ -498,6 +529,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   // ============================================
 
   async getPopularSearches(limit = 20): Promise<Array<{ query: string; count: number }>> {
+    if (!this.isConnected) return [];
     const pipeline = [
       {
         $group: {
@@ -520,6 +552,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getSearchConversionRate(): Promise<number> {
+    if (!this.isConnected) return 0;
     const total = await this.searchAnalytics.countDocuments({});
     const converted = await this.searchAnalytics.countDocuments({ convertedToOrder: true });
     return total > 0 ? (converted / total) * 100 : 0;
