@@ -1,12 +1,13 @@
 /**
  * KanbanScenario Styles
- * Fly.io light theme - Professional restaurant Kanban
+ * Fly.io light theme - Professional restaurant Kanban with animated gradient
  */
 
 .kanban-scenario {
+  position: relative;
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--color-bg-primary);
+  background: transparent;
   color: var(--color-text-primary);
   display: flex;
   flex-direction: column;
@@ -14,12 +15,14 @@
 
 /* Header */
 .kanban-header {
+  position: relative;
+  z-index: 10;
   padding: var(--space-4) var(--space-5);
-  background: var(--color-bg-card);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border-primary);
   position: sticky;
   top: 0;
-  z-index: 10;
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -91,11 +94,15 @@
 
 /* Kanban Board */
 .kanban-board-wrapper {
+  position: relative;
+  z-index: 1;
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
   padding: var(--space-4);
   -webkit-overflow-scrolling: touch;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
 }
 
 .kanban-board-wrapper::-webkit-scrollbar {
@@ -125,8 +132,11 @@
 
 /* Footer / Legend */
 .kanban-footer {
+  position: relative;
+  z-index: 1;
   padding: var(--space-3) var(--space-5);
-  background: var(--color-bg-card);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border-primary);
   display: flex;
   gap: var(--space-6);

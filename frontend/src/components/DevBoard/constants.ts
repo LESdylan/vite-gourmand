@@ -32,6 +32,13 @@ export const CATEGORIES: CategoryData[] = [
     group: 'main',
     description: 'Interactive test scenarios'
   },
+  { 
+    id: 'database', 
+    label: 'Database', 
+    icon: 'database', 
+    group: 'main',
+    description: 'PostgreSQL tables viewer & CRUD'
+  },
   
   // Utility sections
   { 

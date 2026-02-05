@@ -8,6 +8,7 @@ export type TestCategory =
   | 'overview'
   | 'test-automatics'
   | 'scenarios'
+  | 'database'
   | 'settings'
   | 'logs'
   | 'metrics'

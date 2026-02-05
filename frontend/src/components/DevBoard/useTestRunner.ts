@@ -21,6 +21,8 @@ interface UseTestRunnerReturn {
   currentTest: string | null;
   results: RunTestsResponse | null;
   error: string | null;
+  verboseMode: boolean;
+  rawOutput: string | null;
   
   // Derived data
   autoTests: AutoTest[];
@@ -36,6 +38,7 @@ interface UseTestRunnerReturn {
   runTest: (testId: TestConfigId) => Promise<void>;
   runAll: () => Promise<void>;
   refresh: () => Promise<void>;
+  toggleVerbose: () => void;
 }
 
 /**
@@ -51,6 +54,8 @@ function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
       suite: suite.name,
       status: test.status,
       duration: test.duration,
+      output: test.output,
+      error: test.error,
     }))
   );
 }
@@ -74,6 +79,8 @@ export function useTestRunner(): UseTestRunnerReturn {
   const [currentTest, setCurrentTest] = useState<string | null>(null);
   const [results, setResults] = useState<RunTestsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [verboseMode, setVerboseMode] = useState(false);
+  const [rawOutput, setRawOutput] = useState<string | null>(null);
 
   // Load initial results (from cache or mock)
   useEffect(() => {
@@ -82,12 +89,11 @@ export function useTestRunner(): UseTestRunnerReturn {
         const cached = await getTestResults();
         if (cached) {
           setResults(cached);
+          if (cached.rawOutput) setRawOutput(cached.rawOutput);
         } else {
-          // Use mock data for development
           setResults(getMockTestResults());
         }
       } catch {
-        // Use mock data as fallback
         setResults(getMockTestResults());
       }
     };
@@ -101,16 +107,16 @@ export function useTestRunner(): UseTestRunnerReturn {
     setError(null);
     
     try {
-      const response = await runTests(testId);
+      const response = await runTests(testId, { verbose: verboseMode });
       setResults(response);
+      if (response.rawOutput) setRawOutput(response.rawOutput);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Test run failed');
-      // Keep previous results on error
     } finally {
       setIsRunning(false);
       setCurrentTest(null);
     }
-  }, []);
+  }, [verboseMode]);
 
   const runAll = useCallback(async () => {
     setIsRunning(true);
@@ -118,29 +124,33 @@ export function useTestRunner(): UseTestRunnerReturn {
     setError(null);
     
     try {
-      const response = await runAllTests();
+      const response = await runAllTests({ verbose: verboseMode });
       setResults(response);
+      if (response.rawOutput) setRawOutput(response.rawOutput);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Test run failed');
-      // Simulate test run with delay for visual feedback
       await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
-      // Generate fresh mock results each run
       setResults(getMockTestResults());
     } finally {
       setIsRunning(false);
       setCurrentTest(null);
     }
-  }, []);
+  }, [verboseMode]);
 
   const refresh = useCallback(async () => {
     try {
       const cached = await getTestResults();
       if (cached) {
         setResults(cached);
+        if (cached.rawOutput) setRawOutput(cached.rawOutput);
       }
     } catch {
       // Ignore refresh errors
     }
+  }, []);
+
+  const toggleVerbose = useCallback(() => {
+    setVerboseMode(prev => !prev);
   }, []);
 
   return {
@@ -148,10 +158,13 @@ export function useTestRunner(): UseTestRunnerReturn {
     currentTest,
     results,
     error,
+    verboseMode,
+    rawOutput,
     autoTests: toAutoTests(results),
     metrics: calculateMetrics(results),
     runTest,
     runAll,
     refresh,
+    toggleVerbose,
   };
 }

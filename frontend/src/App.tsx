@@ -9,6 +9,7 @@ const DevBoard = lazy(() => import('./components/DevBoard').then(m => ({ default
 const FormTestPage = lazy(() => import('./tests/form').then(m => ({ default: m.FormTestPage })));
 const KanbanScenario = lazy(() => import('./scenarios/kanban').then(m => ({ default: m.KanbanScenario })));
 const MinitalkScenario = lazy(() => import('./scenarios/minitalk').then(m => ({ default: m.MinitalkScenario })));
+const AuthScenario = lazy(() => import('./scenarios/auth').then(m => ({ default: m.AuthScenario })));
 
 function LoadingSpinner() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/scenario/form" element={<FormTestPage />} />
           <Route path="/scenario/kanban" element={<KanbanScenario />} />
           <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
+          <Route path="/scenario/auth" element={<AuthScenario />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

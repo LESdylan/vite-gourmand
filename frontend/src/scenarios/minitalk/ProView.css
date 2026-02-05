@@ -1,0 +1,254 @@
+/* Professional View Styles - Kitchen Display System */
+
+.pro-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  padding: 1rem;
+}
+
+.pro-view-header {
+  text-align: center;
+  padding: 0.5rem 0 1rem;
+  color: white;
+}
+
+.pro-view-header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.pro-view-header p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.pro-columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.pro-column {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-width: 240px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.pro-column.drag-over {
+  border-color: var(--column-color);
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.02);
+}
+
+.pro-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--column-color);
+}
+
+.column-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.column-icon {
+  font-size: 1.25rem;
+}
+
+.pro-column-header h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+}
+
+.pro-column-header .count {
+  padding: 0.25rem 0.625rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+}
+
+.pro-column-tasks {
+  flex: 1;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: auto;
+}
+
+.empty-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.empty-column .empty-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+/* Order Ticket - Kitchen Ticket Style */
+.order-ticket {
+  background: #fefce8;
+  border-radius: 4px;
+  padding: 0.75rem;
+  cursor: grab;
+  position: relative;
+  transition: all 0.2s ease;
+  border-left: 4px solid #eab308;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-family: 'Courier New', monospace;
+}
+
+.order-ticket:hover {
+  transform: translateY(-2px) rotate(1deg);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.order-ticket.selected {
+  border-left-color: #7c3aed;
+  box-shadow: 0 0 0 2px #7c3aed, 0 6px 16px rgba(124, 58, 237, 0.3);
+}
+
+.order-ticket.animating {
+  animation: ticketPop 0.5s ease-in-out;
+}
+
+@keyframes ticketPop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+}
+
+.order-ticket:active {
+  cursor: grabbing;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed #d1d5db;
+  margin-bottom: 0.5rem;
+}
+
+.ticket-number {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.ticket-time {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.ticket-customer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.customer-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.customer-type {
+  font-size: 0.65rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.ticket-items {
+  background: white;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ticket-item {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px dotted #e5e7eb;
+  font-size: 0.8rem;
+}
+
+.ticket-item:last-child {
+  border-bottom: none;
+}
+
+.item-qty {
+  font-weight: 700;
+  color: #dc2626;
+  min-width: 24px;
+}
+
+.item-name {
+  color: #1f2937;
+}
+
+.ticket-notes {
+  background: #fef3c7;
+  padding: 0.375rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+}
+
+.ticket-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #d1d5db;
+}
+
+.ticket-total {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #059669;
+}

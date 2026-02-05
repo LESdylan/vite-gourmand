@@ -1,0 +1,157 @@
+/* Database Viewer Styles - Modern Admin Interface */
+
+.database-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  height: 100%;
+  background: linear-gradient(180deg, var(--color-surface-alt, #f8fafc) 0%, var(--color-surface, #fff) 100%);
+  border-radius: var(--radius-xl, 16px);
+}
+
+.database-viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-schema {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #1a1a2e);
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-schema:hover {
+  border-color: #10b981;
+  color: #059669;
+  background: #ecfdf5;
+}
+
+.btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, var(--color-primary, #7e3af2) 0%, #6366f1 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 2px 4px rgba(126, 58, 242, 0.25);
+}
+
+.btn-create:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(126, 58, 242, 0.35);
+}
+
+.btn-create:active {
+  transform: translateY(0);
+}
+
+.database-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  text-align: center;
+  color: var(--color-text-muted, #6b7280);
+  font-size: 1rem;
+}
+
+.database-loading::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border, #e2e8f0);
+  border-top-color: var(--color-primary, #7e3af2);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.database-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: var(--color-surface, #fff);
+  border-radius: var(--radius-xl, 16px);
+  border: 2px dashed var(--color-border, #e2e8f0);
+}
+
+.database-placeholder p {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--color-text, #1a1a2e);
+}
+
+.database-placeholder-hint {
+  margin-top: 0.75rem !important;
+  font-size: 0.9rem !important;
+  color: var(--color-text-muted, #64748b) !important;
+}
+
+.database-placeholder button {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-primary, #7e3af2);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.database-placeholder button:hover {
+  opacity: 0.9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .database-viewer-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    justify-content: flex-start;
+  }
+}

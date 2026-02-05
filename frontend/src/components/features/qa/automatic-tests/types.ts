@@ -10,4 +10,6 @@ export interface AutoTest {
   suite: string;
   status: AutoTestStatus;
   duration?: number;
+  output?: string;
+  error?: string;
 }

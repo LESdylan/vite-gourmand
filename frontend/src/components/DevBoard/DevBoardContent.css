@@ -40,6 +40,12 @@
   margin-bottom: var(--space-2);
 }
 
+.devboard-content-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .devboard-content-title {
   font-size: 1.25rem;
   font-weight: 600;

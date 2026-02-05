@@ -429,6 +429,24 @@ export function CircleIcon({ className = '', size = 16 }: IconProps) {
   );
 }
 
+/** Database icon - cylinder */
+export function DatabaseIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <ellipse cx="8" cy="3.5" rx="5.5" ry="2" />
+      <path d="M2.5 3.5v9c0 1.1 2.46 2 5.5 2s5.5-.9 5.5-2v-9c0 1.1-2.46 2-5.5 2S2.5 4.6 2.5 3.5Z" />
+      <path d="M2.5 8c0 1.1 2.46 2 5.5 2s5.5-.9 5.5-2" fill="none" stroke="currentColor" strokeWidth="1" />
+    </svg>
+  );
+}
+
 export default {
   SettingsIcon,
   MetricsIcon,
@@ -437,6 +455,7 @@ export default {
   ActivityIcon,
   TestsIcon,
   ScenariosIcon,
+  DatabaseIcon,
   MachineIcon,
   ChevronDownIcon,
   CollapseIcon,

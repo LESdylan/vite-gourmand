@@ -8,9 +8,12 @@ import { TestCardGrid } from '../features/qa/test-cards';
 import { AutoTestList, RunAllButton } from '../features/qa/automatic-tests';
 import { Overview } from '../features/qa/overview';
 import { LogViewer, useMockLogs } from '../features/logs';
+import { DatabaseViewer } from '../database';
 import type { TestCategory } from '../features/qa/sidebar';
 import { useMockData } from './useMockData';
 import { useTestRunner } from './useTestRunner';
+import { VerboseToggle } from './VerboseToggle';
+import { VerboseOutput } from './VerboseOutput';
 import './DevBoardContent.css';
 
 interface DevBoardContentProps {
@@ -21,6 +24,7 @@ const categoryLabels: Record<TestCategory, string> = {
   overview: 'Overview',
   'test-automatics': 'Tests Automatiques',
   scenarios: 'Scénarios',
+  database: 'Database',
   settings: 'Settings',
   logs: 'Live Logs',
   metrics: 'Metrics',
@@ -29,13 +33,15 @@ const categoryLabels: Record<TestCategory, string> = {
 
 export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
   const { tests } = useMockData(activeCategory);
-  const { autoTests, metrics, isRunning, runAll } = useTestRunner();
+  const { autoTests, metrics, isRunning, runAll, verboseMode, toggleVerbose, rawOutput } = useTestRunner();
   const { logs, connected, clear } = useMockLogs();
 
   // Overview doesn't show the metrics dashboard (it has its own)
   const showMetricsDashboard = activeCategory !== 'overview';
   // Only show Run All button for test categories
   const showRunAllButton = activeCategory === 'test-automatics' || activeCategory === 'metrics' || activeCategory === 'activity';
+  // Show verbose toggle for test categories
+  const showVerboseToggle = activeCategory === 'test-automatics' || activeCategory === 'overview';
 
   return (
     <main className="devboard-content">
@@ -55,18 +61,27 @@ export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
           <h2 className="devboard-content-title">
             {categoryLabels[activeCategory]}
           </h2>
-          {showRunAllButton && (
-            <RunAllButton 
-              count={autoTests.length} 
-              onRun={runAll}
-              isRunning={isRunning}
-            />
-          )}
+          <div className="devboard-content-actions">
+            {showVerboseToggle && (
+              <VerboseToggle isActive={verboseMode} onToggle={toggleVerbose} />
+            )}
+            {showRunAllButton && (
+              <RunAllButton 
+                count={autoTests.length} 
+                onRun={runAll}
+                isRunning={isRunning}
+              />
+            )}
+          </div>
         </header>
 
         <div className="devboard-cards-container">
           {renderContent(activeCategory, tests, autoTests, logs, connected, clear, metrics, isRunning)}
         </div>
+
+        {showVerboseToggle && (
+          <VerboseOutput output={rawOutput} isVisible={verboseMode} />
+        )}
       </section>
     </main>
   );
@@ -87,6 +102,8 @@ function renderContent(
       return <Overview metrics={metrics} isRunning={isRunning} />;
     case 'scenarios':
       return <TestCardGrid tests={tests} />;
+    case 'database':
+      return <DatabaseViewer />;
     case 'logs':
       return <LogViewer logs={logs} connected={connected} onClear={clear} />;
     default:

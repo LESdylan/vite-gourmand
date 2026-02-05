@@ -1,0 +1,201 @@
+/* Record Modal Styles - Modern Form Design */
+
+.record-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.record-modal {
+  background: var(--color-surface, #fff);
+  border-radius: var(--radius-xl, 16px);
+  width: 90%;
+  max-width: 560px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.2s ease-out;
+}
+
+.record-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, var(--color-primary, #7e3af2) 0%, #6366f1 100%);
+  color: white;
+}
+
+.record-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.record-modal form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.record-modal-fields {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.record-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.record-field.checkbox-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.record-field.checkbox-field label {
+  order: 2;
+  margin: 0;
+}
+
+.record-field.checkbox-field input[type="checkbox"] {
+  order: 1;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-primary, #7e3af2);
+  cursor: pointer;
+}
+
+.record-field label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text, #1a1a2e);
+}
+
+.field-name {
+  font-weight: 600;
+}
+
+.field-type {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  background: var(--color-surface-alt, #f1f5f9);
+  color: var(--color-text-muted, #64748b);
+  border-radius: var(--radius-full, 9999px);
+}
+
+.required {
+  color: var(--color-danger, #ef4444);
+  font-weight: bold;
+}
+
+.record-field input:not([type="checkbox"]) {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.95rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background: var(--color-surface, #fff);
+}
+
+.record-field input:not([type="checkbox"]):focus {
+  outline: none;
+  border-color: var(--color-primary, #7e3af2);
+  box-shadow: 0 0 0 3px rgba(126, 58, 242, 0.1);
+}
+
+.record-field input:not([type="checkbox"])::placeholder {
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.record-field input[type="datetime-local"],
+.record-field input[type="time"],
+.record-field input[type="date"] {
+  font-family: inherit;
+}
+
+.record-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--color-surface-alt, #f8fafc);
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+
+.btn-cancel,
+.btn-save {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-cancel {
+  background: var(--color-surface, #fff);
+  border: 2px solid var(--color-border, #e2e8f0);
+  color: var(--color-text, #1a1a2e);
+}
+
+.btn-cancel:hover {
+  background: var(--color-surface-alt, #f1f5f9);
+}
+
+.btn-save {
+  background: linear-gradient(135deg, var(--color-primary, #7e3af2) 0%, #6366f1 100%);
+  border: none;
+  color: white;
+}
+
+.btn-save:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}

@@ -1,112 +1,78 @@
 /**
- * MinitalkScenario - Real-time Client-Professional Communication
- * Split-screen scenario for order status updates and messaging
+ * Minitalk Scenario - Real-time Client/Pro Communication
  */
 
+import React from 'react';
+import { GradientBackground } from '../../components/DevBoard';
 import { useMinitalk } from './useMinitalk';
-import { ProfessionalPanel, ClientPanel } from './components';
+import { ProView } from './ProView';
+import { ClientView } from './ClientView';
 import './MinitalkScenario.css';
 
-export function MinitalkScenario() {
+export const MinitalkScenario: React.FC = () => {
   const {
     orders,
-    clientOrders,
     selectedOrder,
-    selectedUser,
-    users,
+    viewMode,
+    statusChanged,
     setSelectedOrder,
-    selectUser,
-    updateOrderStatus,
+    setViewMode,
+    createOrder,
+    updateStatus,
     sendMessage,
   } = useMinitalk();
 
-  const handleSendClientMessage = (orderId: string, content: string) => {
-    if (selectedUser) {
-      sendMessage(orderId, content, 'client', selectedUser.name, 'message');
-    }
-  };
-
-  const handleRequestReturn = (orderId: string) => {
-    if (selectedUser) {
-      sendMessage(
-        orderId,
-        `${selectedUser.name} a demandé un retour pour cette commande`,
-        'client',
-        selectedUser.name,
-        'return_request'
-      );
+  const handleSendMessage = (content: string) => {
+    if (selectedOrder) {
+      sendMessage(selectedOrder.id, content, viewMode === 'client' ? 'client' : 'professional');
     }
   };
 
   return (
-    <div className="minitalk-scenario">
-      {/* Header */}
-      <header className="minitalk-header">
-        <a href="/" className="back-link">← Retour au Dashboard</a>
-        <div className="header-content">
-          <h1>💬 Minitalk - Communication Client/Pro</h1>
-          <p className="header-description">
-            Suivi des commandes en temps réel et messagerie instantanée
-          </p>
-        </div>
-        <div className="live-indicator">
-          <span className="live-dot" />
-          <span className="live-text">En direct</span>
-        </div>
-      </header>
+    <>
+      <GradientBackground />
+      <div className="minitalk-scenario">
+        <header className="minitalk-header">
+          <h1>🍽️ Minitalk</h1>
+          <p>Suivi de commande en temps réel</p>
+          <div className="view-toggle">
+            <button className={viewMode === 'split' ? 'active' : ''} onClick={() => setViewMode('split')}>
+              <span>⚡</span> Vue partagée
+            </button>
+            <button className={viewMode === 'pro' ? 'active' : ''} onClick={() => setViewMode('pro')}>
+              <span>👨‍🍳</span> Professionnel
+            </button>
+            <button className={viewMode === 'client' ? 'active' : ''} onClick={() => setViewMode('client')}>
+              <span>👤</span> Client
+            </button>
+          </div>
+        </header>
 
-      {/* Split View */}
-      <div className="minitalk-split">
-        {/* Professional Side (Left / Top) */}
-        <div className="split-panel professional-side">
-          <ProfessionalPanel
-            orders={orders}
-            selectedOrder={selectedOrder}
-            onSelectOrder={setSelectedOrder}
-            onUpdateStatus={updateOrderStatus}
-          />
-        </div>
-
-        {/* Client Side (Right / Bottom) */}
-        <div className="split-panel client-side">
-          <ClientPanel
-            user={selectedUser}
-            users={users}
-            orders={clientOrders}
-            selectedOrder={clientOrders.find(o => o.id === selectedOrder?.id) || null}
-            onSelectUser={selectUser}
-            onSelectOrder={setSelectedOrder}
-            onSendMessage={handleSendClientMessage}
-            onRequestReturn={handleRequestReturn}
-          />
-        </div>
+        <main className={`minitalk-content view-${viewMode}`}>
+          {(viewMode === 'split' || viewMode === 'pro') && (
+            <section className="minitalk-pro">
+              <ProView
+                orders={orders}
+                selectedId={selectedOrder?.id ?? null}
+                onSelect={setSelectedOrder}
+                onStatusChange={updateStatus}
+              />
+            </section>
+          )}
+          {(viewMode === 'split' || viewMode === 'client') && (
+            <section className="minitalk-client">
+              <ClientView
+                orders={orders}
+                selectedOrder={selectedOrder}
+                statusChanged={statusChanged}
+                onSelectOrder={setSelectedOrder}
+                onCreateOrder={createOrder}
+                onSendMessage={handleSendMessage}
+              />
+            </section>
+          )}
+        </main>
       </div>
-
-      {/* Footer */}
-      <footer className="minitalk-footer">
-        <div className="footer-info">
-          <span className="info-item">
-            📊 {orders.length} commandes actives
-          </span>
-          <span className="info-item">
-            💬 {orders.reduce((acc, o) => acc + o.messages.length, 0)} messages
-          </span>
-          <span className="info-item">
-            ⚠️ {orders.filter(o => o.unreadCount > 0).length} non lus
-          </span>
-        </div>
-        <div className="footer-legend">
-          <span className="legend-item">
-            <span className="badge-demo unread">3</span> Non lu (orange)
-          </span>
-          <span className="legend-item">
-            <span className="badge-demo read">✓</span> Lu (bleu)
-          </span>
-          <span className="legend-item">
-            <span className="badge-demo return">↩️</span> Retour demandé
-          </span>
-        </div>
-      </footer>
-    </div>
+    </>
   );
-}
+};

@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useKanban } from './useKanban';
 import { KanbanColumn, TaskDetailModal, AddTaskModal, AddColumnPlaceholder } from './components';
+import { GradientBackground } from '../../components/DevBoard';
 import type { KanbanTask } from './types';
 import './KanbanScenario.css';
 
@@ -43,6 +44,7 @@ export function KanbanScenario() {
 
   return (
     <div className="kanban-scenario">
+      <GradientBackground />
       {/* Header */}
       <header className="kanban-header">
         <a href="/" className="back-link">← Retour au Dashboard</a>

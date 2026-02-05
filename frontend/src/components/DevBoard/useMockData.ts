@@ -11,6 +11,14 @@ export function useMockData(category: TestCategory) {
   const tests: TestItem[] = [
     { 
       id: '1', 
+      name: 'Authentification', 
+      description: 'Connexion, inscription, réinitialisation mot de passe, OAuth', 
+      status: 'pending', 
+      type: 'scenario',
+      testPath: '/scenario/auth'
+    },
+    { 
+      id: '2', 
       name: 'Validation Formulaire', 
       description: 'Test du formulaire de contact - validation, soumission', 
       status: 'pending', 
@@ -18,15 +26,15 @@ export function useMockData(category: TestCategory) {
       testPath: '/scenario/form'
     },
     { 
-      id: '2', 
+      id: '3', 
       name: 'Minitalk Client-Pro', 
-      description: 'Communication en temps réel entre client et professionnel', 
+      description: 'Communication temps réel entre client et professionnel', 
       status: 'pending', 
       type: 'scenario',
       testPath: '/scenario/minitalk'
     },
     { 
-      id: '3', 
+      id: '4', 
       name: 'Kanban Restaurant', 
       description: 'Gestion des commandes avec Kanban professionnel', 
       status: 'pending', 

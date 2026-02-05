@@ -12,6 +12,7 @@ import {
   ActivityIcon,
   TestsIcon,
   ScenariosIcon,
+  DatabaseIcon,
 } from '../../../icons/FlyIcons';
 import './CategoryItem.css';
 
@@ -62,6 +63,8 @@ function CategoryIcon({ iconType }: { iconType: string }) {
       return <TestsIcon {...iconProps} />;
     case 'scenarios':
       return <ScenariosIcon {...iconProps} />;
+    case 'database':
+      return <DatabaseIcon {...iconProps} />;
     default:
       return <OverviewIcon {...iconProps} />;
   }

@@ -4,6 +4,7 @@
  */
 
 .devboard {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -11,11 +12,12 @@
   width: 100%;
   margin: 0;
   padding: 0;
-  background: var(--color-bg-primary);
+  background: transparent; /* Let gradient show through */
   color: var(--color-text-primary);
 }
 
 .devboard-body {
+  position: relative;
   display: flex;
   flex: 1;
   width: 100%;
@@ -24,6 +26,7 @@
   padding: 0 var(--space-4);
   overflow: hidden;
   box-sizing: border-box;
+  z-index: 1; /* Above background */
 }
 
 /* Large desktop */

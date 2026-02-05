@@ -3,7 +3,8 @@
  * API service to run and fetch backend test results
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// Use empty string to let Vite proxy handle /api routes
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export interface TestResult {
   id: string;
@@ -33,6 +34,12 @@ export interface RunTestsResponse {
     failed: number;
     duration: number;
   };
+  timestamp?: string;
+  rawOutput?: string; // Verbose CLI output
+}
+
+export interface TestRunOptions {
+  verbose?: boolean;
 }
 
 /**
@@ -74,14 +81,14 @@ export type TestConfigId = keyof typeof TEST_CONFIGS;
 /**
  * Run a specific test suite
  */
-export async function runTests(testId: TestConfigId): Promise<RunTestsResponse> {
+export async function runTests(testId: TestConfigId, options: TestRunOptions = {}): Promise<RunTestsResponse> {
   try {
     const response = await fetch(`${API_BASE}/api/tests/run`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ testId }),
+      body: JSON.stringify({ testId, verbose: options.verbose }),
     });
 
     if (!response.ok) {
@@ -98,13 +105,14 @@ export async function runTests(testId: TestConfigId): Promise<RunTestsResponse> 
 /**
  * Run all test suites
  */
-export async function runAllTests(): Promise<RunTestsResponse> {
+export async function runAllTests(options: TestRunOptions = {}): Promise<RunTestsResponse> {
   try {
     const response = await fetch(`${API_BASE}/api/tests/run-all`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ verbose: options.verbose }),
     });
 
     if (!response.ok) {
@@ -204,24 +212,71 @@ export function getMockTestResults(): RunTestsResponse {
   // Create timestamp to track when this run was generated
   const runId = Date.now();
   
+  // Mock CLI output for demo purposes
+  const mockUnitOutput = `PASS  src/app.controller.spec.ts
+  AppController
+    ✓ should return hello (12 ms)
+    ✓ should return version (8 ms)
+
+PASS  src/order.service.spec.ts  
+  OrderService
+    ✓ should create order (45 ms)
+    ✓ should validate items (23 ms)
+
+PASS  src/guards.spec.ts
+  Guards › JwtAuthGuard
+    ✓ should allow valid token (15 ms)
+  Guards › RolesGuard  
+    ✓ should block unauthorized (11 ms)
+
+Test Suites: 3 passed, 3 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        2.541 s`;
+
+  const mockPostmanOutput = `newman
+
+vite-gourmand-complete
+
+→ Auth › Login with valid credentials
+  POST http://localhost:3000/api/auth/login [200 OK, 234ms]
+  ✓ Status code is 200
+  ✓ Response has token
+
+→ Auth › Register new user
+  POST http://localhost:3000/api/auth/register [201 Created, 189ms]
+  ✓ Status code is 201
+
+→ Orders › Create new order
+  POST http://localhost:3000/api/orders [201 Created, 312ms]
+  ✓ Order created successfully
+
+→ Orders › List user orders
+  GET http://localhost:3000/api/orders [200 OK, 156ms]
+  ✓ Returns array of orders
+
+→ Admin › Get dashboard stats
+  GET http://localhost:3000/api/admin/stats [200 OK, 98ms]
+  ✓ Returns dashboard statistics`;
+
   // Unit tests are generally stable - use consistent statuses
-  const tests: Array<{ id: string; name: string; suite: string; status: 'passed' | 'failed'; duration: number }> = [
-    { id: `app-ctrl-1-${runId}`, name: 'AppController › should return hello', suite: 'app.controller.spec.ts', status: 'passed', duration: randomDuration(12) },
-    { id: `app-ctrl-2-${runId}`, name: 'AppController › should return version', suite: 'app.controller.spec.ts', status: 'passed', duration: randomDuration(8) },
-    { id: `order-svc-1-${runId}`, name: 'OrderService › should create order', suite: 'order.service.spec.ts', status: 'passed', duration: randomDuration(45) },
-    { id: `order-svc-2-${runId}`, name: 'OrderService › should validate items', suite: 'order.service.spec.ts', status: 'passed', duration: randomDuration(23) },
-    { id: `guards-1-${runId}`, name: 'Guards › JwtAuthGuard › should allow valid token', suite: 'guards.spec.ts', status: 'passed', duration: randomDuration(15) },
-    { id: `guards-2-${runId}`, name: 'Guards › RolesGuard › should block unauthorized', suite: 'guards.spec.ts', status: 'passed', duration: randomDuration(11) },
+  const tests: Array<{ id: string; name: string; suite: string; status: 'passed' | 'failed'; duration: number; output?: string }> = [
+    { id: `app-ctrl-1-${runId}`, name: 'AppController › should return hello', suite: 'app.controller.spec.ts', status: 'passed', duration: randomDuration(12), output: mockUnitOutput },
+    { id: `app-ctrl-2-${runId}`, name: 'AppController › should return version', suite: 'app.controller.spec.ts', status: 'passed', duration: randomDuration(8), output: mockUnitOutput },
+    { id: `order-svc-1-${runId}`, name: 'OrderService › should create order', suite: 'order.service.spec.ts', status: 'passed', duration: randomDuration(45), output: mockUnitOutput },
+    { id: `order-svc-2-${runId}`, name: 'OrderService › should validate items', suite: 'order.service.spec.ts', status: 'passed', duration: randomDuration(23), output: mockUnitOutput },
+    { id: `guards-1-${runId}`, name: 'Guards › JwtAuthGuard › should allow valid token', suite: 'guards.spec.ts', status: 'passed', duration: randomDuration(15), output: mockUnitOutput },
+    { id: `guards-2-${runId}`, name: 'Guards › RolesGuard › should block unauthorized', suite: 'guards.spec.ts', status: 'passed', duration: randomDuration(11), output: mockUnitOutput },
   ];
 
   // Postman tests - these depend on backend state and can have issues
   // Simulating realistic scenarios where backend may not be ready
-  const postmanTests: Array<{ id: string; name: string; suite: string; status: 'passed' | 'failed'; duration: number }> = [
-    { id: `auth-login-${runId}`, name: 'Auth › Login with valid credentials', suite: 'auth.json', status: 'passed', duration: randomDuration(234) },
-    { id: `auth-register-${runId}`, name: 'Auth › Register new user', suite: 'auth.json', status: 'passed', duration: randomDuration(189) },
-    { id: `orders-create-${runId}`, name: 'Orders › Create new order', suite: 'orders.json', status: 'passed', duration: randomDuration(312) },
-    { id: `orders-list-${runId}`, name: 'Orders › List user orders', suite: 'orders.json', status: 'passed', duration: randomDuration(156) },
-    { id: `admin-stats-${runId}`, name: 'Admin › Get dashboard stats', suite: 'admin.json', status: 'passed', duration: randomDuration(98) },
+  const postmanTests: Array<{ id: string; name: string; suite: string; status: 'passed' | 'failed'; duration: number; output?: string }> = [
+    { id: `auth-login-${runId}`, name: 'Auth › Login with valid credentials', suite: 'auth.json', status: 'passed', duration: randomDuration(234), output: mockPostmanOutput },
+    { id: `auth-register-${runId}`, name: 'Auth › Register new user', suite: 'auth.json', status: 'passed', duration: randomDuration(189), output: mockPostmanOutput },
+    { id: `orders-create-${runId}`, name: 'Orders › Create new order', suite: 'orders.json', status: 'passed', duration: randomDuration(312), output: mockPostmanOutput },
+    { id: `orders-list-${runId}`, name: 'Orders › List user orders', suite: 'orders.json', status: 'passed', duration: randomDuration(156), output: mockPostmanOutput },
+    { id: `admin-stats-${runId}`, name: 'Admin › Get dashboard stats', suite: 'admin.json', status: 'passed', duration: randomDuration(98), output: mockPostmanOutput },
   ];
 
   const unitPassed = tests.length; // All passed in mock
