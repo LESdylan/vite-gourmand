@@ -1,0 +1,152 @@
+/**
+ * PassRateChart donut chart styles
+ */
+
+.pass-rate-chart {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.pass-rate-chart-title {
+  margin: 0 0 var(--space-4) 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.pass-rate-chart-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.pass-rate-donut {
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+
+.pass-rate-donut-bg {
+  stroke: var(--color-danger-100);
+}
+
+.pass-rate-donut-progress {
+  stroke: var(--color-success-500);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.pass-rate-donut-value {
+  font-size: 20px;
+  font-weight: 700;
+  fill: var(--color-text-primary);
+}
+
+.pass-rate-donut-label {
+  font-size: 8px;
+  fill: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.pass-rate-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.pass-rate-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pass-rate-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.pass-rate-legend-color--passed {
+  background: var(--color-success-500);
+}
+
+.pass-rate-legend-color--failed {
+  background: var(--color-danger-500);
+}
+
+.pass-rate-legend-label {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.pass-rate-legend-value {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.pass-rate-legend-item--total {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-primary);
+}
+
+.pass-rate-legend-item--total .pass-rate-legend-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .pass-rate-chart {
+    padding: var(--space-3);
+  }
+
+  .pass-rate-chart-container {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .pass-rate-donut {
+    width: 120px;
+    height: 120px;
+  }
+
+  .pass-rate-legend {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .pass-rate-legend-item--total {
+    width: 100%;
+    justify-content: center;
+    padding-top: var(--space-2);
+  }
+}
+
+@media (max-width: 320px) {
+  .pass-rate-chart {
+    padding: var(--space-2);
+  }
+
+  .pass-rate-chart-title {
+    font-size: 0.875rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .pass-rate-donut {
+    width: 100px;
+    height: 100px;
+  }
+
+  .pass-rate-donut-value {
+    font-size: 16px;
+  }
+}

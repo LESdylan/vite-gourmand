@@ -1,19 +1,18 @@
 /**
  * DevBoardContent styles
- * Full-width responsive layout
+ * Main content area - Takes majority of space - Mobile first
  */
 
 .devboard-content {
   flex: 1;
+  min-width: 0; /* Allow content to shrink */
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-4);
+  padding: var(--space-5);
   overflow-y: auto;
   overflow-x: hidden;
   background: transparent;
-  width: 100%;
-  max-width: 100%;
 }
 
 .devboard-content-metrics {
@@ -86,25 +85,58 @@
   gap: var(--space-3);
 }
 
+/* Tablet landscape */
 @media (max-width: 1024px) {
   .devboard-content {
     padding: var(--space-4);
   }
 }
 
+/* Tablet portrait */
 @media (max-width: 768px) {
   .devboard-content {
     padding: var(--space-3);
     padding-bottom: calc(var(--space-3) + 80px);
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .devboard-content-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--space-2);
   }
 
   .devboard-content-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .devboard-content {
+    padding: var(--space-2);
+    padding-bottom: calc(var(--space-2) + 80px);
+    gap: var(--space-2);
+  }
+
+  .devboard-content-title {
+    font-size: 1rem;
+  }
+}
+
+/* Very small devices (200px+) */
+@media (max-width: 320px) {
+  .devboard-content {
+    padding: 8px;
+    padding-bottom: calc(8px + 70px);
+    gap: 8px;
+  }
+
+  .devboard-content-title {
+    font-size: 0.875rem;
+  }
+
+  .devboard-content-header {
+    gap: 6px;
   }
 }

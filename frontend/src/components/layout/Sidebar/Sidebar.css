@@ -5,7 +5,8 @@
 
 .layout-sidebar {
   width: var(--sidebar-width);
-  min-width: 14rem;
+  min-width: 180px;
+  max-width: 220px;
   height: 100%;
   background: transparent;
   display: flex;
@@ -24,13 +25,14 @@
 .layout-sidebar-collapsed {
   width: var(--sidebar-width-collapsed);
   min-width: auto;
+  max-width: auto;
 }
 
-/* Tablet */
+/* Tablet landscape */
 @media (max-width: 1024px) {
   .layout-sidebar {
-    width: 200px;
-    min-width: auto;
+    width: 180px;
+    min-width: 140px;
   }
   
   .layout-sidebar-collapsed {
@@ -38,9 +40,76 @@
   }
 }
 
-/* Mobile - Hidden */
+/* Tablet portrait - Smaller sidebar */
 @media (max-width: 768px) {
   .layout-sidebar {
     display: none;
+  }
+}
+
+/* Mobile navigation (bottom sheet style) */
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border-primary);
+    padding: var(--space-2);
+    gap: var(--space-1);
+    justify-content: space-around;
+    z-index: 100;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--space-1) var(--space-2);
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 44px;
+    transition: all 0.15s ease;
+  }
+
+  .mobile-nav-item:hover,
+  .mobile-nav-item.active {
+    background: var(--color-primary-100);
+    color: var(--color-primary-600);
+  }
+
+  .mobile-nav-item-icon {
+    font-size: 1.25rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 320px) {
+  .mobile-nav {
+    padding: 4px;
+  }
+
+  .mobile-nav-item {
+    padding: 4px 6px;
+    font-size: 9px;
+    min-width: 36px;
+  }
+
+  .mobile-nav-item-icon {
+    font-size: 1rem;
   }
 }

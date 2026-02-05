@@ -122,7 +122,9 @@ export function useTestRunner(): UseTestRunnerReturn {
       setResults(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Test run failed');
-      // Use consistent mock data - no random results
+      // Simulate test run with delay for visual feedback
+      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
+      // Generate fresh mock results each run
       setResults(getMockTestResults());
     } finally {
       setIsRunning(false);

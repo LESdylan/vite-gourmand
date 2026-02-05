@@ -25,13 +25,11 @@ export function MetricsDashboard({ totalTests, passedTests, failedTests, passRat
         label="Passed" 
         value={passedTests} 
         trend={passedTests > 0 ? 'down' : 'stable'}
-        unit="✓"
       />
       <MetricWidget 
         label="Failed" 
         value={failedTests} 
         trend={failedTests > 0 ? 'up' : 'stable'}
-        unit="✕"
       />
       <MetricWidget 
         label="Pass Rate" 

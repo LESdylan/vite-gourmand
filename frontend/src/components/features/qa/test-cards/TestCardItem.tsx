@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import type { TestItem } from './types';
 import { StatusBadge } from '../../../ui/badges/StatusBadge';
 import { TypeBadge } from '../../../ui/badges/TypeBadge';
-import { IconButton } from '../../../helpers/IconButton';
+import { FlaskIcon, PlayIcon, EyeIcon } from '../../../icons/FlyIcons';
 import './TestCardItem.css';
 
 interface TestCardItemProps {
@@ -52,9 +52,23 @@ export function TestCardItem({ test, onRun, onView }: TestCardItemProps) {
             onClick={handleRunTest} 
             disabled={isRunning}
           >
-            {test.testPath ? '🧪 Lancer le test' : '▶ Run'}
+            {test.testPath ? (
+              <>
+                <FlaskIcon size={14} />
+                <span>Lancer le test</span>
+              </>
+            ) : (
+              <>
+                <PlayIcon size={14} />
+                <span>Run</span>
+              </>
+            )}
           </button>
-          {onView && <IconButton icon="👁" ariaLabel="View details" onClick={onView} variant="subtle" />}
+          {onView && (
+            <button className="test-card-view-btn" onClick={onView} aria-label="View details">
+              <EyeIcon size={16} />
+            </button>
+          )}
         </div>
       </footer>
     </article>

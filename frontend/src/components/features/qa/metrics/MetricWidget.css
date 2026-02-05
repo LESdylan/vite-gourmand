@@ -127,3 +127,58 @@
     margin-top: 0;
   }
 }
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .metric-widget {
+    padding: var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .metric-widget-label {
+    font-size: 0.55rem;
+  }
+
+  .metric-widget-value {
+    font-size: 1rem;
+  }
+
+  .metric-widget-unit {
+    font-size: 0.55rem;
+  }
+}
+
+/* Very small devices (200px+) */
+@media (max-width: 320px) {
+  .metric-widget {
+    padding: 6px;
+    gap: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .metric-widget-label {
+    font-size: 0.5rem;
+    order: unset;
+  }
+
+  .metric-widget-value-row {
+    order: unset;
+    flex-direction: row;
+    align-items: baseline;
+  }
+
+  .metric-widget-value {
+    font-size: 0.9rem;
+  }
+
+  .metric-widget-unit {
+    font-size: 0.5rem;
+  }
+
+  .metric-widget-trend {
+    order: unset;
+    font-size: 0.5rem;
+    padding: 1px 3px;
+  }
+}

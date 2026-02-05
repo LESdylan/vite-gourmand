@@ -186,6 +186,249 @@ export function CollapseIcon({ className = '', size = 16 }: IconProps) {
   );
 }
 
+/** Check/Success icon */
+export function CheckIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
+    </svg>
+  );
+}
+
+/** X/Error/Close icon */
+export function XIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" />
+    </svg>
+  );
+}
+
+/** Warning/Alert icon */
+export function WarningIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l5.847 10.933A1.75 1.75 0 0 1 13.847 14H2.153a1.75 1.75 0 0 1-1.543-2.02L6.457 1.047ZM8 5a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 8 5Zm0 6.25a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+    </svg>
+  );
+}
+
+/** Lightning/Bolt icon for auto/fast */
+export function BoltIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.858 2.929 2.929 0 0 1 0 5.858z"/>
+    </svg>
+  );
+}
+
+/** Performance/Lightning bolt */
+export function PerformanceIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5Z" />
+    </svg>
+  );
+}
+
+/** Clock/Time icon */
+export function ClockIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0-1.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11Z" />
+      <path d="M8 4a.75.75 0 0 1 .75.75v2.69l1.78 1.78a.75.75 0 1 1-1.06 1.06l-2-2A.75.75 0 0 1 7.25 8V4.75A.75.75 0 0 1 8 4Z" />
+    </svg>
+  );
+}
+
+/** Chart/Analytics icon */
+export function ChartIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75ZM4 7a1 1 0 0 1 1 1v5a1 1 0 0 1-2 0V8a1 1 0 0 1 1-1Zm4-2a1 1 0 0 1 1 1v7a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm4 4a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z" />
+    </svg>
+  );
+}
+
+/** Target/Bullseye icon */
+export function TargetIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12Zm0-1.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0-1.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+    </svg>
+  );
+}
+
+/** Play icon for running tests */
+export function PlayIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M4 2.75c0-.973 1.077-1.551 1.91-.986l7.2 4.8a1.25 1.25 0 0 1 0 2.072l-7.2 4.8c-.833.565-1.91-.013-1.91-.986V2.75Z" />
+    </svg>
+  );
+}
+
+/** User/Person icon */
+export function UserIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M10.5 5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm.514 2.63a4 4 0 1 0-6.028 0A4.002 4.002 0 0 0 2 11.5V13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1.5a4.002 4.002 0 0 0-2.986-3.87ZM4 11.5a2.5 2.5 0 0 1 2.5-2.5h3A2.5 2.5 0 0 1 12 11.5V13a.5.5 0 0 1-.5.5h-7A.5.5 0 0 1 4 13v-1.5Z" />
+    </svg>
+  );
+}
+
+/** Eye/View icon */
+export function EyeIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M8 2C4.318 2 1.222 4.493.254 7.862a.5.5 0 0 0 0 .276C1.222 11.507 4.318 14 8 14s6.778-2.493 7.746-5.862a.5.5 0 0 0 0-.276C14.778 4.493 11.682 2 8 2Zm0 10.5c-2.735 0-5.15-1.82-6.207-4.5C2.85 5.32 5.265 3.5 8 3.5c2.735 0 5.15 1.82 6.207 4.5-1.057 2.68-3.472 4.5-6.207 4.5Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" />
+    </svg>
+  );
+}
+
+/** Flask/Test tube icon */
+export function FlaskIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M5 1a1 1 0 0 0 0 2v4.586L1.707 10.88A2 2 0 0 0 3.12 14.5h9.758a2 2 0 0 0 1.414-3.414L11 7.586V3a1 1 0 1 0 0-2H5Zm1.5 2v5a.5.5 0 0 1-.146.354L3.914 10.79a.5.5 0 0 0 .354.854h7.464a.5.5 0 0 0 .354-.854l-2.44-2.436A.5.5 0 0 1 9.5 8V3h-3Z" />
+    </svg>
+  );
+}
+
+/** Info circle icon */
+export function InfoIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0-1.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11ZM8 4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 8 4.5Zm0 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+    </svg>
+  );
+}
+
+/** Refresh/Sync icon */
+export function RefreshIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path fillRule="evenodd" clipRule="evenodd" d="M8 2.5a5.5 5.5 0 0 1 4.95 3.08.75.75 0 0 0 1.35-.66A7 7 0 0 0 1.05 6.5H.75a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 .75-.75V4.75a.75.75 0 0 0-1.5 0v.56A5.48 5.48 0 0 1 8 2.5Zm5.5 5.75a.75.75 0 0 0-.75-.75h-2.5a.75.75 0 0 0-.75.75v2.5a.75.75 0 0 0 1.5 0v-.56A5.48 5.48 0 0 1 8 13.5a5.5 5.5 0 0 1-4.95-3.08.75.75 0 0 0-1.35.66A7 7 0 0 0 14.95 9.5h.3a.75.75 0 0 0 0-1.5h-1.75v.25Z" />
+    </svg>
+  );
+}
+
+/** Circle icon (for status dots) */
+export function CircleIcon({ className = '', size = 16 }: IconProps) {
+  return (
+    <svg 
+      viewBox="0 0 16 16" 
+      width={size} 
+      height={size} 
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <circle cx="8" cy="8" r="4" />
+    </svg>
+  );
+}
+
 export default {
   SettingsIcon,
   MetricsIcon,
@@ -197,4 +440,19 @@ export default {
   MachineIcon,
   ChevronDownIcon,
   CollapseIcon,
+  CheckIcon,
+  XIcon,
+  WarningIcon,
+  BoltIcon,
+  PerformanceIcon,
+  ClockIcon,
+  ChartIcon,
+  TargetIcon,
+  PlayIcon,
+  UserIcon,
+  EyeIcon,
+  FlaskIcon,
+  InfoIcon,
+  RefreshIcon,
+  CircleIcon,
 };

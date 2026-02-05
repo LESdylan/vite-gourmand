@@ -3,35 +3,42 @@
  * Used for showing idle, running, success, failed states
  */
 
+import { CheckIcon, XIcon, CircleIcon, RefreshIcon } from '../../icons/FlyIcons';
 import './StatusBadge.css';
 
-export type BadgeStatus = 'idle' | 'running' | 'success' | 'failed' | 'pending';
+export type BadgeStatus = 'idle' | 'running' | 'success' | 'failed' | 'pending' | 'passed';
 
 interface StatusBadgeProps {
   status: BadgeStatus;
   size?: 'sm' | 'md';
 }
 
-const STATUS_CONFIG: Record<BadgeStatus, { label: string; icon: string }> = {
-  idle: { label: 'En attente', icon: '○' },
-  running: { label: 'En cours', icon: '◎' },
-  success: { label: 'Réussi', icon: '✓' },
-  failed: { label: 'Échoué', icon: '✕' },
-  pending: { label: 'En suspens', icon: '◔' },
+const STATUS_CONFIG: Record<BadgeStatus, { label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }> = {
+  idle: { label: 'En attente', Icon: CircleIcon },
+  running: { label: 'En cours', Icon: RefreshIcon },
+  success: { label: 'Réussi', Icon: CheckIcon },
+  passed: { label: 'Réussi', Icon: CheckIcon },
+  failed: { label: 'Échoué', Icon: XIcon },
+  pending: { label: 'En suspens', Icon: CircleIcon },
 };
 
 export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
   const config = STATUS_CONFIG[status];
   const classes = buildClasses(status, size);
+  const iconSize = size === 'sm' ? 10 : 12;
   
   return (
     <span className={classes} role="status">
-      <span className="status-badge-icon" aria-hidden="true">{config.icon}</span>
+      <span className="status-badge-icon" aria-hidden="true">
+        <config.Icon size={iconSize} />
+      </span>
       <span className="status-badge-label">{config.label}</span>
     </span>
   );
 }
 
 function buildClasses(status: BadgeStatus, size: string): string {
-  return ['status-badge', `status-badge-${status}`, `status-badge-${size}`].join(' ');
+  // Map 'passed' to 'success' for CSS class
+  const cssStatus = status === 'passed' ? 'success' : status;
+  return ['status-badge', `status-badge-${cssStatus}`, `status-badge-${size}`].join(' ');
 }

@@ -1,6 +1,6 @@
 /**
  * DevBoard styles
- * Full-screen dashboard layout
+ * Centered responsive layout - Mobile first
  */
 
 .devboard {
@@ -9,6 +9,8 @@
   min-height: 100vh;
   min-height: 100dvh;
   width: 100%;
+  margin: 0;
+  padding: 0;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
 }
@@ -16,12 +18,46 @@
 .devboard-body {
   display: flex;
   flex: 1;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
-/* Mobile */
+/* Large desktop */
+@media (min-width: 1601px) {
+  .devboard-body {
+    padding: 0 var(--space-6);
+  }
+}
+
+/* Tablet landscape */
+@media (max-width: 1024px) {
+  .devboard-body {
+    padding: 0 var(--space-3);
+  }
+}
+
+/* Tablet portrait */
 @media (max-width: 768px) {
   .devboard-body {
     flex-direction: column;
+    padding: 0 var(--space-2);
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .devboard-body {
+    padding: 0 var(--space-1);
+  }
+}
+
+/* Very small devices (200px+) */
+@media (max-width: 320px) {
+  .devboard-body {
+    padding: 0 4px;
   }
 }

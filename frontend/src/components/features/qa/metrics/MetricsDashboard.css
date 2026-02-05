@@ -1,19 +1,19 @@
 /**
  * MetricsDashboard styles
- * Bordeaux theme - Responsive grid
+ * Responsive grid - Mobile first
  */
 
 .metrics-dashboard {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 /* Large screens */
 @media (max-width: 1400px) {
   .metrics-dashboard {
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 }
 
@@ -32,27 +32,26 @@
   }
 }
 
-/* Mobile - Stack cards horizontally, scroll */
+/* Mobile - 2 columns */
 @media (max-width: 640px) {
   .metrics-dashboard {
-    grid-template-columns: 1fr;
-    gap: var(--space-3);
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
   }
 }
 
-/* Alternative: Horizontal scroll on mobile */
+/* Small mobile - Still 2 columns but more compact */
 @media (max-width: 480px) {
   .metrics-dashboard {
-    display: flex;
-    overflow-x: auto;
-    gap: var(--space-3);
-    padding-bottom: var(--space-2);
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
+}
 
-  .metrics-dashboard > * {
-    flex: 0 0 85%;
-    scroll-snap-align: start;
+/* Very small devices (200px+) - 1 column stack */
+@media (max-width: 320px) {
+  .metrics-dashboard {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 }

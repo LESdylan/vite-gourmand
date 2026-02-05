@@ -1,10 +1,10 @@
 /**
  * TestCardItem styles
- * Fly.io light theme - Professional test cards
+ * Fly.io light theme - Professional test cards - Responsive
  */
 
 .test-card-item {
-  background: var(--color-bg-card);
+  background: var(--color-bg-card, #ffffff);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
@@ -27,7 +27,7 @@
 
 .test-card-item:hover {
   border-color: var(--color-primary-300);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow, 0 4px 12px rgba(0, 0, 0, 0.08));
 }
 
 .test-card-item:hover::before {
@@ -86,6 +86,9 @@
 }
 
 .test-card-run-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
   background: var(--color-primary-600);
   color: white;
@@ -100,12 +103,37 @@
 
 .test-card-run-btn:hover:not(:disabled) {
   background: var(--color-primary-700);
-  box-shadow: var(--shadow-glow-primary);
+  box-shadow: var(--shadow-glow-primary, 0 0 12px rgba(168, 85, 247, 0.4));
 }
 
 .test-card-run-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.test-card-run-btn svg {
+  flex-shrink: 0;
+}
+
+.test-card-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.test-card-view-btn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-primary-600);
+  border-color: var(--color-primary-300);
 }
 
 /* Tablet */
@@ -117,6 +145,10 @@
 
 /* Mobile */
 @media (max-width: 640px) {
+  .test-card-item {
+    padding: var(--space-3);
+  }
+
   .test-card-item-header {
     flex-direction: column;
     gap: var(--space-2);
@@ -126,10 +158,23 @@
     justify-content: flex-start;
   }
 
+  .test-card-item-name {
+    font-size: var(--text-sm);
+  }
+
+  .test-card-item-description {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-3);
+  }
+
   .test-card-item-footer {
     flex-direction: column;
     gap: var(--space-3);
     align-items: stretch;
+  }
+
+  .test-card-item-meta {
+    text-align: center;
   }
 
   .test-card-item-actions {
@@ -137,8 +182,33 @@
   }
 
   .test-card-run-btn {
-    width: 100%;
-    text-align: center;
+    flex: 1;
+    justify-content: center;
     padding: var(--space-3) var(--space-4);
+  }
+}
+
+/* Very small screens (200px+) */
+@media (max-width: 320px) {
+  .test-card-item {
+    padding: var(--space-2);
+  }
+
+  .test-card-item-name {
+    font-size: 0.8125rem;
+  }
+
+  .test-card-item-badges {
+    gap: 4px;
+  }
+
+  .test-card-run-btn {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .test-card-view-btn {
+    width: 32px;
+    height: 32px;
   }
 }

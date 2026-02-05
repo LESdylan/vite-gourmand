@@ -1,40 +1,43 @@
 /**
  * StatusBadge Styles
- * Uses ONLY CSS variables from graphical_chart.css
+ * Fly.io Light Theme - Professional status indicators
  */
 
 .status-badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-full);
+  font-family: var(--font-family-sans, system-ui, sans-serif);
+  font-weight: 500;
+  border-radius: var(--radius-full, 9999px);
   white-space: nowrap;
+  line-height: 1;
 }
 
 /* Sizes */
 .status-badge-sm {
-  height: var(--badge-height-sm);
-  padding: 0 var(--badge-padding-x);
-  font-size: var(--font-size-xs);
+  height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
 }
 
 .status-badge-md {
-  height: var(--badge-height-md);
-  padding: 0 var(--space-3);
-  font-size: var(--badge-font-size);
+  height: 24px;
+  padding: 0 10px;
+  font-size: 12px;
 }
 
-/* Status variants */
+/* Status variants - Light theme with subtle backgrounds */
 .status-badge-idle {
-  background: var(--color-neutral-700);
-  color: var(--color-neutral-300);
+  background: var(--color-neutral-100, #f3f4f6);
+  color: var(--color-neutral-600, #4b5563);
+  border: 1px solid var(--color-neutral-200, #e5e7eb);
 }
 
 .status-badge-running {
-  background: var(--color-warning-600);
-  color: var(--color-text-primary);
+  background: var(--color-warning-50, #fffbeb);
+  color: var(--color-warning-700, #b45309);
+  border: 1px solid var(--color-warning-200, #fde68a);
 }
 
 .status-badge-running .status-badge-icon {
@@ -42,24 +45,51 @@
 }
 
 .status-badge-success {
-  background: var(--color-success-600);
-  color: var(--color-text-primary);
+  background: var(--color-success-50, #ecfdf5);
+  color: var(--color-success-700, #047857);
+  border: 1px solid var(--color-success-200, #a7f3d0);
 }
 
 .status-badge-failed {
-  background: var(--color-danger-600);
-  color: var(--color-text-primary);
+  background: var(--color-danger-50, #fff1f2);
+  color: var(--color-danger-700, #be123c);
+  border: 1px solid var(--color-danger-200, #fecdd3);
 }
 
 .status-badge-pending {
-  background: var(--color-secondary-600);
-  color: var(--color-text-primary);
+  background: var(--color-secondary-50, #f0f9ff);
+  color: var(--color-secondary-700, #0369a1);
+  border: 1px solid var(--color-secondary-200, #bae6fd);
 }
 
 .status-badge-icon {
-  font-size: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .status-badge-md {
+    height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 320px) {
+  .status-badge-md {
+    height: 20px;
+    padding: 0 6px;
+    font-size: 10px;
+  }
+  
+  .status-badge-label {
+    display: none;
+  }
 }

@@ -6,6 +6,7 @@
 import { MetricsDashboard } from '../features/qa/metrics';
 import { TestCardGrid } from '../features/qa/test-cards';
 import { AutoTestList, RunAllButton } from '../features/qa/automatic-tests';
+import { Overview } from '../features/qa/overview';
 import { LogViewer, useMockLogs } from '../features/logs';
 import type { TestCategory } from '../features/qa/sidebar';
 import { useMockData } from './useMockData';
@@ -31,23 +32,30 @@ export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
   const { autoTests, metrics, isRunning, runAll } = useTestRunner();
   const { logs, connected, clear } = useMockLogs();
 
+  // Overview doesn't show the metrics dashboard (it has its own)
+  const showMetricsDashboard = activeCategory !== 'overview';
+  // Only show Run All button for test categories
+  const showRunAllButton = activeCategory === 'test-automatics' || activeCategory === 'metrics' || activeCategory === 'activity';
+
   return (
     <main className="devboard-content">
-      <section className="devboard-content-metrics">
-        <MetricsDashboard 
-          totalTests={metrics.total}
-          passedTests={metrics.passed}
-          failedTests={metrics.failed}
-          passRate={metrics.passRate}
-        />
-      </section>
+      {showMetricsDashboard && (
+        <section className="devboard-content-metrics">
+          <MetricsDashboard 
+            totalTests={metrics.total}
+            passedTests={metrics.passed}
+            failedTests={metrics.failed}
+            passRate={metrics.passRate}
+          />
+        </section>
+      )}
 
       <section className="devboard-content-main">
         <header className="devboard-content-header">
           <h2 className="devboard-content-title">
             {categoryLabels[activeCategory]}
           </h2>
-          {activeCategory !== 'scenarios' && activeCategory !== 'settings' && activeCategory !== 'logs' && (
+          {showRunAllButton && (
             <RunAllButton 
               count={autoTests.length} 
               onRun={runAll}
@@ -57,7 +65,7 @@ export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
         </header>
 
         <div className="devboard-cards-container">
-          {renderContent(activeCategory, tests, autoTests, logs, connected, clear)}
+          {renderContent(activeCategory, tests, autoTests, logs, connected, clear, metrics, isRunning)}
         </div>
       </section>
     </main>
@@ -70,9 +78,13 @@ function renderContent(
   autoTests: ReturnType<typeof useTestRunner>['autoTests'],
   logs: ReturnType<typeof useMockLogs>['logs'],
   connected: boolean,
-  clear: () => void
+  clear: () => void,
+  metrics: ReturnType<typeof useTestRunner>['metrics'],
+  isRunning: boolean
 ) {
   switch (category) {
+    case 'overview':
+      return <Overview metrics={metrics} isRunning={isRunning} />;
     case 'scenarios':
       return <TestCardGrid tests={tests} />;
     case 'logs':
