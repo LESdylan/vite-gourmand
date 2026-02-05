@@ -72,7 +72,6 @@ function calculateMetrics(results: RunTestsResponse | null) {
   
   return { total, passed, failed, passRate, duration, lastRun };
 }
-
 export function useTestRunner(): UseTestRunnerReturn {
   const [isRunning, setIsRunning] = useState(false);
   const [currentTest, setCurrentTest] = useState<string | null>(null);
@@ -82,19 +81,27 @@ export function useTestRunner(): UseTestRunnerReturn {
 
   // Load cached results from backend on mount
   useEffect(() => {
+    let isMounted = true;
+    
     const loadCachedResults = async () => {
       try {
         const cached = await getTestResults();
-        if (cached?.suites?.length) {
+        if (isMounted && cached?.suites?.length) {
           setResults(cached);
           if (cached.rawOutput) setRawOutput(cached.rawOutput);
         }
+        // If no cached results, user needs to click "Run All Tests" button
       } catch {
-        // API not available - leave results null until user runs tests
+        // Backend not available - will show empty state
+        if (isMounted) {
+          console.log('Test results API not available - click Run All Tests to execute');
+        }
       }
     };
     
     loadCachedResults();
+    
+    return () => { isMounted = false; };
   }, []);
 
   const runTest = useCallback(async (testId: TestConfigId) => {

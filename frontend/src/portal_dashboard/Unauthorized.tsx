@@ -5,6 +5,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { usePortalAuth } from './PortalAuthContext';
+import { GradientBackground } from '../components/DevBoard/GradientBackground';
 import './Unauthorized.css';
 
 export function Unauthorized() {
@@ -22,6 +23,7 @@ export function Unauthorized() {
 
   return (
     <div className="unauthorized-page">
+      <GradientBackground />
       <div className="unauthorized-card">
         <span className="unauthorized-icon">🚫</span>
         <h1>Access Denied</h1>

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { BurgerIcon, MobileMenu } from '../../ui/BurgerMenu';
-import { LogoIcon, DashboardIcon, DocsIcon, ResourcesIcon, AccountIcon, NotificationIcon } from './HeaderIcons';
+import { LogoIcon, DashboardIcon, DocsIcon, ResourcesIcon, NotificationIcon } from './HeaderIcons';
+import { ProfileDropdown } from './ProfileDropdown';
 import type { CategoryData, TestCategory } from '../../features/qa/sidebar';
 import './Header.css';
 
@@ -21,7 +22,6 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { id: 'docs', label: 'Docs', icon: <DocsIcon /> },
   { id: 'resources', label: 'Resources', icon: <ResourcesIcon /> },
-  { id: 'account', label: 'Account', icon: <AccountIcon /> },
 ];
 
 export function Header({
@@ -50,6 +50,7 @@ export function Header({
 
       <div className="header-actions">
         <NotificationButton />
+        <ProfileDropdown />
       </div>
 
       <MobileMenu

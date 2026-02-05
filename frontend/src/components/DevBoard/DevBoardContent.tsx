@@ -34,7 +34,7 @@ const categoryLabels: Record<TestCategory, string> = {
 
 export function DevBoardContent({ activeCategory, testRunner }: DevBoardContentProps) {
   const { tests } = useMockData(activeCategory);
-  const { autoTests, metrics, isRunning, runAll, rawOutput } = testRunner;
+  const { autoTests, metrics, isRunning, runAll, rawOutput, error } = testRunner;
   const { logs, connected, clear } = useMockLogs();
 
   // Metrics dashboard only for test-automatics
@@ -46,6 +46,36 @@ export function DevBoardContent({ activeCategory, testRunner }: DevBoardContentP
 
   return (
     <main className="devboard-content">
+      {/* Error banner for backend connectivity issues */}
+      {error && activeCategory === 'test-automatics' && (
+        <div style={{
+          padding: 'var(--space-4)',
+          marginBottom: 'var(--space-4)',
+          background: 'var(--color-error-bg)',
+          border: '1px solid var(--color-error-border)',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--color-error-text)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--space-2)'
+        }}>
+          <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+          <div>
+            <strong>Error: </strong>{error}
+            {error.includes('Backend') && (
+              <div style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--space-1)' }}>
+                Run: <code style={{ 
+                  background: 'rgba(0,0,0,0.1)', 
+                  padding: '2px 6px', 
+                  borderRadius: 'var(--radius-sm)',
+                  fontFamily: 'monospace'
+                }}>cd backend && npm run start:dev</code>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {showMetricsDashboard && (
         <section className="devboard-content-metrics">
           <MetricsDashboard 

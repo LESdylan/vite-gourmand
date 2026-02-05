@@ -3,7 +3,7 @@
  * Category list with collapse functionality
  */
 
-import { Sidebar } from '../layout/Sidebar';
+import { Sidebar, RoleSwitcher } from '../layout/Sidebar';
 import { SidebarHeader, CategoryList } from '../features/qa/sidebar';
 import type { TestCategory, CategoryData } from '../features/qa/sidebar';
 
@@ -31,6 +31,7 @@ export function DevBoardSidebar({
         collapsed={collapsed}
         onSelect={onSelectCategory}
       />
+      <RoleSwitcher collapsed={collapsed} />
     </Sidebar>
   );
 }

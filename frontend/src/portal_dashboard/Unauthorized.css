@@ -7,19 +7,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: var(--color-bg-primary);
   padding: var(--space-4);
+  position: relative;
 }
 
 .unauthorized-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
   padding: var(--space-8);
   text-align: center;
   max-width: 400px;
   width: 100%;
+  box-shadow: var(--glass-shadow);
 }
 
 .unauthorized-icon {
@@ -29,22 +31,25 @@
 }
 
 .unauthorized-card h1 {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0 0 var(--space-2);
 }
 
 .unauthorized-card p {
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   margin: 0 0 var(--space-4);
+  line-height: 1.6;
 }
 
 .unauthorized-role {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-bg-secondary);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-600);
+  font-weight: 500;
 }
 
 .unauthorized-role strong {
@@ -60,29 +65,34 @@
 }
 
 .unauthorized-actions .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--color-border-primary);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
+  font-weight: 500;
 }
 
 .unauthorized-actions .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-primary-300);
 }
 
 .unauthorized-actions .btn-primary {
-  background: var(--color-accent);
+  background: var(--color-primary-600);
   color: white;
   border: none;
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: all 0.15s ease;
+  font-weight: 500;
+  box-shadow: var(--shadow-glow-primary);
 }
 
 .unauthorized-actions .btn-primary:hover {
-  opacity: 0.9;
+  background: var(--color-primary-700);
+  transform: translateY(-1px);
 }
