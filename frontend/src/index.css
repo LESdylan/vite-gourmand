@@ -1,7 +1,7 @@
 /* Import design system variables */
-@import './components/graphical_chart.css';
-@import './components/graphical_chart_part2.css';
-@import './components/graphical_chart_part3.css';
+@import './styles/graphical_chart.css';
+@import './styles/graphical_chart_part2.css';
+@import './styles/graphical_chart_part3.css';
 
 *,
 *::before,

@@ -7,11 +7,13 @@ import './App.css'
 const DevBoard = lazy(() => import('./components/DevBoard').then(m => ({ default: m.DevBoard })));
 const Portal = lazy(() => import('./portal_dashboard').then(m => ({ default: m.Portal })));
 
+
 // Lazy load scenario pages
 // const FormTestPage = lazy(() => import('./tests/form').then(m => ({ default: m.FormTestPage })));
 const KanbanScenario = lazy(() => import('./scenarios/kanban').then(m => ({ default: m.KanbanScenario })));
 const MinitalkScenario = lazy(() => import('./scenarios/minitalk').then(m => ({ default: m.MinitalkScenario })));
 const AuthScenario = lazy(() => import('./scenarios/auth').then(m => ({ default: m.AuthScenario })));
+const FoodCardScenario = lazy(() => import('./scenarios/FoodCardScenario').then(m => ({ default: m.FoodCardScenario })));
 
 function LoadingSpinner() {
   return (
@@ -54,6 +56,7 @@ function App() {
             
             {/* Scenario pages (dev tools) */}
             {/* <Route path="/scenario/form" element={<FormTestPage />} /> */}
+            <Route path="/scenario/foodcard" element={<FoodCardScenario />} />
             <Route path="/scenario/kanban" element={<KanbanScenario />} />
             <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
             <Route path="/scenario/auth" element={<AuthScenario />} />

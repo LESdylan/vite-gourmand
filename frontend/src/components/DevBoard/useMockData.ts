@@ -34,12 +34,20 @@ export function useMockData(category: TestCategory) {
       testPath: '/scenario/minitalk'
     },
     { 
-      id: '4', 
+      id: '8', 
       name: 'Kanban Restaurant', 
       description: 'Gestion des commandes avec Kanban professionnel', 
       status: 'pending', 
       type: 'scenario',
       testPath: '/scenario/kanban'
+    },
+    { 
+      id: '5', 
+      name: 'Food Card Gallery', 
+      description: 'Galerie de menus foodcard, mobile-first', 
+      status: 'pending', 
+      type: 'scenario',
+      testPath: '/scenario/foodcard'
     },
   ];
 

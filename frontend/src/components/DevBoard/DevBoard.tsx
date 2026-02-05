@@ -12,6 +12,7 @@ import { GradientBackground } from './GradientBackground';
 import { SettingsModal } from '../features/qa/settings';
 import { ShellFab, ShellModal } from '../cloud-terminal';
 import { getCategoriesForRole, getDefaultCategory } from './constants';
+import { useMockData } from './useMockData';
 import { TestCountProvider } from './TestCountContext';
 import { RoleViewProvider, useRoleView } from './RoleViewContext';
 import { getDefaultViewForRole } from '../layout/Sidebar';
@@ -53,16 +54,23 @@ function DevBoardInner() {
 
   // Get categories for current role view
   const baseCategories = useMemo(() => getCategoriesForRole(currentView), [currentView]);
-  
+
+  // Get scenario count dynamically from mock data (or real data if available)
+  const scenarioCount = useMockData('scenarios').tests.length;
+
   // Add dynamic test count for dev view
   const categories = useMemo(() => {
     if (currentView !== 'dev') return baseCategories;
-    return baseCategories.map(cat => 
-      cat.id === 'test-automatics' 
-        ? { ...cat, count: testRunner.metrics.total }
-        : cat
-    );
-  }, [baseCategories, currentView, testRunner.metrics.total]);
+    return baseCategories.map(cat => {
+      if (cat.id === 'test-automatics') {
+        return { ...cat, count: testRunner.metrics.total };
+      }
+      if (cat.id === 'scenarios') {
+        return { ...cat, count: scenarioCount };
+      }
+      return cat;
+    });
+  }, [baseCategories, currentView, testRunner.metrics.total, scenarioCount]);
 
   // Keyboard shortcut: Ctrl+` to open terminal (desktop only, dev view only)
   useEffect(() => {
