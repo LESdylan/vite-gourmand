@@ -1,0 +1,23 @@
+{
+  "name": "vg",
+  "version": "1.0.0",
+  "description": "Vite Gourmand CLI - Fly.io-style developer tools",
+  "type": "module",
+  "bin": {
+    "vg": "./bin/vg.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "link": "npm link"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3"
+  }
+}

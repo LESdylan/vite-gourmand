@@ -6,6 +6,7 @@
 import { MetricsDashboard } from '../features/qa/metrics';
 import { TestCardGrid } from '../features/qa/test-cards';
 import { AutoTestList, RunAllButton } from '../features/qa/automatic-tests';
+import { LogViewer, useMockLogs } from '../features/logs';
 import type { TestCategory } from '../features/qa/sidebar';
 import { useMockData } from './useMockData';
 import { useTestRunner } from './useTestRunner';
@@ -20,7 +21,7 @@ const categoryLabels: Record<TestCategory, string> = {
   'test-automatics': 'Tests Automatiques',
   scenarios: 'Scénarios',
   settings: 'Settings',
-  logs: 'Logs & Errors',
+  logs: 'Live Logs',
   metrics: 'Metrics',
   activity: 'Activity',
 };
@@ -28,6 +29,7 @@ const categoryLabels: Record<TestCategory, string> = {
 export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
   const { tests } = useMockData(activeCategory);
   const { autoTests, metrics, isRunning, runAll } = useTestRunner();
+  const { logs, connected, clear } = useMockLogs();
 
   return (
     <main className="devboard-content">
@@ -45,7 +47,7 @@ export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
           <h2 className="devboard-content-title">
             {categoryLabels[activeCategory]}
           </h2>
-          {activeCategory !== 'scenarios' && activeCategory !== 'settings' && (
+          {activeCategory !== 'scenarios' && activeCategory !== 'settings' && activeCategory !== 'logs' && (
             <RunAllButton 
               count={autoTests.length} 
               onRun={runAll}
@@ -55,13 +57,27 @@ export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
         </header>
 
         <div className="devboard-cards-container">
-          {activeCategory === 'scenarios' ? (
-            <TestCardGrid tests={tests} />
-          ) : (
-            <AutoTestList tests={autoTests} />
-          )}
+          {renderContent(activeCategory, tests, autoTests, logs, connected, clear)}
         </div>
       </section>
     </main>
   );
+}
+
+function renderContent(
+  category: TestCategory,
+  tests: ReturnType<typeof useMockData>['tests'],
+  autoTests: ReturnType<typeof useTestRunner>['autoTests'],
+  logs: ReturnType<typeof useMockLogs>['logs'],
+  connected: boolean,
+  clear: () => void
+) {
+  switch (category) {
+    case 'scenarios':
+      return <TestCardGrid tests={tests} />;
+    case 'logs':
+      return <LogViewer logs={logs} connected={connected} onClear={clear} />;
+    default:
+      return <AutoTestList tests={autoTests} />;
+  }
 }

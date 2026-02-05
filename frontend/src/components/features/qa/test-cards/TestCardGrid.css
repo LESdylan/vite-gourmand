@@ -5,7 +5,7 @@
 
 .test-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--space-4);
 }
 
@@ -17,8 +17,8 @@
   min-height: 200px;
   color: var(--color-text-tertiary);
   font-size: var(--text-base);
-  background: rgba(31, 27, 25, 0.3);
-  border: 2px dashed rgba(61, 55, 51, 0.4);
+  background: var(--color-bg-tertiary);
+  border: 2px dashed var(--color-border-primary);
   border-radius: var(--radius-lg);
 }
 

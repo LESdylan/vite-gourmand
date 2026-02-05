@@ -1,23 +1,24 @@
 /**
  * DevBoardContent styles
- * Full-width layout with cards taking 70% of space
+ * Full-width responsive layout
  */
 
 .devboard-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-6);
+  gap: var(--space-4);
+  padding: var(--space-4);
   overflow-y: auto;
   overflow-x: hidden;
   background: transparent;
   width: 100%;
+  max-width: 100%;
 }
 
 .devboard-content-metrics {
   flex-shrink: 0;
-  width: 70%;
+  width: 100%;
 }
 
 /* Section - no card wrapper */
@@ -25,8 +26,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  width: 70%;
+  gap: var(--space-3);
+  width: 100%;
 }
 
 /* Section header - gray title outside card */
@@ -37,11 +38,11 @@
   flex-wrap: wrap;
   gap: var(--space-3);
   padding: 0;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .devboard-content-title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text-secondary);
   margin: 0;
@@ -85,21 +86,9 @@
   gap: var(--space-3);
 }
 
-@media (max-width: 1200px) {
-  .devboard-content-metrics,
-  .devboard-content-main {
-    width: 85%;
-  }
-}
-
 @media (max-width: 1024px) {
   .devboard-content {
     padding: var(--space-4);
-  }
-
-  .devboard-content-metrics,
-  .devboard-content-main {
-    width: 100%;
   }
 }
 

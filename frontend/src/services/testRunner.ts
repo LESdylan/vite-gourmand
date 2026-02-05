@@ -204,12 +204,12 @@ export function getMockTestResults(): RunTestsResponse {
           { id: 'app-controller-1', name: 'AppController › should return hello', suite: 'app.controller.spec.ts', status: 'passed', duration: 12 },
           { id: 'app-controller-2', name: 'AppController › should return version', suite: 'app.controller.spec.ts', status: 'passed', duration: 8 },
           { id: 'order-service-1', name: 'OrderService › should create order', suite: 'order.service.spec.ts', status: 'passed', duration: 45 },
-          { id: 'order-service-2', name: 'OrderService › should validate items', suite: 'order.service.spec.ts', status: 'failed', duration: 23, error: 'Expected 3 but received 2' },
+          { id: 'order-service-2', name: 'OrderService › should validate items', suite: 'order.service.spec.ts', status: 'passed', duration: 23 },
           { id: 'guards-1', name: 'Guards › JwtAuthGuard › should allow valid token', suite: 'guards.spec.ts', status: 'passed', duration: 15 },
           { id: 'guards-2', name: 'Guards › RolesGuard › should block unauthorized', suite: 'guards.spec.ts', status: 'passed', duration: 11 },
         ],
-        totalPassed: 5,
-        totalFailed: 1,
+        totalPassed: 6,
+        totalFailed: 0,
         totalDuration: 114,
       },
       {
@@ -229,8 +229,8 @@ export function getMockTestResults(): RunTestsResponse {
     ],
     summary: {
       total: 11,
-      passed: 9,
-      failed: 1,
+      passed: 10,
+      failed: 0,
       duration: 1005,
     },
   };
