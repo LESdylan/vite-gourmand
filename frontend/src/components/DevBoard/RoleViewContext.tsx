@@ -1,0 +1,41 @@
+/**
+ * RoleViewContext - Manages the current role view state
+ * Allows switching between dev/admin/employee views without routing
+ */
+
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import type { RoleView } from '../DevBoard/constants';
+
+interface RoleViewContextValue {
+  currentView: RoleView;
+  setView: (view: RoleView) => void;
+}
+
+const RoleViewContext = createContext<RoleViewContextValue | null>(null);
+
+interface RoleViewProviderProps {
+  children: ReactNode;
+  defaultView?: RoleView;
+}
+
+export function RoleViewProvider({ children, defaultView = 'dev' }: RoleViewProviderProps) {
+  const [currentView, setCurrentView] = useState<RoleView>(defaultView);
+
+  const setView = useCallback((view: RoleView) => {
+    setCurrentView(view);
+  }, []);
+
+  return (
+    <RoleViewContext.Provider value={{ currentView, setView }}>
+      {children}
+    </RoleViewContext.Provider>
+  );
+}
+
+export function useRoleView() {
+  const context = useContext(RoleViewContext);
+  if (!context) {
+    throw new Error('useRoleView must be used within RoleViewProvider');
+  }
+  return context;
+}

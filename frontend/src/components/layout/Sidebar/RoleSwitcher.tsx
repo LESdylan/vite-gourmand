@@ -1,25 +1,26 @@
 /**
  * RoleSwitcher - Sidebar dropdown for switching between role views
  * Only visible for superadmin users
+ * Uses RoleViewContext for SPA-style view switching (no routing)
  */
 
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { usePortalAuth } from '../../../portal_dashboard';
+import { useRoleView } from '../../DevBoard/RoleViewContext';
+import type { RoleView } from '../../DevBoard/constants';
 import './RoleSwitcher.css';
 
 interface RoleOption {
-  id: string;
+  id: RoleView;
   label: string;
   icon: string;
-  path: string;
   description: string;
 }
 
 const ROLE_OPTIONS: RoleOption[] = [
-  { id: 'dev', label: 'DevBoard', icon: '🛠️', path: '/dev', description: 'QA & Development' },
-  { id: 'admin', label: 'Admin', icon: '👔', path: '/admin', description: 'Administration' },
-  { id: 'employee', label: 'Employé', icon: '👷', path: '/employee', description: 'Espace Employé' },
+  { id: 'dev', label: 'DevBoard', icon: '🛠️', description: 'QA & Development' },
+  { id: 'admin', label: 'Admin', icon: '👔', description: 'Administration' },
+  { id: 'employee', label: 'Employé', icon: '👷', description: 'Espace Employé' },
 ];
 
 interface RoleSwitcherProps {
@@ -28,18 +29,16 @@ interface RoleSwitcherProps {
 
 export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
   const { user } = usePortalAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { currentView, setView } = useRoleView();
   const [isOpen, setIsOpen] = useState(false);
 
   // Only show for superadmin
   if (user?.role !== 'superadmin') return null;
 
-  // Determine current view from path
-  const currentRole = ROLE_OPTIONS.find(r => location.pathname.startsWith(r.path)) || ROLE_OPTIONS[0];
+  const currentRole = ROLE_OPTIONS.find(r => r.id === currentView) || ROLE_OPTIONS[0];
 
   const handleSelect = (role: RoleOption) => {
-    navigate(role.path);
+    setView(role.id);
     setIsOpen(false);
   };
 

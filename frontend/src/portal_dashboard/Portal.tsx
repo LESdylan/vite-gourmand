@@ -63,10 +63,13 @@ function PortalFooter() {
 
 function getDashboardRoute(role: string): string {
   switch (role) {
-    case 'superadmin': return '/dev';
-    case 'admin': return '/admin';
-    case 'employee': return '/employee';
-    case 'customer': return '/unauthorized'; // Customers can't access dashboard
-    default: return '/portal';
+    case 'superadmin':
+    case 'admin':
+    case 'employee':
+      return '/dashboard';
+    case 'customer':
+      return '/unauthorized'; // Customers can't access dashboard
+    default:
+      return '/portal';
   }
 }

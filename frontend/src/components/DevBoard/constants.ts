@@ -1,78 +1,58 @@
 /**
  * DevBoard constants
- * Fly.io-inspired category structure
+ * Unified category structure for all role views
  */
 
-import type { CategoryData } from '../features/qa/sidebar';
+import type { CategoryData, TestCategory } from '../features/qa/sidebar';
 
-/** Main navigation categories - Fly.io style grouping */
-export const CATEGORIES: CategoryData[] = [
-  // Main sections
-  { 
-    id: 'overview', 
-    label: 'Overview', 
-    icon: 'overview', 
-    count: 0, 
-    group: 'main',
-    description: 'Dashboard overview and summary'
-  },
-  { 
-    id: 'test-automatics', 
-    label: 'Tests Auto', 
-    icon: 'tests', 
-    group: 'main',
-    description: 'Automated test suites and results'
-  },
-  { 
-    id: 'scenarios', 
-    label: 'Scénarios', 
-    icon: 'scenarios', 
-    count: 4, 
-    group: 'main',
-    description: 'Interactive test scenarios'
-  },
-  { 
-    id: 'database', 
-    label: 'Database', 
-    icon: 'database', 
-    group: 'main',
-    description: 'PostgreSQL tables viewer & CRUD'
-  },
-  
-  // Utility sections
-  { 
-    id: 'metrics', 
-    label: 'Metrics', 
-    icon: 'metrics', 
-    group: 'utility',
-    description: 'Performance and health metrics'
-  },
-  { 
-    id: 'logs', 
-    label: 'Logs & Errors', 
-    icon: 'logs', 
-    group: 'utility',
-    description: 'Application logs and error tracking'
-  },
-  { 
-    id: 'activity', 
-    label: 'Activity', 
-    icon: 'activity', 
-    group: 'utility',
-    description: 'Recent activity and events'
-  },
-  { 
-    id: 'settings', 
-    label: 'Settings', 
-    icon: 'settings', 
-    group: 'utility',
-    description: 'Configuration and preferences'
-  },
+/** Role view types */
+export type RoleView = 'dev' | 'admin' | 'employee';
+
+/** DEV categories - QA & Development tools */
+export const DEV_CATEGORIES: CategoryData[] = [
+  { id: 'overview', label: 'Overview', icon: 'overview', count: 0, group: 'main', description: 'Dashboard overview' },
+  { id: 'test-automatics', label: 'Tests Auto', icon: 'tests', group: 'main', description: 'Automated tests' },
+  { id: 'scenarios', label: 'Scénarios', icon: 'scenarios', count: 4, group: 'main', description: 'Test scenarios' },
+  { id: 'database', label: 'Database', icon: 'database', group: 'main', description: 'Database viewer' },
+  { id: 'metrics', label: 'Metrics', icon: 'metrics', group: 'utility', description: 'Performance metrics' },
+  { id: 'logs', label: 'Logs & Errors', icon: 'logs', group: 'utility', description: 'Error tracking' },
+  { id: 'activity', label: 'Activity', icon: 'activity', group: 'utility', description: 'Recent activity' },
+  { id: 'settings', label: 'Settings', icon: 'settings', group: 'utility', description: 'Configuration' },
 ];
 
-/** Get categories by group */
-export const getMainCategories = () => CATEGORIES.filter(c => c.group === 'main');
-export const getUtilityCategories = () => CATEGORIES.filter(c => c.group === 'utility');
+/** ADMIN categories - Business management */
+export const ADMIN_CATEGORIES: CategoryData[] = [
+  { id: 'overview', label: 'Tableau de bord', icon: 'overview', group: 'main', description: 'Vue d\'ensemble' },
+  { id: 'database', label: 'Gestion Menu', icon: 'database', group: 'main', description: 'Plats & catégories' },
+  { id: 'activity', label: 'Commandes', icon: 'activity', group: 'main', description: 'Suivi commandes' },
+  { id: 'metrics', label: 'Statistiques', icon: 'metrics', group: 'utility', description: 'Chiffres clés' },
+  { id: 'settings', label: 'Paramètres', icon: 'settings', group: 'utility', description: 'Configuration' },
+];
+
+/** EMPLOYEE categories - Daily operations */
+export const EMPLOYEE_CATEGORIES: CategoryData[] = [
+  { id: 'overview', label: 'Mon Espace', icon: 'overview', group: 'main', description: 'Vue d\'ensemble' },
+  { id: 'activity', label: 'Commandes', icon: 'activity', group: 'main', description: 'Commandes en cours' },
+  { id: 'scenarios', label: 'Tâches', icon: 'scenarios', group: 'main', description: 'Mes tâches' },
+  { id: 'settings', label: 'Profil', icon: 'settings', group: 'utility', description: 'Mon profil' },
+];
+
+/** Get categories for a specific role view */
+export function getCategoriesForRole(role: RoleView): CategoryData[] {
+  switch (role) {
+    case 'admin': return ADMIN_CATEGORIES;
+    case 'employee': return EMPLOYEE_CATEGORIES;
+    default: return DEV_CATEGORIES;
+  }
+}
+
+/** Get default category for a role */
+export function getDefaultCategory(_role: RoleView): TestCategory {
+  return 'overview';
+}
+
+/** Legacy export for backward compatibility */
+export const CATEGORIES = DEV_CATEGORIES;
 
 export const DEFAULT_METRICS = {
   responseTime: { avgMs: 145, trend: 'down' as const, changePercent: 12 },

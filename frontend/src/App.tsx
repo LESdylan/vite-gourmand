@@ -3,10 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { PortalAuthProvider, ProtectedRoute, Unauthorized } from './portal_dashboard'
 import './App.css'
 
-// Lazy load dashboards
+// Lazy load components
 const DevBoard = lazy(() => import('./components/DevBoard').then(m => ({ default: m.DevBoard })));
-const AdminDashboard = lazy(() => import('./admin_space').then(m => ({ default: m.AdminDashboard })));
-const EmployeeDashboard = lazy(() => import('./employee_space').then(m => ({ default: m.EmployeeDashboard })));
 const Portal = lazy(() => import('./portal_dashboard').then(m => ({ default: m.Portal })));
 
 // Lazy load scenario pages
@@ -41,25 +39,18 @@ function App() {
             <Route path="/portal" element={<Portal />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             
-            {/* Role-based dashboards */}
-            <Route path="/dev" element={
-              <ProtectedRoute allowedRoles={['superadmin']}>
+            {/* Unified Dashboard - SPA with role switching */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute allowedRoles={['superadmin', 'admin', 'employee']}>
                 <DevBoard />
               </ProtectedRoute>
             } />
-            <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/employee" element={
-              <ProtectedRoute allowedRoles={['superadmin', 'admin', 'employee']}>
-                <EmployeeDashboard />
-              </ProtectedRoute>
-            } />
             
-            {/* Legacy routes - redirect to portal */}
+            {/* Legacy routes - redirect to dashboard */}
             <Route path="/" element={<Navigate to="/portal" replace />} />
+            <Route path="/dev" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/employee" element={<Navigate to="/dashboard" replace />} />
             
             {/* Scenario pages (dev tools) */}
             <Route path="/scenario/form" element={<FormTestPage />} />
