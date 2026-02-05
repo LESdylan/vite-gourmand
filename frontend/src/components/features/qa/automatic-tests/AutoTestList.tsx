@@ -9,10 +9,9 @@ import './AutoTestList.css';
 
 interface AutoTestListProps {
   tests: AutoTest[];
-  onRunTest?: (id: string) => void;
 }
 
-export function AutoTestList({ tests, onRunTest }: AutoTestListProps) {
+export function AutoTestList({ tests }: AutoTestListProps) {
   // Show empty state when no tests available
   if (tests.length === 0) {
     return (
