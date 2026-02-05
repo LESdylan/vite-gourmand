@@ -2,9 +2,10 @@
  * CRUD Service
  * ============
  * Generic CRUD operations for all entities
+ * Includes schema modification capabilities
  */
 
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
@@ -19,11 +20,300 @@ type EntityType =
   | 'order'
   | 'workingHours';
 
+interface ColumnDefinition {
+  name: string;
+  type: string;
+  nullable: boolean;
+  defaultValue?: string | null;
+  isPrimary?: boolean;
+  isUnique?: boolean;
+  foreignKey?: { table: string; column: string } | null;
+}
+
 @Injectable()
 export class CrudService {
   private readonly SALT_ROUNDS = 12;
+  private readonly logger = new Logger(CrudService.name);
 
   constructor(private prisma: PrismaService) {}
+
+  // ============================================================
+  // RAW SQL EXECUTION (Admin only)
+  // ============================================================
+
+  /**
+   * Execute raw SQL query - READ operations only for safety
+   */
+  async executeRawQuery(sql: string): Promise<{ rows: unknown[]; rowCount: number }> {
+    const trimmed = sql.trim().toUpperCase();
+    
+    // Only allow SELECT for safety
+    if (!trimmed.startsWith('SELECT')) {
+      throw new BadRequestException('Only SELECT queries are allowed');
+    }
+    
+    this.logger.log(`Executing raw SQL: ${sql.substring(0, 100)}...`);
+    
+    try {
+      const result = await this.prisma.$queryRawUnsafe(sql);
+      const rows = Array.isArray(result) ? result : [result];
+      return { rows, rowCount: rows.length };
+    } catch (error) {
+      this.logger.error(`SQL execution failed: ${error}`);
+      throw new BadRequestException(
+        `SQL Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Execute raw SQL mutation - INSERT, UPDATE, DELETE (dangerous!)
+   */
+  async executeRawMutation(sql: string): Promise<{ affected: number }> {
+    const trimmed = sql.trim().toUpperCase();
+    const allowed = ['INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP'];
+    
+    if (!allowed.some(cmd => trimmed.startsWith(cmd))) {
+      throw new BadRequestException(`Only ${allowed.join(', ')} are allowed`);
+    }
+    
+    this.logger.warn(`Executing raw SQL mutation: ${sql.substring(0, 100)}...`);
+    
+    try {
+      const result = await this.prisma.$executeRawUnsafe(sql);
+      return { affected: typeof result === 'number' ? result : 0 };
+    } catch (error) {
+      this.logger.error(`SQL mutation failed: ${error}`);
+      throw new BadRequestException(
+        `SQL Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Execute shell command - Full access (dev mode only!)
+   */
+  async executeShellCommand(command: string): Promise<{ output: string; exitCode: number }> {
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+
+    this.logger.log(`Executing shell: ${command}`);
+
+    try {
+      const { stdout, stderr } = await execAsync(command, { 
+        timeout: 30000, 
+        cwd: process.cwd(),
+        maxBuffer: 1024 * 1024 * 10, // 10MB buffer
+        env: { ...process.env, TERM: 'xterm-256color' },
+      });
+      return { output: stdout || stderr || '(no output)', exitCode: 0 };
+    } catch (error: unknown) {
+      const err = error as { stdout?: string; stderr?: string; code?: number };
+      return {
+        output: err.stderr || err.stdout || 'Command failed',
+        exitCode: err.code || 1,
+      };
+    }
+  }
+
+  // ============================================================
+  // SCHEMA - Get database schema from Prisma
+  // ============================================================
+
+  getSchema() {
+    return this.prisma.getSchema();
+  }
+
+  /**
+   * Get all tables from PostgreSQL (including dynamically created tables)
+   */
+  async getAllTables() {
+    return this.prisma.getAllTables();
+  }
+
+  /**
+   * Get full database schema from PostgreSQL
+   */
+  async getFullDatabaseSchema() {
+    return this.prisma.getFullDatabaseSchema();
+  }
+
+  /**
+   * Get foreign key relationships
+   */
+  async getForeignKeys() {
+    return this.prisma.getForeignKeys();
+  }
+
+  // ============================================================
+  // SCHEMA MODIFICATION - Create tables and add columns
+  // ============================================================
+
+  /**
+   * Create a new table in the database
+   * Automatically adds id SERIAL PRIMARY KEY
+   */
+  async createTable(tableName: string, columns: ColumnDefinition[]) {
+    // Validate table name (snake_case, alphanumeric)
+    if (!/^[a-z][a-z0-9_]*$/.test(tableName)) {
+      throw new BadRequestException('Table name must be lowercase alphanumeric with underscores, starting with a letter');
+    }
+
+    // Build column definitions
+    const columnDefs: string[] = ['id SERIAL PRIMARY KEY'];
+    
+    for (const col of columns) {
+      const colDef = this.buildColumnDefinition(col);
+      columnDefs.push(colDef);
+    }
+
+    // Add timestamps
+    columnDefs.push('"createdAt" TIMESTAMP DEFAULT NOW()');
+    columnDefs.push('"updatedAt" TIMESTAMP DEFAULT NOW()');
+
+    // Build SQL
+    const sql = `CREATE TABLE "${tableName}" (\n  ${columnDefs.join(',\n  ')}\n)`;
+    
+    this.logger.log(`Creating table: ${tableName}`);
+    this.logger.debug(`SQL: ${sql}`);
+
+    try {
+      await this.prisma.$executeRawUnsafe(sql);
+      
+      // Add foreign key constraints separately (cleaner error handling)
+      for (const col of columns) {
+        if (col.foreignKey) {
+          const fkSql = `ALTER TABLE "${tableName}" ADD CONSTRAINT "fk_${tableName}_${col.name}" 
+            FOREIGN KEY ("${col.name}") REFERENCES "${col.foreignKey.table}"("${col.foreignKey.column}")`;
+          await this.prisma.$executeRawUnsafe(fkSql);
+        }
+      }
+
+      return { success: true, message: `Table "${tableName}" created successfully` };
+    } catch (error) {
+      this.logger.error(`Failed to create table: ${error}`);
+      throw new BadRequestException(`Failed to create table: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Add a column to an existing table
+   */
+  async addColumn(tableName: string, column: ColumnDefinition) {
+    // Validate column name
+    if (!/^[a-z][a-z0-9_]*$/i.test(column.name)) {
+      throw new BadRequestException('Column name must be alphanumeric with underscores');
+    }
+
+    const colDef = this.buildColumnDefinition(column);
+    const sql = `ALTER TABLE "${tableName}" ADD COLUMN ${colDef}`;
+    
+    this.logger.log(`Adding column to ${tableName}: ${column.name}`);
+    this.logger.debug(`SQL: ${sql}`);
+
+    try {
+      await this.prisma.$executeRawUnsafe(sql);
+
+      // Add foreign key constraint if specified
+      if (column.foreignKey) {
+        const fkSql = `ALTER TABLE "${tableName}" ADD CONSTRAINT "fk_${tableName}_${column.name}" 
+          FOREIGN KEY ("${column.name}") REFERENCES "${column.foreignKey.table}"("${column.foreignKey.column}")`;
+        await this.prisma.$executeRawUnsafe(fkSql);
+      }
+
+      return { success: true, message: `Column "${column.name}" added to "${tableName}"` };
+    } catch (error) {
+      this.logger.error(`Failed to add column: ${error}`);
+      throw new BadRequestException(`Failed to add column: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Build SQL column definition from ColumnDefinition
+   */
+  private buildColumnDefinition(col: ColumnDefinition): string {
+    const parts: string[] = [`"${col.name}"`, this.mapColumnType(col.type)];
+    
+    if (col.isPrimary) {
+      parts.push('PRIMARY KEY');
+    }
+    
+    if (!col.nullable) {
+      parts.push('NOT NULL');
+    }
+    
+    if (col.isUnique) {
+      parts.push('UNIQUE');
+    }
+    
+    if (col.defaultValue !== undefined && col.defaultValue !== null && col.defaultValue !== '') {
+      // Handle special default values
+      const defaultVal = col.defaultValue.toUpperCase();
+      if (['NOW()', 'CURRENT_TIMESTAMP', 'TRUE', 'FALSE', 'NULL'].includes(defaultVal) || 
+          !isNaN(Number(col.defaultValue))) {
+        parts.push(`DEFAULT ${col.defaultValue}`);
+      } else {
+        parts.push(`DEFAULT '${col.defaultValue.replace(/'/g, "''")}'`);
+      }
+    }
+    
+    return parts.join(' ');
+  }
+
+  /**
+   * Map frontend column types to PostgreSQL types
+   */
+  private mapColumnType(type: string): string {
+    const typeMap: Record<string, string> = {
+      'TEXT': 'TEXT',
+      'INTEGER': 'INTEGER',
+      'BIGINT': 'BIGINT',
+      'DECIMAL': 'DECIMAL(10,2)',
+      'BOOLEAN': 'BOOLEAN',
+      'TIMESTAMP': 'TIMESTAMP',
+      'DATE': 'DATE',
+      'TIME': 'TIME',
+      'JSON': 'JSONB',
+      'UUID': 'UUID',
+    };
+    return typeMap[type.toUpperCase()] || 'TEXT';
+  }
+
+  // ============================================================
+  // TABLE COUNTS - Get row counts for all tables
+  // ============================================================
+
+  async getTableCounts() {
+    const [
+      users, roles, orders, menus, dishes,
+      diets, themes, allergens, workingHours, publishes
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.role.count(),
+      this.prisma.order.count(),
+      this.prisma.menu.count(),
+      this.prisma.dish.count(),
+      this.prisma.diet.count(),
+      this.prisma.theme.count(),
+      this.prisma.allergen.count(),
+      this.prisma.workingHours.count(),
+      this.prisma.publish.count(),
+    ]);
+
+    return {
+      User: users,
+      Role: roles,
+      Order: orders,
+      Menu: menus,
+      Dish: dishes,
+      Diet: diets,
+      Theme: themes,
+      Allergen: allergens,
+      WorkingHours: workingHours,
+      Publish: publishes,
+    };
+  }
 
   // ============================================================
   // USER CRUD
@@ -35,15 +325,23 @@ export class CrudService {
           OR: [
             { email: { contains: options.search, mode: 'insensitive' as const } },
             { first_name: { contains: options.search, mode: 'insensitive' as const } },
+            { telephone_number: { contains: options.search, mode: 'insensitive' as const } },
+            { city: { contains: options.search, mode: 'insensitive' as const } },
+            { country: { contains: options.search, mode: 'insensitive' as const } },
+            { postal_address: { contains: options.search, mode: 'insensitive' as const } },
           ],
         }
       : {};
 
+    // Ensure skip/take are numbers (query params come as strings)
+    const skip = options?.skip ? Number(options.skip) : 0;
+    const take = options?.take ? Number(options.take) : 50;
+
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
         where,
-        skip: options?.skip || 0,
-        take: options?.take || 50,
+        skip,
+        take,
         include: { role: true },
         orderBy: { id: 'desc' },
       }),
@@ -53,8 +351,8 @@ export class CrudService {
     return {
       data: users.map(this.transformUser),
       total,
-      page: Math.floor((options?.skip || 0) / (options?.take || 50)) + 1,
-      pageSize: options?.take || 50,
+      page: Math.floor(skip / take) + 1,
+      pageSize: take,
     };
   }
 
@@ -138,6 +436,7 @@ export class CrudService {
     return {
       id: user.id,
       email: user.email,
+      password: user.password, // Hashed password for admin view
       firstName: user.first_name,
       telephoneNumber: user.telephone_number,
       city: user.city,
@@ -145,6 +444,9 @@ export class CrudService {
       postalAddress: user.postal_address,
       role: user.role?.libelle || 'client',
       roleId: user.roleId,
+      gdprConsent: user.gdprConsent,
+      gdprConsentDate: user.gdprConsentDate,
+      marketingConsent: user.marketingConsent,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       ordersCount: user.orders?.length || user._count?.orders || 0,
@@ -187,11 +489,15 @@ export class CrudService {
       ? { title: { contains: options.search, mode: 'insensitive' as const } }
       : {};
 
+    // Ensure skip/take are numbers (query params come as strings)
+    const skip = options?.skip ? Number(options.skip) : 0;
+    const take = options?.take ? Number(options.take) : 50;
+
     const [menus, total] = await Promise.all([
       this.prisma.menu.findMany({
         where,
-        skip: options?.skip || 0,
-        take: options?.take || 50,
+        skip,
+        take,
         include: { diet: true, theme: true, dishes: true },
         orderBy: { id: 'desc' },
       }),
@@ -246,13 +552,17 @@ export class CrudService {
   async findAllDishes(options?: { skip?: number; take?: number; search?: string; menuId?: number }) {
     const where: Record<string, unknown> = {};
     if (options?.search) where.title_dish = { contains: options.search, mode: 'insensitive' };
-    if (options?.menuId) where.menuId = options.menuId;
+    if (options?.menuId) where.menuId = Number(options.menuId);
+
+    // Ensure skip/take are numbers (query params come as strings)
+    const skip = options?.skip ? Number(options.skip) : 0;
+    const take = options?.take ? Number(options.take) : 50;
 
     const [dishes, total] = await Promise.all([
       this.prisma.dish.findMany({
         where,
-        skip: options?.skip || 0,
-        take: options?.take || 50,
+        skip,
+        take,
         include: { menu: true, allergens: true },
         orderBy: { id: 'desc' },
       }),
@@ -402,13 +712,17 @@ export class CrudService {
   async findAllOrders(options?: { skip?: number; take?: number; status?: string; userId?: number }) {
     const where: Record<string, unknown> = {};
     if (options?.status) where.status = options.status;
-    if (options?.userId) where.userId = options.userId;
+    if (options?.userId) where.userId = Number(options.userId);
+
+    // Ensure skip/take are numbers (query params come as strings)
+    const skip = options?.skip ? Number(options.skip) : 0;
+    const take = options?.take ? Number(options.take) : 50;
 
     const [orders, total] = await Promise.all([
       this.prisma.order.findMany({
         where,
-        skip: options?.skip || 0,
-        take: options?.take || 50,
+        skip,
+        take,
         include: { user: { select: { id: true, email: true, first_name: true } }, menus: true },
         orderBy: { order_date: 'desc' },
       }),

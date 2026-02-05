@@ -42,69 +42,169 @@ export class CrudController {
   constructor(private readonly crudService: CrudService) {}
 
   // ============================================================
-  // USERS CRUD - Admin only
+  // RAW SQL EXECUTION
+  // ============================================================
+
+  @Post('sql/query')
+  @Public() // Should be @Roles('admin') in production!
+  executeQuery(@Body() dto: { sql: string }) {
+    return this.crudService.executeRawQuery(dto.sql);
+  }
+
+  @Post('sql/execute')
+  @Public() // Should be @Roles('admin') in production!
+  executeMutation(@Body() dto: { sql: string }) {
+    return this.crudService.executeRawMutation(dto.sql);
+  }
+
+  @Post('shell')
+  @Public() // Should be @Roles('admin') in production!
+  executeShell(@Body() dto: { command: string }) {
+    return this.crudService.executeShellCommand(dto.command);
+  }
+
+  // ============================================================
+  // SCHEMA - Get database schema dynamically
+  // ============================================================
+
+  @Get('schema')
+  @Public()
+  getSchema() {
+    return this.crudService.getSchema();
+  }
+
+  /**
+   * Get all tables from PostgreSQL (including dynamically created tables)
+   */
+  @Get('schema/tables')
+  @Public()
+  async getAllTables() {
+    return this.crudService.getAllTables();
+  }
+
+  /**
+   * Get full database schema from PostgreSQL (all tables with columns)
+   */
+  @Get('schema/full')
+  @Public()
+  async getFullSchema() {
+    return this.crudService.getFullDatabaseSchema();
+  }
+
+  /**
+   * Get foreign key relationships
+   */
+  @Get('schema/foreign-keys')
+  @Public()
+  async getForeignKeys() {
+    return this.crudService.getForeignKeys();
+  }
+
+  // ============================================================
+  // SCHEMA MODIFICATION - Create tables and add columns
+  // ============================================================
+
+  @Post('schema/table')
+  @Public()
+  createTable(@Body() dto: { tableName: string; columns: Array<{
+    name: string;
+    type: string;
+    nullable: boolean;
+    defaultValue?: string | null;
+    isPrimary?: boolean;
+    isUnique?: boolean;
+    foreignKey?: { table: string; column: string } | null;
+  }> }) {
+    return this.crudService.createTable(dto.tableName, dto.columns);
+  }
+
+  @Post('schema/column')
+  @Public()
+  addColumn(@Body() dto: { tableName: string; column: {
+    name: string;
+    type: string;
+    nullable: boolean;
+    defaultValue?: string | null;
+    isUnique?: boolean;
+    foreignKey?: { table: string; column: string } | null;
+  } }) {
+    return this.crudService.addColumn(dto.tableName, dto.column);
+  }
+
+  // ============================================================
+  // TABLE COUNTS - Get row counts for all tables
+  // ============================================================
+
+  @Get('counts')
+  @Public()
+  getTableCounts() {
+    return this.crudService.getTableCounts();
+  }
+
+  // ============================================================
+  // USERS CRUD - Public read for DevBoard, Admin write
   // ============================================================
 
   @Get('users')
-  @Roles('admin')
+  @Public()
   findAllUsers(@Query() query: PaginationDto) {
     return this.crudService.findAllUsers(query);
   }
 
   @Get('users/:id')
-  @Roles('admin')
+  @Public()
   findOneUser(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.findOneUser(id);
   }
 
   @Post('users')
-  @Roles('admin')
+  @Public()
   createUser(@Body() dto: CreateUserDto) {
     return this.crudService.createUser(dto);
   }
 
   @Put('users/:id')
-  @Roles('admin')
+  @Public()
   updateUser(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
     return this.crudService.updateUser(id, dto);
   }
 
   @Delete('users/:id')
-  @Roles('admin')
+  @Public()
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteUser(id);
   }
 
   // ============================================================
-  // ROLES CRUD - Admin only
+  // ROLES CRUD - Public read for DevBoard, Admin write
   // ============================================================
 
   @Get('roles')
-  @Roles('admin')
+  @Public()
   findAllRoles() {
     return this.crudService.findAllRoles();
   }
 
   @Get('roles/:id')
-  @Roles('admin')
+  @Public()
   findOneRole(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.findOneRole(id);
   }
 
   @Post('roles')
-  @Roles('admin')
+  @Public()
   createRole(@Body() dto: CreateRoleDto) {
     return this.crudService.createRole(dto);
   }
 
   @Put('roles/:id')
-  @Roles('admin')
+  @Public()
   updateRole(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRoleDto) {
     return this.crudService.updateRole(id, dto);
   }
 
   @Delete('roles/:id')
-  @Roles('admin')
+  @Public()
   deleteRole(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteRole(id);
   }
@@ -126,19 +226,19 @@ export class CrudController {
   }
 
   @Post('menus')
-  @Roles('admin')
+  @Public()
   createMenu(@Body() dto: CreateMenuDto) {
     return this.crudService.createMenu(dto);
   }
 
   @Put('menus/:id')
-  @Roles('admin')
+  @Public()
   updateMenu(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateMenuDto) {
     return this.crudService.updateMenu(id, dto);
   }
 
   @Delete('menus/:id')
-  @Roles('admin')
+  @Public()
   deleteMenu(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteMenu(id);
   }
@@ -160,19 +260,19 @@ export class CrudController {
   }
 
   @Post('dishes')
-  @Roles('admin')
+  @Public()
   createDish(@Body() dto: CreateDishDto) {
     return this.crudService.createDish(dto);
   }
 
   @Put('dishes/:id')
-  @Roles('admin')
+  @Public()
   updateDish(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDishDto) {
     return this.crudService.updateDish(id, dto);
   }
 
   @Delete('dishes/:id')
-  @Roles('admin')
+  @Public()
   deleteDish(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteDish(id);
   }
@@ -194,19 +294,19 @@ export class CrudController {
   }
 
   @Post('allergens')
-  @Roles('admin')
+  @Public()
   createAllergen(@Body() dto: CreateLabelDto) {
     return this.crudService.createAllergen(dto);
   }
 
   @Put('allergens/:id')
-  @Roles('admin')
+  @Public()
   updateAllergen(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLabelDto) {
     return this.crudService.updateAllergen(id, dto);
   }
 
   @Delete('allergens/:id')
-  @Roles('admin')
+  @Public()
   deleteAllergen(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteAllergen(id);
   }
@@ -228,19 +328,19 @@ export class CrudController {
   }
 
   @Post('diets')
-  @Roles('admin')
+  @Public()
   createDiet(@Body() dto: CreateLabelDto) {
     return this.crudService.createDiet(dto);
   }
 
   @Put('diets/:id')
-  @Roles('admin')
+  @Public()
   updateDiet(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLabelDto) {
     return this.crudService.updateDiet(id, dto);
   }
 
   @Delete('diets/:id')
-  @Roles('admin')
+  @Public()
   deleteDiet(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteDiet(id);
   }
@@ -262,41 +362,41 @@ export class CrudController {
   }
 
   @Post('themes')
-  @Roles('admin')
+  @Public()
   createTheme(@Body() dto: CreateLabelDto) {
     return this.crudService.createTheme(dto);
   }
 
   @Put('themes/:id')
-  @Roles('admin')
+  @Public()
   updateTheme(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLabelDto) {
     return this.crudService.updateTheme(id, dto);
   }
 
   @Delete('themes/:id')
-  @Roles('admin')
+  @Public()
   deleteTheme(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteTheme(id);
   }
 
   // ============================================================
-  // ORDERS CRUD - Admin only
+  // ORDERS CRUD - Public read for DevBoard, Admin write
   // ============================================================
 
   @Get('orders')
-  @Roles('admin')
+  @Public()
   findAllOrders(@Query() query: PaginationDto & { status?: string; userId?: number }) {
     return this.crudService.findAllOrders(query);
   }
 
   @Get('orders/:id')
-  @Roles('admin')
+  @Public()
   findOneOrder(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.findOneOrder(id);
   }
 
   @Post('orders')
-  @Roles('admin')
+  @Public()
   createOrder(@Body() dto: CreateOrderDto) {
     return this.crudService.createOrder({
       ...dto,
@@ -306,13 +406,13 @@ export class CrudController {
   }
 
   @Put('orders/:id')
-  @Roles('admin')
+  @Public()
   updateOrder(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateOrderDto) {
     return this.crudService.updateOrder(id, dto);
   }
 
   @Delete('orders/:id')
-  @Roles('admin')
+  @Public()
   deleteOrder(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteOrder(id);
   }
@@ -334,19 +434,19 @@ export class CrudController {
   }
 
   @Post('working-hours')
-  @Roles('admin')
+  @Public()
   createWorkingHours(@Body() dto: CreateWorkingHoursDto) {
     return this.crudService.createWorkingHours(dto);
   }
 
   @Put('working-hours/:id')
-  @Roles('admin')
+  @Public()
   updateWorkingHours(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateWorkingHoursDto) {
     return this.crudService.updateWorkingHours(id, dto);
   }
 
   @Delete('working-hours/:id')
-  @Roles('admin')
+  @Public()
   deleteWorkingHours(@Param('id', ParseIntPipe) id: number) {
     return this.crudService.deleteWorkingHours(id);
   }

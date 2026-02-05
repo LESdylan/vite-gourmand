@@ -23,6 +23,7 @@ import { AllergenModule } from './allergen';
 import { CrudModule } from './crud/crud.module';
 import { MailModule } from './mail';
 import { LoggingModule, HttpLogInterceptor } from './logging';
+import { TestRunnerModule } from './test-runner';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -99,6 +100,8 @@ import {
     AllergenModule,
     CrudModule,
     MailModule,
+    // Test Runner (for QA dashboard)
+    TestRunnerModule,
   ],
   controllers: [AppController],
   providers: [
