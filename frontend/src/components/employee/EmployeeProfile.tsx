@@ -8,27 +8,56 @@ export function EmployeeProfile() {
   return (
     <div className="employee-widget">
       <header className="widget-header">
-        <h2>👤 Mon Profil</h2>
-        <p className="widget-subtitle">Informations personnelles et préférences</p>
+        <div className="widget-header-content">
+          <h2>👤 Mon Profil</h2>
+          <p className="widget-subtitle">Informations personnelles et préférences</p>
+        </div>
+        <button className="btn btn-primary">✏️ Modifier</button>
       </header>
 
       <div className="profile-card">
         <div className="profile-avatar">👷</div>
         <div className="profile-info">
           <h3 className="profile-name">Jean Dupont</h3>
-          <span className="profile-role">Serveur</span>
-          <span className="profile-since">Depuis le 15 mars 2024</span>
+          <span className="profile-role">Serveur • Équipe A</span>
+          <div className="profile-meta">
+            <span>📧 jean.dupont@vitegourmand.fr</span>
+            <span>📅 Depuis mars 2024</span>
+          </div>
         </div>
       </div>
 
-      <div className="profile-sections">
-        <ProfileSection title="Informations personnelles">
+      <div className="profile-stats">
+        <div className="profile-stat">
+          <span className="profile-stat-value">245</span>
+          <span className="profile-stat-label">Commandes servies</span>
+        </div>
+        <div className="profile-stat">
+          <span className="profile-stat-value">142h</span>
+          <span className="profile-stat-label">Heures ce mois</span>
+        </div>
+        <div className="profile-stat">
+          <span className="profile-stat-value">4.8</span>
+          <span className="profile-stat-label">Note moyenne</span>
+        </div>
+      </div>
+
+      <section className="widget-section">
+        <div className="widget-section-header">
+          <h3>📞 Contact</h3>
+        </div>
+        <div className="task-list">
           <ProfileField label="Email" value="jean.dupont@vitegourmand.fr" />
           <ProfileField label="Téléphone" value="06 12 34 56 78" />
           <ProfileField label="Adresse" value="123 Rue des Lilas, Paris" />
-        </ProfileSection>
+        </div>
+      </section>
 
-        <ProfileSection title="Horaires habituels">
+      <section className="widget-section">
+        <div className="widget-section-header">
+          <h3>🕐 Horaires habituels</h3>
+        </div>
+        <div className="task-list">
           <ProfileField label="Lundi" value="11h - 15h / 18h - 22h" />
           <ProfileField label="Mardi" value="11h - 15h / 18h - 22h" />
           <ProfileField label="Mercredi" value="Repos" />
@@ -36,57 +65,37 @@ export function EmployeeProfile() {
           <ProfileField label="Vendredi" value="11h - 15h / 18h - 23h" />
           <ProfileField label="Samedi" value="11h - 15h / 18h - 23h" />
           <ProfileField label="Dimanche" value="Repos" />
-        </ProfileSection>
+        </div>
+      </section>
 
-        <ProfileSection title="Statistiques du mois">
-          <ProfileStat label="Commandes servies" value="245" />
-          <ProfileStat label="Heures travaillées" value="142h" />
-          <ProfileStat label="Note moyenne" value="4.8/5" />
-          <ProfileStat label="Pourboires" value="187€" />
-        </ProfileSection>
-
-        <ProfileSection title="Préférences">
-          <ProfileToggle label="Notifications push" checked />
-          <ProfileToggle label="Rappels de tâches" checked />
-          <ProfileToggle label="Mode sombre" checked={false} />
-        </ProfileSection>
-      </div>
+      <section className="widget-section">
+        <div className="widget-section-header">
+          <h3>🔔 Préférences</h3>
+        </div>
+        <div className="task-list">
+          <SettingToggle label="Notifications push" checked />
+          <SettingToggle label="Rappels de tâches" checked />
+          <SettingToggle label="Mode sombre" checked={false} />
+        </div>
+      </section>
     </div>
-  );
-}
-
-function ProfileSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="profile-section">
-      <h3 className="profile-section-title">{title}</h3>
-      <div className="profile-section-content">{children}</div>
-    </section>
   );
 }
 
 function ProfileField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="profile-field">
-      <span className="profile-field-label">{label}</span>
-      <span className="profile-field-value">{value}</span>
+    <div className="task-item">
+      <span className="task-label" style={{ minWidth: '120px', color: 'var(--color-text-muted)' }}>{label}</span>
+      <span style={{ flex: 1, textAlign: 'right' }}>{value}</span>
     </div>
   );
 }
 
-function ProfileStat({ label, value }: { label: string; value: string }) {
+function SettingToggle({ label, checked }: { label: string; checked: boolean }) {
   return (
-    <div className="profile-stat">
-      <span className="profile-stat-value">{value}</span>
-      <span className="profile-stat-label">{label}</span>
-    </div>
-  );
-}
-
-function ProfileToggle({ label, checked }: { label: string; checked: boolean }) {
-  return (
-    <div className="profile-toggle">
-      <span className="profile-toggle-label">{label}</span>
-      <label className="toggle">
+    <div className="task-item">
+      <span className="task-label">{label}</span>
+      <label className="toggle" style={{ marginLeft: 'auto' }}>
         <input type="checkbox" defaultChecked={checked} />
         <span className="toggle-slider"></span>
       </label>

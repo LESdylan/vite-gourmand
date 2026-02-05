@@ -8,35 +8,49 @@ export function EmployeeTasks() {
   return (
     <div className="employee-widget">
       <header className="widget-header">
-        <h2>📝 Mes Tâches</h2>
-        <p className="widget-subtitle">Liste des tâches à accomplir</p>
+        <div className="widget-header-content">
+          <h2>📝 Mes Tâches</h2>
+          <p className="widget-subtitle">Liste des tâches à accomplir</p>
+        </div>
+        <button className="btn btn-primary">+ Nouvelle tâche</button>
       </header>
 
-      <div className="tasks-summary">
-        <div className="task-stat">
-          <span className="task-stat-value">3</span>
-          <span className="task-stat-label">À faire</span>
+      <div className="quick-stats-grid">
+        <div className="quick-stat quick-stat--warning">
+          <div className="quick-stat-icon">📋</div>
+          <span className="quick-stat-value">3</span>
+          <span className="quick-stat-label">À faire</span>
         </div>
-        <div className="task-stat">
-          <span className="task-stat-value">5</span>
-          <span className="task-stat-label">Terminées</span>
+        <div className="quick-stat">
+          <div className="quick-stat-icon">✅</div>
+          <span className="quick-stat-value">5</span>
+          <span className="quick-stat-label">Terminées</span>
         </div>
-        <div className="task-stat">
-          <span className="task-stat-value">62%</span>
-          <span className="task-stat-label">Progression</span>
+        <div className="quick-stat quick-stat--highlight">
+          <div className="quick-stat-icon">📊</div>
+          <span className="quick-stat-value">62%</span>
+          <span className="quick-stat-label">Progression</span>
         </div>
       </div>
 
-      <div className="tasks-list">
-        <TaskSection title="🔴 Urgent">
+      <section className="widget-section">
+        <div className="widget-section-header">
+          <h3>🔴 Tâches urgentes</h3>
+        </div>
+        <div className="task-list">
           <TaskCard 
             title="Réapprovisionner desserts" 
             priority="high"
             dueTime="Avant 14h"
           />
-        </TaskSection>
+        </div>
+      </section>
 
-        <TaskSection title="📋 À faire">
+      <section className="widget-section">
+        <div className="widget-section-header">
+          <h3>📋 À faire</h3>
+        </div>
+        <div className="task-list">
           <TaskCard 
             title="Mise en place tables 1-5" 
             priority="medium"
@@ -52,56 +66,48 @@ export function EmployeeTasks() {
             priority="low"
             dueTime="Fermeture"
           />
-        </TaskSection>
+        </div>
+      </section>
 
-        <TaskSection title="✅ Terminées">
+      <section className="widget-section">
+        <div className="widget-section-header">
+          <h3>✅ Terminées</h3>
+        </div>
+        <div className="task-list">
           <TaskCard 
             title="Ouverture caisse" 
-            priority="done"
+            priority="low"
             dueTime="Terminé à 11h30"
             done
           />
           <TaskCard 
             title="Inventaire boissons" 
-            priority="done"
+            priority="low"
             dueTime="Terminé à 11h45"
             done
           />
-        </TaskSection>
-      </div>
+        </div>
+      </section>
     </div>
-  );
-}
-
-function TaskSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="task-section">
-      <h3 className="task-section-title">{title}</h3>
-      <div className="task-section-items">{children}</div>
-    </section>
   );
 }
 
 interface TaskCardProps {
   title: string;
-  priority: 'high' | 'medium' | 'low' | 'done';
+  priority: 'high' | 'medium' | 'low';
   dueTime: string;
   done?: boolean;
 }
 
 function TaskCard({ title, priority, dueTime, done }: TaskCardProps) {
   return (
-    <div className={`task-card task-card--${priority} ${done ? 'task-card--done' : ''}`}>
-      <div className="task-card-check">
-        <input type="checkbox" checked={done} readOnly />
-      </div>
-      <div className="task-card-content">
-        <span className="task-card-title">{title}</span>
-        <span className="task-card-time">{dueTime}</span>
-      </div>
-      {!done && (
-        <button className="task-card-action">Terminer</button>
-      )}
+    <div className={`task-item ${done ? 'task-item--done' : ''}`}>
+      <div className="task-checkbox">{done ? '✓' : ''}</div>
+      <span className="task-label">{title}</span>
+      <span className={`task-priority task-priority--${done ? 'low' : priority}`}>
+        {done ? 'Fait' : dueTime}
+      </span>
+      {!done && <button className="btn btn-sm btn-primary">Terminer</button>}
     </div>
   );
 }

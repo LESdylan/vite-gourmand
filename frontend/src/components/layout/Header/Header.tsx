@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { BurgerIcon, MobileMenu } from '../../ui/BurgerMenu';
 import { LogoIcon, DashboardIcon, DocsIcon, ResourcesIcon, NotificationIcon } from './HeaderIcons';
 import { ProfileDropdown } from './ProfileDropdown';
+import { SearchBar } from '../../ui/Search';
 import type { CategoryData, TestCategory } from '../../features/qa/sidebar';
 import './Header.css';
 
@@ -47,6 +48,10 @@ export function Header({
           <NavButton key={item.id} item={item} active={activeSection === item.id} onClick={onSectionChange} />
         ))}
       </nav>
+
+      <div className="header-search">
+        <SearchBar placeholder="Rechercher un utilisateur..." />
+      </div>
 
       <div className="header-actions">
         <NotificationButton />

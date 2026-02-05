@@ -104,6 +104,13 @@
   white-space: nowrap;
 }
 
+/* Search Bar in Header */
+.header-search {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 var(--space-4);
+}
+
 /* Actions */
 .header-actions {
   display: flex;
@@ -166,6 +173,10 @@
   }
 
   .header-nav {
+    display: none;
+  }
+
+  .header-search {
     display: none;
   }
 }

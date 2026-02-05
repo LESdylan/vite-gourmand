@@ -1,10 +1,12 @@
 /**
  * RoleSwitcher - Sidebar dropdown for switching between role views
- * Only visible for superadmin users
- * Uses RoleViewContext for SPA-style view switching (no routing)
+ * Role-based visibility:
+ * - superadmin: can see dev, admin, employee
+ * - admin: can see admin, employee
+ * - employee: can see only employee (no switcher shown)
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { usePortalAuth } from '../../../portal_dashboard';
 import { useRoleView } from '../../DevBoard/RoleViewContext';
 import type { RoleView } from '../../DevBoard/constants';
@@ -15,13 +17,29 @@ interface RoleOption {
   label: string;
   icon: string;
   description: string;
+  allowedRoles: string[]; // Which user roles can access this view
 }
 
 const ROLE_OPTIONS: RoleOption[] = [
-  { id: 'dev', label: 'DevBoard', icon: '🛠️', description: 'QA & Development' },
-  { id: 'admin', label: 'Admin', icon: '👔', description: 'Administration' },
-  { id: 'employee', label: 'Employé', icon: '👷', description: 'Espace Employé' },
+  { id: 'dev', label: 'DevBoard', icon: '🛠️', description: 'QA & Development', allowedRoles: ['superadmin'] },
+  { id: 'admin', label: 'Admin', icon: '👔', description: 'Administration', allowedRoles: ['superadmin', 'admin'] },
+  { id: 'employee', label: 'Employé', icon: '👷', description: 'Espace Employé', allowedRoles: ['superadmin', 'admin', 'employee'] },
 ];
+
+/** Get available views for a user role */
+export function getAvailableViews(userRole: string): RoleOption[] {
+  return ROLE_OPTIONS.filter(opt => opt.allowedRoles.includes(userRole));
+}
+
+/** Get default view for a user role */
+export function getDefaultViewForRole(userRole: string): RoleView {
+  switch (userRole) {
+    case 'superadmin': return 'dev';
+    case 'admin': return 'admin';
+    case 'employee': return 'employee';
+    default: return 'employee';
+  }
+}
 
 interface RoleSwitcherProps {
   collapsed?: boolean;
@@ -32,10 +50,16 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
   const { currentView, setView } = useRoleView();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Only show for superadmin
-  if (user?.role !== 'superadmin') return null;
+  // Get available views for current user
+  const availableViews = useMemo(() => {
+    if (!user?.role) return [];
+    return getAvailableViews(user.role);
+  }, [user?.role]);
 
-  const currentRole = ROLE_OPTIONS.find(r => r.id === currentView) || ROLE_OPTIONS[0];
+  // Don't show switcher if user has only one view available
+  if (availableViews.length <= 1) return null;
+
+  const currentRole = availableViews.find(r => r.id === currentView) || availableViews[0];
 
   const handleSelect = (role: RoleOption) => {
     setView(role.id);
@@ -54,7 +78,7 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
         </button>
         {isOpen && (
           <div className="role-switcher-dropdown role-switcher-dropdown--right">
-            {ROLE_OPTIONS.map(role => (
+            {availableViews.map(role => (
               <button
                 key={role.id}
                 className={`role-option ${currentRole.id === role.id ? 'active' : ''}`}
@@ -88,7 +112,7 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
       {isOpen && (
         <div className="role-switcher-dropdown">
           <div className="role-dropdown-header">Changer de vue</div>
-          {ROLE_OPTIONS.map(role => (
+          {availableViews.map(role => (
             <button
               key={role.id}
               className={`role-option ${currentRole.id === role.id ? 'active' : ''}`}

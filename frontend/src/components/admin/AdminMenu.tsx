@@ -8,17 +8,19 @@ export function AdminMenu() {
   return (
     <div className="admin-widget">
       <header className="widget-header">
-        <h2>🍽️ Gestion du Menu</h2>
-        <p className="widget-subtitle">Plats, catégories et disponibilités</p>
-        <button className="btn-primary">+ Ajouter un plat</button>
+        <div className="widget-header-content">
+          <h2>🍽️ Gestion du Menu</h2>
+          <p className="widget-subtitle">Plats, catégories et disponibilités</p>
+        </div>
+        <button className="btn btn-primary">+ Ajouter un plat</button>
       </header>
 
-      <div className="widget-filters">
-        <button className="filter-btn active">Tous</button>
-        <button className="filter-btn">Entrées</button>
-        <button className="filter-btn">Plats</button>
-        <button className="filter-btn">Desserts</button>
-        <button className="filter-btn">Boissons</button>
+      <div className="filter-tabs">
+        <button className="filter-tab active">Tous</button>
+        <button className="filter-tab">Entrées</button>
+        <button className="filter-tab">Plats</button>
+        <button className="filter-tab">Desserts</button>
+        <button className="filter-tab">Boissons</button>
       </div>
 
       <div className="menu-grid">
@@ -27,24 +29,28 @@ export function AdminMenu() {
           category="Plats" 
           price="12.50€" 
           available={true}
+          emoji="🍕"
         />
         <MenuItem 
           name="Salade César" 
           category="Entrées" 
           price="8.90€" 
           available={true}
+          emoji="🥗"
         />
         <MenuItem 
           name="Tiramisu" 
           category="Desserts" 
           price="6.50€" 
           available={false}
+          emoji="🍰"
         />
         <MenuItem 
           name="Burger Gourmet" 
           category="Plats" 
           price="15.90€" 
           available={true}
+          emoji="🍔"
         />
       </div>
     </div>
@@ -56,18 +62,19 @@ interface MenuItemProps {
   category: string;
   price: string;
   available: boolean;
+  emoji: string;
 }
 
-function MenuItem({ name, category, price, available }: MenuItemProps) {
+function MenuItem({ name, category, price, available, emoji }: MenuItemProps) {
   return (
-    <div className={`menu-item ${!available ? 'menu-item--unavailable' : ''}`}>
-      <div className="menu-item-image">🍽️</div>
-      <div className="menu-item-content">
-        <h4 className="menu-item-name">{name}</h4>
-        <span className="menu-item-category">{category}</span>
-        <span className="menu-item-price">{price}</span>
+    <div className={`menu-card ${!available ? 'menu-card--unavailable' : ''}`}>
+      <div className="menu-card-image">{emoji}</div>
+      <div className="menu-card-content">
+        <h4 className="menu-card-name">{name}</h4>
+        <span className="menu-card-category">{category}</span>
+        <span className="menu-card-price">{price}</span>
       </div>
-      <div className="menu-item-actions">
+      <div className="menu-card-actions">
         <label className="toggle">
           <input type="checkbox" checked={available} readOnly />
           <span className="toggle-slider"></span>

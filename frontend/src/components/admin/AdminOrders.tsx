@@ -8,16 +8,19 @@ export function AdminOrders() {
   return (
     <div className="admin-widget">
       <header className="widget-header">
-        <h2>📋 Gestion des Commandes</h2>
-        <p className="widget-subtitle">Suivi et gestion des commandes en temps réel</p>
+        <div className="widget-header-content">
+          <h2>📋 Gestion des Commandes</h2>
+          <p className="widget-subtitle">Suivi et gestion des commandes en temps réel</p>
+        </div>
+        <button className="btn btn-primary">🔄 Actualiser</button>
       </header>
 
-      <div className="widget-filters">
-        <button className="filter-btn active">Toutes</button>
-        <button className="filter-btn">En attente</button>
-        <button className="filter-btn">En cours</button>
-        <button className="filter-btn">Prêtes</button>
-        <button className="filter-btn">Livrées</button>
+      <div className="filter-tabs">
+        <button className="filter-tab active">Toutes</button>
+        <button className="filter-tab">En attente</button>
+        <button className="filter-tab">En cours</button>
+        <button className="filter-tab">Prêtes</button>
+        <button className="filter-tab">Livrées</button>
       </div>
 
       <div className="orders-grid">
@@ -60,29 +63,39 @@ interface OrderCardProps {
 }
 
 function OrderCard({ id, table, status, items, total, time }: OrderCardProps) {
-  const statusConfig: Record<string, { label: string; color: string }> = {
-    'en-attente': { label: 'En attente', color: 'warning' },
-    'en-cours': { label: 'En préparation', color: 'info' },
-    'prêt': { label: 'Prêt', color: 'success' },
+  const statusConfig: Record<string, { label: string; className: string }> = {
+    'en-attente': { label: 'En attente', className: 'order-card-badge--pending' },
+    'en-cours': { label: 'En préparation', className: 'order-card-badge--progress' },
+    'prêt': { label: 'Prêt', className: 'order-card-badge--ready' },
   };
   
   const config = statusConfig[status] || statusConfig['en-attente'];
   
   return (
-    <div className={`order-card status-border-${config.color}`}>
+    <div className="order-card">
       <div className="order-card-header">
         <span className="order-card-id">{id}</span>
-        <span className={`order-card-status status-${config.color}`}>{config.label}</span>
+        <span className={`order-card-badge ${config.className}`}>{config.label}</span>
       </div>
-      <div className="order-card-table">{table} • {time}</div>
-      <ul className="order-card-items">
-        {items.map((item, i) => <li key={i}>{item}</li>)}
-      </ul>
+      <div className="order-card-body">
+        <div className="order-card-meta">
+          <span>📍 {table}</span>
+          <span>🕐 {time}</span>
+        </div>
+        <ul className="order-card-items">
+          {items.map((item, i) => (
+            <li key={i}>
+              <span className="order-card-item-name">{item}</span>
+              <span className="order-card-item-qty">x1</span>
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className="order-card-footer">
         <span className="order-card-total">{total}</span>
         <div className="order-card-actions">
-          <button className="btn-sm btn-primary">Valider</button>
-          <button className="btn-sm btn-ghost">Détails</button>
+          <button className="btn btn-success btn-sm">✓ Valider</button>
+          <button className="btn btn-secondary btn-sm">Détails</button>
         </div>
       </div>
     </div>

@@ -1,35 +1,39 @@
 /**
- * SystemMetrics grid styles
+ * SystemMetrics grid styles - with 3D shadow
  */
 
 .system-metrics {
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
 .system-metrics-title {
-  margin: 0 0 var(--space-4) 0;
+  margin: 0 0 16px 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #1f2937;
 }
 
 .system-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-3);
+  gap: 12px;
 }
 
 .system-metric-card {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-primary);
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -39,15 +43,15 @@
 }
 
 .system-metric-card--good {
-  border-color: var(--color-success-200);
+  border-color: #86efac;
 }
 
 .system-metric-card--warning {
-  border-color: var(--color-warning-200);
+  border-color: #fde047;
 }
 
 .system-metric-card--critical {
-  border-color: var(--color-danger-200);
+  border-color: #fca5a5;
 }
 
 .system-metric-icon {
@@ -63,8 +67,8 @@
 }
 
 .system-metric-label {
-  font-size: var(--text-xs);
-  color: var(--color-text-tertiary);
+  font-size: 11px;
+  color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -72,7 +76,7 @@
 .system-metric-value-row {
   display: flex;
   align-items: baseline;
-  gap: var(--space-1);
+  gap: 4px;
 }
 
 .system-metric-value {

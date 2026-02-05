@@ -14,13 +14,19 @@ import { ShellFab, ShellModal } from '../cloud-terminal';
 import { getCategoriesForRole, getDefaultCategory } from './constants';
 import { TestCountProvider } from './TestCountContext';
 import { RoleViewProvider, useRoleView } from './RoleViewContext';
+import { getDefaultViewForRole } from '../layout/Sidebar';
+import { usePortalAuth } from '../../portal_dashboard';
 import { useTestRunner } from './useTestRunner';
 import type { NavSection } from '../layout/Header/Header';
 import './DevBoard.css';
 
 export function DevBoard() {
+  const { user } = usePortalAuth();
+  // Set default view based on user role
+  const defaultView = user?.role ? getDefaultViewForRole(user.role) : 'employee';
+  
   return (
-    <RoleViewProvider defaultView="dev">
+    <RoleViewProvider defaultView={defaultView}>
       <DevBoardInner />
     </RoleViewProvider>
   );
