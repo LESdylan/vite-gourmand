@@ -315,7 +315,7 @@
   }
 }
 
-/* Mobile - Stack layout */
+/* Mobile - Card-like layout */
 @media (max-width: 768px) {
   .fly-table-row {
     display: flex;
@@ -323,10 +323,12 @@
     padding: var(--space-3);
     gap: var(--space-2);
     align-items: center;
+    border-bottom: 1px solid var(--color-border-primary);
   }
   
   .fly-table-cell {
     padding: 0;
+    white-space: normal;
   }
   
   .fly-table-cell:first-child,
@@ -336,19 +338,65 @@
   
   .fly-table-cell--name {
     flex: 1;
-    min-width: 60%;
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .fly-test-name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  
+  .fly-test-id {
+    display: none;
   }
   
   .fly-table-cell--status {
     order: 2;
+    flex-shrink: 0;
   }
   
   .fly-table-cell--actions {
     order: 3;
+    flex-shrink: 0;
   }
   
   .fly-table-cell--suite,
   .fly-table-cell--duration {
     display: none;
+  }
+  
+  .run-test-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .fly-test-detail {
+    padding: var(--space-3);
+  }
+  
+  .fly-test-detail-content {
+    font-size: 11px;
+    padding: var(--space-3);
+    max-height: 200px;
+  }
+}
+
+/* Very small mobile */
+@media (max-width: 360px) {
+  .fly-table-row {
+    padding: var(--space-2);
+  }
+  
+  .fly-status-dot {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .fly-test-name {
+    font-size: var(--text-xs);
   }
 }

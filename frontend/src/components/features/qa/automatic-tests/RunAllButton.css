@@ -21,6 +21,7 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.15s ease;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .run-all-button button:hover:not(:disabled) {
@@ -41,5 +42,17 @@
   .run-all-button button {
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-xs);
+  }
+}
+
+/* Small mobile - full width */
+@media (max-width: 480px) {
+  .run-all-button {
+    width: 100%;
+  }
+
+  .run-all-button button {
+    width: 100%;
+    justify-content: center;
   }
 }

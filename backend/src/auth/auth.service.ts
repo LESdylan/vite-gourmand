@@ -272,15 +272,18 @@ export class AuthService {
 
   /**
    * Request password reset - generates token and sends email
+   * Security: Returns same response for existing and non-existing emails
+   * to prevent email enumeration attacks
    */
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string; token?: string }> {
     const user = await this.findUserByEmail(dto.email);
 
-    // Explicitly reject non-registered emails
-    // Note: This allows email enumeration but provides better UX
+    // Security best practice: Don't reveal whether email exists
+    // Return same message regardless of whether user exists
     if (!user) {
       this.logger.warn(`Password reset attempted for non-existent email: ${dto.email}`);
-      throw new NotFoundException('No account found with this email address. Please register first.');
+      // In dev mode, still return success message (no token since no user)
+      return this.getPasswordResetSuccessMessage();
     }
 
     await this.invalidateExistingTokens(user.id);
@@ -297,7 +300,9 @@ export class AuthService {
 
     if (emailSent) {
       this.logger.log(`Password reset email sent to: ${dto.email}`);
-      return this.getPasswordResetSuccessMessage();
+      // In dev mode, also return token for testing even when email is sent
+      const isDev = process.env.NODE_ENV !== 'production';
+      return isDev ? this.getPasswordResetSuccessMessage(token) : this.getPasswordResetSuccessMessage();
     } else {
       // In dev mode without email config, return token for testing
       this.logger.warn(`Email not configured, returning token for dev testing`);

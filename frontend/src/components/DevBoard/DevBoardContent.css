@@ -102,14 +102,21 @@
 @media (max-width: 768px) {
   .devboard-content {
     padding: var(--space-3);
-    padding-bottom: calc(var(--space-3) + 80px);
+    padding-bottom: calc(var(--space-3) + 20px);
     gap: var(--space-3);
   }
 
   .devboard-content-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: var(--space-2);
+  }
+
+  .devboard-content-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    width: 100%;
   }
 
   .devboard-content-title {
@@ -121,8 +128,12 @@
 @media (max-width: 480px) {
   .devboard-content {
     padding: var(--space-2);
-    padding-bottom: calc(var(--space-2) + 80px);
+    padding-bottom: calc(var(--space-2) + 20px);
     gap: var(--space-2);
+  }
+
+  .devboard-content-actions {
+    flex-direction: column;
   }
 
   .devboard-content-title {
@@ -134,7 +145,7 @@
 @media (max-width: 320px) {
   .devboard-content {
     padding: 8px;
-    padding-bottom: calc(8px + 70px);
+    padding-bottom: calc(8px + 16px);
     gap: 8px;
   }
 

@@ -9,9 +9,11 @@ import { DatabaseService } from './DatabaseService';
 import { TableSelector } from './TableSelector';
 import { FilterBar } from './FilterBar';
 import { DataTable } from './DataTable';
+import { DatabaseCards } from './DatabaseCards';
 import { Pagination } from './Pagination';
 import { RecordModal } from './RecordModal';
 import { SchemaEditor } from './SchemaEditor';
+import { useIsMobile } from '../hooks';
 import type { TableRecord, TableColumn } from './types';
 import './DatabaseViewer.css';
 
@@ -25,6 +27,7 @@ export function DatabaseViewer() {
   const db = useDatabase();
   const [modal, setModal] = useState<ModalType>(null);
   const [columns, setColumns] = useState<TableColumn[]>([]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (db.activeTable) {
@@ -123,12 +126,21 @@ export function DatabaseViewer() {
             onSearch={db.handleSearch}
             onClear={db.clearSearch}
           />
-          <DataTable 
-            columns={columns} 
-            records={db.records} 
-            onEdit={r => setModal({ type: 'record', record: r })} 
-            onDelete={handleDelete} 
-          />
+          {isMobile ? (
+            <DatabaseCards
+              columns={columns}
+              records={db.records}
+              onEdit={r => setModal({ type: 'record', record: r })}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <DataTable 
+              columns={columns} 
+              records={db.records} 
+              onEdit={r => setModal({ type: 'record', record: r })} 
+              onDelete={handleDelete} 
+            />
+          )}
           <Pagination 
             page={db.pagination.page} 
             pageSize={db.pagination.pageSize} 

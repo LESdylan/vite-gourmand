@@ -95,7 +95,8 @@ export async function runTests(testId: TestConfigId, options: TestRunOptions = {
       throw new Error(`Test run failed: ${response.statusText}`);
     }
 
-    return await response.json();
+    const json = await response.json();
+    return json.data || json; // Backend wraps response in data property
   } catch (error) {
     console.error('Failed to run tests:', error);
     throw error;
@@ -119,7 +120,8 @@ export async function runAllTests(options: TestRunOptions = {}): Promise<RunTest
       throw new Error(`Test run failed: ${response.statusText}`);
     }
 
-    return await response.json();
+    const json = await response.json();
+    return json.data || json; // Backend wraps response in data property
   } catch (error) {
     console.error('Failed to run all tests:', error);
     throw error;
@@ -128,21 +130,20 @@ export async function runAllTests(options: TestRunOptions = {}): Promise<RunTest
 
 /**
  * Get latest test results from cache
+ * Returns null silently if no results available (404 is expected)
  */
 export async function getTestResults(): Promise<RunTestsResponse | null> {
   try {
     const response = await fetch(`${API_BASE}/api/tests/results`);
     
     if (!response.ok) {
-      if (response.status === 404) {
-        return null; // No cached results
-      }
-      throw new Error(`Failed to fetch results: ${response.statusText}`);
+      return null; // No cached results or endpoint not available
     }
 
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to fetch test results:', error);
+    const json = await response.json();
+    return json.data || json; // Backend wraps response in data property
+  } catch {
+    // Silent fail - API might not be available
     return null;
   }
 }
@@ -158,7 +159,8 @@ export async function getTestStatus(): Promise<{ running: boolean; currentTest?:
       throw new Error(`Failed to fetch status: ${response.statusText}`);
     }
 
-    return await response.json();
+    const json = await response.json();
+    return json.data || json; // Backend wraps response in data property
   } catch (error) {
     console.error('Failed to fetch test status:', error);
     return { running: false };

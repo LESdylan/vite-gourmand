@@ -16,6 +16,7 @@
   transition: all 0.2s ease;
   backdrop-filter: blur(8px);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
 }
 
 .verbose-toggle:hover {
@@ -57,4 +58,13 @@
   background: linear-gradient(135deg, #8b5cf6 0%, #10b981 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .verbose-toggle {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 12px;
+  }
 }

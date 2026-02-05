@@ -17,7 +17,8 @@ export class TestRunnerService {
   private readonly backendPath: string;
 
   constructor() {
-    this.backendPath = path.resolve(__dirname, '..', '..');
+    // Navigate from dist/src/test-runner to backend root (3 levels up)
+    this.backendPath = path.resolve(__dirname, '..', '..', '..');
   }
 
   getStatus(): { running: boolean; currentTest?: string } {

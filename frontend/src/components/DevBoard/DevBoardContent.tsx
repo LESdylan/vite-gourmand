@@ -36,12 +36,12 @@ export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
   const { autoTests, metrics, isRunning, runAll, verboseMode, toggleVerbose, rawOutput } = useTestRunner();
   const { logs, connected, clear } = useMockLogs();
 
-  // Overview doesn't show the metrics dashboard (it has its own)
-  const showMetricsDashboard = activeCategory !== 'overview';
-  // Only show Run All button for test categories
-  const showRunAllButton = activeCategory === 'test-automatics' || activeCategory === 'metrics' || activeCategory === 'activity';
-  // Show verbose toggle for test categories
-  const showVerboseToggle = activeCategory === 'test-automatics' || activeCategory === 'overview';
+  // Metrics dashboard only for test-automatics
+  const showMetricsDashboard = activeCategory === 'test-automatics';
+  // Run All button for test categories
+  const showRunAllButton = activeCategory === 'test-automatics';
+  // Show verbose toggle only for test-automatics
+  const showVerboseToggle = activeCategory === 'test-automatics';
 
   return (
     <main className="devboard-content">

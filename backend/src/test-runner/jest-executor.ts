@@ -78,9 +78,23 @@ async function parseJestResults(
   const jsonPath = path.join(backendPath, 'test-results.json');
 
   if (fs.existsSync(jsonPath)) {
-    const content = fs.readFileSync(jsonPath, 'utf-8');
-    fs.unlinkSync(jsonPath);
-    return parseJestJson(JSON.parse(content), suiteName);
+    try {
+      const content = fs.readFileSync(jsonPath, 'utf-8');
+      const jestResults = JSON.parse(content);
+      fs.unlinkSync(jsonPath);
+      
+      // Parse JSON results with proper test names
+      const suite = parseJestJson(jestResults, suiteName);
+      
+      // Attach raw output to each test for verbose mode
+      for (const test of suite.tests) {
+        test.output = output;
+      }
+      
+      return suite;
+    } catch (e) {
+      console.error('Failed to parse Jest JSON:', e);
+    }
   }
 
   return parseJestText(output, suiteName, type);

@@ -8,7 +8,6 @@ import {
   runTests,
   runAllTests,
   getTestResults,
-  getMockTestResults,
   TEST_CONFIGS,
   type TestConfigId,
   type RunTestsResponse,
@@ -45,10 +44,10 @@ interface UseTestRunnerReturn {
  * Convert API results to AutoTest format for display
  */
 function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
-  if (!results) return [];
+  if (!results?.suites?.length) return [];
   
   return results.suites.flatMap(suite => 
-    suite.tests.map(test => ({
+    (suite.tests || []).map(test => ({
       id: test.id,
       name: test.name,
       suite: suite.name,
@@ -64,11 +63,11 @@ function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
  * Calculate metrics from results
  */
 function calculateMetrics(results: RunTestsResponse | null) {
-  if (!results) {
+  if (!results?.summary) {
     return { total: 0, passed: 0, failed: 0, passRate: 0, duration: 0 };
   }
   
-  const { total, passed, failed, duration } = results.summary;
+  const { total = 0, passed = 0, failed = 0, duration = 0 } = results.summary;
   const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
   
   return { total, passed, failed, passRate, duration };
@@ -82,23 +81,21 @@ export function useTestRunner(): UseTestRunnerReturn {
   const [verboseMode, setVerboseMode] = useState(false);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
 
-  // Load initial results (from cache or mock)
+  // Load cached results from backend on mount
   useEffect(() => {
-    const loadResults = async () => {
+    const loadCachedResults = async () => {
       try {
         const cached = await getTestResults();
-        if (cached) {
+        if (cached?.suites?.length) {
           setResults(cached);
           if (cached.rawOutput) setRawOutput(cached.rawOutput);
-        } else {
-          setResults(getMockTestResults());
         }
       } catch {
-        setResults(getMockTestResults());
+        // API not available - leave results null until user runs tests
       }
     };
     
-    loadResults();
+    loadCachedResults();
   }, []);
 
   const runTest = useCallback(async (testId: TestConfigId) => {
@@ -128,9 +125,7 @@ export function useTestRunner(): UseTestRunnerReturn {
       setResults(response);
       if (response.rawOutput) setRawOutput(response.rawOutput);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Test run failed');
-      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
-      setResults(getMockTestResults());
+      setError(err instanceof Error ? err.message : 'Test run failed - is the backend running?');
     } finally {
       setIsRunning(false);
       setCurrentTest(null);

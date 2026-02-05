@@ -3,6 +3,7 @@
  */
 
 export { DatabaseViewer } from './DatabaseViewer';
+export { DatabaseCards } from './DatabaseCards';
 export { useDatabase } from './useDatabase';
 export { TableSelector } from './TableSelector';
 export { FilterBar } from './FilterBar';

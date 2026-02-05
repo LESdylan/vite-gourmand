@@ -27,10 +27,10 @@ export function DevBoard() {
     closeSettings,
   } = useDevBoard();
 
-  // Keyboard shortcut: Ctrl+` to open terminal
+  // Keyboard shortcut: Ctrl+` to open terminal (desktop only)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === '`') {
+      if (e.ctrlKey && e.key === '`' && window.innerWidth > 768) {
         e.preventDefault();
         setIsShellOpen(prev => !prev);
       }
@@ -45,6 +45,9 @@ export function DevBoard() {
       <DevBoardHeader 
         activeSection={activeSection}
         onSectionChange={setActiveSection}
+        categories={CATEGORIES}
+        activeCategory={activeCategory}
+        onCategoryChange={selectCategory}
       />
       <section className="devboard-body">
         <DevBoardSidebar
@@ -58,7 +61,7 @@ export function DevBoard() {
       </section>
       <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
       
-      {/* Cloud Shell - Accessible from anywhere */}
+      {/* Cloud Shell - Desktop only (beta feature) */}
       <ShellFab onClick={() => setIsShellOpen(true)} />
       <ShellModal isOpen={isShellOpen} onClose={() => setIsShellOpen(false)} />
     </div>

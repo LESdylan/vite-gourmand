@@ -2,7 +2,7 @@
  * Shell Terminal Styles - macOS-like terminal
  */
 
-/* Floating Action Button */
+/* Floating Action Button - Desktop only (beta feature) */
 .shell-fab {
   position: fixed;
   bottom: 1.5rem;
@@ -27,6 +27,13 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
   background: #2a2a2a;
+}
+
+/* Hide terminal FAB on mobile - beta desktop-only feature */
+@media (max-width: 768px) {
+  .shell-fab {
+    display: none;
+  }
 }
 
 /* Backdrop - click-through except shell */

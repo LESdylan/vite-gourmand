@@ -66,7 +66,7 @@
   }
 }
 
-/* Mobile - Compact table */
+/* Mobile - Card list style */
 @media (max-width: 768px) {
   .fly-table-header {
     display: none;
@@ -74,5 +74,20 @@
   
   .fly-card {
     border-radius: var(--radius-md);
+  }
+  
+  .fly-table {
+    display: block;
+  }
+  
+  .fly-table-body {
+    display: block;
+  }
+}
+
+/* Very small screens - ensure content doesn't clip */
+@media (max-width: 320px) {
+  .fly-card {
+    border-radius: var(--radius-sm);
   }
 }

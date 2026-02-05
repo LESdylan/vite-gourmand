@@ -38,25 +38,38 @@
   letter-spacing: -0.02em;
 }
 
-.sidebar-toggle {
+/* Subtle collapse toggle - chevron style */
+.sidebar-collapse-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  background: var(--icon-gradient);
-  border: 1px solid var(--glass-border);
-  color: var(--color-neutral-600);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-400);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(124, 58, 237, 0.08);
+  opacity: 0.6;
 }
 
-.sidebar-toggle:hover {
-  background: var(--icon-gradient-active);
+.sidebar-collapse-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-collapse-toggle:hover {
+  background: var(--color-neutral-100);
   color: var(--color-primary-600);
-  transform: scale(1.05);
+  opacity: 1;
+}
+
+/* Collapsed state - rotate chevron */
+.sidebar-collapse-toggle--collapsed svg {
+  transform: rotate(180deg);
 }
 
 /* Tablet */
