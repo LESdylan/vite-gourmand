@@ -27,3 +27,4 @@ node_modules/
 data/postgres
 data/mongo
 frontend/node_modules
+vitegourmand/
