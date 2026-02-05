@@ -7,17 +7,18 @@ import { MetricsDashboard } from '../features/qa/metrics';
 import { TestCardGrid } from '../features/qa/test-cards';
 import { AutoTestList, RunAllButton } from '../features/qa/automatic-tests';
 import { Overview } from '../features/qa/overview';
+import { Activity } from '../features/qa/activity';
 import { LogViewer, useMockLogs } from '../features/logs';
 import { DatabaseViewer } from '../database';
 import type { TestCategory } from '../features/qa/sidebar';
 import { useMockData } from './useMockData';
-import { useTestRunner } from './useTestRunner';
-import { VerboseToggle } from './VerboseToggle';
+import type { useTestRunner } from './useTestRunner';
 import { VerboseOutput } from './VerboseOutput';
 import './DevBoardContent.css';
 
 interface DevBoardContentProps {
   activeCategory: TestCategory;
+  testRunner: ReturnType<typeof useTestRunner>;
 }
 
 const categoryLabels: Record<TestCategory, string> = {
@@ -31,17 +32,17 @@ const categoryLabels: Record<TestCategory, string> = {
   activity: 'Activity',
 };
 
-export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
+export function DevBoardContent({ activeCategory, testRunner }: DevBoardContentProps) {
   const { tests } = useMockData(activeCategory);
-  const { autoTests, metrics, isRunning, runAll, verboseMode, toggleVerbose, rawOutput } = useTestRunner();
+  const { autoTests, metrics, isRunning, runAll, rawOutput } = testRunner;
   const { logs, connected, clear } = useMockLogs();
 
   // Metrics dashboard only for test-automatics
   const showMetricsDashboard = activeCategory === 'test-automatics';
   // Run All button for test categories
   const showRunAllButton = activeCategory === 'test-automatics';
-  // Show verbose toggle only for test-automatics
-  const showVerboseToggle = activeCategory === 'test-automatics';
+  // Show CLI output for test-automatics (always visible)
+  const showCliOutput = activeCategory === 'test-automatics';
 
   return (
     <main className="devboard-content">
@@ -62,9 +63,6 @@ export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
             {categoryLabels[activeCategory]}
           </h2>
           <div className="devboard-content-actions">
-            {showVerboseToggle && (
-              <VerboseToggle isActive={verboseMode} onToggle={toggleVerbose} />
-            )}
             {showRunAllButton && (
               <RunAllButton 
                 count={autoTests.length} 
@@ -79,8 +77,8 @@ export function DevBoardContent({ activeCategory }: DevBoardContentProps) {
           {renderContent(activeCategory, tests, autoTests, logs, connected, clear, metrics, isRunning)}
         </div>
 
-        {showVerboseToggle && (
-          <VerboseOutput output={rawOutput} isVisible={verboseMode} />
+        {showCliOutput && (
+          <VerboseOutput output={rawOutput} isVisible={true} />
         )}
       </section>
     </main>
@@ -106,6 +104,8 @@ function renderContent(
       return <DatabaseViewer />;
     case 'logs':
       return <LogViewer logs={logs} connected={connected} onClear={clear} />;
+    case 'activity':
+      return <Activity />;
     default:
       return <AutoTestList tests={autoTests} />;
   }

@@ -1,9 +1,13 @@
 import { Suspense, lazy } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { PortalAuthProvider, ProtectedRoute, Unauthorized } from './portal_dashboard'
 import './App.css'
 
-// Lazy load DevBoard
+// Lazy load dashboards
 const DevBoard = lazy(() => import('./components/DevBoard').then(m => ({ default: m.DevBoard })));
+const AdminDashboard = lazy(() => import('./admin_space').then(m => ({ default: m.AdminDashboard })));
+const EmployeeDashboard = lazy(() => import('./employee_space').then(m => ({ default: m.EmployeeDashboard })));
+const Portal = lazy(() => import('./portal_dashboard').then(m => ({ default: m.Portal })));
 
 // Lazy load scenario pages
 const FormTestPage = lazy(() => import('./tests/form').then(m => ({ default: m.FormTestPage })));
@@ -30,15 +34,41 @@ function LoadingSpinner() {
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          <Route path="/" element={<DevBoard />} />
-          <Route path="/scenario/form" element={<FormTestPage />} />
-          <Route path="/scenario/kanban" element={<KanbanScenario />} />
-          <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
-          <Route path="/scenario/auth" element={<AuthScenario />} />
-        </Routes>
-      </Suspense>
+      <PortalAuthProvider>
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* Portal & Auth */}
+            <Route path="/portal" element={<Portal />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            
+            {/* Role-based dashboards */}
+            <Route path="/dev" element={
+              <ProtectedRoute allowedRoles={['developer']}>
+                <DevBoard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/employee" element={
+              <ProtectedRoute allowedRoles={['employee']}>
+                <EmployeeDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Legacy routes - redirect to portal */}
+            <Route path="/" element={<Navigate to="/portal" replace />} />
+            
+            {/* Scenario pages (dev tools) */}
+            <Route path="/scenario/form" element={<FormTestPage />} />
+            <Route path="/scenario/kanban" element={<KanbanScenario />} />
+            <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
+            <Route path="/scenario/auth" element={<AuthScenario />} />
+          </Routes>
+        </Suspense>
+      </PortalAuthProvider>
     </BrowserRouter>
   );
 }

@@ -1,0 +1,145 @@
+/**
+ * Portal Login Styles
+ */
+
+.portal-login-form {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-6);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.portal-login-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-6);
+  text-align: center;
+}
+
+.portal-login-error {
+  padding: var(--space-3);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-bottom: var(--space-4);
+}
+
+.portal-login-submit {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: var(--space-4);
+}
+
+.portal-login-submit:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.portal-login-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.portal-login-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.portal-login-divider::before,
+.portal-login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.portal-login-link {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  margin-top: var(--space-4);
+}
+
+.portal-login-link:hover {
+  text-decoration: underline;
+}
+
+/* Remember Me */
+.remember-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+}
+
+.remember-banner button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.remember-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  margin-top: var(--space-3);
+}
+
+.remember-checkbox input {
+  accent-color: var(--color-primary);
+}
+
+/* Google Button */
+.google-login-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.google-login-btn:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.google-login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

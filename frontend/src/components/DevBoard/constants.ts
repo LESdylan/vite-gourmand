@@ -20,7 +20,6 @@ export const CATEGORIES: CategoryData[] = [
     id: 'test-automatics', 
     label: 'Tests Auto', 
     icon: 'tests', 
-    count: 96, 
     group: 'main',
     description: 'Automated test suites and results'
   },
@@ -28,7 +27,7 @@ export const CATEGORIES: CategoryData[] = [
     id: 'scenarios', 
     label: 'Scénarios', 
     icon: 'scenarios', 
-    count: 6, 
+    count: 4, 
     group: 'main',
     description: 'Interactive test scenarios'
   },

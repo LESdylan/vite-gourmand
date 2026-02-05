@@ -16,6 +16,7 @@ interface OverviewProps {
     failed: number;
     passRate: number;
     duration: number;
+    lastRun: Date | null;
   };
   isRunning?: boolean;
 }
@@ -52,7 +53,7 @@ export function Overview({ metrics, isRunning }: OverviewProps) {
         testCount={metrics.total}
         passRate={metrics.passRate}
         avgDuration={Math.round(metrics.duration / Math.max(metrics.total, 1))}
-        lastRun={new Date()}
+        lastRun={metrics.lastRun}
       />
     </div>
   );

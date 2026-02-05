@@ -1,0 +1,88 @@
+/**
+ * Unauthorized Page Styles
+ */
+
+.unauthorized-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: var(--space-4);
+}
+
+.unauthorized-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.unauthorized-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.unauthorized-card h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.unauthorized-card p {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.unauthorized-role {
+  background: rgba(255, 255, 255, 0.05);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.unauthorized-role strong {
+  color: var(--color-accent);
+  text-transform: capitalize;
+}
+
+.unauthorized-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+.unauthorized-actions .btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.unauthorized-actions .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.unauthorized-actions .btn-primary {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.unauthorized-actions .btn-primary:hover {
+  opacity: 0.9;
+}

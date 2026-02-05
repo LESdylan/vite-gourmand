@@ -1,0 +1,77 @@
+/**
+ * Portal Styles
+ */
+
+.portal {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  position: relative;
+}
+
+.portal--loading {
+  cursor: wait;
+}
+
+.portal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  z-index: 1;
+}
+
+.portal-spinner {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+/* Logo */
+.portal-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.portal-logo-icon {
+  font-size: 3rem;
+}
+
+.portal-logo-text {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.portal-logo-badge {
+  font-size: 0.75rem;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Footer */
+.portal-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.portal-footer a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.portal-footer a:hover {
+  text-decoration: underline;
+}

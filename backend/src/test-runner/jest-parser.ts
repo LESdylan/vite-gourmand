@@ -44,8 +44,10 @@ function parseTestFile(testFile: any, fileName: string) {
     const status = assertion.status === 'passed' ? 'passed' : 
                   assertion.status === 'failed' ? 'failed' : 'idle';
     
+    // Include ancestor titles in ID to ensure uniqueness
+    const fullPath = [...(assertion.ancestorTitles || []), assertion.title].join('-');
     const testResult: TestResult = {
-      id: `${fileName}-${assertion.title}`.replace(/\s+/g, '-').toLowerCase(),
+      id: `${fileName}-${fullPath}`.replace(/\s+/g, '-').toLowerCase(),
       name: formatTestName(assertion),
       suite: fileName,
       status,

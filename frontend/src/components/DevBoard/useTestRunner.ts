@@ -20,7 +20,6 @@ interface UseTestRunnerReturn {
   currentTest: string | null;
   results: RunTestsResponse | null;
   error: string | null;
-  verboseMode: boolean;
   rawOutput: string | null;
   
   // Derived data
@@ -31,13 +30,13 @@ interface UseTestRunnerReturn {
     failed: number;
     passRate: number;
     duration: number;
+    lastRun: Date | null;
   };
   
   // Actions
   runTest: (testId: TestConfigId) => Promise<void>;
   runAll: () => Promise<void>;
   refresh: () => Promise<void>;
-  toggleVerbose: () => void;
 }
 
 /**
@@ -64,13 +63,14 @@ function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
  */
 function calculateMetrics(results: RunTestsResponse | null) {
   if (!results?.summary) {
-    return { total: 0, passed: 0, failed: 0, passRate: 0, duration: 0 };
+    return { total: 0, passed: 0, failed: 0, passRate: 0, duration: 0, lastRun: null };
   }
   
   const { total = 0, passed = 0, failed = 0, duration = 0 } = results.summary;
   const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+  const lastRun = results.timestamp ? new Date(results.timestamp) : null;
   
-  return { total, passed, failed, passRate, duration };
+  return { total, passed, failed, passRate, duration, lastRun };
 }
 
 export function useTestRunner(): UseTestRunnerReturn {
@@ -78,7 +78,6 @@ export function useTestRunner(): UseTestRunnerReturn {
   const [currentTest, setCurrentTest] = useState<string | null>(null);
   const [results, setResults] = useState<RunTestsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [verboseMode, setVerboseMode] = useState(false);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
 
   // Load cached results from backend on mount
@@ -104,7 +103,8 @@ export function useTestRunner(): UseTestRunnerReturn {
     setError(null);
     
     try {
-      const response = await runTests(testId, { verbose: verboseMode });
+      // Always request verbose output to show CLI results
+      const response = await runTests(testId, { verbose: true });
       setResults(response);
       if (response.rawOutput) setRawOutput(response.rawOutput);
     } catch (err) {
@@ -113,7 +113,7 @@ export function useTestRunner(): UseTestRunnerReturn {
       setIsRunning(false);
       setCurrentTest(null);
     }
-  }, [verboseMode]);
+  }, []);
 
   const runAll = useCallback(async () => {
     setIsRunning(true);
@@ -121,7 +121,8 @@ export function useTestRunner(): UseTestRunnerReturn {
     setError(null);
     
     try {
-      const response = await runAllTests({ verbose: verboseMode });
+      // Always request verbose output to show CLI results
+      const response = await runAllTests({ verbose: true });
       setResults(response);
       if (response.rawOutput) setRawOutput(response.rawOutput);
     } catch (err) {
@@ -130,7 +131,7 @@ export function useTestRunner(): UseTestRunnerReturn {
       setIsRunning(false);
       setCurrentTest(null);
     }
-  }, [verboseMode]);
+  }, []);
 
   const refresh = useCallback(async () => {
     try {
@@ -144,22 +145,16 @@ export function useTestRunner(): UseTestRunnerReturn {
     }
   }, []);
 
-  const toggleVerbose = useCallback(() => {
-    setVerboseMode(prev => !prev);
-  }, []);
-
   return {
     isRunning,
     currentTest,
     results,
     error,
-    verboseMode,
     rawOutput,
     autoTests: toAutoTests(results),
     metrics: calculateMetrics(results),
     runTest,
     runAll,
     refresh,
-    toggleVerbose,
   };
 }

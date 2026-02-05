@@ -1,17 +1,16 @@
 /**
- * Verbose Output Panel
- * Displays raw CLI output from test execution
+ * CLI Output Panel
+ * Displays raw CLI output from test execution - always visible when there's output
  */
-import React from 'react';
 import './VerboseOutput.css';
 
 interface VerboseOutputProps {
   output: string | null;
-  isVisible: boolean;
+  isVisible?: boolean; // kept for compatibility but not used
 }
 
-export const VerboseOutput: React.FC<VerboseOutputProps> = ({ output, isVisible }) => {
-  if (!isVisible || !output) return null;
+export function VerboseOutput({ output }: VerboseOutputProps) {
+  if (!output) return null;
 
   return (
     <div className="verbose-output">
@@ -22,4 +21,4 @@ export const VerboseOutput: React.FC<VerboseOutputProps> = ({ output, isVisible 
       <pre className="verbose-output__content">{output}</pre>
     </div>
   );
-};
+}

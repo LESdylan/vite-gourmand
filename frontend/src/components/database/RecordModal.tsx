@@ -108,9 +108,13 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Clean up the form data - remove empty strings for optional fields
+    // Clean up the form data - remove empty strings, undefined, and id fields
     const cleanedData: Record<string, unknown> = {};
     Object.entries(form).forEach(([key, value]) => {
+      // Skip id and primary key fields - backend doesn't accept them in body
+      if (key === 'id' || key.endsWith('_id') && columns.find(c => c.name === key)?.isPrimary) {
+        return;
+      }
       if (value !== '' && value !== undefined) {
         cleanedData[key] = value;
       }

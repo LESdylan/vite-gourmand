@@ -7,7 +7,6 @@ export { DevBoardHeader } from './DevBoardHeader';
 export { DevBoardSidebar } from './DevBoardSidebar';
 export { DevBoardContent } from './DevBoardContent';
 export { GradientBackground } from './GradientBackground';
-export { VerboseToggle } from './VerboseToggle';
 export { VerboseOutput } from './VerboseOutput';
 export { CheckboxList, useCheckboxList } from './CheckboxList';
 export { useDevBoard } from './useDevBoard';

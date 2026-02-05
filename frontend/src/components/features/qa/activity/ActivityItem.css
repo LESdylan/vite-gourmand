@@ -1,0 +1,68 @@
+/**
+ * ActivityItem Styles
+ * Activity entry with severity-based coloring
+ */
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease;
+}
+
+.activity-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Severity variants */
+.activity-item--info {
+  border-left-color: var(--color-primary);
+}
+
+.activity-item--success {
+  border-left-color: var(--color-success);
+}
+
+.activity-item--warning {
+  border-left-color: var(--color-warning);
+}
+
+.activity-item--error {
+  border-left-color: var(--color-danger);
+}
+
+.activity-item__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.activity-item__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-item__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.activity-item__desc {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.activity-item__time {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}

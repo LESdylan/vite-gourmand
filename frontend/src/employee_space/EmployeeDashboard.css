@@ -1,0 +1,73 @@
+/**
+ * Employee Dashboard Styles
+ */
+
+.employee-dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-primary);
+  position: relative;
+}
+
+.employee-dashboard-header {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.employee-dashboard-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.employee-dashboard-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Reuse sidebar-user styles from admin */
+.employee-dashboard .sidebar-user {
+  margin-top: auto;
+  padding: var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.employee-dashboard .sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.employee-dashboard .sidebar-user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.employee-dashboard .sidebar-user-role {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.employee-dashboard .sidebar-logout {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.employee-dashboard .sidebar-logout:hover {
+  opacity: 1;
+}

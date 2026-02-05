@@ -1,0 +1,48 @@
+/**
+ * Activity Styles
+ * Main container styles
+ */
+
+.activity {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.activity__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.activity__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.activity__refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.activity__refresh:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.activity__refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

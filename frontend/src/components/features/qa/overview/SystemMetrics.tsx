@@ -10,11 +10,12 @@ interface SystemMetricsProps {
   testCount: number;
   passRate: number;
   avgDuration: number;
-  lastRun: Date;
+  lastRun: Date | null;
 }
 
 export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: SystemMetricsProps) {
-  const formatTime = (date: Date) => {
+  const formatTime = (date: Date | null) => {
+    if (!date) return 'Never';
     return date.toLocaleTimeString('fr-FR', { 
       hour: '2-digit', 
       minute: '2-digit',

@@ -3,7 +3,6 @@
  * This file shows different ways to use the CheckboxList component
  */
 
-import React from 'react';
 import { CheckboxList, useCheckboxList, type CheckboxItem } from '../DevBoard';
 
 // Example 1: Basic usage
