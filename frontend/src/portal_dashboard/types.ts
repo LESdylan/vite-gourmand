@@ -3,7 +3,10 @@
  * Role-based access definitions
  */
 
-export type UserRole = 'developer' | 'admin' | 'employee';
+export type UserRole = 'superadmin' | 'admin' | 'employee' | 'customer';
+
+/** Bot identifiers for debugging */
+export type BotId = 'bot_admin' | 'bot_employee' | 'bot_user';
 
 export interface DashboardUser {
   id: number;
@@ -11,6 +14,7 @@ export interface DashboardUser {
   name: string;
   role: UserRole;
   avatar?: string;
+  isBot?: boolean;
 }
 
 export interface RememberMeData {
@@ -27,15 +31,28 @@ export interface PortalAuthState {
   error: string | null;
 }
 
+/** Bot users for debugging (superadmin only) */
+export const DEBUG_BOTS: Record<BotId, DashboardUser> = {
+  bot_admin: { id: -1, email: 'bot_admin@debug', name: 'Bot Admin', role: 'admin', isBot: true },
+  bot_employee: { id: -2, email: 'bot_employee@debug', name: 'Bot Employee', role: 'employee', isBot: true },
+  bot_user: { id: -3, email: 'bot_user@debug', name: 'Bot Customer', role: 'customer', isBot: true },
+};
+
 /** Role-based permissions */
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  developer: ['*'], // All access
-  admin: ['metrics', 'activity', 'database', 'logs', 'settings'],
-  employee: ['tasks', 'activity'],
+  superadmin: ['*'], // All access + debug tools
+  admin: ['metrics', 'activity', 'database', 'logs', 'settings', 'orders', 'users'],
+  employee: ['tasks', 'orders', 'activity'],
+  customer: [], // No dashboard access
 };
 
 /** Check if role has permission */
 export function hasPermission(role: UserRole, permission: string): boolean {
   const perms = ROLE_PERMISSIONS[role];
   return perms.includes('*') || perms.includes(permission);
+}
+
+/** Check if role can access dashboard */
+export function canAccessDashboard(role: UserRole): boolean {
+  return role !== 'customer';
 }

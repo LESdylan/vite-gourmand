@@ -91,7 +91,9 @@ export function usePortalAuth() {
 
 /** Map API role to dashboard role */
 function mapRole(apiRole: string): UserRole {
-  if (apiRole === 'admin') return 'admin';
-  if (apiRole === 'employee') return 'employee';
-  return 'developer'; // Default for client/dev roles
+  const normalizedRole = apiRole?.toLowerCase() || '';
+  if (normalizedRole === 'superadmin') return 'superadmin';
+  if (normalizedRole === 'admin') return 'admin';
+  if (normalizedRole === 'employee') return 'employee';
+  return 'customer'; // Default for client/customer roles
 }

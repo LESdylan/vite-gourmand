@@ -1,6 +1,6 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { PortalAuthProvider, ProtectedRoute, Unauthorized } from './portal_dashboard'
+import { PortalAuthProvider, ProtectedRoute, Unauthorized, DebugSwitcher } from './portal_dashboard'
 import './App.css'
 
 // Lazy load dashboards
@@ -43,17 +43,17 @@ function App() {
             
             {/* Role-based dashboards */}
             <Route path="/dev" element={
-              <ProtectedRoute allowedRoles={['developer']}>
+              <ProtectedRoute allowedRoles={['superadmin']}>
                 <DevBoard />
               </ProtectedRoute>
             } />
             <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['admin']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin']}>
                 <AdminDashboard />
               </ProtectedRoute>
             } />
             <Route path="/employee" element={
-              <ProtectedRoute allowedRoles={['employee']}>
+              <ProtectedRoute allowedRoles={['superadmin', 'admin', 'employee']}>
                 <EmployeeDashboard />
               </ProtectedRoute>
             } />
@@ -67,6 +67,9 @@ function App() {
             <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
             <Route path="/scenario/auth" element={<AuthScenario />} />
           </Routes>
+          
+          {/* Debug Switcher - only visible for superadmin */}
+          <DebugSwitcher />
         </Suspense>
       </PortalAuthProvider>
     </BrowserRouter>
