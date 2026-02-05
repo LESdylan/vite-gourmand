@@ -22,6 +22,7 @@ import { ThemeModule } from './theme';
 import { AllergenModule } from './allergen';
 import { CrudModule } from './crud/crud.module';
 import { MailModule } from './mail';
+import { LoggingModule, HttpLogInterceptor } from './logging';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -82,6 +83,8 @@ import {
     // Database
     PrismaModule,
     AnalyticsModule,
+    // Logging (real-time streaming)
+    LoggingModule,
     // Features
     AuthModule,
     MenuModule,
@@ -123,6 +126,10 @@ import {
       useClass: HttpExceptionFilter,
     },
     // Global Interceptors
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLogInterceptor,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
