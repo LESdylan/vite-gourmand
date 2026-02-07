@@ -1,3 +1,6 @@
+/* Tailwind CSS v4 */
+@import "tailwindcss";
+
 /* Import design system variables */
 @import './styles/graphical_chart.css';
 @import './styles/graphical_chart_part2.css';

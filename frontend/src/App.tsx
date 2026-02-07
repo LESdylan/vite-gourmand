@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from 'react'
+import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { PortalAuthProvider, ProtectedRoute, Unauthorized } from './portal_dashboard'
 import './App.css'
@@ -6,7 +6,7 @@ import './App.css'
 // Lazy load components
 const DevBoard = lazy(() => import('./components/DevBoard').then(m => ({ default: m.DevBoard })));
 const Portal = lazy(() => import('./portal_dashboard').then(m => ({ default: m.Portal })));
-const HomePage = lazy(() => import('./pages/Home'));
+const PublicSPA = lazy(() => import('./pages/PublicSPA'));
 
 // Lazy load scenario pages
 // const FormTestPage = lazy(() => import('./tests/form').then(m => ({ default: m.FormTestPage })));
@@ -31,20 +31,14 @@ function LoadingSpinner() {
   );
 }
 
-// Wrapper for HomePage with internal navigation state
-function HomePageWrapper() {
-  const [, setCurrentPage] = useState<'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv'>('home');
-  return <HomePage setCurrentPage={setCurrentPage} />;
-}
-
 function App() {
   return (
     <BrowserRouter>
       <PortalAuthProvider>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            {/* Public Home Page - Landing page for clients */}
-            <Route path="/" element={<HomePageWrapper />} />
+            {/* Public SPA - Landing page with internal navigation */}
+            <Route path="/" element={<PublicSPA />} />
             
             {/* Portal & Auth */}
             <Route path="/portal" element={<Portal />} />
