@@ -81,6 +81,10 @@ The project gives a certain amount of freedoms and requirements that I need foll
 - [manage OAuth app breanding ](https://support.google.com/cloud/answer/15549049?hl=fr&visit_id=639056608802274595-2425559031&rd=1#publishing-status)
 - [typescript docs](https://www.typescriptlang.org/docs/handbook/intro.html)
 - [Unsplash API](https://unsplash.com/documentation#public-authentication)
+- [RGPD](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/the-right-to-be-informed/checklists/)
+- [RGAA](https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/#2)
+
+
 ## Use Of AI
 **Documentation & Research** - Used to clarify ambiguities in edge cases where conventions differ and to research complex topics not detailed in standard textbooks, ensuring realistic solutinos within the project's scope.
 
