@@ -51,15 +51,30 @@
     font-size: inherit;
     line-height: inherit;
     cursor: pointer;
-    border: none;
-    background: none;
-    color: inherit;
   }
 
   button:focus-visible {
     outline: 2px solid var(--color-primary-500);
     outline-offset: 2px;
   }
+}
+
+/* IMPORTANT: These must be OUTSIDE @layer to have higher specificity than browser defaults */
+/* Reset link styles - components use inline styles or explicit color classes for their needs */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+
+/* Scale up on large displays for readability */
+@media (min-width: 1920px) {
+  html { font-size: 17px; }
+}
+@media (min-width: 2560px) {
+  html { font-size: 18px; }
 }
 
 /* Smooth scrolling */
@@ -71,19 +86,19 @@
 
 /* Custom scrollbar for modern look */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border-secondary);
-  border-radius: 4px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neutral-500);
+  background: rgba(0,0,0,0.25);
 }
