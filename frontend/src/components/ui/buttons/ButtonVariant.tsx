@@ -3,27 +3,44 @@ import {Slot} from "@radix-ui/react-slot";
 import {cva, type VariantProps} from "class-variance-authority";
 import { cn } from "../utils";
 
+/**
+ * Button variants following the graphical chart:
+ * - Deep Bordeaux (#722F37) - Primary actions
+ * - Champagne (#D4AF37) - Secondary/accent
+ * - Crème (#FFF8F0) - Light backgrounds
+ * - Vert olive (#556B2F) - Success states
+ * - Noir charbon (#1A1A1A) - Text/dark elements
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all duration-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "bg-orange-600 text-white hover:bg-orange-700",
-        destructive:
-          "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
-        outline:
-          "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900",
-        secondary:
-          "bg-gray-100 text-gray-900 hover:bg-gray-200",
-        ghost:
-          "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-        link: "text-orange-600 underline-offset-4 hover:underline",
+        // Primary - Deep Bordeaux
+        default: "bg-[#722F37] text-white hover:bg-[#5a252c] focus-visible:ring-[#722F37] shadow-lg shadow-[#722F37]/20 hover:shadow-[#722F37]/30",
+        // Champagne accent
+        champagne: "bg-[#D4AF37] text-[#1A1A1A] hover:bg-[#c9a431] focus-visible:ring-[#D4AF37] shadow-lg shadow-[#D4AF37]/20",
+        // Destructive
+        destructive: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500 shadow-lg shadow-red-500/20",
+        // Outline - Bordeaux border
+        outline: "border-2 border-[#722F37] bg-transparent text-[#722F37] hover:bg-[#722F37] hover:text-white focus-visible:ring-[#722F37]",
+        // Outline light - for dark backgrounds
+        outlineLight: "border-2 border-white/80 bg-transparent text-white hover:bg-white hover:text-[#1A1A1A] focus-visible:ring-white",
+        // Secondary - Light cream
+        secondary: "bg-[#FFF8F0] text-[#722F37] hover:bg-[#f5ede3] focus-visible:ring-[#722F37] border border-[#722F37]/10",
+        // Ghost
+        ghost: "text-[#1A1A1A] hover:bg-[#FFF8F0] hover:text-[#722F37] focus-visible:ring-[#722F37]",
+        // Link
+        link: "text-[#722F37] underline-offset-4 hover:underline focus-visible:ring-[#722F37]",
+        // Olive/Success
+        success: "bg-[#556B2F] text-white hover:bg-[#475a27] focus-visible:ring-[#556B2F] shadow-lg shadow-[#556B2F]/20",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9 rounded-md",
+        default: "h-11 px-6 py-2 text-sm rounded-lg",
+        sm: "h-9 px-4 py-2 text-sm rounded-lg",
+        lg: "h-12 px-8 py-3 text-base rounded-xl",
+        xl: "h-14 px-10 py-4 text-lg rounded-xl",
+        icon: "size-10 rounded-lg",
       },
     },
     defaultVariants: {

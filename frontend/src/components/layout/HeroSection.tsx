@@ -1,4 +1,5 @@
-import { ArrowRight, Play } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowRight, Phone, Star, Award, Users, ChefHat, Calendar, Sparkles } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface HeroSectionProps {
@@ -6,83 +7,257 @@ interface HeroSectionProps {
   onContact: () => void;
 }
 
+/**
+ * HeroSection - Premium landing section with smooth animations
+ * 
+ * Color scheme from graphical chart:
+ * - Deep Bordeaux (#722F37) - Primary brand color
+ * - Champagne (#D4AF37) - Accent/highlights
+ * - Crème (#FFF8F0) - Light backgrounds
+ * - Vert olive (#556B2F) - Success/natural
+ * - Noir charbon (#1A1A1A) - Text
+ */
 export default function HeroSection({ onExploreMenus, onContact }: HeroSectionProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image with Overlay */}
+    <section className="relative min-h-[100svh] flex items-center overflow-hidden bg-[#1A1A1A]">
+      {/* Background Image with parallax effect */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
         style={{
           backgroundImage: `url('https://images.unsplash.com/photo-1555244162-803834f70033?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXRlcmluZyUyMGVsZWdhbnQlMjBmb29kfGVufDF8fHx8MTc3MDExMzI3Nnww&ixlib=rb-4.1.0&q=80&w=1920')`
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-orange-900/40" />
+        {/* Multi-layer overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A] via-[#1A1A1A]/85 to-[#1A1A1A]/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-[#1A1A1A]/40" />
+        <div className="absolute inset-0 bg-[#722F37]/10 mix-blend-multiply" />
+      </div>
+
+      {/* Animated decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className={`absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-[#D4AF37]/8 rounded-full blur-[100px] transition-all duration-1000 ${
+            mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+          }`}
+          style={{ transitionDelay: '300ms' }}
+        />
+        <div 
+          className={`absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-[#722F37]/15 rounded-full blur-[100px] transition-all duration-1000 ${
+            mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+          }`}
+          style={{ transitionDelay: '500ms' }}
+        />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 text-center">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-orange-500/20 backdrop-blur-md border border-orange-400/30 rounded-full px-4 sm:px-6 py-2 sm:py-3 mb-6 sm:mb-8">
-          <span className="w-2 h-2 sm:w-3 sm:h-3 bg-orange-500 rounded-full animate-pulse" />
-          <span className="text-orange-100 text-xs sm:text-sm font-medium tracking-wide">Traiteur à Bordeaux depuis 25 ans</span>
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-16 sm:pb-20">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left column - Text content (7 cols) */}
+          <div className="lg:col-span-7 space-y-6 sm:space-y-8">
+            {/* Badge */}
+            <div 
+              className={`inline-flex items-center gap-2 sm:gap-3 bg-[#D4AF37]/15 backdrop-blur-md border border-[#D4AF37]/30 rounded-full px-4 py-2 transition-all duration-700 ${
+                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+            >
+              <Sparkles className="w-4 h-4 text-[#D4AF37] animate-pulse" />
+              <span className="text-[#D4AF37] text-xs sm:text-sm font-medium tracking-wide">
+                Traiteur d'exception à Bordeaux
+              </span>
+            </div>
+
+            {/* Main title */}
+            <div 
+              className={`space-y-3 sm:space-y-4 transition-all duration-700 ${
+                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+              style={{ transitionDelay: '150ms' }}
+            >
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+                <span className="block">L'art de la</span>
+                <span className="block bg-gradient-to-r from-[#D4AF37] to-[#f0d78c] bg-clip-text text-transparent">
+                  gastronomie
+                </span>
+                <span className="block">française</span>
+              </h1>
+              <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-[#722F37] to-[#D4AF37] rounded-full" />
+            </div>
+
+            {/* Subtitle */}
+            <p 
+              className={`text-base sm:text-lg text-white/75 max-w-xl leading-relaxed transition-all duration-700 ${
+                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+              style={{ transitionDelay: '300ms' }}
+            >
+              Julie et José mettent leur <span className="text-[#D4AF37] font-medium">25 années d'expertise</span> au service de vos événements. 
+              Une cuisine raffinée, des moments inoubliables.
+            </p>
+
+            {/* CTA Buttons */}
+            <div 
+              className={`flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 transition-all duration-700 ${
+                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+              style={{ transitionDelay: '450ms' }}
+            >
+              <Button
+                onClick={onExploreMenus}
+                size="lg"
+                className="group w-full sm:w-auto justify-center text-sm sm:text-base h-12 sm:h-14 px-6 sm:px-8"
+              >
+                Découvrir nos menus
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+              <Button
+                onClick={onContact}
+                variant="outlineLight"
+                size="lg"
+                className="w-full sm:w-auto justify-center text-sm sm:text-base h-12 sm:h-14 px-6 sm:px-8"
+              >
+                <Phone className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                Nous contacter
+              </Button>
+            </div>
+
+            {/* Trust indicators */}
+            <div 
+              className={`flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 pt-4 sm:pt-6 transition-all duration-700 ${
+                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+              style={{ transitionDelay: '600ms' }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex -space-x-2.5">
+                  {['JD', 'ML', 'PB', 'AS'].map((initials, i) => (
+                    <div 
+                      key={i} 
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#1A1A1A] bg-gradient-to-br from-[#D4AF37]/90 to-[#722F37] flex items-center justify-center text-white text-xs font-medium shadow-lg"
+                    >
+                      {initials}
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37] fill-[#D4AF37]" />
+                    ))}
+                    <span className="text-white/80 text-sm ml-1.5">4.9/5</span>
+                  </div>
+                  <p className="text-white/50 text-xs sm:text-sm">+500 avis clients vérifiés</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right column - Stats cards (5 cols) */}
+          <div 
+            className={`lg:col-span-5 hidden lg:block transition-all duration-1000 ${
+              mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+            }`}
+            style={{ transitionDelay: '400ms' }}
+          >
+            <div className="relative">
+              {/* Decorative circles */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-72 h-72 border border-[#D4AF37]/15 rounded-full animate-[spin_20s_linear_infinite]" />
+                <div className="absolute w-96 h-96 border border-[#D4AF37]/8 rounded-full animate-[spin_30s_linear_infinite_reverse]" />
+              </div>
+              
+              <div className="relative grid grid-cols-2 gap-4">
+                {/* Stat card 1 */}
+                <div className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                  <div className="w-11 h-11 bg-[#D4AF37]/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <Award className="w-5 h-5 text-[#D4AF37]" />
+                  </div>
+                  <div className="text-3xl font-bold text-white mb-0.5">25+</div>
+                  <p className="text-white/50 text-sm">Années d'expérience</p>
+                </div>
+
+                {/* Stat card 2 */}
+                <div className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1 mt-8">
+                  <div className="w-11 h-11 bg-[#722F37]/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <Calendar className="w-5 h-5 text-[#FFF8F0]" />
+                  </div>
+                  <div className="text-3xl font-bold text-white mb-0.5">2000+</div>
+                  <p className="text-white/50 text-sm">Événements réalisés</p>
+                </div>
+
+                {/* Stat card 3 */}
+                <div className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                  <div className="w-11 h-11 bg-[#556B2F]/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-5 h-5 text-[#8fad6a]" />
+                  </div>
+                  <div className="text-3xl font-bold text-white mb-0.5">98%</div>
+                  <p className="text-white/50 text-sm">Clients satisfaits</p>
+                </div>
+
+                {/* Testimonial card */}
+                <div className="group bg-gradient-to-br from-[#722F37] to-[#5a252c] rounded-2xl p-5 mt-8 shadow-xl shadow-[#722F37]/25 hover:shadow-[#722F37]/40 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                  <div className="flex items-center gap-1 mb-2">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Star key={i} className="w-3 h-3 text-[#D4AF37] fill-[#D4AF37]" />
+                    ))}
+                  </div>
+                  <p className="text-white/90 text-sm mb-3 leading-relaxed line-clamp-3">
+                    "Un service exceptionnel du début à la fin. Merci pour ce mariage de rêve !"
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-[#D4AF37]/30 flex items-center justify-center text-white text-xs font-medium">
+                      MD
+                    </div>
+                    <span className="text-white/60 text-xs">Marie D. - Mariage 2025</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Title */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight tracking-tight">
-          Vite & <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Gourmand</span>
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-lg sm:text-xl md:text-2xl text-gray-100 mb-3 sm:mb-4 max-w-3xl mx-auto font-light">
-          Votre traiteur de confiance pour des événements inoubliables
-        </p>
-
-        <p className="text-sm sm:text-base md:text-lg text-gray-300 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
-          Julie et José mettent leur savoir-faire au service de vos événements pour créer des moments mémorables autour d'une cuisine raffinée et généreuse.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-16">
-          <Button
-            onClick={onExploreMenus}
-            size="lg"
-            className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 sm:px-10 py-4 sm:py-6 text-base sm:text-lg rounded-full shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300"
-          >
-            Découvrir nos menus
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <Button
-            onClick={onContact}
-            variant="outline"
-            size="lg"
-            className="w-full sm:w-auto border-2 border-white/40 text-white hover:bg-white/10 hover:border-white/60 px-6 sm:px-10 py-4 sm:py-6 text-base sm:text-lg rounded-full backdrop-blur-sm transition-all duration-300"
-          >
-            <Play className="mr-2 h-5 w-5" />
-            Nous contacter
-          </Button>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-xl sm:max-w-2xl mx-auto">
-          <div className="text-center p-3 sm:p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
-            <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-500">25+</div>
-            <div className="text-gray-300 text-xs sm:text-sm mt-1">Années d'expérience</div>
-          </div>
-          <div className="text-center p-3 sm:p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
-            <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-500">2000+</div>
-            <div className="text-gray-300 text-xs sm:text-sm mt-1">Événements réalisés</div>
-          </div>
-          <div className="text-center p-3 sm:p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
-            <div className="text-2xl sm:text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-500">98%</div>
-            <div className="text-gray-300 text-xs sm:text-sm mt-1">Clients satisfaits</div>
-          </div>
+        {/* Mobile stats row */}
+        <div 
+          className={`lg:hidden mt-10 sm:mt-12 grid grid-cols-3 gap-3 transition-all duration-700 ${
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}
+          style={{ transitionDelay: '700ms' }}
+        >
+          {[
+            { value: '25+', label: 'Années', icon: Award },
+            { value: '2000+', label: 'Événements', icon: Calendar },
+            { value: '98%', label: 'Satisfaits', icon: Users },
+          ].map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div 
+                key={index}
+                className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10"
+              >
+                <Icon className="w-5 h-5 text-[#D4AF37] mx-auto mb-2" />
+                <div className="text-xl sm:text-2xl font-bold text-white">{stat.value}</div>
+                <div className="text-white/50 text-xs mt-0.5">{stat.label}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Scroll indicator - hidden on mobile */}
-      <div className="hidden sm:block absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white/50 rounded-full mt-2 animate-pulse" />
+      {/* Scroll indicator */}
+      <div 
+        className={`absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 hidden sm:flex transition-all duration-700 ${
+          mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        }`}
+        style={{ transitionDelay: '800ms' }}
+      >
+        <span className="text-white/30 text-[10px] tracking-[0.2em] uppercase">Scroll</span>
+        <div className="w-5 h-8 border border-white/20 rounded-full flex justify-center">
+          <div className="w-1 h-2.5 bg-[#D4AF37] rounded-full mt-1.5 animate-bounce" />
         </div>
       </div>
     </section>

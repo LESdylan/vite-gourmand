@@ -72,8 +72,8 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation - always visible */}
+    <div className="min-h-screen bg-[#FFF8F0]">
+      {/* Navigation - always visible, fixed position */}
       <Navbar
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
@@ -82,7 +82,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
       />
       
       {/* Main content - changes based on currentPage */}
-      <main>
+      <main className={currentPage === 'home' ? '' : 'pt-16 sm:pt-20'}>
         {renderPage()}
       </main>
     </div>

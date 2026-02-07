@@ -1,5 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Star, ArrowRight, ChefHat, Award, Heart, Clock, Quote } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { 
+  Star, ArrowRight, ChefHat, Award, Heart, Clock, 
+  Quote, Utensils, Users, Leaf, ChevronLeft, ChevronRight,
+  Sparkles, MapPin, Check
+} from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import HeroSection from '../components/layout/HeroSection';
@@ -7,17 +11,6 @@ import Footer from '../components/layout/Footer';
 
 // Page types for internal navigation
 export type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
-
-// User type for authentication
-export type User = {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  address?: string;
-  role: 'user' | 'employee' | 'admin';
-};
 
 type HomePageProps = {
   setCurrentPage: (page: Page) => void;
@@ -29,58 +22,114 @@ type Review = {
   rating: number;
   text: string;
   createdAt: string;
+  eventType?: string;
 };
 
-function featuresSection() {
+/**
+ * HomePage - Premium landing page with smooth animations
+ * 
+ * Color scheme from graphical chart:
+ * - Deep Bordeaux (#722F37) - Primary brand color
+ * - Champagne (#D4AF37) - Accent/highlights
+ * - Crème (#FFF8F0) - Light backgrounds
+ * - Vert olive (#556B2F) - Success/natural
+ * - Noir charbon (#1A1A1A) - Text
+ */
+
+// ========================================
+// FEATURES SECTION
+// ========================================
+function FeaturesSection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   const features = [
     {
       icon: ChefHat,
-      title: 'Expertise depuis 25 ans',
-      description: 'Julie et José vous proposent une cuisine raffinée et authentique, fruit de 25 années d\'expérience.',
-      gradient: 'from-orange-500 to-red-500'
+      title: 'Expertise culinaire',
+      description: '25 années d\'expérience au service de votre palais. Une cuisine raffinée et authentique.',
+      color: '#722F37'
     },
     {
       icon: Award,
-      title: 'Professionnalisme',
-      description: 'Une équipe dédiée et passionnée qui met tout en œuvre pour la réussite de vos événements.',
-      gradient: 'from-blue-500 to-indigo-500'
+      title: 'Excellence',
+      description: 'Des produits frais et de saison, sélectionnés avec soin auprès de producteurs locaux.',
+      color: '#D4AF37'
     },
     {
       icon: Heart,
       title: 'Sur mesure',
-      description: 'Des menus personnalisables pour tous vos événements : mariages, anniversaires, réceptions professionnelles.',
-      gradient: 'from-pink-500 to-rose-500'
+      description: 'Chaque menu est personnalisé selon vos envies, votre budget et le thème de votre événement.',
+      color: '#722F37'
     },
     {
       icon: Clock,
-      title: 'Service réactif',
-      description: 'Une écoute attentive et une disponibilité pour répondre à toutes vos demandes.',
-      gradient: 'from-green-500 to-emerald-500'
+      title: 'Réactivité',
+      description: 'Une équipe disponible et à l\'écoute pour répondre à toutes vos demandes rapidement.',
+      color: '#556B2F'
     }
   ];
 
   return (
-    <section className="py-16 sm:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 sm:mb-16">
-          <span className="inline-block px-4 py-1 bg-orange-100 text-orange-600 rounded-full text-sm font-medium mb-4">Nos atouts</span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Pourquoi nous choisir ?</h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-            Une équipe professionnelle au service de vos événements
+    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-[#FFF8F0]">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        {/* Section header */}
+        <div 
+          className={`text-center max-w-2xl mx-auto mb-12 sm:mb-16 transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <div className="inline-flex items-center gap-2 bg-[#722F37]/10 rounded-full px-4 py-2 mb-4 sm:mb-6">
+            <Utensils className="w-4 h-4 text-[#722F37]" />
+            <span className="text-[#722F37] text-xs sm:text-sm font-medium">Nos engagements</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-4 sm:mb-5 leading-tight">
+            Pourquoi choisir <span className="text-[#722F37]">Vite & Gourmand</span> ?
+          </h2>
+          <p className="text-sm sm:text-base text-[#1A1A1A]/60 leading-relaxed">
+            Notre passion pour la gastronomie et notre engagement envers l'excellence 
+            font de chaque événement un moment unique.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        {/* Features grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card key={index} className="group border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
-                <CardContent className="p-6 sm:p-8 text-center">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${feature.gradient} rounded-2xl mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+              <Card 
+                key={index} 
+                className={`group bg-white border-0 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden rounded-2xl ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
+                <CardContent className="p-6 sm:p-8">
+                  <div 
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 transition-transform duration-300 group-hover:scale-110"
+                    style={{ backgroundColor: `${feature.color}12` }}
+                  >
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: feature.color }} />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-2 sm:mb-3">{feature.title}</h3>
+                  <p className="text-sm text-[#1A1A1A]/60 leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             );
@@ -91,43 +140,111 @@ function featuresSection() {
   );
 }
 
-function teamSection(setCurrentPage: (page: Page) => void) {
+// ========================================
+// ABOUT SECTION
+// ========================================
+function AboutSection({ setCurrentPage }: { setCurrentPage: (page: Page) => void }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-16 sm:py-24 bg-gradient-to-br from-gray-50 to-orange-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-          <div className="relative order-2 lg:order-1">
+          {/* Image column */}
+          <div 
+            className={`relative order-2 lg:order-1 transition-all duration-1000 ${
+              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
+            }`}
+          >
             <div className="relative z-10">
               <img
-                src="https://images.unsplash.com/photo-1767785990437-dfe1fe516fe8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjaGVmJTIwdGVhbXxlbnwxfHx8fDE3NzAxMjY5NjR8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                alt="Notre équipe professionnelle"
-                className="rounded-2xl shadow-2xl w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover"
+                src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800"
+                alt="Julie et José - Notre équipe"
+                className="rounded-2xl sm:rounded-3xl shadow-2xl w-full h-[280px] sm:h-[350px] lg:h-[450px] object-cover"
               />
+              {/* Floating card */}
+              <div className="absolute -bottom-4 -right-4 sm:bottom-6 sm:right-6 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-5 max-w-[160px] sm:max-w-[180px]">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#D4AF37]/20 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <Award className="w-4 h-4 sm:w-5 sm:h-5 text-[#D4AF37]" />
+                  </div>
+                  <span className="text-2xl sm:text-3xl font-bold text-[#722F37]">25</span>
+                </div>
+                <p className="text-xs sm:text-sm text-[#1A1A1A]/60">Années d'expérience</p>
+              </div>
             </div>
             {/* Decorative elements */}
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 sm:w-32 sm:h-32 bg-orange-500 rounded-2xl -z-10 hidden sm:block" />
-            <div className="absolute -top-4 -left-4 w-16 h-16 sm:w-24 sm:h-24 bg-orange-200 rounded-2xl -z-10 hidden sm:block" />
+            <div className="absolute -bottom-6 -left-6 w-32 sm:w-48 h-32 sm:h-48 bg-[#722F37]/8 rounded-2xl sm:rounded-3xl -z-10 hidden lg:block" />
+            <div className="absolute -top-6 -right-6 w-24 sm:w-32 h-24 sm:h-32 bg-[#D4AF37]/15 rounded-2xl sm:rounded-3xl -z-10 hidden lg:block" />
           </div>
-          <div className="order-1 lg:order-2">
-            <span className="inline-block px-4 py-1 bg-orange-100 text-orange-600 rounded-full text-sm font-medium mb-4">Notre histoire</span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">Une passion<br />transmise depuis<br /><span className="text-orange-600">25 ans</span></h2>
-            <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
-              Fondée il y a 25 ans à Bordeaux par Julie et José, Vite & Gourmand est née d'une passion commune pour la gastronomie et le service.
-            </p>
-            <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
-              Notre duo complémentaire allie créativité culinaire et sens du détail pour offrir des prestations sur mesure qui subliment vos événements.
-            </p>
-            <p className="text-base sm:text-lg text-gray-700 mb-8 leading-relaxed">
-              Chaque menu est conçu avec soin, en utilisant des produits frais et de saison, pour garantir une expérience gustative mémorable.
-            </p>
-            <Button
-              onClick={() => setCurrentPage('contact')}
-              variant="outline"
-              className="border-2 border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white px-6 sm:px-8 py-3 rounded-full transition-all duration-300"
-            >
-              Contactez-nous
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+
+          {/* Text column */}
+          <div 
+            className={`order-1 lg:order-2 space-y-5 sm:space-y-6 transition-all duration-1000 ${
+              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+            }`}
+            style={{ transitionDelay: '200ms' }}
+          >
+            <div className="inline-flex items-center gap-2 bg-[#D4AF37]/10 rounded-full px-4 py-2">
+              <Heart className="w-4 h-4 text-[#D4AF37]" />
+              <span className="text-[#D4AF37] text-xs sm:text-sm font-medium">Notre histoire</span>
+            </div>
+            
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] leading-tight">
+              Une passion<br />
+              <span className="text-[#722F37]">transmise</span> depuis<br />
+              deux générations
+            </h2>
+            
+            <div className="w-12 sm:w-16 h-1 bg-gradient-to-r from-[#722F37] to-[#D4AF37] rounded-full" />
+            
+            <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-[#1A1A1A]/70 leading-relaxed">
+              <p>
+                Fondée il y a 25 ans à Bordeaux par <strong className="text-[#1A1A1A]">Julie et José</strong>, 
+                Vite & Gourmand est née d'une passion commune pour la gastronomie.
+              </p>
+              <p>
+                Notre duo allie créativité culinaire et sens du détail pour offrir 
+                des prestations sur mesure qui subliment vos événements.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 sm:pt-4">
+              <Button
+                onClick={() => setCurrentPage('contact')}
+                size="default"
+                className="w-full sm:w-auto justify-center"
+              >
+                Nous rencontrer
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+              <Button
+                onClick={() => setCurrentPage('menu')}
+                variant="outline"
+                size="default"
+                className="w-full sm:w-auto justify-center"
+              >
+                Voir nos menus
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -135,57 +252,296 @@ function teamSection(setCurrentPage: (page: Page) => void) {
   );
 }
 
-function reviewsSection(reviews: Review[], loading: boolean) {
+// ========================================
+// SERVICES SECTION
+// ========================================
+function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => void }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const services = [
+    {
+      title: 'Mariages',
+      description: 'De l\'apéritif au dessert, un menu sur mesure pour le plus beau jour.',
+      image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600',
+      persons: '30 - 300 personnes'
+    },
+    {
+      title: 'Événements d\'entreprise',
+      description: 'Séminaires, cocktails, team building... Impressionnez vos collaborateurs.',
+      image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600',
+      persons: '10 - 200 personnes'
+    },
+    {
+      title: 'Réceptions privées',
+      description: 'Anniversaires, baptêmes, communions... Des moments de partage inoubliables.',
+      image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600',
+      persons: '10 - 100 personnes'
+    }
+  ];
+
   return (
-    <section className="py-16 sm:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 sm:mb-16">
-          <span className="inline-block px-4 py-1 bg-orange-100 text-orange-600 rounded-full text-sm font-medium mb-4">Témoignages</span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Avis de nos clients</h2>
-          <p className="text-lg sm:text-xl text-gray-600">
-            Ce qu'ils disent de nous
+    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-[#1A1A1A]">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        {/* Section header */}
+        <div 
+          className={`text-center max-w-2xl mx-auto mb-10 sm:mb-14 transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <div className="inline-flex items-center gap-2 bg-[#D4AF37]/15 rounded-full px-4 py-2 mb-4 sm:mb-6">
+            <Users className="w-4 h-4 text-[#D4AF37]" />
+            <span className="text-[#D4AF37] text-xs sm:text-sm font-medium">Nos prestations</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 sm:mb-5">
+            Un service adapté à <span className="text-[#D4AF37]">chaque occasion</span>
+          </h2>
+          <p className="text-sm sm:text-base text-white/50">
+            Quel que soit votre événement, nous avons la solution pour vous régaler.
+          </p>
+        </div>
+
+        {/* Services grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          {services.map((service, index) => (
+            <div 
+              key={index}
+              className={`group relative overflow-hidden rounded-2xl sm:rounded-3xl cursor-pointer transition-all duration-700 ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              }`}
+              style={{ transitionDelay: `${index * 150}ms` }}
+              onClick={() => setCurrentPage('menu')}
+            >
+              <div className="aspect-[4/5] sm:aspect-[3/4] relative">
+                <img
+                  src={service.image}
+                  alt={service.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-[#1A1A1A]/50 to-transparent" />
+                
+                {/* Content */}
+                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                  <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 mb-3">
+                    <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#D4AF37]" />
+                    <span className="text-white/80 text-xs">{service.persons}</span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{service.title}</h3>
+                  <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 line-clamp-2">{service.description}</p>
+                  <div className="flex items-center text-[#D4AF37] text-sm font-medium group-hover:gap-3 gap-2 transition-all">
+                    <span>Découvrir</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ========================================
+// TESTIMONIALS CAROUSEL
+// ========================================
+function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading: boolean }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Auto-advance carousel
+  useEffect(() => {
+    if (!isAutoPlaying || reviews.length === 0 || !isVisible) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % reviews.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, reviews.length, isVisible]);
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+    setIsAutoPlaying(false);
+  };
+
+  const goToPrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
+    setIsAutoPlaying(false);
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % reviews.length);
+    setIsAutoPlaying(false);
+  };
+
+  return (
+    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-[#FFF8F0] overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        {/* Section header */}
+        <div 
+          className={`text-center max-w-2xl mx-auto mb-10 sm:mb-14 transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
+          <div className="inline-flex items-center gap-2 bg-[#722F37]/10 rounded-full px-4 py-2 mb-4 sm:mb-6">
+            <Quote className="w-4 h-4 text-[#722F37]" />
+            <span className="text-[#722F37] text-xs sm:text-sm font-medium">Témoignages</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-4 sm:mb-5">
+            Ce que nos <span className="text-[#722F37]">clients</span> disent
+          </h2>
+          <p className="text-sm sm:text-base text-[#1A1A1A]/60">
+            La satisfaction de nos clients est notre plus belle récompense.
           </p>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-orange-200 border-t-orange-600"></div>
+            <div className="w-10 h-10 border-3 border-[#722F37]/20 border-t-[#722F37] rounded-full animate-spin" />
           </div>
         ) : reviews.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {reviews.slice(0, 6).map((review) => (
-              <Card key={review.id} className="group border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-white to-orange-50/30">
-                <CardContent className="p-6 sm:p-8">
-                  <Quote className="h-8 w-8 text-orange-200 mb-4" />
-                  <div className="flex items-center mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < review.rating ? 'text-amber-400 fill-amber-400' : 'text-gray-200'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-6 italic leading-relaxed">"{review.text}"</p>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold">
-                        {review.userName.charAt(0)}
-                      </div>
-                      <p className="font-semibold text-gray-900">{review.userName}</p>
+          <div 
+            className={`relative transition-all duration-700 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+            style={{ transitionDelay: '200ms' }}
+          >
+            {/* Carousel container */}
+            <div 
+              className="overflow-hidden"
+              onMouseEnter={() => setIsAutoPlaying(false)}
+              onMouseLeave={() => setIsAutoPlaying(true)}
+            >
+              <div 
+                className="flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+              >
+                {reviews.map((review) => (
+                  <div 
+                    key={review.id} 
+                    className="w-full flex-shrink-0 px-2 sm:px-4"
+                  >
+                    <div className="max-w-3xl mx-auto">
+                      <Card className="bg-white border-0 shadow-lg sm:shadow-xl rounded-2xl sm:rounded-3xl overflow-hidden">
+                        <CardContent className="p-6 sm:p-10 lg:p-12">
+                          {/* Quote icon */}
+                          <Quote className="w-8 h-8 sm:w-10 sm:h-10 text-[#D4AF37]/25 mb-4 sm:mb-6" />
+                          
+                          {/* Stars */}
+                          <div className="flex items-center gap-1 mb-4 sm:mb-6">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                                  i < review.rating 
+                                    ? 'text-[#D4AF37] fill-[#D4AF37]' 
+                                    : 'text-[#D4AF37]/20'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          
+                          {/* Review text */}
+                          <blockquote className="text-lg sm:text-xl lg:text-2xl text-[#1A1A1A] font-medium leading-relaxed mb-6 sm:mb-8">
+                            "{review.text}"
+                          </blockquote>
+                          
+                          {/* Author */}
+                          <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#722F37] to-[#D4AF37] flex items-center justify-center text-white text-base sm:text-lg font-bold">
+                              {review.userName.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-[#1A1A1A] text-sm sm:text-base">{review.userName}</p>
+                              <p className="text-[#1A1A1A]/50 text-xs sm:text-sm">
+                                {review.eventType || 'Client vérifié'} • {new Date(review.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
-                    <p className="text-sm text-gray-500">
-                      {new Date(review.createdAt).toLocaleDateString('fr-FR')}
-                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
+              <button
+                onClick={goToPrev}
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white shadow-lg flex items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white transition-all duration-300"
+                aria-label="Avis précédent"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              
+              {/* Dots */}
+              <div className="flex items-center gap-2">
+                {reviews.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToSlide(index)}
+                    className={`transition-all duration-300 rounded-full ${
+                      index === currentIndex 
+                        ? 'w-6 sm:w-8 h-2 bg-[#722F37]' 
+                        : 'w-2 h-2 bg-[#722F37]/25 hover:bg-[#722F37]/40'
+                    }`}
+                    aria-label={`Aller à l'avis ${index + 1}`}
+                  />
+                ))}
+              </div>
+              
+              <button
+                onClick={goToNext}
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white shadow-lg flex items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white transition-all duration-300"
+                aria-label="Avis suivant"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-600">Aucun avis pour le moment. Soyez le premier à nous évaluer !</p>
+            <p className="text-[#1A1A1A]/60 text-sm">Aucun avis pour le moment.</p>
           </div>
         )}
       </div>
@@ -193,34 +549,208 @@ function reviewsSection(reviews: Review[], loading: boolean) {
   );
 }
 
-function ctaSection(setCurrentPage: (page: Page) => void) {
+// ========================================
+// VALUES SECTION
+// ========================================
+function ValuesSection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const values = [
+    {
+      icon: Leaf,
+      title: 'Produits locaux',
+      description: 'Nous privilégions les circuits courts et les producteurs de la région bordelaise.'
+    },
+    {
+      icon: Heart,
+      title: 'Fait maison',
+      description: 'Toutes nos préparations sont réalisées dans notre cuisine, avec passion.'
+    },
+    {
+      icon: Award,
+      title: 'Qualité premium',
+      description: 'Des ingrédients sélectionnés avec soin pour une qualité irréprochable.'
+    }
+  ];
+
   return (
-    <section className="py-16 sm:py-24 relative overflow-hidden">
+    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-white">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+          {/* Values list */}
+          <div 
+            className={`space-y-5 sm:space-y-6 transition-all duration-1000 ${
+              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
+            }`}
+          >
+            <div className="inline-flex items-center gap-2 bg-[#556B2F]/10 rounded-full px-4 py-2">
+              <Leaf className="w-4 h-4 text-[#556B2F]" />
+              <span className="text-[#556B2F] text-xs sm:text-sm font-medium">Nos valeurs</span>
+            </div>
+            
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] leading-tight">
+              L'engagement d'une<br />
+              <span className="text-[#556B2F]">cuisine responsable</span>
+            </h2>
+
+            <div className="space-y-4 sm:space-y-5">
+              {values.map((value, index) => {
+                const Icon = value.icon;
+                return (
+                  <div 
+                    key={index} 
+                    className={`flex gap-4 transition-all duration-700 ${
+                      isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+                    }`}
+                    style={{ transitionDelay: `${(index + 1) * 150}ms` }}
+                  >
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 bg-[#556B2F]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-[#556B2F]" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-[#1A1A1A] text-base sm:text-lg mb-1">{value.title}</h3>
+                      <p className="text-sm text-[#1A1A1A]/60 leading-relaxed">{value.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Image */}
+          <div 
+            className={`relative transition-all duration-1000 ${
+              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+            }`}
+            style={{ transitionDelay: '300ms' }}
+          >
+            <img
+              src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=600"
+              alt="Produits frais et locaux"
+              className="rounded-2xl sm:rounded-3xl shadow-xl w-full h-[280px] sm:h-[350px] lg:h-[400px] object-cover"
+              loading="lazy"
+            />
+            <div className="absolute -bottom-4 -left-4 sm:-bottom-5 sm:-left-5 bg-[#556B2F] text-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-xl">
+              <div className="text-2xl sm:text-3xl font-bold mb-0.5">100%</div>
+              <p className="text-white/80 text-xs sm:text-sm">Produits frais<br />et de saison</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ========================================
+// CTA SECTION
+// ========================================
+function CTASection({ setCurrentPage }: { setCurrentPage: (page: Page) => void }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section ref={sectionRef} className="py-24 sm:py-32 lg:py-40 relative overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-600 via-orange-500 to-red-500" />
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJjMCAwIDItMiAyLTQgMCAyIDIgNCAyIDRzMiAyIDQgMmMwIDAtMiAyLTIgNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#722F37] via-[#722F37] to-[#5a252c]" />
       
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">Prêt à organiser votre événement ?</h2>
-        <p className="text-lg sm:text-xl text-orange-100 mb-8 sm:mb-10 max-w-2xl mx-auto">
-          Découvrez nos menus variés et passez commande en quelques clics pour créer un moment inoubliable
+      {/* Decorative patterns */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-0 left-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-white rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+        <div className="absolute bottom-0 right-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-[#D4AF37] rounded-full blur-[100px] translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDelay: '1s', animationDuration: '3s' }} />
+      </div>
+      
+      <div 
+        className={`relative z-10 max-w-4xl mx-auto px-8 sm:px-12 lg:px-16 text-center transition-all duration-1000 ease-out ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+        }`}
+      >
+        <div 
+          className={`inline-flex items-center gap-3 bg-white/15 backdrop-blur-md rounded-full px-6 py-3 mb-10 sm:mb-12 border border-white/20 transition-all duration-700 ${
+            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+          }`}
+          style={{ transitionDelay: '200ms' }}
+        >
+          <Sparkles className="w-5 h-5 text-[#D4AF37] animate-pulse" />
+          <span className="text-white text-sm sm:text-base font-medium">Prêt à vous régaler ?</span>
+        </div>
+        
+        <h2 
+          className={`text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-8 sm:mb-10 leading-tight transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}
+          style={{ transitionDelay: '300ms' }}
+        >
+          Organisons ensemble votre<br />
+          <span className="text-[#D4AF37] inline-block mt-3">prochain événement</span>
+        </h2>
+        
+        <p 
+          className={`text-base sm:text-lg lg:text-xl text-white/80 mb-12 sm:mb-14 max-w-2xl mx-auto leading-relaxed transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}
+          style={{ transitionDelay: '400ms' }}
+        >
+          Découvrez nos menus variés et laissez-nous créer une expérience 
+          culinaire sur mesure pour votre occasion spéciale.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        
+        <div 
+          className={`flex flex-col sm:flex-row gap-5 sm:gap-6 justify-center transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}
+          style={{ transitionDelay: '500ms' }}
+        >
           <Button
             onClick={() => setCurrentPage('menu')}
-            size="lg"
-            className="bg-white text-orange-600 hover:bg-gray-100 px-8 sm:px-10 py-4 sm:py-6 text-base sm:text-lg rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
+            variant="champagne"
+            size="xl"
+            className="group w-full sm:w-auto justify-center min-w-[220px] hover:scale-105 transition-transform duration-300"
           >
-            Voir nos menus
-            <ArrowRight className="ml-2 h-5 w-5" />
+            Découvrir nos menus
+            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Button>
           <Button
             onClick={() => setCurrentPage('contact')}
-            variant="outline"
-            size="lg"
-            className="border-2 border-white/30 text-white hover:bg-white/10 px-8 sm:px-10 py-4 sm:py-6 text-base sm:text-lg rounded-full transition-all duration-300"
+            variant="outlineLight"
+            size="xl"
+            className="w-full sm:w-auto justify-center min-w-[220px] hover:scale-105 transition-transform duration-300"
           >
-            Demander un devis
+            Demander un devis gratuit
           </Button>
         </div>
       </div>
@@ -228,6 +758,9 @@ function ctaSection(setCurrentPage: (page: Page) => void) {
   );
 }
 
+// ========================================
+// MAIN HOMEPAGE COMPONENT
+// ========================================
 export default function HomePage({ setCurrentPage }: HomePageProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -238,36 +771,42 @@ export default function HomePage({ setCurrentPage }: HomePageProps) {
 
   const fetchReviews = async () => {
     try {
-      // TODO: Replace with actual backend API call when reviews endpoint is ready
-      // const response = await apiRequest<{ reviews: Review[] }>('/api/reviews');
-      // setReviews(response.reviews || []);
-      
-      // Mock reviews for now
+      // Mock reviews - replace with actual API call
       const mockReviews: Review[] = [
         {
           id: '1',
           userName: 'Marie Dupont',
           rating: 5,
-          text: 'Un service exceptionnel ! Julie et José ont sublimé notre mariage avec des plats raffinés.',
-          createdAt: '2025-12-15'
+          text: 'Un service exceptionnel du début à la fin ! Julie et José ont sublimé notre mariage avec des plats raffinés. Nos invités en parlent encore.',
+          createdAt: '2025-12-15',
+          eventType: 'Mariage'
         },
         {
           id: '2',
           userName: 'Pierre Martin',
           rating: 5,
-          text: 'Traiteur de qualité pour notre séminaire d\'entreprise. Tout le monde a adoré !',
-          createdAt: '2025-11-20'
+          text: 'Traiteur de grande qualité pour notre séminaire. Ponctualité, présentation soignée et saveurs au rendez-vous. Une valeur sûre.',
+          createdAt: '2025-11-20',
+          eventType: 'Séminaire entreprise'
         },
         {
           id: '3',
           userName: 'Sophie Bernard',
-          rating: 4,
-          text: 'Excellent rapport qualité-prix. Les menus sont variés et s\'adaptent à tous les goûts.',
-          createdAt: '2025-10-08'
+          rating: 5,
+          text: 'Les 60 ans de ma mère resteront gravés dans nos mémoires. Menu personnalisé, produits frais et une équipe aux petits soins.',
+          createdAt: '2025-10-08',
+          eventType: 'Anniversaire'
+        },
+        {
+          id: '4',
+          userName: 'Laurent Dubois',
+          rating: 5,
+          text: 'Deuxième fois que nous faisons appel à eux et toujours la même excellence. Le rapport qualité-prix est imbattable.',
+          createdAt: '2025-09-22',
+          eventType: 'Réception privée'
         }
       ];
       
-      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 300));
       setReviews(mockReviews);
     } catch (error) {
@@ -278,15 +817,17 @@ export default function HomePage({ setCurrentPage }: HomePageProps) {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#FFF8F0]">
       <HeroSection
         onExploreMenus={() => setCurrentPage('menu')}
         onContact={() => setCurrentPage('contact')}
       />
-      {featuresSection()}
-      {teamSection(setCurrentPage)}
-      {reviewsSection(reviews, loading)}
-      {ctaSection(setCurrentPage)}
+      <FeaturesSection />
+      <AboutSection setCurrentPage={setCurrentPage} />
+      <ServicesSection setCurrentPage={setCurrentPage} />
+      <TestimonialsSection reviews={reviews} loading={loading} />
+      <ValuesSection />
+      <CTASection setCurrentPage={setCurrentPage} />
       <Footer setCurrentPage={setCurrentPage} />
     </div>
   );
