@@ -367,6 +367,7 @@ function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading:
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -391,139 +392,200 @@ function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading:
     if (!isAutoPlaying || reviews.length === 0 || !isVisible) return;
     
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % reviews.length);
-    }, 5000);
+      if (!isAnimating) {
+        setIsAnimating(true);
+        setCurrentIndex((prev) => (prev + 1) % reviews.length);
+        setTimeout(() => setIsAnimating(false), 600);
+      }
+    }, 6000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, reviews.length, isVisible]);
+  }, [isAutoPlaying, reviews.length, isVisible, isAnimating]);
 
   const goToSlide = (index: number) => {
+    if (isAnimating || index === currentIndex) return;
+    setIsAnimating(true);
     setCurrentIndex(index);
     setIsAutoPlaying(false);
+    setTimeout(() => setIsAnimating(false), 600);
   };
 
   const goToPrev = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
     setIsAutoPlaying(false);
+    setTimeout(() => setIsAnimating(false), 600);
   };
 
   const goToNext = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     setCurrentIndex((prev) => (prev + 1) % reviews.length);
     setIsAutoPlaying(false);
+    setTimeout(() => setIsAnimating(false), 600);
   };
 
   return (
-    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-[#FFF8F0] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+    <section ref={sectionRef} className="py-24 sm:py-32 lg:py-40 bg-gradient-to-b from-[#FFF8F0] via-white to-[#FFF8F0] overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
         {/* Section header */}
         <div 
-          className={`text-center max-w-2xl mx-auto mb-10 sm:mb-14 transition-all duration-700 ${
+          className={`text-center max-w-3xl mx-auto mb-16 sm:mb-20 lg:mb-24 transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          <div className="inline-flex items-center gap-2 bg-[#722F37]/10 rounded-full px-4 py-2 mb-4 sm:mb-6">
-            <Quote className="w-4 h-4 text-[#722F37]" />
-            <span className="text-[#722F37] text-xs sm:text-sm font-medium">Témoignages</span>
+          <div className="inline-flex items-center gap-3 bg-[#722F37]/10 rounded-full px-6 py-3 mb-8 sm:mb-10">
+            <Quote className="w-5 h-5 text-[#722F37]" />
+            <span className="text-[#722F37] text-sm sm:text-base font-medium">Témoignages clients</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-4 sm:mb-5">
-            Ce que nos <span className="text-[#722F37]">clients</span> disent
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1A1A1A] mb-6 sm:mb-8">
+            Ce que nos <span className="text-[#722F37]">clients</span> disent de nous
           </h2>
-          <p className="text-sm sm:text-base text-[#1A1A1A]/60">
-            La satisfaction de nos clients est notre plus belle récompense.
+          <p className="text-base sm:text-lg text-[#1A1A1A]/60 leading-relaxed max-w-2xl mx-auto">
+            La satisfaction de nos clients est notre plus belle récompense. Découvrez leurs témoignages.
           </p>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-10 h-10 border-3 border-[#722F37]/20 border-t-[#722F37] rounded-full animate-spin" />
+          <div className="flex justify-center py-20">
+            <div className="w-14 h-14 border-4 border-[#722F37]/20 border-t-[#722F37] rounded-full animate-spin" />
           </div>
         ) : reviews.length > 0 ? (
           <div 
-            className={`relative transition-all duration-700 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            className={`relative transition-all duration-1000 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
             }`}
-            style={{ transitionDelay: '200ms' }}
+            style={{ transitionDelay: '300ms' }}
           >
+            {/* Decorative quote */}
+            <div className="absolute -top-16 left-1/2 -translate-x-1/2 text-[250px] font-serif text-[#722F37]/[0.03] pointer-events-none select-none hidden lg:block leading-none">
+              "
+            </div>
+            
             {/* Carousel container */}
             <div 
-              className="overflow-hidden"
+              className="relative"
               onMouseEnter={() => setIsAutoPlaying(false)}
               onMouseLeave={() => setIsAutoPlaying(true)}
             >
-              <div 
-                className="flex transition-transform duration-500 ease-out"
-                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-              >
-                {reviews.map((review) => (
-                  <div 
-                    key={review.id} 
-                    className="w-full flex-shrink-0 px-2 sm:px-4"
-                  >
-                    <div className="max-w-3xl mx-auto">
-                      <Card className="bg-white border-0 shadow-lg sm:shadow-xl rounded-2xl sm:rounded-3xl overflow-hidden">
-                        <CardContent className="p-6 sm:p-10 lg:p-12">
-                          {/* Quote icon */}
-                          <Quote className="w-8 h-8 sm:w-10 sm:h-10 text-[#D4AF37]/25 mb-4 sm:mb-6" />
-                          
-                          {/* Stars */}
-                          <div className="flex items-center gap-1 mb-4 sm:mb-6">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                                  i < review.rating 
-                                    ? 'text-[#D4AF37] fill-[#D4AF37]' 
-                                    : 'text-[#D4AF37]/20'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          
-                          {/* Review text */}
-                          <blockquote className="text-lg sm:text-xl lg:text-2xl text-[#1A1A1A] font-medium leading-relaxed mb-6 sm:mb-8">
-                            "{review.text}"
-                          </blockquote>
-                          
-                          {/* Author */}
-                          <div className="flex items-center gap-3 sm:gap-4">
-                            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#722F37] to-[#D4AF37] flex items-center justify-center text-white text-base sm:text-lg font-bold">
-                              {review.userName.charAt(0)}
+              <div className="overflow-hidden rounded-3xl">
+                <div 
+                  className="flex"
+                  style={{ 
+                    transform: `translateX(-${currentIndex * 100}%)`,
+                    transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  {reviews.map((review, idx) => (
+                    <div 
+                      key={review.id} 
+                      className="w-full flex-shrink-0 px-4 sm:px-8"
+                    >
+                      <div className="max-w-5xl mx-auto">
+                        <Card className="bg-white border-0 shadow-2xl shadow-[#722F37]/10 rounded-3xl overflow-hidden">
+                          <CardContent className="p-8 sm:p-12 lg:p-16 xl:p-20">
+                            <div className="flex flex-col lg:flex-row lg:items-start gap-10 lg:gap-16">
+                              {/* Left side - Content */}
+                              <div className="flex-1 space-y-8">
+                                {/* Quote icon */}
+                                <div className="relative inline-block">
+                                  <Quote className="w-14 h-14 sm:w-16 sm:h-16 text-[#D4AF37]" />
+                                  <div className="absolute -inset-4 bg-[#D4AF37]/10 rounded-full blur-2xl -z-10" />
+                                </div>
+                                
+                                {/* Stars */}
+                                <div className="flex items-center gap-2">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`w-6 h-6 sm:w-7 sm:h-7 ${
+                                        i < review.rating 
+                                          ? 'text-[#D4AF37] fill-[#D4AF37]' 
+                                          : 'text-[#D4AF37]/20'
+                                      }`}
+                                    />
+                                  ))}
+                                  <span className="ml-4 text-[#1A1A1A]/40 text-base font-medium">5.0</span>
+                                </div>
+                                
+                                {/* Review text */}
+                                <blockquote className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-[#1A1A1A] font-medium leading-relaxed">
+                                  "{review.text}"
+                                </blockquote>
+                              </div>
+                              
+                              {/* Right side - Author card */}
+                              <div className="lg:w-72 flex-shrink-0">
+                                <div className="bg-gradient-to-br from-[#FFF8F0] to-[#f5ede3] rounded-2xl p-8 space-y-6 border border-[#722F37]/5">
+                                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#722F37] to-[#D4AF37] flex items-center justify-center text-white text-3xl font-bold shadow-xl shadow-[#722F37]/30">
+                                    {review.userName.charAt(0)}
+                                  </div>
+                                  <div className="space-y-2">
+                                    <p className="font-bold text-[#1A1A1A] text-xl">{review.userName}</p>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 rounded-full bg-[#556B2F]" />
+                                      <p className="text-[#722F37] font-medium">
+                                        {review.eventType || 'Client vérifié'}
+                                      </p>
+                                    </div>
+                                    <p className="text-[#1A1A1A]/50 text-sm pt-2">
+                                      {new Date(review.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-semibold text-[#1A1A1A] text-sm sm:text-base">{review.userName}</p>
-                              <p className="text-[#1A1A1A]/50 text-xs sm:text-sm">
-                                {review.eventType || 'Client vérifié'} • {new Date(review.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                          </CardContent>
+                        </Card>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Navigation */}
-            <div className="flex items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
+              {/* Navigation arrows - positioned outside on desktop */}
               <button
                 onClick={goToPrev}
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white shadow-lg flex items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white transition-all duration-300"
+                disabled={isAnimating}
+                className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 w-14 h-14 rounded-full bg-white shadow-xl shadow-[#722F37]/10 items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white hover:shadow-[#722F37]/30 transition-all duration-300 hover:scale-110 disabled:opacity-50 z-10"
+                aria-label="Avis précédent"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              
+              <button
+                onClick={goToNext}
+                disabled={isAnimating}
+                className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 w-14 h-14 rounded-full bg-white shadow-xl shadow-[#722F37]/10 items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white hover:shadow-[#722F37]/30 transition-all duration-300 hover:scale-110 disabled:opacity-50 z-10"
+                aria-label="Avis suivant"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Mobile/Tablet Navigation */}
+            <div className="flex items-center justify-center gap-6 mt-10 sm:mt-12 lg:mt-14">
+              <button
+                onClick={goToPrev}
+                disabled={isAnimating}
+                className="lg:hidden w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white transition-all duration-300 disabled:opacity-50"
                 aria-label="Avis précédent"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               
-              {/* Dots */}
-              <div className="flex items-center gap-2">
+              {/* Progress dots */}
+              <div className="flex items-center gap-3 sm:gap-4">
                 {reviews.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`transition-all duration-300 rounded-full ${
+                    disabled={isAnimating}
+                    className={`relative transition-all duration-500 rounded-full ${
                       index === currentIndex 
-                        ? 'w-6 sm:w-8 h-2 bg-[#722F37]' 
-                        : 'w-2 h-2 bg-[#722F37]/25 hover:bg-[#722F37]/40'
+                        ? 'w-12 sm:w-14 h-3 sm:h-4 bg-[#722F37]' 
+                        : 'w-3 sm:w-4 h-3 sm:h-4 bg-[#722F37]/20 hover:bg-[#722F37]/40'
                     }`}
                     aria-label={`Aller à l'avis ${index + 1}`}
                   />
@@ -532,16 +594,24 @@ function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading:
               
               <button
                 onClick={goToNext}
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white shadow-lg flex items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white transition-all duration-300"
+                disabled={isAnimating}
+                className="lg:hidden w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white transition-all duration-300 disabled:opacity-50"
                 aria-label="Avis suivant"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
+            
+            {/* Counter */}
+            <div className="text-center mt-8">
+              <span className="text-[#1A1A1A]/40 text-sm font-medium tracking-wide">
+                {String(currentIndex + 1).padStart(2, '0')} / {String(reviews.length).padStart(2, '0')}
+              </span>
+            </div>
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-[#1A1A1A]/60 text-sm">Aucun avis pour le moment.</p>
+          <div className="text-center py-20">
+            <p className="text-[#1A1A1A]/60">Aucun avis pour le moment.</p>
           </div>
         )}
       </div>
