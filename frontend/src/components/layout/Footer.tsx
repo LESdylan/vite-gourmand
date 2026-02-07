@@ -1,5 +1,4 @@
-import { Clock, MapPin, Phone, Mail, ChefHat, Facebook, Instagram, Linkedin, ArrowRight } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Clock, MapPin, Phone, Mail, ChefHat, Facebook, Instagram, Linkedin } from 'lucide-react';
 
 // Page type for navigation
 type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
@@ -32,46 +31,11 @@ export default function Footer({ setCurrentPage }: FooterProps) {
 
   return (
     <footer className="bg-[#1A1A1A] text-white">
-      {/* Top section with CTA */}
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 py-16 sm:py-20 lg:py-24">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16">
-            <div className="text-center lg:text-left max-w-xl">
-              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
-                Prêt à créer un moment <span className="text-[#D4AF37]">inoubliable</span> ?
-              </h3>
-              <p className="text-white/60 text-base sm:text-lg leading-relaxed">
-                Contactez-nous pour discuter de votre projet et recevoir un devis personnalisé.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
-              <Button
-                onClick={() => handleNavClick('menu')}
-                size="lg"
-                className="min-w-[180px] justify-center"
-              >
-                Voir nos menus
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                onClick={() => handleNavClick('contact')}
-                variant="outlineLight"
-                size="lg"
-                className="min-w-[180px] justify-center"
-              >
-                <Phone className="mr-2 h-4 w-4" />
-                Nous contacter
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main footer content */}
-      <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 py-16 sm:py-20 lg:py-24">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Company info */}
-          <div className="sm:col-span-2 lg:col-span-1 space-y-8">
+          <div className="sm:col-span-2 lg:col-span-1 space-y-6">
             <button
               onClick={() => handleNavClick('home')}
               className="flex items-center gap-4 group"
@@ -114,40 +78,63 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           </div>
 
           {/* Contact info */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             <h3 className="text-white font-bold text-lg flex items-center gap-3">
               <div className="w-1.5 h-6 bg-[#D4AF37] rounded-full" />
               Contact
             </h3>
-            <div className="space-y-5">
-              <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 text-white/60 hover:text-[#D4AF37] transition-colors group">
-                <div className="w-10 h-10 bg-[#722F37]/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-[#722F37]/30 transition-colors">
-                  <MapPin className="h-5 w-5 text-[#722F37]" />
+            <div className="space-y-1">
+              <a
+                href="https://maps.google.com/?q=15+Rue+Sainte-Catherine+33000+Bordeaux"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 -mx-3 rounded-xl text-white/70 hover:text-white hover:bg-white/[0.04] transition-all duration-300 group"
+                aria-label="Notre adresse : 15 Rue Sainte-Catherine, 33000 Bordeaux"
+              >
+                <div className="w-9 h-9 bg-[#722F37]/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-[#722F37] transition-all duration-300">
+                  <MapPin className="h-4 w-4 text-[#D4AF37] group-hover:text-white transition-colors" />
                 </div>
-                <span className="text-base leading-relaxed pt-2">15 Rue Sainte-Catherine<br />33000 Bordeaux</span>
+                <div className="text-sm leading-snug">
+                  <span className="block font-medium">15 Rue Sainte-Catherine</span>
+                  <span className="block text-white/40 text-xs mt-0.5">33000 Bordeaux</span>
+                </div>
               </a>
-              <a href="tel:+33556000000" className="flex items-center gap-4 text-white/60 hover:text-[#D4AF37] transition-colors group">
-                <div className="w-10 h-10 bg-[#722F37]/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-[#722F37]/30 transition-colors">
-                  <Phone className="h-5 w-5 text-[#722F37]" />
+              <a
+                href="tel:+33556000000"
+                className="flex items-center gap-3 p-3 -mx-3 rounded-xl text-white/70 hover:text-white hover:bg-white/[0.04] transition-all duration-300 group"
+                aria-label="Appelez-nous au 05 56 00 00 00"
+              >
+                <div className="w-9 h-9 bg-[#722F37]/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-[#722F37] transition-all duration-300">
+                  <Phone className="h-4 w-4 text-[#D4AF37] group-hover:text-white transition-colors" />
                 </div>
-                <span className="text-base">+33 5 56 00 00 00</span>
+                <div className="text-sm">
+                  <span className="block font-medium">05 56 00 00 00</span>
+                  <span className="block text-white/40 text-xs mt-0.5">Lun–Ven · 9h–18h</span>
+                </div>
               </a>
-              <a href="mailto:contact@vite-gourmand.fr" className="flex items-center gap-4 text-white/60 hover:text-[#D4AF37] transition-colors group">
-                <div className="w-10 h-10 bg-[#722F37]/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-[#722F37]/30 transition-colors">
-                  <Mail className="h-5 w-5 text-[#722F37]" />
+              <a
+                href="mailto:contact@vite-gourmand.fr"
+                className="flex items-center gap-3 p-3 -mx-3 rounded-xl text-white/70 hover:text-white hover:bg-white/[0.04] transition-all duration-300 group"
+                aria-label="Envoyez un email à contact@vite-gourmand.fr"
+              >
+                <div className="w-9 h-9 bg-[#722F37]/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-[#722F37] transition-all duration-300">
+                  <Mail className="h-4 w-4 text-[#D4AF37] group-hover:text-white transition-colors" />
                 </div>
-                <span className="text-base">contact@vite-gourmand.fr</span>
+                <div className="text-sm">
+                  <span className="block font-medium">contact@vite-gourmand.fr</span>
+                  <span className="block text-white/40 text-xs mt-0.5">Réponse sous 24h</span>
+                </div>
               </a>
             </div>
           </div>
 
           {/* Opening hours */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             <h3 className="text-white font-bold text-lg flex items-center gap-3">
               <div className="w-1.5 h-6 bg-[#D4AF37] rounded-full" />
               Horaires
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {hours.map((schedule) => (
                 <div key={schedule.day} className="flex justify-between items-center py-3 border-b border-white/5 last:border-0">
                   <span className="text-white/60 text-base">{schedule.day}</span>
@@ -164,12 +151,12 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           </div>
 
           {/* Legal links & Newsletter */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             <h3 className="text-white font-bold text-lg flex items-center gap-3">
               <div className="w-1.5 h-6 bg-[#D4AF37] rounded-full" />
               Informations
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <button
                 onClick={() => handleNavClick('menu')}
                 className="flex items-center gap-3 text-white/60 hover:text-[#D4AF37] transition-colors text-base group"
@@ -220,8 +207,8 @@ export default function Footer({ setCurrentPage }: FooterProps) {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-8 sm:px-12 lg:px-16 py-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-base text-white/50">
               © {new Date().getFullYear()} Vite & Gourmand. Tous droits réservés.
             </p>

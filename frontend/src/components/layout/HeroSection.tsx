@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Phone, Star, Award, Users, ChefHat, Calendar, Sparkles } from 'lucide-react';
+import { ArrowRight, Phone, Star, Award, Users, Calendar, Sparkles } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface HeroSectionProps {
@@ -56,8 +56,8 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-16 sm:pb-20">
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="relative z-10 w-full max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12 pt-28 sm:pt-32 pb-16 sm:pb-20">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-[4vw] items-center">
           {/* Left column - Text content (7 cols) */}
           <div className="lg:col-span-7 space-y-6 sm:space-y-8">
             {/* Badge */}
@@ -79,19 +79,19 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
               }`}
               style={{ transitionDelay: '150ms' }}
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+              <h1 className="text-[clamp(2rem,6vw,4rem)] font-bold text-white leading-[1.1] tracking-tight">
                 <span className="block">L'art de la</span>
                 <span className="block bg-gradient-to-r from-[#D4AF37] to-[#f0d78c] bg-clip-text text-transparent">
                   gastronomie
                 </span>
                 <span className="block">française</span>
               </h1>
-              <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-[#722F37] to-[#D4AF37] rounded-full" />
+              <div className="w-16 sm:w-20 lg:w-[5vw] h-1 bg-gradient-to-r from-[#722F37] to-[#D4AF37] rounded-full" />
             </div>
 
             {/* Subtitle */}
             <p 
-              className={`text-base sm:text-lg text-white/75 max-w-xl leading-relaxed transition-all duration-700 ${
+              className={`text-[clamp(0.9rem,1.5vw,1.25rem)] text-white/75 max-w-xl leading-relaxed transition-all duration-700 ${
                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
               style={{ transitionDelay: '300ms' }}

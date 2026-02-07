@@ -30,7 +30,7 @@ function MenuDetailModal({
       végétarien: 'bg-emerald-100 text-emerald-800 border-emerald-200',
       'sans-gluten': 'bg-amber-100 text-amber-800 border-amber-200',
       'sans-lactose': 'bg-purple-100 text-purple-800 border-purple-200',
-      halal: 'bg-blue-100 text-blue-800 border-blue-200',
+      halal: 'bg-[#FFF8F0] text-[#722F37] border-[#722F37]/20',
       casher: 'bg-indigo-100 text-indigo-800 border-indigo-200',
       bio: 'bg-lime-100 text-lime-800 border-lime-200',
       classique: 'bg-gray-100 text-gray-800 border-gray-200'
@@ -105,8 +105,8 @@ function MenuDetailModal({
               <p className="text-xs text-gray-500">Prix/pers.</p>
               <p className="font-bold text-gray-900">{menu.pricePerPerson.toFixed(2)}€</p>
             </div>
-            <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-100">
-              <Clock className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+            <div className="bg-[#FFF8F0] rounded-xl p-4 text-center border border-[#D4AF37]/20">
+              <Clock className="h-6 w-6 text-[#D4AF37] mx-auto mb-2" />
               <p className="text-xs text-gray-500">Stock</p>
               <p className="font-bold text-gray-900">{menu.stockQuantity} dispo.</p>
             </div>
@@ -136,8 +136,8 @@ function MenuDetailModal({
 
           {/* Delivery Notes */}
           {menu.deliveryNotes && (
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-              <p className="text-sm text-blue-800">
+            <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#722F37]/10">
+              <p className="text-sm text-[#722F37]">
                 <strong>Note de livraison:</strong> {menu.deliveryNotes}
               </p>
             </div>

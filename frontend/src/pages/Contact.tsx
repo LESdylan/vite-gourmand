@@ -59,7 +59,7 @@ export default function ContactPage() {
           </Button>
         </>
       ),
-      gradient: 'from-blue-500 to-indigo-500'
+      gradient: 'from-[#722F37] to-[#5a252c]'
     },
     {
       icon: Phone,
@@ -74,7 +74,7 @@ export default function ContactPage() {
           </p>
         </>
       ),
-      gradient: 'from-green-500 to-emerald-500'
+      gradient: 'from-[#556B2F] to-[#3d4e22]'
     },
     {
       icon: Mail,
@@ -89,7 +89,7 @@ export default function ContactPage() {
           </p>
         </>
       ),
-      gradient: 'from-purple-500 to-pink-500'
+      gradient: 'from-[#D4AF37] to-[#b8962e]'
     },
     {
       icon: Clock,
@@ -110,14 +110,14 @@ export default function ContactPage() {
           </div>
         </div>
       ),
-      gradient: 'from-orange-500 to-red-500'
+      gradient: 'from-[#722F37] to-[#D4AF37]'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFF8F0] to-[#f5ede3]">
       {/* Header Section */}
-      <div className="bg-gradient-to-br from-orange-600 to-orange-500 py-16 sm:py-24">
+      <div className="bg-gradient-to-br from-[#722F37] to-[#5a252c] py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block px-4 py-1 bg-white/20 text-white rounded-full text-sm font-medium mb-4 backdrop-blur-sm">
             Contact
@@ -155,7 +155,7 @@ export default function ContactPage() {
           {/* Contact Form - Takes 3 columns */}
           <div className="lg:col-span-3">
             <Card className="bg-white border-0 shadow-xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
+              <CardHeader className="bg-gradient-to-r from-[#1A1A1A] to-[#2d2d2d] text-white">
                 <CardTitle className="flex items-center text-xl">
                   <MessageCircle className="h-6 w-6 mr-3 text-orange-400" />
                   Envoyez-nous un message
@@ -244,7 +244,7 @@ export default function ContactPage() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white h-14 rounded-xl text-lg font-semibold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300"
+                    className="w-full bg-gradient-to-r from-[#722F37] to-[#5a252c] hover:from-[#5a252c] hover:to-[#722F37] text-white h-14 rounded-xl text-lg font-semibold shadow-lg shadow-[#722F37]/25 hover:shadow-[#722F37]/40 transition-all duration-300"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -288,7 +288,7 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-orange-500 to-orange-600 border-0 shadow-xl text-white">
+            <Card className="bg-gradient-to-br from-[#722F37] to-[#5a252c] border-0 shadow-xl text-white">
               <CardHeader>
                 <CardTitle className="text-xl text-white">Zone de livraison</CardTitle>
               </CardHeader>

@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   Star, ArrowRight, ChefHat, Award, Heart, Clock, 
-  Quote, Utensils, Users, Leaf, ChevronLeft, ChevronRight,
-  Sparkles, MapPin, Check
+  Quote, Utensils, Users, Leaf
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -88,11 +87,11 @@ function FeaturesSection() {
   ];
 
   return (
-    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-[#FFF8F0]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+    <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-[#FFF8F0]">
+      <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12">
         {/* Section header */}
         <div 
-          className={`text-center max-w-2xl mx-auto mb-12 sm:mb-16 transition-all duration-700 ${
+          className={`text-center max-w-2xl mx-auto mb-10 sm:mb-12 lg:mb-14 transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
@@ -100,17 +99,17 @@ function FeaturesSection() {
             <Utensils className="w-4 h-4 text-[#722F37]" />
             <span className="text-[#722F37] text-xs sm:text-sm font-medium">Nos engagements</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-4 sm:mb-5 leading-tight">
+          <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-[#1A1A1A] mb-4 sm:mb-5 leading-tight">
             Pourquoi choisir <span className="text-[#722F37]">Vite & Gourmand</span> ?
           </h2>
-          <p className="text-sm sm:text-base text-[#1A1A1A]/60 leading-relaxed">
+          <p className="text-[clamp(0.875rem,1.5vw,1rem)] text-[#1A1A1A]/60 leading-relaxed">
             Notre passion pour la gastronomie et notre engagement envers l'excellence 
             font de chaque événement un moment unique.
           </p>
         </div>
 
         {/* Features grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-[2vw]">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
@@ -165,9 +164,9 @@ function AboutSection({ setCurrentPage }: { setCurrentPage: (page: Page) => void
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+    <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-white overflow-hidden">
+      <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-[5vw] items-center">
           {/* Image column */}
           <div 
             className={`relative order-2 lg:order-1 transition-all duration-1000 ${
@@ -208,7 +207,7 @@ function AboutSection({ setCurrentPage }: { setCurrentPage: (page: Page) => void
               <span className="text-[#D4AF37] text-xs sm:text-sm font-medium">Notre histoire</span>
             </div>
             
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] leading-tight">
+            <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-[#1A1A1A] leading-tight">
               Une passion<br />
               <span className="text-[#722F37]">transmise</span> depuis<br />
               deux générations
@@ -298,11 +297,11 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
   ];
 
   return (
-    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-[#1A1A1A]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+    <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-[#1A1A1A]">
+      <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12">
         {/* Section header */}
         <div 
-          className={`text-center max-w-2xl mx-auto mb-10 sm:mb-14 transition-all duration-700 ${
+          className={`text-center max-w-2xl mx-auto mb-8 sm:mb-10 lg:mb-12 transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
@@ -310,16 +309,16 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
             <Users className="w-4 h-4 text-[#D4AF37]" />
             <span className="text-[#D4AF37] text-xs sm:text-sm font-medium">Nos prestations</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 sm:mb-5">
+          <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-white mb-4 sm:mb-5">
             Un service adapté à <span className="text-[#D4AF37]">chaque occasion</span>
           </h2>
-          <p className="text-sm sm:text-base text-white/50">
+          <p className="text-[clamp(0.875rem,1.5vw,1rem)] text-white/50">
             Quel que soit votre événement, nous avons la solution pour vous régaler.
           </p>
         </div>
 
         {/* Services grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-[2vw]">
           {services.map((service, index) => (
             <div 
               key={index}
@@ -361,260 +360,143 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
 }
 
 // ========================================
-// TESTIMONIALS CAROUSEL
+// TESTIMONIALS — COMPACT MARQUEE
 // ========================================
 function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading: boolean }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
+        if (entry.isIntersecting) setIsVisible(true);
       },
       { threshold: 0.1 }
     );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
 
-  // Auto-advance carousel
-  useEffect(() => {
-    if (!isAutoPlaying || reviews.length === 0 || !isVisible) return;
-    
-    const interval = setInterval(() => {
-      if (!isAnimating) {
-        setIsAnimating(true);
-        setCurrentIndex((prev) => (prev + 1) % reviews.length);
-        setTimeout(() => setIsAnimating(false), 600);
-      }
-    }, 6000);
-
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, reviews.length, isVisible, isAnimating]);
-
-  const goToSlide = (index: number) => {
-    if (isAnimating || index === currentIndex) return;
-    setIsAnimating(true);
-    setCurrentIndex(index);
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAnimating(false), 600);
-  };
-
-  const goToPrev = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAnimating(false), 600);
-  };
-
-  const goToNext = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setCurrentIndex((prev) => (prev + 1) % reviews.length);
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAnimating(false), 600);
-  };
+  const tripleReviews = [...reviews, ...reviews, ...reviews];
 
   return (
-    <section ref={sectionRef} className="py-24 sm:py-32 lg:py-40 bg-gradient-to-b from-[#FFF8F0] via-white to-[#FFF8F0] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
-        {/* Section header */}
-        <div 
-          className={`text-center max-w-3xl mx-auto mb-16 sm:mb-20 lg:mb-24 transition-all duration-1000 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+    <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-[#FFF8F0] overflow-hidden">
+      {/* Compact header */}
+      <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12 mb-8 sm:mb-10">
+        <div
+          className={`flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
         >
-          <div className="inline-flex items-center gap-3 bg-[#722F37]/10 rounded-full px-6 py-3 mb-8 sm:mb-10">
-            <Quote className="w-5 h-5 text-[#722F37]" />
-            <span className="text-[#722F37] text-sm sm:text-base font-medium">Témoignages clients</span>
+          <div>
+            <div className="inline-flex items-center gap-2 bg-[#722F37]/8 rounded-full px-3 py-1.5 mb-3">
+              <Quote className="w-3.5 h-3.5 text-[#722F37]" />
+              <span className="text-[#722F37] text-xs font-medium tracking-wide">Témoignages</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1A1A1A]">
+              La confiance de nos <span className="text-[#722F37]">clients</span>
+            </h2>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1A1A1A] mb-6 sm:mb-8">
-            Ce que nos <span className="text-[#722F37]">clients</span> disent de nous
-          </h2>
-          <p className="text-base sm:text-lg text-[#1A1A1A]/60 leading-relaxed max-w-2xl mx-auto">
-            La satisfaction de nos clients est notre plus belle récompense. Découvrez leurs témoignages.
-          </p>
+          <div className="flex items-center gap-2 pb-1">
+            <div className="flex items-center gap-0.5">
+              {[1,2,3,4,5].map(i => (
+                <Star key={i} className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]" />
+              ))}
+            </div>
+            <span className="text-sm font-bold text-[#1A1A1A]">4.9</span>
+            <span className="text-xs text-[#1A1A1A]/40">· 500+ avis</span>
+          </div>
         </div>
-
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="w-14 h-14 border-4 border-[#722F37]/20 border-t-[#722F37] rounded-full animate-spin" />
-          </div>
-        ) : reviews.length > 0 ? (
-          <div 
-            className={`relative transition-all duration-1000 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-            }`}
-            style={{ transitionDelay: '300ms' }}
-          >
-            {/* Decorative quote */}
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2 text-[250px] font-serif text-[#722F37]/[0.03] pointer-events-none select-none hidden lg:block leading-none">
-              "
-            </div>
-            
-            {/* Carousel container */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setIsAutoPlaying(false)}
-              onMouseLeave={() => setIsAutoPlaying(true)}
-            >
-              <div className="overflow-hidden rounded-3xl">
-                <div 
-                  className="flex"
-                  style={{ 
-                    transform: `translateX(-${currentIndex * 100}%)`,
-                    transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                >
-                  {reviews.map((review, idx) => (
-                    <div 
-                      key={review.id} 
-                      className="w-full flex-shrink-0 px-4 sm:px-8"
-                    >
-                      <div className="max-w-5xl mx-auto">
-                        <Card className="bg-white border-0 shadow-2xl shadow-[#722F37]/10 rounded-3xl overflow-hidden">
-                          <CardContent className="p-8 sm:p-12 lg:p-16 xl:p-20">
-                            <div className="flex flex-col lg:flex-row lg:items-start gap-10 lg:gap-16">
-                              {/* Left side - Content */}
-                              <div className="flex-1 space-y-8">
-                                {/* Quote icon */}
-                                <div className="relative inline-block">
-                                  <Quote className="w-14 h-14 sm:w-16 sm:h-16 text-[#D4AF37]" />
-                                  <div className="absolute -inset-4 bg-[#D4AF37]/10 rounded-full blur-2xl -z-10" />
-                                </div>
-                                
-                                {/* Stars */}
-                                <div className="flex items-center gap-2">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-6 h-6 sm:w-7 sm:h-7 ${
-                                        i < review.rating 
-                                          ? 'text-[#D4AF37] fill-[#D4AF37]' 
-                                          : 'text-[#D4AF37]/20'
-                                      }`}
-                                    />
-                                  ))}
-                                  <span className="ml-4 text-[#1A1A1A]/40 text-base font-medium">5.0</span>
-                                </div>
-                                
-                                {/* Review text */}
-                                <blockquote className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl text-[#1A1A1A] font-medium leading-relaxed">
-                                  "{review.text}"
-                                </blockquote>
-                              </div>
-                              
-                              {/* Right side - Author card */}
-                              <div className="lg:w-72 flex-shrink-0">
-                                <div className="bg-gradient-to-br from-[#FFF8F0] to-[#f5ede3] rounded-2xl p-8 space-y-6 border border-[#722F37]/5">
-                                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#722F37] to-[#D4AF37] flex items-center justify-center text-white text-3xl font-bold shadow-xl shadow-[#722F37]/30">
-                                    {review.userName.charAt(0)}
-                                  </div>
-                                  <div className="space-y-2">
-                                    <p className="font-bold text-[#1A1A1A] text-xl">{review.userName}</p>
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-2 h-2 rounded-full bg-[#556B2F]" />
-                                      <p className="text-[#722F37] font-medium">
-                                        {review.eventType || 'Client vérifié'}
-                                      </p>
-                                    </div>
-                                    <p className="text-[#1A1A1A]/50 text-sm pt-2">
-                                      {new Date(review.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Navigation arrows - positioned outside on desktop */}
-              <button
-                onClick={goToPrev}
-                disabled={isAnimating}
-                className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 w-14 h-14 rounded-full bg-white shadow-xl shadow-[#722F37]/10 items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white hover:shadow-[#722F37]/30 transition-all duration-300 hover:scale-110 disabled:opacity-50 z-10"
-                aria-label="Avis précédent"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              
-              <button
-                onClick={goToNext}
-                disabled={isAnimating}
-                className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 w-14 h-14 rounded-full bg-white shadow-xl shadow-[#722F37]/10 items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white hover:shadow-[#722F37]/30 transition-all duration-300 hover:scale-110 disabled:opacity-50 z-10"
-                aria-label="Avis suivant"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Mobile/Tablet Navigation */}
-            <div className="flex items-center justify-center gap-6 mt-10 sm:mt-12 lg:mt-14">
-              <button
-                onClick={goToPrev}
-                disabled={isAnimating}
-                className="lg:hidden w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white transition-all duration-300 disabled:opacity-50"
-                aria-label="Avis précédent"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              
-              {/* Progress dots */}
-              <div className="flex items-center gap-3 sm:gap-4">
-                {reviews.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    disabled={isAnimating}
-                    className={`relative transition-all duration-500 rounded-full ${
-                      index === currentIndex 
-                        ? 'w-12 sm:w-14 h-3 sm:h-4 bg-[#722F37]' 
-                        : 'w-3 sm:w-4 h-3 sm:h-4 bg-[#722F37]/20 hover:bg-[#722F37]/40'
-                    }`}
-                    aria-label={`Aller à l'avis ${index + 1}`}
-                  />
-                ))}
-              </div>
-              
-              <button
-                onClick={goToNext}
-                disabled={isAnimating}
-                className="lg:hidden w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-[#722F37] hover:bg-[#722F37] hover:text-white transition-all duration-300 disabled:opacity-50"
-                aria-label="Avis suivant"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {/* Counter */}
-            <div className="text-center mt-8">
-              <span className="text-[#1A1A1A]/40 text-sm font-medium tracking-wide">
-                {String(currentIndex + 1).padStart(2, '0')} / {String(reviews.length).padStart(2, '0')}
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-20">
-            <p className="text-[#1A1A1A]/60">Aucun avis pour le moment.</p>
-          </div>
-        )}
       </div>
+
+      {/* Marquee */}
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="w-10 h-10 border-4 border-[#722F37]/20 border-t-[#722F37] rounded-full animate-spin" />
+        </div>
+      ) : reviews.length > 0 ? (
+        <div
+          className={`relative transition-all duration-700 ${
+            isVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ transitionDelay: '200ms' }}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          role="region"
+          aria-label="Avis clients — survolez pour mettre en pause le défilement"
+        >
+          {/* Fade edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-[#FFF8F0] to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-[#FFF8F0] to-transparent z-10 pointer-events-none" />
+
+          <div
+            className="flex gap-4"
+            style={{
+              animation: `testimonialScroll ${reviews.length * 7}s linear infinite`,
+              animationPlayState: isPaused ? 'paused' : 'running',
+              width: 'max-content'
+            }}
+          >
+            {tripleReviews.map((review, idx) => (
+              <article
+                key={`${review.id}-${idx}`}
+                className="w-[250px] sm:w-[280px] flex-shrink-0"
+              >
+                <div className="bg-white rounded-2xl p-4 sm:p-5 h-full border border-[#1A1A1A]/[0.04] shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-lg hover:border-[#722F37]/15 transition-all duration-300 hover:-translate-y-0.5">
+                  {/* Rating + event */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-3 h-3 ${
+                            i < review.rating
+                              ? 'text-[#D4AF37] fill-[#D4AF37]'
+                              : 'text-[#1A1A1A]/10'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    {review.eventType && (
+                      <span className="text-[10px] font-medium text-[#722F37]/70 bg-[#722F37]/5 rounded-full px-2 py-0.5">
+                        {review.eventType}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Quote */}
+                  <blockquote className="text-[13px] text-[#1A1A1A]/75 leading-relaxed mb-4 line-clamp-3">
+                    «&nbsp;{review.text}&nbsp;»
+                  </blockquote>
+
+                  {/* Author */}
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#722F37] to-[#D4AF37] flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+                      {review.userName.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <span className="font-semibold text-[#1A1A1A] text-xs">{review.userName}</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-[#1A1A1A]/50 text-sm">Aucun avis pour le moment.</p>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes testimonialScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-33.333%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [style*="animation"] { animation-duration: 0s !important; }
+        }
+      `}</style>
     </section>
   );
 }
@@ -662,9 +544,9 @@ function ValuesSection() {
   ];
 
   return (
-    <section ref={sectionRef} className="py-16 sm:py-20 lg:py-28 bg-white">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+    <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-white">
+      <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-[5vw] items-center">
           {/* Values list */}
           <div 
             className={`space-y-5 sm:space-y-6 transition-all duration-1000 ${
@@ -676,7 +558,7 @@ function ValuesSection() {
               <span className="text-[#556B2F] text-xs sm:text-sm font-medium">Nos valeurs</span>
             </div>
             
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A1A] leading-tight">
+            <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-[#1A1A1A] leading-tight">
               L'engagement d'une<br />
               <span className="text-[#556B2F]">cuisine responsable</span>
             </h2>
@@ -723,105 +605,6 @@ function ValuesSection() {
               <p className="text-white/80 text-xs sm:text-sm">Produits frais<br />et de saison</p>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ========================================
-// CTA SECTION
-// ========================================
-function CTASection({ setCurrentPage }: { setCurrentPage: (page: Page) => void }) {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <section ref={sectionRef} className="py-24 sm:py-32 lg:py-40 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#722F37] via-[#722F37] to-[#5a252c]" />
-      
-      {/* Decorative patterns */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute top-0 left-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-white rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-[#D4AF37] rounded-full blur-[100px] translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDelay: '1s', animationDuration: '3s' }} />
-      </div>
-      
-      <div 
-        className={`relative z-10 max-w-4xl mx-auto px-8 sm:px-12 lg:px-16 text-center transition-all duration-1000 ease-out ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-        }`}
-      >
-        <div 
-          className={`inline-flex items-center gap-3 bg-white/15 backdrop-blur-md rounded-full px-6 py-3 mb-10 sm:mb-12 border border-white/20 transition-all duration-700 ${
-            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
-          }`}
-          style={{ transitionDelay: '200ms' }}
-        >
-          <Sparkles className="w-5 h-5 text-[#D4AF37] animate-pulse" />
-          <span className="text-white text-sm sm:text-base font-medium">Prêt à vous régaler ?</span>
-        </div>
-        
-        <h2 
-          className={`text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-8 sm:mb-10 leading-tight transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
-          style={{ transitionDelay: '300ms' }}
-        >
-          Organisons ensemble votre<br />
-          <span className="text-[#D4AF37] inline-block mt-3">prochain événement</span>
-        </h2>
-        
-        <p 
-          className={`text-base sm:text-lg lg:text-xl text-white/80 mb-12 sm:mb-14 max-w-2xl mx-auto leading-relaxed transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
-          style={{ transitionDelay: '400ms' }}
-        >
-          Découvrez nos menus variés et laissez-nous créer une expérience 
-          culinaire sur mesure pour votre occasion spéciale.
-        </p>
-        
-        <div 
-          className={`flex flex-col sm:flex-row gap-5 sm:gap-6 justify-center transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
-          style={{ transitionDelay: '500ms' }}
-        >
-          <Button
-            onClick={() => setCurrentPage('menu')}
-            variant="champagne"
-            size="xl"
-            className="group w-full sm:w-auto justify-center min-w-[220px] hover:scale-105 transition-transform duration-300"
-          >
-            Découvrir nos menus
-            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-          </Button>
-          <Button
-            onClick={() => setCurrentPage('contact')}
-            variant="outlineLight"
-            size="xl"
-            className="w-full sm:w-auto justify-center min-w-[220px] hover:scale-105 transition-transform duration-300"
-          >
-            Demander un devis gratuit
-          </Button>
         </div>
       </div>
     </section>
@@ -897,7 +680,6 @@ export default function HomePage({ setCurrentPage }: HomePageProps) {
       <ServicesSection setCurrentPage={setCurrentPage} />
       <TestimonialsSection reviews={reviews} loading={loading} />
       <ValuesSection />
-      <CTASection setCurrentPage={setCurrentPage} />
       <Footer setCurrentPage={setCurrentPage} />
     </div>
   );

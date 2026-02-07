@@ -277,11 +277,8 @@ export default function Navbar({
                 <Button
                   onClick={() => window.location.href = '/portal'}
                   size="sm"
-                  className={`transition-all duration-300 ${
-                    scrolled 
-                      ? '' 
-                      : 'bg-white text-[#722F37] hover:bg-white/90'
-                  }`}
+                  variant={scrolled ? 'default' : 'secondary'}
+                  className="transition-all duration-300 shadow-md hover:shadow-lg"
                 >
                   Connexion
                 </Button>
