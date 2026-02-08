@@ -1,4 +1,0 @@
-INSERT INTO "SupportTicket" ("ticket_number", "created_by", "assigned_to", "category", "priority", "status", "subject", "description") VALUES
-    ('TKT-2026-00001', (SELECT "id" FROM "User" WHERE "email"='bob@example.fr'),    (SELECT "id" FROM "User" WHERE "email"='pierre@vitegourmand.fr'), 'delivery', 'normal', 'resolved', 'Livraison en retard',          'Ma commande ORD-2026-00002 est arrivée 30 min en retard.'),
-    ('TKT-2026-00002', (SELECT "id" FROM "User" WHERE "email"='claire@example.fr'), (SELECT "id" FROM "User" WHERE "email"='sophie@vitegourmand.fr'), 'order',    'high',   'open',     'Demande de remboursement',      'Suite à l''annulation de ma commande, je souhaite un remboursement.'),
-    ('TKT-2026-00003', (SELECT "id" FROM "User" WHERE "email"='alice@example.fr'),  NULL,                                                             'account',  'low',    'open',     'Changement d''adresse email',  'Je souhaite modifier mon adresse email de contact.');

@@ -1,0 +1,18 @@
+INSERT INTO "Publish" ("user_id","order_id","note","description","status") VALUES
+    (8,1,'5','Service impeccable pour notre mariage !','approved'),
+    (9,2,'4','Très bon rapport qualité-prix.','approved'),
+    (11,NULL,'5','Le brunch était parfait !','approved'),
+    (8,NULL,'5','Menu gastronomique exceptionnel.','approved'),
+    (10,NULL,'3','Bon service mais livraison en retard.','pending'),
+    (9,NULL,'4','Cocktail entreprise réussi.','pending'),
+    (11,NULL,'2','Qualité en dessous de mes attentes.','rejected'),
+    (12,11,'5','Tout était délicieux à Toulouse !','approved'),
+    (13,12,'4','Le foie gras était exceptionnel.','approved'),
+    (19,19,'5','Fidèle client, jamais déçu.','approved'),
+    (19,20,'4','Petit événement mais grande qualité.','approved'),
+    (14,NULL,'3','Portions un peu justes.','pending'),
+    (15,NULL,'4','Menu mariage très réussi.','pending'),
+    (16,NULL,'5','Brunch parfait pour mon anniversaire !','approved'),
+    (17,NULL,'1','Commande annulée sans explication claire.','rejected'),
+    (18,NULL,'4','Bonne expérience globale.','pending'),
+    (11,NULL,'5','Le menu gastronomique est une tuerie.','approved');
