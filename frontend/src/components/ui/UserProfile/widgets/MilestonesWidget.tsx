@@ -21,7 +21,9 @@ export function MilestonesWidget({ profile }: ProfileWidgetProps) {
   );
 }
 
-function MilestoneItem({ milestone }: { milestone: typeof milestone }) {
+import type { Milestone } from '../types';
+
+function MilestoneItem({ milestone }: { milestone: Milestone }) {
   return (
     <div className={`up-milestone ${milestone.achieved ? 'up-milestone--achieved' : ''}`}>
       <span className="up-milestone-icon">{milestone.icon}</span>

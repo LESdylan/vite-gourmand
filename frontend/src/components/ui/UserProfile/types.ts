@@ -39,6 +39,7 @@ export interface FullUserProfile {
 
 export interface ProfileStats {
   ordersHandled: number;
+  ordersCompleted: number;
   hoursWorked: number;
   averageRating: number;
   tasksCompleted: number;
@@ -84,6 +85,7 @@ export interface ProfileWidgetConfig {
 export interface UserProfileProps {
   userId: string;
   onClose?: () => void;
+  isModal?: boolean;
 }
 
 /* ───────────────── Legacy compat ───────────────── */

@@ -64,8 +64,8 @@ export function useAuth() {
           await authService.register({
             email: form.email,
             password: form.password,
-            name: form.name,
-            phone: form.phone || undefined,
+            firstName: form.name,
+            telephoneNumber: form.phone || undefined,
           });
           navigate('/');
           break;
