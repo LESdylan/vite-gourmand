@@ -3,10 +3,10 @@
  * 
  * This component handles all public pages (Home, Menus, Contact, Legal)
  * using internal state navigation to maintain SPA efficiency.
- * 
- * The admin/dashboard routes remain separate and are handled by React Router.
+ * Smooth transitions between pages give the impression of content changing
+ * rather than navigating to a new page.
  */
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import HomePage from './Home';
 import MenusPage from './Menus';
 import ContactPage from './Contact';
@@ -21,18 +21,37 @@ interface PublicSPAProps {
 
 export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [displayedPage, setDisplayedPage] = useState<Page>('home');
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Smooth page transition: fade out → switch → fade in
+  const handlePageChange = (newPage: Page) => {
+    if (newPage === currentPage) return;
+    setIsTransitioning(true);
+    // After fade out completes, swap content and fade in
+    setTimeout(() => {
+      setCurrentPage(newPage);
+      setDisplayedPage(newPage);
+      window.scrollTo({ top: 0 });
+      // Small delay to let new content render, then fade in
+      requestAnimationFrame(() => {
+        setIsTransitioning(false);
+      });
+    }, 150);
+  };
 
   // Render the current page content based on internal navigation state
   const renderPage = () => {
-    switch (currentPage) {
+    switch (displayedPage) {
       case 'home':
-        return <HomePage setCurrentPage={setCurrentPage} />;
+        return <HomePage setCurrentPage={handlePageChange} />;
       
       case 'menu':
         return (
           <>
-            <MenusPage setCurrentPage={setCurrentPage} />
-            <Footer setCurrentPage={setCurrentPage} />
+            <MenusPage setCurrentPage={handlePageChange} />
+            <Footer setCurrentPage={handlePageChange} />
           </>
         );
       
@@ -40,34 +59,32 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
         return (
           <>
             <ContactPage />
-            <Footer setCurrentPage={setCurrentPage} />
+            <Footer setCurrentPage={handlePageChange} />
           </>
         );
       
       case 'legal-mentions':
         return (
           <>
-            <LegalPage section="mentions" setCurrentPage={setCurrentPage} />
-            <Footer setCurrentPage={setCurrentPage} />
+            <LegalPage section="mentions" setCurrentPage={handlePageChange} />
+            <Footer setCurrentPage={handlePageChange} />
           </>
         );
       
       case 'legal-cgv':
         return (
           <>
-            <LegalPage section="cgv" setCurrentPage={setCurrentPage} />
-            <Footer setCurrentPage={setCurrentPage} />
+            <LegalPage section="cgv" setCurrentPage={handlePageChange} />
+            <Footer setCurrentPage={handlePageChange} />
           </>
         );
       
       case 'user-profile':
-        // For now, redirect to dashboard for user profile
-        // In future, could add a dedicated user profile page here
         window.location.href = '/dashboard';
         return null;
       
       default:
-        return <HomePage setCurrentPage={setCurrentPage} />;
+        return <HomePage setCurrentPage={handlePageChange} />;
     }
   };
 
@@ -76,13 +93,18 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
       {/* Navigation - always visible, fixed position */}
       <Navbar
         currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
+        setCurrentPage={handlePageChange}
         user={user}
         onLogout={onLogout}
       />
       
-      {/* Main content - changes based on currentPage */}
-      <main className={currentPage === 'home' ? '' : 'pt-16 sm:pt-20'}>
+      {/* Main content with smooth transition */}
+      <main 
+        ref={mainRef}
+        className={`transition-opacity duration-150 ease-in-out ${
+          isTransitioning ? 'opacity-0' : 'opacity-100'
+        } ${currentPage === 'home' ? '' : 'pt-14 sm:pt-16'}`}
+      >
         {renderPage()}
       </main>
     </div>

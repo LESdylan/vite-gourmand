@@ -5,11 +5,14 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import * as authService from '../services/auth';
+import type { RegisterData } from '../services/auth';
 import { getRememberMe, saveRememberMe, clearRememberMe } from './rememberMe';
 import type { PortalAuthState, UserRole } from './types';
 
 interface PortalAuthContextValue extends PortalAuthState {
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
+  forgotPassword: (email: string) => Promise<string>;
   loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
   rememberMeData: { email: string; name: string } | null;
@@ -70,6 +73,30 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const registerUser = useCallback(async (data: RegisterData) => {
+    setState(s => ({ ...s, isLoading: true, error: null }));
+    try {
+      const { user } = await authService.register(data);
+      const role = mapRole(user.role);
+      setState({ user: { ...user, role }, isAuthenticated: true, isLoading: false, error: null });
+    } catch (e) {
+      setState(s => ({ ...s, isLoading: false, error: e instanceof Error ? e.message : 'Échec de l\'inscription' }));
+      throw e;
+    }
+  }, []);
+
+  const forgotPassword = useCallback(async (email: string): Promise<string> => {
+    setState(s => ({ ...s, isLoading: true, error: null }));
+    try {
+      const result = await authService.forgotPassword(email);
+      setState(s => ({ ...s, isLoading: false }));
+      return result.message;
+    } catch (e) {
+      setState(s => ({ ...s, isLoading: false, error: e instanceof Error ? e.message : 'Échec de l\'envoi' }));
+      throw e;
+    }
+  }, []);
+
   const logout = useCallback(() => {
     authService.logout();
     clearRememberMe();
@@ -77,7 +104,7 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <PortalAuthContext.Provider value={{ ...state, login, loginWithGoogle, logout, rememberMeData }}>
+    <PortalAuthContext.Provider value={{ ...state, login, register: registerUser, forgotPassword, loginWithGoogle, logout, rememberMeData }}>
       {children}
     </PortalAuthContext.Provider>
   );

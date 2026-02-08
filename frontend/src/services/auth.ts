@@ -41,8 +41,11 @@ interface RawAuthResponse {
 export interface RegisterData {
   email: string;
   password: string;
-  name: string;
-  phone?: string;
+  firstName: string;
+  telephoneNumber?: string;
+  postalAddress?: string;
+  city?: string;
+  country?: string;
 }
 
 export interface LoginData {
