@@ -1,4 +1,3 @@
-
 # Variables (defined first, before they're used)
 DOCKER_COMPOSE = docker-compose
 POSTGRES_SERVICE = vite-gourmand-db-1
@@ -371,3 +370,10 @@ quick-start-cloud:  ## Full cloud setup (Supabase + MongoDB Atlas)
 	@echo "Run 'cd backend && npm run start:dev' to start the server"
 
 .PHONY: help restore destroy prune fclean clean diagnostic-all diagnostic-rgpd diagnostic diagnostic-routines seed-test-data test_backend test_backend_flows all up down restart logs psql wait-for-db wait-for-mongo mongo-init mongosh install-backend generate-prisma init-migration migrate reset reload seed_db_playground seed_playground seed_test_data test_backend test_backend_e2e test_backend_orders test_backend_flows postman-install postman-login postman-list postman-run postman-local postman-local-all setup-env setup-supabase setup-supabase-full setup-local supabase-migrate supabase-push supabase-seed supabase-pull supabase-studio supabase-test mongo-atlas-test mongo-atlas-stats mongo-atlas-cleanup mongo-atlas-emergency mongo-atlas-init quick-start-local quick-start-supabase quick-start-cloud
+
+# Deploy to Fly.io
+.PHONY: deploy
+
+deploy:
+	flyctl deploy --remote-only
+	@echo "Deployment to Fly.io complete!"
