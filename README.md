@@ -83,7 +83,7 @@ The project gives a certain amount of freedoms and requirements that I need foll
 - [Unsplash API](https://unsplash.com/documentation#public-authentication)
 - [RGPD](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/the-right-to-be-informed/checklists/)
 - [RGAA](https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/#2)
-
+- [CS50 SQL Notes](https://cs50.harvard.edu/sql)
 
 ## Use Of AI
 **Documentation & Research** - Used to clarify ambiguities in edge cases where conventions differ and to research complex topics not detailed in standard textbooks, ensuring realistic solutinos within the project's scope.
