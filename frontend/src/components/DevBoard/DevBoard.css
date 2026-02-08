@@ -3,6 +3,11 @@
  * Centered responsive layout - Mobile first
  */
 
+/* Override body background when DevBoard is active so fixed gradient shows through */
+body:has(.devboard) {
+  background: transparent !important;
+}
+
 .devboard {
   position: relative;
   display: flex;
@@ -14,7 +19,7 @@
   padding: 0;
   background: transparent; /* Let gradient show through */
   color: var(--color-text-primary);
-  isolation: isolate; /* Create stacking context so gradient z-index:-1 stays above body */
+  z-index: 1; /* Above the fixed gradient background */
 }
 
 .devboard-body {
@@ -27,7 +32,6 @@
   padding: 0 var(--space-4);
   overflow: hidden;
   box-sizing: border-box;
-  z-index: 1; /* Above background */
 }
 
 /* Large desktop */
