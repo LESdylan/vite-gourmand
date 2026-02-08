@@ -6,6 +6,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import * as authService from '../services/auth';
 import type { RegisterData } from '../services/auth';
+import { isAuthenticated } from '../services/api';
 import { getRememberMe, saveRememberMe, clearRememberMe } from './rememberMe';
 import type { PortalAuthState, UserRole } from './types';
 
@@ -36,11 +37,16 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
       const remembered = getRememberMe();
       if (remembered) setRememberMeData({ email: remembered.email, name: remembered.name });
 
-      try {
-        const profile = await authService.getProfile();
-        const role = mapRole(profile.role);
-        setState({ user: { ...profile, role }, isAuthenticated: true, isLoading: false, error: null });
-      } catch {
+      // Only attempt profile fetch if we have a token — prevents 401 spam
+      if (isAuthenticated()) {
+        try {
+          const profile = await authService.getProfile();
+          const role = mapRole(profile.role);
+          setState({ user: { ...profile, role }, isAuthenticated: true, isLoading: false, error: null });
+        } catch {
+          setState(s => ({ ...s, isLoading: false }));
+        }
+      } else {
         setState(s => ({ ...s, isLoading: false }));
       }
     };

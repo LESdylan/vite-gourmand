@@ -224,31 +224,12 @@
   background: #e0d5d8;
 }
 
-/* ── Google ── */
-.pf-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+/* ── Google (GSI rendered button) ── */
+.pf-google-wrap {
   width: 100%;
-  padding: 11px 0;
-  border: 1.5px solid #e0d5d8;
-  border-radius: 10px;
-  background: #fff;
-  color: #3c3c3c;
-  font-size: 0.88rem;
-  font-weight: 500;
-  font-family: 'Inter', system-ui, sans-serif;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.15s;
-}
-.pf-google:hover:not(:disabled) {
-  border-color: #722F37;
-  background: #fdf7f2;
-}
-.pf-google:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
 }
 
 /* ── Alerts ── */

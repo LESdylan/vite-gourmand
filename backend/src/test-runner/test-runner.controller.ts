@@ -31,12 +31,17 @@ export class TestRunnerController {
   @Get('results')
   @Public()
   @ApiOperation({ summary: 'Get cached test results' })
-  @ApiResponse({ status: 200, description: 'Returns cached test results' })
-  @ApiResponse({ status: 404, description: 'No cached results available' })
+  @ApiResponse({ status: 200, description: 'Returns cached or default test results' })
   getResults(): RunTestsResponse {
     const results = this.testRunnerService.getCachedResults();
     if (!results) {
-      throw new HttpException('No cached results available', HttpStatus.NOT_FOUND);
+      // Return empty default instead of 404 — no tests have run yet since server start
+      return {
+        success: true,
+        suites: [],
+        summary: { total: 0, passed: 0, failed: 0, duration: 0 },
+        timestamp: new Date().toISOString(),
+      };
     }
     return results;
   }

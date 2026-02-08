@@ -119,6 +119,12 @@ export function logout(): void {
   clearTokens();
 }
 
+/** Get Google OAuth client ID from backend */
+export async function getGoogleConfig(): Promise<{ clientId: string | null }> {
+  const wrapper = await apiRequest<ApiWrapper<{ clientId: string | null }>>('/api/auth/google/config');
+  return wrapper.data;
+}
+
 /** Get current user profile */
 export async function getProfile(): Promise<AuthUserMapped> {
   const wrapper = await apiRequest<ApiWrapper<AuthUser>>('/api/auth/me');

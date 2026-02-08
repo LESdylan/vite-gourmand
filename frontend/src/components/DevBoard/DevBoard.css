@@ -14,6 +14,7 @@
   padding: 0;
   background: transparent; /* Let gradient show through */
   color: var(--color-text-primary);
+  isolation: isolate; /* Create stacking context so gradient z-index:-1 stays above body */
 }
 
 .devboard-body {
