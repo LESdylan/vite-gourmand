@@ -22,8 +22,9 @@ interface OverviewProps {
 }
 
 export function Overview({ metrics, isRunning }: OverviewProps) {
-  // Derive health status
-  const health = metrics.passRate >= 95 ? 'healthy' : 
+  // Derive health status (-1 means no data yet / tests pending)
+  const health = metrics.passRate < 0 ? 'healthy' :
+                 metrics.passRate >= 95 ? 'healthy' : 
                  metrics.passRate >= 80 ? 'warning' : 'critical';
 
   return (

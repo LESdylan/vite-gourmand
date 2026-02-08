@@ -48,7 +48,7 @@ export function HealthStatus({ status, passRate, testsRunning }: HealthStatusPro
         </p>
       </div>
       <div className="health-status-metric">
-        <span className="health-status-value">{passRate}%</span>
+        <span className="health-status-value">{passRate < 0 ? '—' : `${passRate}%`}</span>
         <span className="health-status-label">Pass Rate</span>
       </div>
     </div>

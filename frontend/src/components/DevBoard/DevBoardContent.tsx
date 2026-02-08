@@ -119,7 +119,7 @@ export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }
             totalTests={metrics.total}
             passedTests={metrics.passed}
             failedTests={metrics.failed}
-            passRate={metrics.passRate}
+            passRate={Math.max(0, metrics.passRate)}
           />
         </section>
       )}

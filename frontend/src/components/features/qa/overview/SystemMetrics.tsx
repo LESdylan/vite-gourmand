@@ -33,9 +33,9 @@ export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: Sys
     },
     {
       label: 'Reliability',
-      value: `${passRate}`,
+      value: `${passRate < 0 ? '--' : passRate}`,
       unit: '%',
-      status: passRate >= 95 ? 'good' : passRate >= 80 ? 'warning' : 'critical',
+      status: passRate < 0 ? 'good' : passRate >= 95 ? 'good' : passRate >= 80 ? 'warning' : 'critical',
       Icon: TargetIcon,
     },
     {

@@ -63,11 +63,13 @@ function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
  */
 function calculateMetrics(results: RunTestsResponse | null) {
   if (!results?.summary) {
-    return { total: 0, passed: 0, failed: 0, passRate: 0, duration: 0, lastRun: null };
+    // No data yet — return -1 passRate to distinguish from actual 0% failure
+    return { total: 0, passed: 0, failed: 0, passRate: -1, duration: 0, lastRun: null };
   }
   
   const { total = 0, passed = 0, failed = 0, duration = 0 } = results.summary;
-  const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+  // -1 signals 'no data / pending' to the UI so it doesn't show 'critical'
+  const passRate = total > 0 ? Math.round((passed / total) * 100) : -1;
   const lastRun = results.timestamp ? new Date(results.timestamp) : null;
   
   return { total, passed, failed, passRate, duration, lastRun };
@@ -79,22 +81,45 @@ export function useTestRunner(): UseTestRunnerReturn {
   const [error, setError] = useState<string | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
 
-  // Load cached results from backend on mount
+  // Load cached results from backend on mount — auto-run if cache is empty
   useEffect(() => {
     let isMounted = true;
     
     const loadCachedResults = async () => {
       try {
         const cached = await getTestResults();
-        if (isMounted && cached?.suites?.length) {
+        if (!isMounted) return;
+
+        if (cached?.suites?.length) {
+          // Cache has data — use it
           setResults(cached);
           if (cached.rawOutput) setRawOutput(cached.rawOutput);
+        } else {
+          // Cache is empty (server restarted) — auto-run all tests
+          console.log('No cached test results — auto-running all tests…');
+          setIsRunning(true);
+          setCurrentTest('All Tests (auto)');
+          try {
+            const response = await runAllTests({ verbose: true });
+            if (isMounted) {
+              setResults(response);
+              if (response.rawOutput) setRawOutput(response.rawOutput);
+            }
+          } catch (err) {
+            if (isMounted) {
+              setError(err instanceof Error ? err.message : 'Auto-run failed');
+            }
+          } finally {
+            if (isMounted) {
+              setIsRunning(false);
+              setCurrentTest(null);
+            }
+          }
         }
-        // If no cached results, user needs to click "Run All Tests" button
       } catch {
-        // Backend not available - will show empty state
+        // Backend not available
         if (isMounted) {
-          console.log('Test results API not available - click Run All Tests to execute');
+          console.log('Test results API not available - backend may not be running');
         }
       }
     };
