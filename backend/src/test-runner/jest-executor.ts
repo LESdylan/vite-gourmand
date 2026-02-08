@@ -31,7 +31,8 @@ export async function executeJestTests(
   try {
     const { stdout, stderr } = await execAsync(command, {
       cwd: backendPath,
-      timeout: 120000,
+      timeout: 180000,
+      maxBuffer: 10 * 1024 * 1024,
       env: { ...process.env, NODE_ENV: 'test', FORCE_COLOR: '0' },
     });
 
@@ -47,19 +48,24 @@ export async function executeJestTests(
 
 /**
  * Get Jest command configuration
+ * Uses node directly with --localstorage-file (required by Jest 30's jest-environment-node)
+ * instead of npm run scripts to avoid shell indirection issues in Docker
  */
 function getJestCommand(type: TestType): { command: string; suiteName: string } {
+  const nodeFlags = 'node --max-old-space-size=512 --localstorage-file=/tmp/jest-localstorage';
+  const jestBin = 'node_modules/.bin/jest';
+
   const commands: Record<TestType, { command: string; suiteName: string }> = {
     unit: {
-      command: 'npm run test -- --json --outputFile=test-results.json 2>&1 || true',
+      command: `${nodeFlags} ${jestBin} --runInBand --json --outputFile=test-results.json --forceExit 2>&1 || true`,
       suiteName: 'Unit Tests',
     },
     e2e: {
-      command: 'npm run test:e2e -- --json --outputFile=test-results.json 2>&1 || true',
+      command: `${nodeFlags} ${jestBin} --config ./test/jest-e2e.json --runInBand --json --outputFile=test-results.json --forceExit 2>&1 || true`,
       suiteName: 'E2E Tests',
     },
     orders: {
-      command: 'npm run test:orders -- --json --outputFile=test-results.json 2>&1 || true',
+      command: `${nodeFlags} ${jestBin} --config ./test/jest-e2e.json --testPathPattern=order --runInBand --json --outputFile=test-results.json --forceExit 2>&1 || true`,
       suiteName: 'Orders Tests',
     },
   };

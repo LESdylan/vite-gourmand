@@ -74,7 +74,11 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
-    await this.connect();
+    // Don't await - connect in background so the HTTP server starts immediately
+    // MongoDB is optional; the app works without it
+    this.connect().catch((err) => {
+      this.logger.warn(`MongoDB background connect failed: ${err?.message || err}`);
+    });
   }
 
   async connect(): Promise<void> {
@@ -95,6 +99,11 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
         minPoolSize: 1,
         retryWrites: true,
         retryReads: true,
+        tls: true,
+        tlsAllowInvalidCertificates: false,
+        connectTimeoutMS: 10000,
+        socketTimeoutMS: 10000,
+        serverSelectionTimeoutMS: 10000,
       } : {};
 
       this.client = new MongoClient(uri, clientOptions);

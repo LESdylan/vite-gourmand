@@ -13,11 +13,11 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "node --localstorage-file=/tmp/jest-storage node_modules/.bin/jest --runInBand",
-    "test:watch": "node --localstorage-file=/tmp/jest-storage node_modules/.bin/jest --watch --runInBand",
-    "test:cov": "node --localstorage-file=/tmp/jest-storage node_modules/.bin/jest --coverage --runInBand",
-    "test:debug": "node --inspect-brk --localstorage-file=/tmp/jest-storage -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "node --localstorage-file=/tmp/jest-storage node_modules/.bin/jest --config ./test/jest-e2e.json --runInBand",
+    "test": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --runInBand",
+    "test:watch": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --watch --runInBand",
+    "test:cov": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --coverage --runInBand",
+    "test:debug": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./test/jest-e2e.json --runInBand",
     "test:orders": "jest --config ./test/jest-e2e.json --testPathPattern=order",
     "test:flows": "jest --config ./test/jest-e2e.json --testPathPattern=api-flows",
     "test:all": "jest --config ./test/jest-e2e.json --runInBand",
@@ -98,8 +98,8 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "rootDir": ".",
+    "testRegex": ".*\\.(spec|test)\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
@@ -107,6 +107,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "testPathIgnorePatterns": [
+      "<rootDir>/test/cli_test/tests/"
+    ],
     "testEnvironment": "node",
     "testEnvironmentOptions": {
       "customExportConditions": [

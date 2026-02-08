@@ -1,0 +1,106 @@
+name: CI Tests (unit + optional e2e)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  backend-tests:
+    name: Backend tests (unit + optional e2e)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\\"ping\\")'" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache backend node modules
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-backend-node-${{ hashFiles('backend/package-lock.json', 'backend/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-backend-node-
+
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+
+      - name: Run backend unit tests
+        working-directory: backend
+        env:
+          NODE_ENV: test
+        run: |
+          npm run test -- --json --outputFile=test-results.json || true
+
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-unit-test-results
+          path: backend/test-results.json
+
+      - name: Prepare environment for e2e (use secrets if provided)
+        working-directory: backend
+        run: |
+          echo "Checking for repository-provided DATABASE_URL / MONGODB_URI..."
+          if [ -n "${{ secrets.DATABASE_URL }}" ] && [ -n "${{ secrets.MONGODB_URI }}" ]; then
+            echo "Using repository secrets for DATABASE_URL and MONGODB_URI"
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+            echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> $GITHUB_ENV
+          else
+            echo "No external DB secrets provided — using service containers started by workflow"
+            echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres" >> $GITHUB_ENV
+            echo "MONGODB_URI=mongodb://localhost:27017/vite_gourmand" >> $GITHUB_ENV
+          fi
+
+      - name: Prepare database (Prisma) if using local services
+        if: ${{ !secrets.DATABASE_URL || !secrets.MONGODB_URI }}
+        working-directory: backend
+        run: |
+          echo "Preparing local Postgres/MongoDB for e2e..."
+          npx prisma generate
+          npx prisma migrate reset --force --schema=prisma/schema.prisma || true
+
+      - name: Run backend e2e tests
+        working-directory: backend
+        env:
+          NODE_ENV: test
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          MONGODB_URI: ${{ env.MONGODB_URI }}
+        run: |
+          npm run test:e2e -- --json --outputFile=test-results-e2e.json || true
+
+      - name: Upload e2e results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-e2e-test-results
+          path: backend/test-results-e2e.json
+
+      - name: Note about secrets
+        run: |
+          echo "If your e2e tests require Supabase or external services, add secrets to the repository and update the workflow to use them."

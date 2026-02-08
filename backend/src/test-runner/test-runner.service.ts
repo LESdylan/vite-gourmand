@@ -1,15 +1,20 @@
 /**
  * Test Runner Service
- * Orchestrates test execution - delegates to specialized executors
+ * Hybrid approach:
+ * - On startup: loads pre-built unit test results from Docker build (instant devboard)
+ * - On demand: runs tests LIVE against the production environment (POST /run, /run-all)
+ * - This lets you verify deployment health by re-running tests
  */
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as path from 'path';
+import * as fs from 'fs';
 import { RunTestsResponse, TestRunOptions, TestType } from './types';
 import { executeJestTests } from './jest-executor';
 import { executePostmanTests } from './postman-executor';
+import { parseJestJson } from './jest-parser';
 
 @Injectable()
-export class TestRunnerService {
+export class TestRunnerService implements OnModuleInit {
   private readonly logger = new Logger(TestRunnerService.name);
   private isRunning = false;
   private currentTest: string | null = null;
@@ -19,6 +24,57 @@ export class TestRunnerService {
   constructor() {
     // Navigate from dist/src/test-runner to backend root (3 levels up)
     this.backendPath = path.resolve(__dirname, '..', '..', '..');
+  }
+
+  /**
+   * On startup, load pre-built unit test results so the devboard
+   * shows data immediately without waiting for a manual test run
+   */
+  async onModuleInit() {
+    this.loadPreBuiltResults();
+  }
+
+  /**
+   * Load test results from JSON files baked into the Docker image at build time
+   */
+  private loadPreBuiltResults(): void {
+    const unitPath = path.join(this.backendPath, 'test-results-unit.json');
+    const suites: any[] = [];
+
+    // Load unit test results (built at Docker build time)
+    const unitSuite = this.loadResultFile(unitPath, 'Unit Tests');
+    if (unitSuite) suites.push(unitSuite);
+
+    if (suites.length > 0) {
+      this.cachedResults = this.buildResponse(suites);
+      this.logger.log(
+        `✅ Loaded pre-built test results: ${this.cachedResults.summary.passed} passed, ` +
+        `${this.cachedResults.summary.failed} failed, ${this.cachedResults.summary.total} total`,
+      );
+      this.logger.log('💡 Use POST /api/tests/run-all to run live tests against this deployment');
+    } else {
+      this.logger.warn('⚠️ No pre-built test results found - use POST /api/tests/run-all to run tests');
+    }
+  }
+
+  /**
+   * Parse a Jest JSON result file into a TestSuite
+   */
+  private loadResultFile(filePath: string, suiteName: string): any | null {
+    try {
+      if (!fs.existsSync(filePath)) {
+        this.logger.warn(`Test results file not found: ${filePath}`);
+        return null;
+      }
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const jestResults = JSON.parse(content);
+      const suite = parseJestJson(jestResults, suiteName);
+      this.logger.log(`📋 ${suiteName}: ${suite.totalPassed} passed, ${suite.totalFailed} failed`);
+      return suite;
+    } catch (error) {
+      this.logger.error(`Failed to load ${suiteName} results: ${error}`);
+      return null;
+    }
   }
 
   getStatus(): { running: boolean; currentTest?: string } {
@@ -33,6 +89,7 @@ export class TestRunnerService {
     this.assertNotRunning();
     this.isRunning = true;
     this.currentTest = testId;
+    this.logger.log(`🧪 Running live test: ${testId}`);
 
     try {
       const result = await this.executeTest(testId, options);
@@ -46,6 +103,7 @@ export class TestRunnerService {
   async runAllTests(options: TestRunOptions = {}): Promise<RunTestsResponse> {
     this.assertNotRunning();
     this.isRunning = true;
+    this.logger.log('🧪 Running all tests live against current deployment...');
 
     try {
       const result = await this.executeAllTests(options);

@@ -1,3 +1,26 @@
+# Run backend tests in production (Fly.io) container
+.PHONY: prod-test prod-test-e2e
+
+prod-test:
+	@echo "Running unit tests on Fly instance and saving results to /tmp/test-results.json"
+	flyctl ssh console -C "sh -lc 'cd /app && npm run test -- --json --outputFile=/tmp/test-results.json || true; cat /tmp/test-results.json'"
+
+prod-test-e2e:
+	@echo "Running e2e tests on Fly instance and saving results to /tmp/test-results-e2e.json"
+	flyctl ssh console -C "sh -lc 'cd /app && npm run test:e2e -- --json --outputFile=/tmp/test-results-e2e.json || true; cat /tmp/test-results-e2e.json'"
+
+# Start a Fly VM (may incur charges) and run remote tests
+.PHONY: fly-start-and-test
+fly-start-and-test:
+	@if [ -z "$(FLY_APP)" ]; then \
+		echo "Usage: make fly-start-and-test FLY_APP=vite-gourmand-withered-glitter-7902"; exit 1; \
+	fi
+	@echo "Scaling Fly app $(FLY_APP) to 1 machine (may incur charges)..."
+	fly scale count 1 -a $(FLY_APP)
+	@echo "Running unit tests on Fly instance ($(FLY_APP)) and saving results to /tmp/test-results.json"
+	flyctl ssh console -a $(FLY_APP) -C "sh -lc 'cd /app && node --max-old-space-size=1024 node_modules/.bin/jest --runInBand --json --outputFile=/tmp/test-results.json || true; cat /tmp/test-results.json'"
+	@echo "Running e2e tests on Fly instance ($(FLY_APP)) and saving results to /tmp/test-results-e2e.json"
+	flyctl ssh console -a $(FLY_APP) -C "sh -lc 'cd /app && node --max-old-space-size=1024 node_modules/.bin/jest --config ./test/jest-e2e.json --runInBand --json --outputFile=/tmp/test-results-e2e.json || true; cat /tmp/test-results-e2e.json'"
 # Variables (defined first, before they're used)
 DOCKER_COMPOSE = docker-compose
 POSTGRES_SERVICE = vite-gourmand-db-1
@@ -34,6 +57,9 @@ restart:  ## Restart all containers
 
 logs:  ## Show logs for all containers
 	$(DOCKER_COMPOSE) logs -f
+
+fly_log:
+	fly logs -a vite-gourmand-withered-glitter-7902
 
 psql:  ## Open psql shell to the PostgreSQL container
 	docker exec -it $(POSTGRES_SERVICE) psql -U postgres
