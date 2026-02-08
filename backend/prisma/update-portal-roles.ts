@@ -22,10 +22,10 @@ async function hashPassword(password: string): Promise<string> {
 async function main() {
   console.log('🔄 Updating portal roles and users...\n');
 
-  // 1. Create new roles (if not exist)
+  // 1. Create roles matching the subject
   console.log('👥 Setting up roles...');
   
-  const roleNames = ['superadmin', 'admin', 'employee', 'customer'];
+  const roleNames = ['superadmin', 'admin', 'employee', 'utilisateur'];
   const roles: Record<string, { id: number }> = {};
   
   for (const name of roleNames) {
@@ -58,17 +58,18 @@ async function main() {
         email: dylanEmail,
         password: dylanPassword,
         first_name: 'Dylan',
+        last_name: 'Lesieur',
         telephone_number: '+33600000000',
-        city: 'Paris',
+        city: 'Bordeaux',
         country: 'France',
-        postal_address: '1 Rue du Dev',
+        postal_address: '1 Rue du Dev, 33000',
         roleId: roles.superadmin.id,
       },
     });
     console.log(`   ✓ Created Dylan as superadmin`);
   }
 
-  // 3. Create/Update Julie as admin
+  // 3. Create/Update Julie as admin (subject: José asks us to create his account)
   console.log('\n👤 Setting up Julie as admin...');
   const julieEmail = 'julie@vitegourmand.fr';
   const adminPassword = await hashPassword('Admin123!');
@@ -86,10 +87,11 @@ async function main() {
         email: julieEmail,
         password: adminPassword,
         first_name: 'Julie',
+        last_name: '',
         telephone_number: '+33600000001',
-        city: 'Paris',
+        city: 'Bordeaux',
         country: 'France',
-        postal_address: '10 Rue Vite Gourmand',
+        postal_address: '10 Rue Vite Gourmand, 33000 Bordeaux',
         roleId: roles.admin.id,
       },
     });
@@ -113,24 +115,25 @@ async function main() {
         email: joseEmail,
         password: adminPassword,
         first_name: 'José',
+        last_name: '',
         telephone_number: '+33600000002',
-        city: 'Paris',
+        city: 'Bordeaux',
         country: 'France',
-        postal_address: '10 Rue Vite Gourmand',
+        postal_address: '10 Rue Vite Gourmand, 33000 Bordeaux',
         roleId: roles.admin.id,
       },
     });
     console.log(`   ✓ Created José as admin`);
   }
 
-  // 5. Create bot users (no password, for debug only)
+  // 5. Create bot users
   console.log('\n🤖 Setting up bot users for debugging...');
   const botPassword = await hashPassword('bot_debug_only');
   
   const bots = [
     { email: 'bot_admin@debug.local', name: 'Bot Admin', role: 'admin' },
     { email: 'bot_employee@debug.local', name: 'Bot Employee', role: 'employee' },
-    { email: 'bot_user@debug.local', name: 'Bot Customer', role: 'customer' },
+    { email: 'bot_user@debug.local', name: 'Bot Utilisateur', role: 'utilisateur' },
   ];
 
   for (const bot of bots) {
@@ -147,6 +150,7 @@ async function main() {
           email: bot.email,
           password: botPassword,
           first_name: bot.name,
+          last_name: '',
           telephone_number: '+00000000000',
           city: 'Debug',
           country: 'Debug',

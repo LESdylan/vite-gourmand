@@ -7,6 +7,7 @@ import {
   DashboardStats,
   AuditLog,
   SearchAnalytics,
+  RevenueByMenu,
   MONGO_COLLECTIONS,
 } from './schemas';
 
@@ -32,6 +33,7 @@ const RETENTION_POLICY = {
   [MONGO_COLLECTIONS.AUDIT_LOGS]: 90,         // Audit logs: 90 days (compliance)
   [MONGO_COLLECTIONS.ORDER_SNAPSHOTS]: 180,   // Order history: 6 months
   [MONGO_COLLECTIONS.MENU_ANALYTICS]: 365,    // Menu analytics: 1 year
+  [MONGO_COLLECTIONS.REVENUE_BY_MENU]: 365,   // Revenue by menu: 1 year
   [MONGO_COLLECTIONS.DASHBOARD_STATS]: 365,   // Dashboard stats: 1 year
 } as const;
 
@@ -44,6 +46,7 @@ const CLEANUP_PRIORITY = [
   MONGO_COLLECTIONS.AUDIT_LOGS,         // Important but older ones less relevant
   MONGO_COLLECTIONS.ORDER_SNAPSHOTS,    // Historical orders
   MONGO_COLLECTIONS.MENU_ANALYTICS,     // Business insights - keep longer
+  MONGO_COLLECTIONS.REVENUE_BY_MENU,    // Revenue data - keep longer
   MONGO_COLLECTIONS.DASHBOARD_STATS,    // Pre-computed stats - most valuable
 ];
 
@@ -65,6 +68,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
   private dashboardStats!: Collection<DashboardStats>;
   private auditLogs!: Collection<AuditLog>;
   private searchAnalytics!: Collection<SearchAnalytics>;
+  private revenueByMenu!: Collection<RevenueByMenu>;
 
   /**
    * Check if MongoDB is available. Analytics features are optional.
@@ -122,6 +126,7 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
       this.dashboardStats = this.db.collection(MONGO_COLLECTIONS.DASHBOARD_STATS);
       this.auditLogs = this.db.collection(MONGO_COLLECTIONS.AUDIT_LOGS);
       this.searchAnalytics = this.db.collection(MONGO_COLLECTIONS.SEARCH_ANALYTICS);
+      this.revenueByMenu = this.db.collection(MONGO_COLLECTIONS.REVENUE_BY_MENU);
 
       // Create TTL indexes for automatic cleanup
       await this.ensureIndexes();
@@ -180,6 +185,12 @@ export class AnalyticsService implements OnModuleInit, OnModuleDestroy {
       await this.orderSnapshots.createIndex({ orderId: 1 }, { unique: true });
       await this.orderSnapshots.createIndex({ 'user.id': 1 });
       await this.dashboardStats.createIndex({ date: 1, type: 1 }, { unique: true });
+
+      // Revenue by menu indexes
+      await this.revenueByMenu.createIndex(
+        { menuId: 1, period: 1, periodType: 1 },
+        { unique: true }
+      );
 
       this.logger.log('✅ MongoDB indexes created/verified');
     } catch (error) {

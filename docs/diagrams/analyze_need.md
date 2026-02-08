@@ -6,63 +6,51 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    SUPER ADMIN                          │
-│  Full system access + infrastructure + code deployment  │
+│              SUPERADMIN (bonus, developer)               │
+│  Full system access + infrastructure + seeded only       │
 ├─────────────────────────────────────────────────────────┤
-│                      ADMIN                              │
-│  Business management, employee oversight, analytics     │
-├──────────────────────┬──────────────────────────────────┤
-│      EMPLOYEE        │           CLIENT                 │
-│  Order processing,   │  Browse menus, place orders,     │
-│  delivery, reviews   │  track delivery, leave reviews   │
-└──────────────────────┴──────────────────────────────────┘
+│              ADMIN (José — seeded, not creatable)        │
+│  Everything employee can do + create employees +         │
+│  analytics charts + disable accounts                     │
+├─────────────────────────────────────────────────────────┤
+│              EMPLOYEE (created by admin)                  │
+│  Menus/dishes CRUD, order status management,             │
+│  review moderation, working hours                        │
+├─────────────────────────────────────────────────────────┤
+│              UTILISATEUR (self-registered client)        │
+│  Browse menus, place orders, track orders, leave reviews │
+└─────────────────────────────────────────────────────────┘
 ```
+
+> **Subject rule:** "il ne doit pas être possible de créer un compte Administrateur depuis l'application"
 
 ---
 
-## Permission Matrix
+## Permission Matrix (subject-grounded)
 
-| Resource | Action | Super Admin | Admin | Employee | Client |
-|----------|--------|:-----------:|:-----:|:--------:|:------:|
-| **Users** | Create | ✅ | ✅ | ❌ | ❌ |
-| **Users** | Read all | ✅ | ✅ | ❌ | ❌ |
-| **Users** | Read own | ✅ | ✅ | ✅ | ✅ |
-| **Users** | Update any | ✅ | ✅ | ❌ | ❌ |
-| **Users** | Update own | ✅ | ✅ | ✅ | ✅ |
-| **Users** | Suspend | ✅ | ✅ | ❌ | ❌ |
-| **Users** | Delete (GDPR) | ✅ | ✅ | ❌ | ✅ (own) |
-| **Menus** | Create | ✅ | ✅ | ✅ | ❌ |
-| **Menus** | Update | ✅ | ✅ | ✅ | ❌ |
-| **Menus** | Delete | ✅ | ✅ | ❌ | ❌ |
-| **Menus** | Publish | ✅ | ✅ | ❌ | ❌ |
+| Resource | Action | Admin | Employee | Utilisateur | Visitor |
+|----------|--------|:-----:|:--------:|:-----------:|:-------:|
 | **Menus** | View published | ✅ | ✅ | ✅ | ✅ |
-| **Orders** | Place | ✅ | ✅ | ✅ | ✅ |
-| **Orders** | View all | ✅ | ✅ | ✅ | ❌ |
-| **Orders** | View own | ✅ | ✅ | ✅ | ✅ |
-| **Orders** | Update status | ✅ | ✅ | ✅ | ❌ |
-| **Orders** | Cancel (any) | ✅ | ✅ | ❌ | ❌ |
-| **Orders** | Cancel (own, pre-confirm) | ✅ | ✅ | ❌ | ✅ |
-| **Orders** | Assign employee | ✅ | ✅ | ❌ | ❌ |
-| **Reviews** | Write | ✅ | ✅ | ❌ | ✅ |
-| **Reviews** | Moderate | ✅ | ✅ | ✅ | ❌ |
-| **Reviews** | Delete | ✅ | ✅ | ❌ | ❌ |
-| **Delivery** | Assign | ✅ | ✅ | ❌ | ❌ |
-| **Delivery** | Update status | ✅ | ✅ | ✅ | ❌ |
-| **Delivery** | Track (own order) | ✅ | ✅ | ✅ | ✅ |
-| **Analytics** | View dashboard | ✅ | ✅ | ❌ | ❌ |
-| **Analytics** | Export data | ✅ | ✅ | ❌ | ❌ |
-| **Support** | Create ticket | ✅ | ✅ | ✅ | ✅ |
-| **Support** | View all tickets | ✅ | ✅ | ✅ | ❌ |
-| **Support** | Assign ticket | ✅ | ✅ | ❌ | ❌ |
-| **Kanban** | Configure columns | ✅ | ✅ | ❌ | ❌ |
-| **Kanban** | Manage tags | ✅ | ✅ | ❌ | ❌ |
-| **Kanban** | Move cards | ✅ | ✅ | ✅ | ❌ |
-| **Loyalty** | Configure program | ✅ | ✅ | ❌ | ❌ |
-| **Loyalty** | View own points | ✅ | ✅ | ✅ | ✅ |
-| **Discounts** | Create codes | ✅ | ✅ | ❌ | ❌ |
-| **System** | DB monitoring | ✅ | ❌ | ❌ | ❌ |
-| **System** | Manage roles | ✅ | ❌ | ❌ | ❌ |
-| **System** | GDPR requests | ✅ | ✅ | ❌ | ❌ |
+| **Menus** | Create/Update | ✅ | ✅ | ❌ | ❌ |
+| **Menus** | Delete | ✅ | ✅ | ❌ | ❌ |
+| **Dishes** | CRUD | ✅ | ✅ | ❌ | ❌ |
+| **Working Hours** | Update | ✅ | ✅ | ❌ | ❌ |
+| **Orders** | Place | ✅ | ❌ | ✅ | ❌ |
+| **Orders** | View all | ✅ | ✅ | ❌ | ❌ |
+| **Orders** | View own | ✅ | ❌ | ✅ | ❌ |
+| **Orders** | Update status | ✅ | ✅ | ❌ | ❌ |
+| **Orders** | Cancel (pre-accepted) | ✅ | ❌ | ✅ | ❌ |
+| **Orders** | Cancel (with reason) | ✅ | ✅ (contact required) | ❌ | ❌ |
+| **Orders** | Modify (pre-accepted) | ✅ | ❌ | ✅ (except menu) | ❌ |
+| **Reviews** | Write | ❌ | ❌ | ✅ (after completed) | ❌ |
+| **Reviews** | Moderate | ✅ | ✅ | ❌ | ❌ |
+| **Employees** | Create account | ✅ | ❌ | ❌ | ❌ |
+| **Employees** | Disable account | ✅ | ❌ | ❌ | ❌ |
+| **Analytics** | View charts | ✅ | ❌ | ❌ | ❌ |
+| **Contact** | Send message | ✅ | ✅ | ✅ | ✅ |
+| **Account** | Register | ❌ | ❌ | — | ✅ |
+| **Account** | Update own info | ✅ | ✅ | ✅ | ❌ |
+| **Account** | Reset password | ✅ | ✅ | ✅ | ❌ |
 
 ---
 
@@ -103,6 +91,28 @@
 │  → App works without it (analytics just disabled)        │
 └──────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Subject Business Rules (enforcement)
+
+| Rule (from subject) | Enforcement |
+|------|-------------|
+| Client cancels only before `accepted` | Backend: reject if `status != 'pending'` |
+| Client modifies everything except menu choice | Backend: reject menu_id change if exists |
+| Employee contacts client before cancel | Backend: require `cancellation_contact_mode` + `cancellation_reason` |
+| 10% discount if persons ≥ person_min + 5 | Backend: compute at order creation |
+| Delivery: €5 + €0.59/km outside Bordeaux | Backend: compute based on `delivery_city` |
+| Material return: 10 business days | Backend: set `material_return_deadline`, send email |
+| Material penalty: €600 | Mentioned in CGV, tracked by deadline |
+| Review after order `completed` | Backend: allow Publish creation only if order completed |
+| Review = 1-5 stars + comment | Backend: validate note range |
+| Admin sees charts from NoSQL | Frontend queries MongoDB via API |
+| Admin account seeded, not creatable | No admin creation endpoint; seed script only |
+| Welcome email on registration | Backend: email service triggered after user creation |
+| Confirmation email on order | Backend: email service triggered after order creation |
+| Email on order `completed` | Backend: email service triggered on status change |
+| Password: 10 chars, 1 special, 1 upper, 1 lower, 1 digit | Backend + Frontend validation |
 
 ---
 

@@ -261,6 +261,75 @@ async function main() {
   ]);
   console.log(`   Created ${allergens.length} allergens`);
 
+  // 6.5. Create Ingredients
+  console.log('🥕 Creating ingredients...');
+  const ingredients = await Promise.all([
+    prisma.ingredient.create({
+      data: {
+        name: 'Foie Gras',
+        unit: 'kg',
+        current_stock: 5.0,
+        min_stock_level: 1.0,
+        cost_per_unit: 120.0,
+      },
+    }),
+    prisma.ingredient.create({
+      data: {
+        name: 'Filet de Bœuf',
+        unit: 'kg',
+        current_stock: 20.0,
+        min_stock_level: 5.0,
+        cost_per_unit: 45.0,
+      },
+    }),
+    prisma.ingredient.create({
+      data: {
+        name: 'Champignons',
+        unit: 'kg',
+        current_stock: 15.0,
+        min_stock_level: 3.0,
+        cost_per_unit: 8.0,
+      },
+    }),
+    prisma.ingredient.create({
+      data: {
+        name: 'Œufs',
+        unit: 'pièces',
+        current_stock: 200,
+        min_stock_level: 50,
+        cost_per_unit: 0.3,
+      },
+    }),
+    prisma.ingredient.create({
+      data: {
+        name: 'Farine',
+        unit: 'kg',
+        current_stock: 50.0,
+        min_stock_level: 10.0,
+        cost_per_unit: 1.5,
+      },
+    }),
+    prisma.ingredient.create({
+      data: {
+        name: 'Beurre',
+        unit: 'kg',
+        current_stock: 10.0,
+        min_stock_level: 2.0,
+        cost_per_unit: 12.0,
+      },
+    }),
+    prisma.ingredient.create({
+      data: {
+        name: 'Homard',
+        unit: 'kg',
+        current_stock: 8.0,
+        min_stock_level: 2.0,
+        cost_per_unit: 80.0,
+      },
+    }),
+  ]);
+  console.log(`   Created ${ingredients.length} ingredients`);
+
   // 7. Create Menus
   console.log('📋 Creating menus...');
   const menus = await Promise.all([
@@ -333,75 +402,134 @@ async function main() {
   ]);
   console.log(`   Created ${menus.length} menus`);
 
-  // 8. Create Dishes with allergen connections
+  // 8. Create Dishes with allergen connections AND menu connections (M:N) AND ingredient connections
   console.log('🍽️  Creating dishes...');
   const dishes = await Promise.all([
     prisma.dish.create({
       data: {
         title_dish: 'Foie Gras Maison',
         photo: '/images/dishes/foie-gras.jpg',
-        menuId: menus[0].id,
+        course_type: 'entree',
+        menus: { connect: [{ id: menus[0].id }] },
         allergens: { connect: [{ id: allergens[0].id }, { id: allergens[2].id }] },
+        ingredients: {
+          create: [
+            { ingredient_id: ingredients[0].id, quantity: 0.15 }, // 150g foie gras per serving
+            { ingredient_id: ingredients[4].id, quantity: 0.05 }, // 50g flour
+          ],
+        },
       },
     }),
     prisma.dish.create({
       data: {
         title_dish: 'Filet de Bœuf Wellington',
         photo: '/images/dishes/beef-wellington.jpg',
-        menuId: menus[0].id,
+        course_type: 'plat',
+        menus: { connect: [{ id: menus[0].id }] },
         allergens: { connect: [{ id: allergens[0].id }, { id: allergens[2].id }, { id: allergens[6].id }] },
+        ingredients: {
+          create: [
+            { ingredient_id: ingredients[1].id, quantity: 0.25 }, // 250g beef per serving
+            { ingredient_id: ingredients[2].id, quantity: 0.1 },  // 100g mushrooms
+            { ingredient_id: ingredients[4].id, quantity: 0.05 }, // 50g flour
+            { ingredient_id: ingredients[5].id, quantity: 0.03 }, // 30g butter
+          ],
+        },
       },
     }),
     prisma.dish.create({
       data: {
         title_dish: 'Paris-Brest',
         photo: '/images/dishes/paris-brest.jpg',
-        menuId: menus[0].id,
+        course_type: 'dessert',
+        menus: { connect: [{ id: menus[0].id }, { id: menus[4].id }] },
         allergens: { connect: [{ id: allergens[0].id }, { id: allergens[2].id }, { id: allergens[6].id }, { id: allergens[7].id }] },
+        ingredients: {
+          create: [
+            { ingredient_id: ingredients[3].id, quantity: 3 },    // 3 eggs per serving
+            { ingredient_id: ingredients[4].id, quantity: 0.08 }, // 80g flour
+            { ingredient_id: ingredients[5].id, quantity: 0.06 }, // 60g butter
+          ],
+        },
       },
     }),
     prisma.dish.create({
       data: {
         title_dish: 'Risotto aux Champignons',
         photo: '/images/dishes/mushroom-risotto.jpg',
-        menuId: menus[1].id,
+        course_type: 'plat',
+        menus: { connect: [{ id: menus[1].id }] },
         allergens: { connect: [{ id: allergens[6].id }, { id: allergens[8].id }] },
+        ingredients: {
+          create: [
+            { ingredient_id: ingredients[2].id, quantity: 0.15 }, // 150g mushrooms per serving
+            { ingredient_id: ingredients[5].id, quantity: 0.02 }, // 20g butter
+          ],
+        },
       },
     }),
     prisma.dish.create({
       data: {
         title_dish: 'Mini Quiches Lorraine',
         photo: '/images/dishes/mini-quiche.jpg',
-        menuId: menus[2].id,
+        course_type: 'entree',
+        menus: { connect: [{ id: menus[2].id }] },
         allergens: { connect: [{ id: allergens[0].id }, { id: allergens[2].id }, { id: allergens[6].id }] },
+        ingredients: {
+          create: [
+            { ingredient_id: ingredients[3].id, quantity: 2 },    // 2 eggs per serving
+            { ingredient_id: ingredients[4].id, quantity: 0.06 }, // 60g flour
+            { ingredient_id: ingredients[5].id, quantity: 0.04 }, // 40g butter
+          ],
+        },
       },
     }),
     prisma.dish.create({
       data: {
         title_dish: 'Œufs Bénédicte',
         photo: '/images/dishes/eggs-benedict.jpg',
-        menuId: menus[3].id,
+        course_type: 'plat',
+        menus: { connect: [{ id: menus[3].id }] },
         allergens: { connect: [{ id: allergens[0].id }, { id: allergens[2].id }, { id: allergens[6].id }] },
+        ingredients: {
+          create: [
+            { ingredient_id: ingredients[3].id, quantity: 2 },    // 2 eggs per serving
+            { ingredient_id: ingredients[5].id, quantity: 0.03 }, // 30g butter
+          ],
+        },
       },
     }),
     prisma.dish.create({
       data: {
         title_dish: 'Homard Bleu',
         photo: '/images/dishes/lobster.jpg',
-        menuId: menus[4].id,
+        course_type: 'plat',
+        menus: { connect: [{ id: menus[4].id }] },
         allergens: { connect: [{ id: allergens[1].id }] },
+        ingredients: {
+          create: [
+            { ingredient_id: ingredients[6].id, quantity: 0.4 }, // 400g lobster per serving
+            { ingredient_id: ingredients[5].id, quantity: 0.02 }, // 20g butter
+          ],
+        },
       },
     }),
     prisma.dish.create({
       data: {
         title_dish: 'Côte de Bœuf Grillée',
         photo: '/images/dishes/grilled-beef.jpg',
-        menuId: menus[5].id,
+        course_type: 'plat',
+        menus: { connect: [{ id: menus[5].id }] },
         allergens: { connect: [] },
+        ingredients: {
+          create: [
+            { ingredient_id: ingredients[1].id, quantity: 0.35 }, // 350g beef per serving
+          ],
+        },
       },
     }),
   ]);
-  console.log(`   Created ${dishes.length} dishes`);
+  console.log(`   Created ${dishes.length} dishes with ingredient tracking`);
 
   // 9. Create Orders
   console.log('📦 Creating orders...');

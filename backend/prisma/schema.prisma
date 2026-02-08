@@ -107,14 +107,43 @@ model Theme {
 }
 
 model Dish {
-  id        Int        @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   title_dish String
-  photo      String
-  menuId     Int?
-  menu       Menu?     @relation(fields: [menuId], references: [id])
+  photo      String     @default("")
+  description String    @default("")
+  course_type String    @default("plat") // "entree", "plat", "dessert"
+  menus      Menu[]     @relation("MenuDishes")
   allergens  Allergen[] @relation("DishAllergens")
+  ingredients DishIngredient[]
 
-  @@index([menuId])
+  @@index([course_type])
+}
+
+model Ingredient {
+  id               Int      @id @default(autoincrement())
+  name             String   @unique
+  unit             String   @default("kg")
+  current_stock    Float    @default(0)
+  min_stock_level  Float    @default(0)
+  cost_per_unit    Float    @default(0)
+  last_restocked_at DateTime?
+  dishes           DishIngredient[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+
+  @@index([name])
+}
+
+model DishIngredient {
+  dish_id      Int
+  ingredient_id Int
+  quantity     Float @default(0) // Quantity needed per serving
+  dish         Dish   @relation(fields: [dish_id], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade)
+
+  @@id([dish_id, ingredient_id])
+  @@index([dish_id])
+  @@index([ingredient_id])
 }
 
 model Allergen {

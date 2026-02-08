@@ -160,6 +160,29 @@ export interface DashboardStats {
 }
 
 /**
+ * Revenue By Menu - Subject requirement: "chiffre d'affaires par menu"
+ * Used for admin dashboard charts and comparisons between menus.
+ */
+export interface RevenueByMenu {
+  _id?: string;
+  menuId: number;              // FK to PostgreSQL Menu.id
+  menuTitle: string;           // Denormalized for chart labels
+  period: string;              // "2026-02", "2026-W05", "2026-02-01"
+  periodType: 'daily' | 'weekly' | 'monthly';
+  
+  // Revenue metrics
+  orderCount: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  totalPersons: number;        // Sum of person_number across orders
+  deliveryRevenue: number;     // Sum of delivery_price
+  discountTotal: number;       // Sum of discount_amount applied
+  
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
  * Audit Log - Track all changes to critical data
  */
 export interface AuditLog {
@@ -218,6 +241,7 @@ export interface SearchAnalytics {
 
 export const MONGO_COLLECTIONS = {
   MENU_ANALYTICS: 'menu_analytics',
+  REVENUE_BY_MENU: 'revenue_by_menu',
   USER_ACTIVITY: 'user_activity_logs',
   ORDER_SNAPSHOTS: 'order_snapshots',
   DASHBOARD_STATS: 'dashboard_stats',
@@ -258,5 +282,10 @@ export const MONGO_INDEXES = {
     { key: { normalizedQuery: 1 } },
     { key: { timestamp: -1 } },
     { key: { convertedToOrder: 1 } },
+  ],
+  revenue_by_menu: [
+    { key: { menuId: 1, period: 1, periodType: 1 }, unique: true },
+    { key: { periodType: 1, period: -1 } },
+    { key: { totalRevenue: -1 } },
   ],
 };

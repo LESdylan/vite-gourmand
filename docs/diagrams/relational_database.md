@@ -11,11 +11,52 @@
 |-----------|---------------|
 | **Normalization** | Each entity in its own table; junction tables for M:N |
 | **Referential Integrity** | Foreign keys with `ON DELETE CASCADE` or `SET NULL` |
-| **Soft Deletion** | `is_deleted` + `deleted_at` columns instead of hard delete |
-| **Audit Trail** | `created_at`, `updated_at` on every mutable table |
+| **Soft Deletion** | `is_active` flag on User (subject: disable employee accounts) |
+| **Audit Trail** | `created_at`, `updated_at` on mutable tables; `OrderStatusHistory` |
 | **GDPR by Design** | Consent tracking, data export, anonymization support |
 | **Index Strategy** | Composite indexes on frequent query patterns |
 | **Prepared Statements** | All queries parameterized (Prisma handles this) |
+
+---
+
+## Subject-Specific Business Rules
+
+| Rule (from subject) | DB Implementation |
+|---------------------|-------------------|
+| Dishes shared across menus | M:N junction `MenuDishes` (no FK on Dish) |
+| 14 EU allergens per dish | M:N junction `DishAllergens` |
+| Menu conditions (lead time, storage) | `Menu.conditions` text field |
+| 10% discount if `person_number >= person_min + 5` | `Order.discount_percent`, `Order.discount_amount` computed at creation |
+| Delivery: €5 + €0.59/km if outside Bordeaux | `Order.delivery_city`, `Order.delivery_distance_km`, `Order.delivery_price` |
+| Client can cancel/modify only before `accepted` | Backend guard on `Order.status` |
+| Employee must specify contact mode + reason to cancel | `Order.cancellation_reason`, `Order.cancellation_contact_mode` |
+| Material return: 10 business days, €600 penalty | `Order.material_return_deadline` set on status `awaiting_material_return` |
+| Review linked to order, note 1-5 | `Publish.orderId` FK, `Publish.note` |
+| Review moderation by employee/admin | `Publish.status` (pending/approved/rejected) |
+| Admin account seeded, no admin creation from app | Seed script creates José's account |
+| Admin can disable employee accounts | `User.is_active` flag |
+| Contact form: title + description + email | `ContactMessage` table, triggers email |
+| Working hours Mon-Sun in footer | `WorkingHours` table |
+| Admin charts: orders per menu from NoSQL | MongoDB `MenuAnalytics` collection |
+| Admin: chiffre d'affaires par menu with filters | MongoDB `RevenueByMenu` collection |
+| **Stock management via ingredients** | **`Ingredient.current_stock`, `DishIngredient` junction tracks quantities** |
+| **Menu stock calculation** | **Backend: sum ingredient needs × person_min, compare to `Ingredient.current_stock`** |
+| **Dish stock calculation** | **Backend: for each ingredient in dish, `current_stock / quantity` = max servings** |
+
+---
+
+## Subject Order Statuses
+
+| Status Key | French Label (subject) | Triggered By |
+|------------|----------------------|--------------|
+| `pending` | En attente | Client places order |
+| `accepted` | Accepté | Employee validates |
+| `preparing` | En préparation | Kitchen starts |
+| `delivering` | En cours de livraison | Delivery starts |
+| `delivered` | Livré | Delivery confirms |
+| `awaiting_material_return` | En attente du retour de matériel | If `material_lending = true` |
+| `completed` | Terminée | Delivered (no material) or material returned |
+| `cancelled` | Annulée | Client (pre-accepted) or Employee (with reason) |
 
 ---
 
@@ -43,7 +84,7 @@ erDiagram
         boolean is_email_verified "DEFAULT false"
         boolean is_deleted "Soft delete flag"
         datetime deleted_at
-        string preferred_language "DEFAULT 'fr'"
+        string preferred_language "DEFAULT fr"
         datetime created_at "DEFAULT now()"
         datetime updated_at "Auto-updated"
         datetime last_login_at
@@ -51,7 +92,7 @@ erDiagram
 
     Role {
         int id PK "SERIAL"
-        string name UK "superadmin, admin, employee, client"
+        string name UK "admin, employee, utilisateur"
         string description
         datetime created_at
     }
@@ -132,11 +173,12 @@ erDiagram
 
     Menu {
         int id PK "SERIAL"
-        string title "NOT NULL, indexed for search"
+        string title "NOT NULL, indexed"
         text description
+        text conditions "Lead time, storage, etc."
         int person_min "CHECK > 0"
-        decimal price_per_person "DECIMAL(10,2), CHECK > 0"
-        int remaining_qty "CHECK >= 0"
+        decimal price_per_person "DECIMAL 10 2"
+        int remaining_qty "CHECK >= 0, stock"
         string status "draft, published, archived"
         int diet_id FK
         int theme_id FK
@@ -161,26 +203,30 @@ erDiagram
 
     Diet {
         int id PK "SERIAL"
-        string name UK "Classique, Végétarien, Végan, etc."
+        string name UK "Classique, Vegetarien, Vegan, etc."
         string description
         string icon_url
     }
 
     Theme {
         int id PK "SERIAL"
-        string name UK "Mariage, Entreprise, Cocktail, etc."
+        string name UK "Noel, Paques, Classique, Evenement"
         string description
         string icon_url
     }
 
     Dish {
         int id PK "SERIAL"
-        int menu_id FK "ON DELETE CASCADE"
         string title "NOT NULL"
         text description
         string photo_url
-        int course_order "1=entrée, 2=plat, 3=dessert"
+        string course_type "entree, plat, dessert"
         datetime created_at
+    }
+
+    MenuDish {
+        int menu_id FK "ON DELETE CASCADE"
+        int dish_id FK "ON DELETE CASCADE"
     }
 
     Allergen {
@@ -196,18 +242,26 @@ erDiagram
 
     Ingredient {
         int id PK "SERIAL"
-        string name UK
-        string unit "kg, litres, pièces"
-        decimal current_stock "DECIMAL(10,2)"
-        decimal min_stock_level "Alert threshold"
-        decimal cost_per_unit "DECIMAL(10,2)"
-        datetime last_restocked_at
+        string name UK "NOT NULL"
+        string unit "kg, litres, pieces, DEFAULT kg"
+        decimal current_stock "DECIMAL 10 2, DEFAULT 0"
+        decimal min_stock_level "DECIMAL 10 2, alert threshold"
+        decimal cost_per_unit "DECIMAL 10 2"
+        datetime last_restocked_at "Nullable"
+        datetime created_at "DEFAULT now()"
+        datetime updated_at "Auto-updated"
+    }
+
+    DishIngredient {
+        int dish_id FK "ON DELETE CASCADE"
+        int ingredient_id FK "ON DELETE CASCADE"
+        decimal quantity "DECIMAL 10 3, per serving"
     }
 
     MenuIngredient {
         int menu_id FK "ON DELETE CASCADE"
         int ingredient_id FK "ON DELETE CASCADE"
-        decimal quantity_per_person "DECIMAL(10,3)"
+        decimal quantity_per_person "DECIMAL 10 3"
     }
 
     %% ========================================
@@ -216,39 +270,32 @@ erDiagram
 
     Order {
         int id PK "SERIAL"
-        string order_number UK "ORD-YYYY-NNNNN, indexed"
+        string order_number UK "ORD-YYYY-NNNNN"
         int user_id FK "Client who placed it"
-        int delivery_address_id FK
-        datetime order_date "DEFAULT now(), indexed"
-        date delivery_date "NOT NULL"
-        string delivery_time_slot "e.g. 12h-14h"
-        decimal subtotal "DECIMAL(10,2)"
-        decimal delivery_fee "DECIMAL(10,2)"
-        decimal discount_amount "DECIMAL(10,2) DEFAULT 0"
-        decimal tax_amount "DECIMAL(10,2)"
-        decimal total_amount "DECIMAL(10,2)"
-        string status "pending, confirmed, preparing, delivering, delivered, cancelled, refunded"
-        text special_instructions
+        datetime order_date "DEFAULT now()"
+        date delivery_date "NOT NULL, prestation date"
+        string delivery_hour
+        string delivery_address
+        string delivery_city "DEFAULT Bordeaux"
+        float delivery_distance_km "DEFAULT 0"
+        int person_number "CHECK >= menu.person_min"
+        decimal menu_price "DECIMAL 10 2"
+        decimal delivery_price "DECIMAL 10 2"
+        decimal discount_percent "DEFAULT 0"
+        decimal discount_amount "DEFAULT 0"
+        decimal total_price "DECIMAL 10 2"
+        string status "see status table above"
         boolean material_lending "DEFAULT false"
         boolean material_returned "DEFAULT false"
-        int assigned_to FK "Employee handling it"
-        int discount_id FK "Applied promo code"
+        datetime material_return_deadline
+        string cancellation_reason "Required if cancelled by employee"
+        string cancellation_contact_mode "gsm, email"
+        text special_instructions
         datetime confirmed_at
         datetime delivered_at
         datetime cancelled_at
-        string cancellation_reason
         datetime created_at
         datetime updated_at
-    }
-
-    OrderItem {
-        int id PK "SERIAL"
-        int order_id FK "ON DELETE CASCADE"
-        int menu_id FK
-        int quantity "Number of persons"
-        decimal unit_price "Snapshot at time of order"
-        decimal line_total "quantity * unit_price"
-        text special_requests
     }
 
     OrderStatusHistory {
@@ -257,51 +304,44 @@ erDiagram
         string old_status
         string new_status "NOT NULL"
         string notes
-        int changed_by FK "User who changed it"
         datetime changed_at "DEFAULT now()"
     }
 
     %% ========================================
-    %% DELIVERY
+    %% REVIEWS (Publish model)
     %% ========================================
 
-    DeliveryAssignment {
+    Publish {
         int id PK "SERIAL"
-        int order_id FK "ON DELETE CASCADE"
-        int delivery_person_id FK "Employee user"
-        string vehicle_type "bike, scooter, car"
-        string status "assigned, picked_up, in_transit, delivered, failed"
-        datetime assigned_at "DEFAULT now()"
-        datetime picked_up_at
-        datetime delivered_at
-        text delivery_notes
-        string proof_photo_url
-        int client_rating "1-5, nullable"
-    }
-
-    %% ========================================
-    %% REVIEWS & MODERATION
-    %% ========================================
-
-    Review {
-        int id PK "SERIAL"
-        int order_id FK "ON DELETE SET NULL"
+        string note "Rating 1-5"
+        string description "Comment text"
+        string status "pending, approved, rejected"
         int user_id FK "ON DELETE CASCADE"
-        int menu_id FK "ON DELETE SET NULL"
-        int rating "CHECK BETWEEN 1 AND 5"
-        text comment
-        boolean is_approved "DEFAULT false"
-        int moderated_by FK "Employee or Admin"
-        datetime moderated_at
+        int order_id FK "ON DELETE SET NULL"
         datetime created_at
-        datetime updated_at
     }
 
-    ReviewImage {
+    %% ========================================
+    %% CONTACT
+    %% ========================================
+
+    ContactMessage {
         int id PK "SERIAL"
-        int review_id FK "ON DELETE CASCADE"
-        string image_url "NOT NULL"
-        datetime uploaded_at
+        string title "NOT NULL"
+        text description "NOT NULL"
+        string email "NOT NULL"
+        datetime created_at "DEFAULT now()"
+    }
+
+    %% ========================================
+    %% COMPANY SCHEDULE
+    %% ========================================
+
+    WorkingHours {
+        int id PK "SERIAL"
+        string day "Lundi to Dimanche"
+        string opening
+        string closing
     }
 
     %% ========================================
@@ -310,10 +350,10 @@ erDiagram
 
     LoyaltyAccount {
         int id PK "SERIAL"
-        int user_id FK "ON DELETE CASCADE, one per user"
+        int user_id FK "ON DELETE CASCADE"
         int total_earned
         int total_spent
-        int balance "Computed: earned - spent"
+        int balance "earned minus spent"
         datetime last_activity_at
     }
 
@@ -321,7 +361,7 @@ erDiagram
         int id PK "SERIAL"
         int loyalty_account_id FK "ON DELETE CASCADE"
         int order_id FK "ON DELETE SET NULL"
-        int points "Positive=earn, Negative=spend"
+        int points "Positive earn Negative spend"
         string type "earn, redeem, expire, bonus"
         text description
         datetime created_at
@@ -332,9 +372,9 @@ erDiagram
         string code UK "Promo code"
         string description
         string type "percentage, fixed_amount"
-        decimal value "DECIMAL(10,2)"
-        decimal min_order_amount "DECIMAL(10,2)"
-        int max_uses "NULL = unlimited"
+        decimal value "DECIMAL 10 2"
+        decimal min_order_amount "DECIMAL 10 2"
+        int max_uses "NULL unlimited"
         int current_uses "DEFAULT 0"
         date valid_from
         date valid_until
@@ -345,15 +385,6 @@ erDiagram
     %% ========================================
     %% EMPLOYEE MANAGEMENT
     %% ========================================
-
-    WorkingHours {
-        int id PK "SERIAL"
-        int user_id FK "ON DELETE CASCADE"
-        string day_of_week "monday..sunday"
-        time start_time
-        time end_time
-        boolean is_available "DEFAULT true"
-    }
 
     TimeOffRequest {
         int id PK "SERIAL"
@@ -388,7 +419,7 @@ erDiagram
     Notification {
         int id PK "SERIAL"
         int user_id FK "ON DELETE CASCADE"
-        string type "order_update, delivery, promo, system, review"
+        string type "order_update, promo, system, review"
         string title
         text body
         string link_url
@@ -402,7 +433,7 @@ erDiagram
         string ticket_number UK "TKT-YYYY-NNNNN"
         int created_by FK "ON DELETE SET NULL"
         int assigned_to FK "ON DELETE SET NULL"
-        string category "order, payment, delivery, account, other"
+        string category "order, payment, account, other"
         string priority "low, normal, high, urgent"
         string status "open, in_progress, waiting, resolved, closed"
         string subject "NOT NULL"
@@ -462,39 +493,29 @@ erDiagram
     User ||--o{ UserConsent : "gives"
     User ||--o{ DataDeletionRequest : "requests"
 
-    %% Menus
+    %% Menus (M:N with Dish via MenuDish)
     Diet ||--o{ Menu : "categorizes"
     Theme ||--o{ Menu : "categorizes"
     User ||--o{ Menu : "creates"
     Menu ||--o{ MenuImage : "has"
-    Menu ||--o{ Dish : "contains"
+    Menu ||--o{ MenuDish : "includes"
+    Dish ||--o{ MenuDish : "appears_in"
     Menu ||--o{ MenuIngredient : "requires"
     Ingredient ||--o{ MenuIngredient : "used_in"
+    Dish ||--o{ DishIngredient : "requires"
+    Ingredient ||--o{ DishIngredient : "used_in"
     Dish ||--o{ DishAllergen : "has"
     Allergen ||--o{ DishAllergen : "flags"
 
     %% Orders
     User ||--o{ Order : "places"
-    UserAddress ||--o{ Order : "delivered_to"
-    User ||--o{ Order : "assigned_to employee"
-    Discount ||--o{ Order : "applied_to"
-    Order ||--o{ OrderItem : "contains"
-    Menu ||--o{ OrderItem : "included_in"
     Order ||--o{ OrderStatusHistory : "tracked_by"
-    User ||--o{ OrderStatusHistory : "changed_by"
     Order ||--o{ OrderOrderTag : "tagged_with"
     OrderTag ||--o{ OrderOrderTag : "applied_to"
 
-    %% Delivery
-    User ||--o{ DeliveryAssignment : "delivers"
-    Order ||--o{ DeliveryAssignment : "fulfilled_by"
-
     %% Reviews
-    Order ||--o{ Review : "reviewed_in"
-    User ||--o{ Review : "writes"
-    Menu ||--o{ Review : "receives"
-    User ||--o{ Review : "moderates"
-    Review ||--o{ ReviewImage : "has"
+    User ||--o{ Publish : "writes"
+    Order ||--o{ Publish : "reviewed_via"
 
     %% Loyalty
     User ||--o{ LoyaltyAccount : "has"
@@ -503,7 +524,6 @@ erDiagram
     User ||--o{ Discount : "creates admin"
 
     %% Employee
-    User ||--o{ WorkingHours : "has"
     User ||--o{ TimeOffRequest : "requests"
     User ||--o{ TimeOffRequest : "decides admin"
 
@@ -519,4 +539,3 @@ erDiagram
     %% Kanban
     User ||--o{ KanbanColumn : "configures"
     User ||--o{ OrderTag : "creates"
-``` 

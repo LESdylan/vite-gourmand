@@ -27,6 +27,7 @@
 | `audit_logs` | 90 days | Compliance requirement |
 | `order_snapshots` | 180 days | Historical reference |
 | `menu_analytics` | 365 days | Business intelligence |
+| `revenue_by_menu` | 365 days | Subject requirement: CA par menu |
 | `dashboard_stats` | 365 days | Year-over-year comparison |
 
 > ⚠️ **Atlas free tier:** 512 MB limit. The service monitors storage at 85% threshold and triggers automatic cleanup by priority.
@@ -53,9 +54,25 @@ erDiagram
         float totalRevenue
         float averageRating
         int ratingCount
-        object ordersByDiet "{ vegetarian: 15, vegan: 8 }"
-        object ordersByTheme "{ italian: 20 }"
-        array peakHours "[12, 13, 19, 20]"
+        object ordersByDiet "map string to number"
+        object ordersByTheme "map string to number"
+        array peakHours "array of int"
+        date createdAt
+        date updatedAt
+    }
+
+    RevenueByMenu {
+        ObjectId _id PK
+        int menuId "FK to PostgreSQL Menu.id"
+        string menuTitle "Denormalized"
+        string period "2026-02"
+        string periodType "daily, weekly, monthly"
+        int orderCount "Atomic $inc"
+        float totalRevenue "Atomic $inc"
+        float averageOrderValue
+        int totalPersons "Sum of person_number"
+        float deliveryRevenue "Sum of delivery_price"
+        float discountTotal "Sum of discount_amount"
         date createdAt
         date updatedAt
     }
@@ -73,24 +90,24 @@ erDiagram
         int newUsers
         int activeUsers
         int returningUsers
-        array topMenus "[ { id, title, count } ]"
-        object dietDistribution "{ vegan: 30 }"
-        object ordersByHour "{ 12: 15, 13: 20 }"
-        object ordersByDayOfWeek "{ monday: 50 }"
+        array topMenus "array of id title count"
+        object dietDistribution "map string to number"
+        object ordersByHour "map string to number"
+        object ordersByDayOfWeek "map string to number"
         date computedAt
     }
 
     SearchAnalytics {
         ObjectId _id PK
         string query
-        string normalizedQuery "lowercase, trimmed"
+        string normalizedQuery "lowercase trimmed"
         int resultsCount
-        array clickedResults "[ menuId1, menuId2 ]"
-        object filters "{ diet, theme, priceRange }"
+        array clickedResults "array of menuId"
+        object filters "diet theme priceRange"
         int userId "Nullable"
         string sessionId
         boolean convertedToOrder
-        date timestamp "TTL: 30 days"
+        date timestamp "TTL 30 days"
     }
 
     %% ========================================
@@ -101,14 +118,14 @@ erDiagram
         ObjectId _id PK
         int userId "FK to PostgreSQL User.id"
         string sessionId
-        string action "view_menu, add_to_cart, place_order, search, login"
+        string action "view_menu, place_order, search, login"
         string targetType "menu, dish, order, category"
         int targetId
         string targetName "Denormalized"
-        object searchContext "{ query, filters }"
+        object searchContext "query and filters"
         string ipAddress
         string userAgent
-        date timestamp "TTL: 30 days"
+        date timestamp "TTL 30 days"
     }
 
     %% ========================================
@@ -120,15 +137,15 @@ erDiagram
         int userId "Nullable for system actions"
         string userEmail "Denormalized"
         string userRole "Denormalized"
-        string action "create, update, delete, login, permission_change"
+        string action "create, update, delete, login"
         string entityType "user, order, menu, role"
         int entityId
         object previousState "JSON diff"
         object newState "JSON diff"
-        array changedFields "[ email, phone ]"
+        array changedFields "array of string"
         string ipAddress
         string userAgent
-        date timestamp "TTL: 90 days"
+        date timestamp "TTL 90 days"
     }
 
     %% ========================================
@@ -139,29 +156,32 @@ erDiagram
         ObjectId _id PK
         int orderId UK "FK to PostgreSQL Order.id"
         string orderNumber
-        object user "{ id, email, firstName, city }"
+        object user "id email firstName city"
         date orderDate
         date deliveryDate
         string deliveryHour
         int personNumber
         string status
-        float subtotal
-        float deliveryFee
-        float totalAmount
-        array menus "[ { id, title, price, diet, dishes: [...] } ]"
+        float menuPrice
+        float deliveryPrice
+        float discountAmount
+        float totalPrice
+        array menus "id title price diet dishes"
         boolean materialLending
-        array tags "[ weekend, large_party, vip ]"
+        array tags "weekend large_party vip"
         date createdAt
     }
 
     %% ========================================
-    %% RELATIONSHIPS (logical, not enforced)
+    %% RELATIONSHIPS (logical not enforced)
     %% ========================================
 
+    MenuAnalytics ||--|| RevenueByMenu : "revenue_detail"
     MenuAnalytics ||--|| DashboardStats : "aggregated_into"
     UserActivityLog ||--o{ SearchAnalytics : "generates"
     UserActivityLog ||--o{ MenuAnalytics : "feeds"
     OrderSnapshot ||--o{ DashboardStats : "aggregated_into"
+    OrderSnapshot ||--o{ RevenueByMenu : "feeds"
     AuditLog ||--o{ OrderSnapshot : "tracks_changes_to"
 ```
 
@@ -246,6 +266,46 @@ db.user_activity_logs.aggregate([
   { $unwind: "$prior_actions" },
   { $group: { _id: "$prior_actions.action", count: { $sum: 1 } } },
   { $sort: { count: -1 } }
+]);
+
+// === SUBJECT REQUIREMENT: Chiffre d'affaires par menu avec filtres ===
+// Revenue by menu with date range filter (admin dashboard charts)
+db.revenue_by_menu.aggregate([
+  { $match: {
+    periodType: "monthly",
+    period: { $gte: "2026-01", $lte: "2026-06" }
+  }},
+  { $group: {
+    _id: { menuId: "$menuId", menuTitle: "$menuTitle" },
+    totalRevenue: { $sum: "$totalRevenue" },
+    totalOrders: { $sum: "$orderCount" },
+    totalPersons: { $sum: "$totalPersons" },
+    avgOrderValue: { $avg: "$averageOrderValue" }
+  }},
+  { $sort: { totalRevenue: -1 } }
+]);
+
+// Revenue for a specific menu over time (line chart)
+db.revenue_by_menu.aggregate([
+  { $match: { menuId: 1, periodType: "monthly" } },
+  { $sort: { period: 1 } },
+  { $project: {
+    period: 1,
+    totalRevenue: 1,
+    orderCount: 1,
+    averageOrderValue: 1
+  }}
+]);
+
+// Compare all menus side by side (bar chart - subject requirement)
+db.revenue_by_menu.aggregate([
+  { $match: { periodType: "monthly", period: "2026-02" } },
+  { $project: {
+    menuTitle: 1,
+    orderCount: 1,
+    totalRevenue: 1
+  }},
+  { $sort: { orderCount: -1 } }
 ]);
 ```
 

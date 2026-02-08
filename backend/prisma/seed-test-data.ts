@@ -15,14 +15,14 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
-// Order statuses for testing
+// Order statuses for testing (subject-accurate)
 const ORDER_STATUSES = [
   'pending',
-  'confirmed',
+  'accepted',
   'preparing',
-  'ready',
   'delivering',
   'delivered',
+  'awaiting_material_return',
   'completed',
   'cancelled',
 ] as const;
@@ -41,23 +41,23 @@ async function main() {
   
   const password = await hashPassword('Test123!');
 
-  // Ensure roles exist
+  // Ensure roles exist (subject roles)
   const adminRole = await prisma.role.upsert({
-    where: { id: 1 },
+    where: { libelle: 'admin' },
     update: {},
-    create: { id: 1, libelle: 'admin' },
+    create: { libelle: 'admin' },
   });
 
-  const managerRole = await prisma.role.upsert({
-    where: { id: 2 },
+  const employeeRole = await prisma.role.upsert({
+    where: { libelle: 'employee' },
     update: {},
-    create: { id: 2, libelle: 'manager' },
+    create: { libelle: 'employee' },
   });
 
   const clientRole = await prisma.role.upsert({
-    where: { id: 3 },
+    where: { libelle: 'utilisateur' },
     update: {},
-    create: { id: 3, libelle: 'client' },
+    create: { libelle: 'utilisateur' },
   });
 
   // Create test users
@@ -67,27 +67,29 @@ async function main() {
     create: {
       email: 'test.admin@test.com',
       password,
-      first_name: 'Test Admin',
+      first_name: 'Test',
+      last_name: 'Admin',
       telephone_number: '+33600000001',
-      city: 'Paris',
+      city: 'Bordeaux',
       country: 'France',
-      postal_address: '1 Test Street',
+      postal_address: '1 Test Street, 33000',
       roleId: adminRole.id,
     },
   });
 
-  const testManager = await prisma.user.upsert({
-    where: { email: 'test.manager@test.com' },
+  const testEmployee = await prisma.user.upsert({
+    where: { email: 'test.employee@test.com' },
     update: {},
     create: {
-      email: 'test.manager@test.com',
+      email: 'test.employee@test.com',
       password,
-      first_name: 'Test Manager',
+      first_name: 'Test',
+      last_name: 'Employee',
       telephone_number: '+33600000002',
-      city: 'Lyon',
+      city: 'Bordeaux',
       country: 'France',
-      postal_address: '2 Test Avenue',
-      roleId: managerRole.id,
+      postal_address: '2 Test Avenue, 33000',
+      roleId: employeeRole.id,
     },
   });
 
@@ -97,11 +99,12 @@ async function main() {
     create: {
       email: 'test.client@test.com',
       password,
-      first_name: 'Test Client',
+      first_name: 'Test',
+      last_name: 'Client',
       telephone_number: '+33600000003',
-      city: 'Marseille',
+      city: 'Bordeaux',
       country: 'France',
-      postal_address: '3 Test Boulevard',
+      postal_address: '3 Test Boulevard, 33000',
       roleId: clientRole.id,
     },
   });
@@ -109,7 +112,7 @@ async function main() {
   console.log(`   ✅ Created 3 test users`);
 
   // ============================================
-  // 2. Create Test Menus
+  // 2. Create Test Menus (with conditions field)
   // ============================================
   console.log('📋 Creating test menus...');
 
@@ -119,10 +122,11 @@ async function main() {
       update: {},
       create: {
         id: 1000,
-        title: 'Test Menu - Small Event',
+        title: 'Test Menu - Petit Événement',
         person_min: 10,
         price_per_person: 35.0,
-        description: 'Test menu for small events',
+        description: 'Menu test pour petits événements',
+        conditions: 'Commander au minimum 7 jours avant la prestation.',
         remaining_qty: 50,
       },
     }),
@@ -131,10 +135,11 @@ async function main() {
       update: {},
       create: {
         id: 1001,
-        title: 'Test Menu - Large Event',
+        title: 'Test Menu - Grand Événement',
         person_min: 50,
         price_per_person: 65.0,
-        description: 'Test menu for large events',
+        description: 'Menu test pour grands événements',
+        conditions: 'Commander au minimum 14 jours avant. Stockage réfrigéré requis.',
         remaining_qty: 20,
       },
     }),
@@ -146,7 +151,8 @@ async function main() {
         title: 'Test Menu - Premium',
         person_min: 10,
         price_per_person: 120.0,
-        description: 'Premium test menu',
+        description: 'Menu premium test',
+        conditions: 'Commander au minimum 21 jours avant. Matériel prêté.',
         remaining_qty: 10,
       },
     }),
@@ -288,15 +294,15 @@ async function main() {
   console.log('\n========================================');
   console.log('✅ TEST DATA SEED COMPLETED!');
   console.log('========================================');
-  console.log('Users: 3 (admin, manager, client)');
+  console.log('Users: 3 (admin, employee, utilisateur)');
   console.log('Menus: 3');
   console.log(`Orders: ${testOrders.length + 3} (all statuses + edge cases)`);
   console.log(`Reviews: ${testReviews.length}`);
   console.log('========================================');
   console.log('\n🔐 TEST CREDENTIALS (all same password):');
-  console.log('   Email: test.admin@test.com    / Test123!');
-  console.log('   Email: test.manager@test.com  / Test123!');
-  console.log('   Email: test.client@test.com   / Test123!');
+  console.log('   Email: test.admin@test.com      / Test123!');
+  console.log('   Email: test.employee@test.com   / Test123!');
+  console.log('   Email: test.client@test.com     / Test123!');
   console.log('========================================');
   console.log('\n📦 ORDERS BY STATUS:');
   for (const status of ORDER_STATUSES) {
