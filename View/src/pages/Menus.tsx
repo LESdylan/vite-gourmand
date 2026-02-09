@@ -2,15 +2,16 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Search, Users, Euro, X, ChefHat, Clock, AlertTriangle, 
   SlidersHorizontal, UtensilsCrossed, ShoppingCart, 
-  ArrowRight, Filter
+  ArrowRight, Filter, Loader2
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { menus, getAllThemes } from '../data/menus';
-import type { Menu, DietaryType } from '../data/menus';
+import { useMenus } from '../services/useMenus';
+import type { Menu } from '../services/menus';
+import { getAllThemes, getAllDietaryTypes, type DietaryType } from '../data/menus';
 import type { Page } from './Home';
 
 type MenusPageProps = {
@@ -60,6 +61,11 @@ function MenuDetailModal({
   }, [onClose]);
 
   const totalMinPrice = (menu.pricePerPerson * menu.minPersons).toFixed(0);
+  
+  // Get dish counts from dishes object
+  const entreesCount = menu.dishes?.entrees?.length || 0;
+  const mainsCount = menu.dishes?.mains?.length || 0;
+  const dessertsCount = menu.dishes?.desserts?.length || 0;
 
   return (
     <div 
@@ -132,17 +138,62 @@ function MenuDetailModal({
             </h3>
             <div className="grid sm:grid-cols-3 gap-3">
               {[
-                { label: 'Entrées', items: menu.composition.entreeDishes, color: 'border-[#556B2F]', bg: 'bg-[#556B2F]/5' },
-                { label: 'Plats', items: menu.composition.mainDishes, color: 'border-[#722F37]', bg: 'bg-[#722F37]/5' },
-                { label: 'Desserts', items: menu.composition.dessertDishes, color: 'border-[#D4AF37]', bg: 'bg-[#D4AF37]/5' },
+                { label: 'Entrées', count: entreesCount, color: 'border-[#556B2F]', bg: 'bg-[#556B2F]/5' },
+                { label: 'Plats', count: mainsCount, color: 'border-[#722F37]', bg: 'bg-[#722F37]/5' },
+                { label: 'Desserts', count: dessertsCount, color: 'border-[#D4AF37]', bg: 'bg-[#D4AF37]/5' },
               ].map((cat) => (
                 <div key={cat.label} className={`border-l-4 ${cat.color} ${cat.bg} rounded-r-lg p-3`}>
                   <p className="font-semibold text-sm text-[#1A1A1A]">{cat.label}</p>
-                  <p className="text-[#1A1A1A]/50 text-sm">{cat.items.length} choix</p>
+                  <p className="text-[#1A1A1A]/50 text-sm">{cat.count} choix</p>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Dishes details if available */}
+          {menu.dishes && (menu.dishes.entrees.length > 0 || menu.dishes.mains.length > 0 || menu.dishes.desserts.length > 0) && (
+            <div className="space-y-3">
+              {menu.dishes.entrees.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-[#556B2F] uppercase mb-2">Entrées</h4>
+                  <ul className="space-y-1">
+                    {menu.dishes.entrees.map(d => (
+                      <li key={d.id} className="text-sm text-[#1A1A1A]/70 flex items-start gap-2">
+                        <span className="text-[#556B2F]">•</span>
+                        <span>{d.title}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {menu.dishes.mains.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-[#722F37] uppercase mb-2">Plats</h4>
+                  <ul className="space-y-1">
+                    {menu.dishes.mains.map(d => (
+                      <li key={d.id} className="text-sm text-[#1A1A1A]/70 flex items-start gap-2">
+                        <span className="text-[#722F37]">•</span>
+                        <span>{d.title}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {menu.dishes.desserts.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold text-[#D4AF37] uppercase mb-2">Desserts</h4>
+                  <ul className="space-y-1">
+                    {menu.dishes.desserts.map(d => (
+                      <li key={d.id} className="text-sm text-[#1A1A1A]/70 flex items-start gap-2">
+                        <span className="text-[#D4AF37]">•</span>
+                        <span>{d.title}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Allergens */}
           {menu.allergens.length > 0 && (
@@ -279,6 +330,8 @@ function MenuCard({ menu, onDetailClick }: { menu: Menu; onDetailClick: (m: Menu
    Main Menus Page
    ══════════════════════════════════════════════════════════ */
 export default function MenusPage({ setCurrentPage }: MenusPageProps) {
+  const { menus, isLoading, error, refetch } = useMenus({ limit: 50 });
+  
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
 
@@ -290,8 +343,9 @@ export default function MenusPage({ setCurrentPage }: MenusPageProps) {
   const [minPeople, setMinPeople] = useState('');
 
   const themes = getAllThemes();
-  const dietaryOptions: DietaryType[] = ['classique', 'végétarien', 'vegan', 'sans-gluten', 'sans-lactose', 'halal', 'casher', 'bio'];
+  const dietaryOptions: DietaryType[] = getAllDietaryTypes();
 
+  // Client-side filtering on fetched menus
   const filteredMenus = useMemo(() => {
     let filtered = [...menus];
     if (searchQuery) {
@@ -306,7 +360,7 @@ export default function MenusPage({ setCurrentPage }: MenusPageProps) {
     if (selectedDietary && selectedDietary !== 'all') filtered = filtered.filter(m => m.dietary.includes(selectedDietary as DietaryType));
     if (minPeople) filtered = filtered.filter(m => m.minPersons <= Number.parseInt(minPeople));
     return filtered;
-  }, [searchQuery, priceMax, priceMin, selectedTheme, selectedDietary, minPeople]);
+  }, [menus, searchQuery, priceMax, priceMin, selectedTheme, selectedDietary, minPeople]);
 
   const clearFilters = () => {
     setSearchQuery(''); setPriceMax(''); setPriceMin('');
@@ -413,37 +467,65 @@ export default function MenusPage({ setCurrentPage }: MenusPageProps) {
           </div>
         </div>
 
-        {/* Results info */}
-        <div className="flex items-center justify-between mb-5 px-1">
-          <p className="text-sm text-[#1A1A1A]/60">
-            <span className="font-bold text-[#1A1A1A]">{filteredMenus.length}</span>{' '}
-            menu{filteredMenus.length !== 1 ? 's' : ''} disponible{filteredMenus.length !== 1 ? 's' : ''}
-          </p>
-          {activeFilterCount > 0 && (
-            <p className="text-xs text-[#722F37] flex items-center gap-1">
-              <Filter className="h-3 w-3" /> {activeFilterCount} filtre{activeFilterCount > 1 ? 's' : ''} actif{activeFilterCount > 1 ? 's' : ''}
-            </p>
-          )}
-        </div>
+        {/* Loading state */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="h-10 w-10 text-[#722F37] animate-spin mb-4" />
+            <p className="text-[#1A1A1A]/60">Chargement des menus...</p>
+          </div>
+        )}
 
-        {/* Grid */}
-        {filteredMenus.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {filteredMenus.map(menu => (
-              <MenuCard key={menu.id} menu={menu} onDetailClick={setSelectedMenu} />
-            ))}
+        {/* Error state */}
+        {error && !isLoading && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center mb-6">
+            <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+            <h3 className="font-bold text-red-900 mb-2">Erreur de chargement</h3>
+            <p className="text-red-700 text-sm mb-4">{error}</p>
+            <Button onClick={refetch} variant="outline" size="sm">
+              Réessayer
+            </Button>
           </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[#1A1A1A]/5 rounded-2xl flex items-center justify-center">
-              <Search className="h-7 w-7 text-[#1A1A1A]/20" />
+        )}
+
+        {/* Results info */}
+        {!isLoading && !error && (
+          <>
+            <div className="flex items-center justify-between mb-5 px-1">
+              <p className="text-sm text-[#1A1A1A]/60">
+                <span className="font-bold text-[#1A1A1A]">{filteredMenus.length}</span>{' '}
+                menu{filteredMenus.length !== 1 ? 's' : ''} disponible{filteredMenus.length !== 1 ? 's' : ''}
+              </p>
+              {activeFilterCount > 0 && (
+                <p className="text-xs text-[#722F37] flex items-center gap-1">
+                  <Filter className="h-3 w-3" /> {activeFilterCount} filtre{activeFilterCount > 1 ? 's' : ''} actif{activeFilterCount > 1 ? 's' : ''}
+                </p>
+              )}
             </div>
-            <h3 className="font-bold text-[#1A1A1A] text-lg mb-2">Aucun menu trouvé</h3>
-            <p className="text-[#1A1A1A]/50 text-sm mb-4">Essayez de modifier vos critères de recherche</p>
-            {activeFilterCount > 0 && (
-              <Button onClick={clearFilters} variant="outline" size="sm">Réinitialiser les filtres</Button>
+
+            {/* Grid */}
+            {filteredMenus.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {filteredMenus.map(menu => (
+                  <MenuCard key={menu.id} menu={menu} onDetailClick={setSelectedMenu} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="w-16 h-16 mx-auto mb-4 bg-[#1A1A1A]/5 rounded-2xl flex items-center justify-center">
+                  <Search className="h-7 w-7 text-[#1A1A1A]/20" />
+                </div>
+                <h3 className="font-bold text-[#1A1A1A] text-lg mb-2">Aucun menu trouvé</h3>
+                <p className="text-[#1A1A1A]/50 text-sm mb-4">
+                  {menus.length === 0 
+                    ? 'Les menus seront bientôt disponibles.' 
+                    : 'Essayez de modifier vos critères de recherche'}
+                </p>
+                {activeFilterCount > 0 && (
+                  <Button onClick={clearFilters} variant="outline" size="sm">Réinitialiser les filtres</Button>
+                )}
+              </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Bottom CTA */}

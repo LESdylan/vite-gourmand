@@ -8,6 +8,8 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from '../prisma';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
@@ -16,11 +18,19 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
+  private googleClient: OAuth2Client | null = null;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly passwordService: PasswordService,
     private readonly tokenService: TokenService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
+    if (clientId) {
+      this.googleClient = new OAuth2Client(clientId);
+    }
+  }
 
   async register(dto: RegisterDto) {
     await this.ensureEmailAvailable(dto.email);
@@ -73,6 +83,32 @@ export class AuthService {
     });
     if (!user) user = await this.createOAuthUser(profile);
     return this.generateAuthResponse(user);
+  }
+
+  async googleTokenLogin(credential: string) {
+    if (!this.googleClient) {
+      throw new UnauthorizedException('Google OAuth not configured');
+    }
+
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: credential,
+        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      });
+
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        throw new UnauthorizedException('Invalid Google token');
+      }
+
+      return this.googleLogin({
+        email: payload.email,
+        name: payload.name || payload.email.split('@')[0],
+      });
+    } catch (error) {
+      if (error instanceof UnauthorizedException) throw error;
+      throw new UnauthorizedException('Failed to verify Google token');
+    }
   }
 
   private async ensureEmailAvailable(email: string): Promise<void> {

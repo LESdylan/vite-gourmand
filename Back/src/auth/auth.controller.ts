@@ -13,6 +13,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { Public, CurrentUser, JwtPayload } from '../common';
 import { AuthGuard } from '@nestjs/passport';
@@ -24,7 +25,10 @@ import { ChangePasswordDto } from './dto/password.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Public()
   @Post('register')
@@ -93,5 +97,21 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleCallback(@Req() req: { user: { email: string; name: string } }) {
     return this.authService.googleLogin(req.user);
+  }
+
+  @Public()
+  @Get('google/config')
+  @ApiOperation({ summary: 'Get Google OAuth client configuration' })
+  getGoogleConfig() {
+    const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
+    return { clientId: clientId || null };
+  }
+
+  @Public()
+  @Post('google/token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with Google ID token (from frontend GSI)' })
+  async googleToken(@Body() body: { credential: string }) {
+    return this.authService.googleTokenLogin(body.credential);
   }
 }

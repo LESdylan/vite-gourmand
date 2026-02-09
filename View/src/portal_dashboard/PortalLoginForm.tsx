@@ -114,7 +114,7 @@ export function PortalLoginForm() {
         password: regPassword,
         firstName: `${regPrenom.trim()} ${regNom.trim()}`,
         telephoneNumber: regPhone || undefined,
-        postalAddress: regAddress || undefined,
+        city: regAddress || undefined,  // Backend expects 'city', not 'postalAddress'
       });
       // On success, PortalAuthContext sets user → Portal.tsx will redirect
     } catch {

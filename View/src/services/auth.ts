@@ -43,9 +43,7 @@ export interface RegisterData {
   password: string;
   firstName: string;
   telephoneNumber?: string;
-  postalAddress?: string;
   city?: string;
-  country?: string;
 }
 
 export interface LoginData {
@@ -121,8 +119,13 @@ export function logout(): void {
 
 /** Get Google OAuth client ID from backend */
 export async function getGoogleConfig(): Promise<{ clientId: string | null }> {
-  const wrapper = await apiRequest<ApiWrapper<{ clientId: string | null }>>('/api/auth/google/config');
-  return wrapper.data;
+  try {
+    const wrapper = await apiRequest<ApiWrapper<{ clientId: string | null }>>('/api/auth/google/config');
+    return wrapper.data;
+  } catch {
+    // If endpoint doesn't exist or fails, return null
+    return { clientId: null };
+  }
 }
 
 /** Get current user profile */
