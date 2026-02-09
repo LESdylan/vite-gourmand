@@ -71,7 +71,7 @@ export class SessionController {
     @Query('active') active?: string,
   ) {
     return this.sessionService.getAllSessions({
-      userId: userId ? parseInt(userId, 10) : undefined,
+      userId: userId ? Number.parseInt(userId, 10) : undefined,
       active: active !== undefined ? active === 'true' : undefined,
     });
   }

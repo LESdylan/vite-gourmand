@@ -74,7 +74,8 @@ export class MessageService {
   }
 
   async getThread(messageId: number, userId: number) {
-    const message = await this.findById(messageId, userId);
+    // Validate access - findById throws if user doesn't have access
+    await this.findById(messageId, userId);
 
     // Get all messages in thread
     const thread = await this.prisma.message.findMany({

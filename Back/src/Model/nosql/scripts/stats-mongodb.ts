@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     console.log('');
 
     // Threshold check
-    const threshold = parseInt(
+    const threshold = Number.parseInt(
       process.env.MONGODB_CLEANUP_THRESHOLD_PERCENT || '85',
       10,
     );

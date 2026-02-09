@@ -142,7 +142,7 @@ describe('OrderService', () => {
         id: 2,
       });
 
-      const result = await service.create(1, dto);
+      await service.create(1, dto);
 
       expect(prisma.order.create).toHaveBeenCalled();
     });
@@ -156,11 +156,7 @@ describe('OrderService', () => {
         qty: 3,
       });
 
-      const result = await service.update(
-        1,
-        { specialInstructions: 'No nuts' },
-        mockUser,
-      );
+      await service.update(1, { specialInstructions: 'No nuts' }, mockUser);
 
       expect(prisma.order.update).toHaveBeenCalled();
     });

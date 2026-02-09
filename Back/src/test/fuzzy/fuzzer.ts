@@ -3,8 +3,6 @@
  * Implements multiple mutation strategies for comprehensive testing
  */
 
-import { randomString } from '../utils/test-data';
-
 export interface FuzzOptions {
   seed?: number;
   strategy?: FuzzStrategy;
@@ -105,7 +103,7 @@ export class Fuzzer {
           'مستخدم@مثال.com', // Arabic
         ]);
 
-      case 'mutation':
+      case 'mutation': {
         const base = `${this.randomString(8)}@${this.randomString(5)}.com`;
         const mutations = [
           base.replace('@', '@@'), // Double @
@@ -116,6 +114,7 @@ export class Fuzzer {
           base + '.', // Trailing dot
         ];
         return this.randomChoice(mutations);
+      }
 
       case 'random':
       default:
@@ -164,12 +163,13 @@ export class Fuzzer {
         ]);
 
       case 'random':
-      default:
+      default: {
         const length = this.randomInt(0, 20);
         return (
           this.randomChoice(['+', '0', '']) +
           this.randomString(length, '0123456789 -().+')
         );
+      }
     }
   }
 
@@ -188,17 +188,18 @@ export class Fuzzer {
           '5500000000000004', // Valid MC
         ]);
 
-      case 'mutation':
+      case 'mutation': {
         // Start with valid card and mutate
         const validCard = '4111111111111111';
         const pos = this.randomInt(0, validCard.length - 1);
         const newDigit = (
-          (parseInt(validCard[pos]) + this.randomInt(1, 9)) %
+          (Number.parseInt(validCard[pos]) + this.randomInt(1, 9)) %
           10
         ).toString();
         return (
           validCard.substring(0, pos) + newDigit + validCard.substring(pos + 1)
         );
+      }
 
       case 'injection':
         return this.randomChoice([
@@ -209,9 +210,10 @@ export class Fuzzer {
         ]);
 
       case 'random':
-      default:
+      default: {
         const length = this.randomInt(12, 20);
         return this.randomString(length, '0123456789');
+      }
     }
   }
 
@@ -263,12 +265,13 @@ export class Fuzzer {
         ]);
 
       case 'random':
-      default:
+      default: {
         const length = this.randomInt(0, 50);
         return this.randomString(
           length,
           'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?',
         );
+      }
     }
   }
 

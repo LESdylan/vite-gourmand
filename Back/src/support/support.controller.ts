@@ -27,8 +27,8 @@ export class SupportController {
     @Query('offset') offset?: string,
   ) {
     return this.supportService.getMyTickets(user.sub, {
-      limit: limit ? parseInt(limit, 10) : undefined,
-      offset: offset ? parseInt(offset, 10) : undefined,
+      limit: limit ? Number.parseInt(limit, 10) : undefined,
+      offset: offset ? Number.parseInt(offset, 10) : undefined,
     });
   }
 
@@ -69,9 +69,9 @@ export class SupportController {
   ) {
     return this.supportService.findAll({
       status,
-      assignedTo: assignedTo ? parseInt(assignedTo, 10) : undefined,
-      limit: limit ? parseInt(limit, 10) : undefined,
-      offset: offset ? parseInt(offset, 10) : undefined,
+      assignedTo: assignedTo ? Number.parseInt(assignedTo, 10) : undefined,
+      limit: limit ? Number.parseInt(limit, 10) : undefined,
+      offset: offset ? Number.parseInt(offset, 10) : undefined,
     });
   }
 
@@ -91,8 +91,8 @@ export class SupportController {
     @Query('offset') offset?: string,
   ) {
     return this.supportService.getAssignedTickets(user.sub, {
-      limit: limit ? parseInt(limit, 10) : undefined,
-      offset: offset ? parseInt(offset, 10) : undefined,
+      limit: limit ? Number.parseInt(limit, 10) : undefined,
+      offset: offset ? Number.parseInt(offset, 10) : undefined,
     });
   }
 

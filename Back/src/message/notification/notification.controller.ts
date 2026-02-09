@@ -35,8 +35,8 @@ export class NotificationController {
   ) {
     return this.notificationService.findAll(user.sub, {
       unreadOnly: unreadOnly === 'true',
-      limit: limit ? parseInt(limit, 10) : undefined,
-      offset: offset ? parseInt(offset, 10) : undefined,
+      limit: limit ? Number.parseInt(limit, 10) : undefined,
+      offset: offset ? Number.parseInt(offset, 10) : undefined,
     });
   }
 

@@ -5,7 +5,7 @@
 
 import { BaseTest, TestResult, FuzzyTestResult } from './base.test';
 import { PasswordValidator } from '../validators';
-import { TestData, randomPassword, randomString } from '../utils/test-data';
+import { TestData, randomPassword } from '../utils/test-data';
 
 export class PasswordStrengthTest extends BaseTest {
   name = 'password_strength';

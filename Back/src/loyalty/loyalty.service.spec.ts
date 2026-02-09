@@ -73,7 +73,7 @@ describe('LoyaltyService', () => {
         total_spent: 0,
       });
 
-      const result = await service.getAccount(1);
+      await service.getAccount(1);
 
       expect(prisma.loyaltyAccount.create).toHaveBeenCalled();
     });
@@ -127,7 +127,7 @@ describe('LoyaltyService', () => {
         total_earned: 1100,
       });
 
-      const result = await service.earnPoints(1, {
+      await service.earnPoints(1, {
         points: 100,
         type: LoyaltyTransactionType.EARN,
         description: 'Test order',
@@ -162,7 +162,7 @@ describe('LoyaltyService', () => {
         mockLoyaltyAccount,
       );
 
-      const result = await service.earnPointsFromOrder(1, 123, 50); // 50€ = 500 points
+      await service.earnPointsFromOrder(1, 123, 50); // 50€ = 500 points
 
       expect(prisma.loyaltyTransaction.create).toHaveBeenCalled();
     });

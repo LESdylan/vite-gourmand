@@ -3,21 +3,13 @@
  */
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, testUtils } from '../test-utils';
+import { createTestApp } from '../test-utils';
 
 describe('Reviews API (e2e)', () => {
   let app: INestApplication;
-  let userToken: string;
 
   beforeAll(async () => {
     app = await createTestApp();
-
-    const email = testUtils.uniqueEmail('review');
-    const registerRes = await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({ email, password: 'TestPassword123!', firstName: 'Reviewer' });
-
-    userToken = registerRes.body.data?.accessToken;
   });
 
   afterAll(async () => {

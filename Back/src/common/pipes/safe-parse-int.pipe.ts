@@ -2,19 +2,14 @@
  * Safe Parse Int Pipe
  * Validates integers are within PostgreSQL INT range
  */
-import {
-  PipeTransform,
-  Injectable,
-  BadRequestException,
-  ArgumentMetadata,
-} from '@nestjs/common';
+import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 const MAX_INT = 2147483647;
 const MIN_INT = -2147483648;
 
 @Injectable()
 export class SafeParseIntPipe implements PipeTransform<string, number> {
-  transform(value: string, _metadata: ArgumentMetadata): number {
+  transform(value: string): number {
     if (value === undefined || value === null || value === '') {
       throw new BadRequestException(
         'Validation failed (numeric string is expected)',
@@ -28,9 +23,9 @@ export class SafeParseIntPipe implements PipeTransform<string, number> {
       );
     }
 
-    const num = parseInt(value, 10);
+    const num = Number.parseInt(value, 10);
 
-    if (isNaN(num)) {
+    if (Number.isNaN(num)) {
       throw new BadRequestException(
         'Validation failed (numeric string is expected)',
       );

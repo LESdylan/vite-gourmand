@@ -6,7 +6,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ApiSuccessResponse<T> {
   @ApiProperty({ example: true })
-  success: true = true;
+  success = true as const;
 
   @ApiProperty({ example: 200 })
   statusCode!: number;
@@ -26,7 +26,7 @@ export class ApiSuccessResponse<T> {
 
 export class ApiErrorResponse {
   @ApiProperty({ example: false })
-  success: false = false;
+  success = false as const;
 
   @ApiProperty({ example: 400 })
   statusCode!: number;

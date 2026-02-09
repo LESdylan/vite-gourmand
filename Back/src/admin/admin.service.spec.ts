@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../prisma';
 
@@ -86,7 +86,7 @@ describe('AdminService', () => {
         role_id: 1,
       });
 
-      const result = await service.updateUserRole(1, 1);
+      await service.updateUserRole(1, 1);
 
       expect(prisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -122,7 +122,7 @@ describe('AdminService', () => {
         is_active: false,
       });
 
-      const result = await service.toggleUserActive(1);
+      await service.toggleUserActive(1);
 
       expect(prisma.user.update).toHaveBeenCalledWith(
         expect.objectContaining({

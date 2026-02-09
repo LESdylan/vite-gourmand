@@ -77,7 +77,7 @@ export class TimeOffController {
   ) {
     return this.timeoffService.findAll({
       status,
-      userId: userId ? parseInt(userId, 10) : undefined,
+      userId: userId ? Number.parseInt(userId, 10) : undefined,
     });
   }
 

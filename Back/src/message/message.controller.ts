@@ -32,8 +32,8 @@ export class MessageController {
   ) {
     return this.messageService.getInbox(user.sub, {
       unreadOnly: unreadOnly === 'true',
-      limit: limit ? parseInt(limit, 10) : undefined,
-      offset: offset ? parseInt(offset, 10) : undefined,
+      limit: limit ? Number.parseInt(limit, 10) : undefined,
+      offset: offset ? Number.parseInt(offset, 10) : undefined,
     });
   }
 
@@ -45,8 +45,8 @@ export class MessageController {
     @Query('offset') offset?: string,
   ) {
     return this.messageService.getSent(user.sub, {
-      limit: limit ? parseInt(limit, 10) : undefined,
-      offset: offset ? parseInt(offset, 10) : undefined,
+      limit: limit ? Number.parseInt(limit, 10) : undefined,
+      offset: offset ? Number.parseInt(offset, 10) : undefined,
     });
   }
 

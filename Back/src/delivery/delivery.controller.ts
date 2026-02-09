@@ -37,7 +37,7 @@ export class DeliveryController {
     return this.deliveryService.findAll({
       status,
       deliveryPersonId: deliveryPersonId
-        ? parseInt(deliveryPersonId, 10)
+        ? Number.parseInt(deliveryPersonId, 10)
         : undefined,
     });
   }

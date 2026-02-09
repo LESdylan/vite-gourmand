@@ -110,7 +110,9 @@ export class DiscountService {
     // Check minimum order amount
     if (discount.min_order_amount && dto.orderAmount) {
       if (dto.orderAmount < Number(discount.min_order_amount)) {
-        errors.push(`Minimum order amount is ${discount.min_order_amount}€`);
+        errors.push(
+          `Minimum order amount is ${String(discount.min_order_amount)}€`,
+        );
       }
     }
 

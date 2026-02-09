@@ -7,7 +7,6 @@ import { createTestApp, testUtils } from '../test-utils';
 
 describe('Edge Cases and Boundaries (e2e)', () => {
   let app: INestApplication;
-  let authToken: string;
 
   beforeAll(async () => {
     app = await createTestApp();
@@ -16,11 +15,9 @@ describe('Edge Cases and Boundaries (e2e)', () => {
       .post('/api/auth/register')
       .send({ email, password: 'Test123!', firstName: 'Edge' });
 
-    const login = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email, password: 'Test123!' });
-
-    authToken = login.body.data?.accessToken;
   });
 
   afterAll(async () => {

@@ -117,10 +117,11 @@ export function randomPhone(
   format: 'FR' | 'US' | 'international' = 'FR',
 ): string {
   switch (format) {
-    case 'FR':
+    case 'FR': {
       // French mobile: 06 or 07 + 8 digits
       const prefix = Math.random() > 0.5 ? '06' : '07';
       return prefix + randomString(8, '0123456789');
+    }
     case 'US':
       // US format: (XXX) XXX-XXXX
       return `(${randomString(3, '0123456789')}) ${randomString(3, '0123456789')}-${randomString(4, '0123456789')}`;
@@ -136,9 +137,7 @@ export function randomPhone(
  * Generate a valid credit card number using Luhn algorithm
  * @param typeOrPrefix - Either a card type ('visa', 'mastercard', 'amex') or a prefix string ('4', '51', '37', etc.)
  */
-export function generateValidCreditCard(
-  typeOrPrefix: 'visa' | 'mastercard' | 'amex' | string = 'visa',
-): string {
+export function generateValidCreditCard(typeOrPrefix: string = 'visa'): string {
   let prefix: string;
   let length: number;
 
@@ -201,7 +200,7 @@ function calculateLuhnCheckDigit(partial: string): string {
   let isEven = true;
 
   for (let i = partial.length - 1; i >= 0; i--) {
-    let digit = parseInt(partial[i], 10);
+    let digit = Number.parseInt(partial[i], 10);
 
     if (isEven) {
       digit *= 2;

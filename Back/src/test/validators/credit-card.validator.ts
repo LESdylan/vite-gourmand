@@ -95,7 +95,7 @@ export class CreditCardValidator {
    * Clean a card number (remove spaces, dashes)
    */
   private static cleanNumber(cardNumber: string): string {
-    return cardNumber.replace(/[\s\-]/g, '');
+    return cardNumber.replace(/[\s-]/g, '');
   }
 
   /**
@@ -118,7 +118,7 @@ export class CreditCardValidator {
 
     // Process from right to left
     for (let i = digits.length - 1; i >= 0; i--) {
-      let digit = parseInt(digits[i], 10);
+      let digit = Number.parseInt(digits[i], 10);
 
       if (isEven) {
         digit *= 2;
@@ -144,7 +144,7 @@ export class CreditCardValidator {
 
     // Process from right to left
     for (let i = digits.length - 1; i >= 0; i--) {
-      let digit = parseInt(digits[i], 10);
+      let digit = Number.parseInt(digits[i], 10);
 
       if (isEven) {
         digit *= 2;
@@ -242,7 +242,7 @@ export class CreditCardValidator {
     // Calculate check digit for reference
     const checkDigit =
       cleanedNumber.length > 0
-        ? parseInt(cleanedNumber[cleanedNumber.length - 1], 10)
+        ? Number.parseInt(cleanedNumber[cleanedNumber.length - 1], 10)
         : undefined;
 
     // Determine issuer

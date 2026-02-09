@@ -256,6 +256,8 @@ export class QuickConnectionTest extends BaseTest {
       // ===== Complete OAuth Flow Simulation =====
       const simulateOAuthFlow = () => {
         // Step 1: Authorization redirect (simulated)
+        // In real OAuth, this code would be exchanged for tokens
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const authorizationCode = randomString(64);
 
         // Step 2: Token exchange

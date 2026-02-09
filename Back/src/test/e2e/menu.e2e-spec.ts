@@ -3,7 +3,7 @@
  */
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, testUtils } from '../test-utils';
+import { createTestApp } from '../test-utils';
 
 describe('Menu API (e2e)', () => {
   let app: INestApplication;

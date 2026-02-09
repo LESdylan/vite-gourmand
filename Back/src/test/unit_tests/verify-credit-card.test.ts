@@ -155,16 +155,20 @@ export class VerifyCreditCardTest extends BaseTest {
         // Generate invalid card
         const invalidType = Math.floor(Math.random() * 4);
         switch (invalidType) {
-          case 0:
+          case 0: {
             // Invalid Luhn - change a digit
             cardNumber = generateValidCreditCard('4');
             const pos = Math.floor(Math.random() * (cardNumber.length - 1));
-            const newDigit = ((parseInt(cardNumber[pos]) + 1) % 10).toString();
+            const newDigit = (
+              (Number.parseInt(cardNumber[pos]) + 1) %
+              10
+            ).toString();
             cardNumber =
               cardNumber.substring(0, pos) +
               newDigit +
               cardNumber.substring(pos + 1);
             break;
+          }
           case 1:
             // Too short
             cardNumber = randomString(8, '0123456789');

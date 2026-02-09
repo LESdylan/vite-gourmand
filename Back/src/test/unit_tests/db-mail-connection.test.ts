@@ -346,7 +346,7 @@ export class DbMailConnectionTest extends BaseTest {
         try {
           // Format: postgresql://user:password@host:port/database
           const regex =
-            /^(?:postgresql|postgres|mysql):\/\/(?:([^:]+):([^@]+)@)?([^:\/]+):(\d+)\/(.+)$/;
+            /^(?:postgresql|postgres|mysql):\/\/(?:([^:]+):([^@]+)@)?([^:/]+):(\d+)\/(.+)$/;
           const match = url.match(regex);
 
           if (!match) return null;
@@ -355,7 +355,7 @@ export class DbMailConnectionTest extends BaseTest {
             user: match[1],
             password: match[2],
             host: match[3],
-            port: parseInt(match[4], 10),
+            port: Number.parseInt(match[4], 10),
             database: match[5],
           };
         } catch {

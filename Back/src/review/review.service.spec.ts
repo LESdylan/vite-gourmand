@@ -119,7 +119,7 @@ describe('ReviewService', () => {
       (prisma.publish.findUnique as jest.Mock).mockResolvedValue(mockReview);
       (prisma.publish.update as jest.Mock).mockResolvedValue(rejected);
 
-      const result = await service.moderate(1, 2, dto);
+      await service.moderate(1, 2, dto);
 
       expect(prisma.publish.update).toHaveBeenCalled();
     });

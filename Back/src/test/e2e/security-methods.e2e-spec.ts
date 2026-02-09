@@ -3,24 +3,13 @@
  */
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestApp, testUtils } from '../test-utils';
+import { createTestApp } from '../test-utils';
 
 describe('HTTP Method Security (e2e)', () => {
   let app: INestApplication;
-  let authToken: string;
 
   beforeAll(async () => {
     app = await createTestApp();
-    const email = testUtils.uniqueEmail('method');
-    await request(app.getHttpServer())
-      .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'Method' });
-
-    const login = await request(app.getHttpServer())
-      .post('/api/auth/login')
-      .send({ email, password: 'Test123!' });
-
-    authToken = login.body.data?.accessToken;
   });
 
   afterAll(async () => {

@@ -63,7 +63,7 @@ describe('IngredientService', () => {
     it('should return low stock ingredients when lowStockOnly is true', async () => {
       (prisma.$queryRaw as jest.Mock).mockResolvedValue([mockIngredient]);
 
-      const result = await service.findAll({ lowStockOnly: true });
+      await service.findAll({ lowStockOnly: true });
 
       expect(prisma.$queryRaw).toHaveBeenCalled();
     });

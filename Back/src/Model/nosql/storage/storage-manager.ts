@@ -12,11 +12,11 @@ import { RETENTION_RULES, getCleanupOrder } from './retention-policy';
 import type { StorageInfo, CollectionStats } from '../types';
 
 // Default thresholds from .env or fallback
-const MAX_STORAGE_MB = parseInt(
+const MAX_STORAGE_MB = Number.parseInt(
   process.env.MONGODB_MAX_STORAGE_MB || '450',
   10,
 );
-const CLEANUP_THRESHOLD = parseInt(
+const CLEANUP_THRESHOLD = Number.parseInt(
   process.env.MONGODB_CLEANUP_THRESHOLD_PERCENT || '85',
   10,
 );
@@ -57,7 +57,6 @@ async function getCollectionStats(
   name: string,
 ): Promise<CollectionStats> {
   try {
-    const coll = db.collection(name);
     const stats = (await db.command({ collStats: name })) as MongoStats;
     return {
       name,

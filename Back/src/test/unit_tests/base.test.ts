@@ -64,7 +64,7 @@ export abstract class BaseTest {
         }
       } catch (error) {
         const errorResult = this.failure(
-          `Iteration ${i + 1} threw error: ${error}`,
+          `Iteration ${i + 1} threw error: ${String(error)}`,
         );
         results.push(errorResult);
         failedCases.push(errorResult);
@@ -129,7 +129,7 @@ export abstract class BaseTest {
   protected assertEqual<T>(actual: T, expected: T, message: string): void {
     if (actual !== expected) {
       throw new Error(
-        `Assertion failed: ${message}. Expected: ${expected}, Got: ${actual}`,
+        `Assertion failed: ${message}. Expected: ${String(expected)}, Got: ${String(actual)}`,
       );
     }
   }
