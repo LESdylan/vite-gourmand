@@ -24,6 +24,22 @@ import { CrudModule } from './crud/crud.module';
 import { MailModule } from './mail';
 import { LoggingModule, HttpLogInterceptor } from './logging';
 import { TestRunnerModule } from './test/test-runner';
+// New API modules for complete database coverage
+import { ContactModule } from './contact';
+import { DiscountModule } from './discount';
+import { LoyaltyModule } from './loyalty';
+import { IngredientModule } from './ingredient';
+import { DeliveryModule } from './delivery';
+import { NotificationModule } from './notification';
+import { MessageModule } from './message';
+import { SupportModule } from './support';
+import { KanbanModule } from './kanban';
+import { TimeOffModule } from './timeoff';
+// Temporarily disabled - require schema alignment
+// import { GdprModule } from './gdpr';
+// import { SessionModule } from './session';
+// import { ImageModule } from './image';
+// import { RoleModule } from './role';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -102,6 +118,22 @@ import {
     MailModule,
     // Test Runner (for QA dashboard)
     TestRunnerModule,
+    // New API modules for complete database coverage
+    ContactModule,
+    DiscountModule,
+    LoyaltyModule,
+    IngredientModule,
+    DeliveryModule,
+    NotificationModule,
+    MessageModule,
+    SupportModule,
+    KanbanModule,
+    TimeOffModule,
+    // Temporarily disabled - require schema alignment
+    // GdprModule,
+    // SessionModule,
+    // ImageModule,
+    // RoleModule,
   ],
   controllers: [AppController],
   providers: [
