@@ -1,661 +1,336 @@
-# Run backend tests in production (Fly.io) container
-.PHONY: prod-test prod-test-e2e
+# ============================================
+# VITE GOURMAND - MAKEFILE
+# ============================================
+# Usage: make <target>
+# Run 'make help' to see all available targets
+# ============================================
 
-prod-test:
-	@echo "Running unit tests on Fly instance and saving results to /tmp/test-results.json"
-	flyctl ssh console -C "sh -lc 'cd /app && npm run test -- --json --outputFile=/tmp/test-results.json || true; cat /tmp/test-results.json'"
+.PHONY: help
+.DEFAULT_GOAL := help
 
-prod-test-e2e:
-	@echo "Running e2e tests on Fly instance and saving results to /tmp/test-results-e2e.json"
-	flyctl ssh console -C "sh -lc 'cd /app && npm run test:e2e -- --json --outputFile=/tmp/test-results-e2e.json || true; cat /tmp/test-results-e2e.json'"
+# ── Variables ────────────────────────────────────────
+DOCKER_COMPOSE   = docker compose
+BACKEND_PATH     = ./Back
+FRONTEND_PATH    = ./Front
+SCRIPTS_PATH     = ./scripts
+PRISMA_SCHEMA    = $(BACKEND_PATH)/src/Model/prisma/schema.prisma
 
-# Start a Fly VM (may incur charges) and run remote tests
-.PHONY: fly-start-and-test
-fly-start-and-test:
-	@if [ -z "$(FLY_APP)" ]; then \
-		echo "Usage: make fly-start-and-test FLY_APP=vite-gourmand-withered-glitter-7902"; exit 1; \
-	fi
-	@echo "Scaling Fly app $(FLY_APP) to 1 machine (may incur charges)..."
-	fly scale count 1 -a $(FLY_APP)
-	@echo "Running unit tests on Fly instance ($(FLY_APP)) and saving results to /tmp/test-results.json"
-	flyctl ssh console -a $(FLY_APP) -C "sh -lc 'cd /app && node --max-old-space-size=1024 node_modules/.bin/jest --runInBand --json --outputFile=/tmp/test-results.json || true; cat /tmp/test-results.json'"
-	@echo "Running e2e tests on Fly instance ($(FLY_APP)) and saving results to /tmp/test-results-e2e.json"
-	flyctl ssh console -a $(FLY_APP) -C "sh -lc 'cd /app && node --max-old-space-size=1024 node_modules/.bin/jest --config ./test/jest-e2e.json --runInBand --json --outputFile=/tmp/test-results-e2e.json || true; cat /tmp/test-results-e2e.json'"
-# Variables (defined first, before they're used)
-DOCKER_COMPOSE = docker-compose
-POSTGRES_SERVICE = vite-gourmand-db-1
-POSTGRES_VOLUME = pgdata
-PRISMA = npx prisma
-BACKEND_PATH = ./backend
-MIGRATIONS_PATH = $(BACKEND_PATH)/src/Model/prisma/migrations
-SCRIPTS_PATH = ./scripts
-
-# Load environment variables from backend/.env
+# Load environment if available
 -include $(BACKEND_PATH)/.env
-export DATABASE_URL
-export DIRECT_URL
-export MONGODB_URI
-export SUPABASE_URL
-export SUPABASE_ANON_KEY
-export DB_MODE
+export
 
-# Detect database mode (local or supabase)
-DB_MODE ?= local
+# ============================================
+#  🚀 QUICK START
+# ============================================
 
-all: up wait-for-db wait-for-mongo install-backend generate-prisma init-migration reset
+.PHONY: quick-start quick-start-local quick-start-cloud
 
-# Targets
+quick-start: quick-start-local  ## Default quick start (local Docker)
 
-up:  ## Start all containers in detached mode
-	$(DOCKER_COMPOSE) up -d --build
-
-down:  ## Stop and remove containers, keep persistent db volume
-	$(DOCKER_COMPOSE) down
-
-restart:  ## Restart all containers
-	$(DOCKER_COMPOSE) restart
-
-logs:  ## Show logs for all containers
-	$(DOCKER_COMPOSE) logs -f
-
-fly_log:
-	fly logs -a vite-gourmand-withered-glitter-7902
-
-psql:  ## Open psql shell to the PostgreSQL container
-	docker exec -it $(POSTGRES_SERVICE) psql -U postgres
-
-wait-for-db:  ## Wait for PostgreSQL to accept connections
-	@echo "Waiting for PostgreSQL to be ready..."
-	@until docker exec $(POSTGRES_SERVICE) pg_isready -U postgres; do sleep 1; done
-
-wait-for-mongo:  ## Wait for MongoDB to accept connections
-	@echo "Waiting for MongoDB to be ready..."
-	@until docker exec vite-gourmand-mongo-1 mongosh --eval "db.adminCommand('ping')" > /dev/null 2>&1; do sleep 1; done
-	@echo "MongoDB is ready!"
-
-mongo-init: wait-for-mongo  ## Manually run MongoDB init script (runs automatically on first start)
-	@echo "Running MongoDB initialization..."
-	docker exec vite-gourmand-mongo-1 mongosh -u root -p example --authenticationDatabase admin vite_gourmand /docker-entrypoint-initdb.d/mongo-init.js
-
-mongosh:  ## Open MongoDB shell
-	docker exec -it vite-gourmand-mongo-1 mongosh -u root -p example --authenticationDatabase admin vite_gourmand
-
-install-backend:  ## Install backend dependencies if not present
-	@if [ ! -d "$(BACKEND_PATH)/node_modules" ]; then \
-		echo "Installing backend dependencies..."; \
-		cd $(BACKEND_PATH) && npm install; \
-	else \
-		echo "Backend dependencies already installed."; \
-	fi
-
-generate-prisma: install-backend  ## Generate Prisma Client from schema
-	@echo "Generating Prisma Client..."
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) generate --schema=src/Model/prisma/schema.prisma
-
-init-migration: install-backend generate-prisma  ## Create and apply initial migration if none exist
-	@if [ ! -d "$(MIGRATIONS_PATH)" ] || [ -z "`ls -A $(MIGRATIONS_PATH) 2>/dev/null | grep -v '^\.\.'`" ]; then \
-		echo "Creating initial migration..."; \
-		cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate dev --name init --schema=src/Model/prisma/schema.prisma; \
-	else \
-		echo "Migration already exists. Skipping initial migration."; \
-	fi
-
-migrate: install-backend generate-prisma  ## Run Prisma migrations on the database
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate deploy --schema=src/Model/prisma/schema.prisma
-
-reset: install-backend generate-prisma  ## Reset the database and load schema using Prisma (WARNING: destroys data)
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate reset --force --schema=src/Model/prisma/schema.prisma
-
-reload:  ## Reload PostgreSQL container and update the database schema (DANGER: destroys all data!)
-	$(DOCKER_COMPOSE) restart db
-	$(MAKE) wait-for-db
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate dev --name reload --schema=src/Model/prisma/schema.prisma --create-only
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate reset --force --schema=src/Model/prisma/schema.prisma
-
-seed_db_playground: wait-for-db  ## Seed database with playground data (bcrypt-hashed passwords)
-	@echo "🌱 Seeding database with playground data..."
-	docker exec -i $(POSTGRES_SERVICE) psql -U postgres -d vite_gourmand < ./data/samples/seed_playground.sql
-	@echo "✅ Playground data seeded successfully!"
-	@echo "📋 Login credentials:"
-	@echo "   Admin:   admin@vitegourmand.fr / Admin123!"
-	@echo "   Manager: manager@vitegourmand.fr / Manager123!"
-	@echo "   Client:  alice.dupont@email.fr / Client123!"
-
-test_backend: wait-for-db  ## Run all backend tests (unit + e2e)
-	@echo "🧪 Running backend tests..."
-	cd $(BACKEND_PATH) && npm run test
-	@echo "✅ Unit tests completed!"
-
-test_backend_e2e: wait-for-db  ## Run backend E2E tests only
-	@echo "🧪 Running backend E2E tests..."
-	cd $(BACKEND_PATH) && npm run test:e2e
-	@echo "✅ E2E tests completed!"
-
-test_backend_orders: wait-for-db  ## Run order lifecycle tests
-	@echo "🧪 Running order lifecycle tests..."
-	cd $(BACKEND_PATH) && npm run test:orders
-	@echo "✅ Order tests completed!"
-
-test_backend_flows: wait-for-db  ## Run API flow simulation tests
-	@echo "🧪 Running API flow tests..."
-	cd $(BACKEND_PATH) && npm run test:flows
-	@echo "✅ Flow tests completed!"
-
-seed_test_data: wait-for-db  ## Seed database with test data (all order statuses)
-	@echo "🌱 Seeding database with test data..."
-	cd $(BACKEND_PATH) && npm run seed:test
-	@echo "✅ Test data seeded successfully!"
-
-update-menu-images:  ## Update menu images with real Unsplash photos
-	@echo "📸 Fetching real photos from Unsplash API..."
-	cd $(BACKEND_PATH) && npm run seed:images
-	@echo "✅ Menu images updated!"
-
-diagnostic:  ## Run the diagnostic script (interactive REPL)
-	bash ./scripts/diagnostic.sh
-
-diagnostic-routines:  ## Check backend routines configuration
-	bash ./scripts/diagnostic.sh routines
-
-diagnostic-rgpd:  ## Check RGPD compliance
-	bash ./scripts/diagnostic.sh rgpd
-
-diagnostic-all:  ## Run all diagnostics
-	bash ./scripts/diagnostic.sh all
-
-clean:  ## Remove all containers, networks, and images (keep db volume)
-	$(DOCKER_COMPOSE) down --rmi all
-
-fclean:  ## Remove all containers and images for this project, keep volumes
-	$(DOCKER_COMPOSE) down --rmi all
-
-prune:  ## Remove all containers, networks, images, and volumes (including db)
-	$(DOCKER_COMPOSE) down -v --rmi all
-	docker volume rm $(POSTGRES_VOLUME) || true
-
-destroy:  ## Remove all containers, images, and volumes for this project
-	$(DOCKER_COMPOSE) down -v --rmi all
-	docker volume rm $(POSTGRES_VOLUME) || true
-
-restore:  ## Install dependencies in both frontend and backend
-	(cd frontend ; npm install)
-	(cd backend ; npm install)
-
-help:  ## Show this help message
-	@echo "Available targets:"
-	@echo "  all            Build images, start services, install deps, generate Prisma client, and migrate DB (default)"
-	@echo "  up             Start all containers (detached)"
-	@echo "  down           Stop and remove containers, keep persistent db volume"
-	@echo "  restart        Restart all containers"
-	@echo "  logs           Show logs for all containers"
-	@echo "  psql           Open psql shell to the PostgreSQL container"
-	@echo "  mongosh        Open MongoDB shell"
-	@echo "  wait-for-db    Wait for PostgreSQL to accept connections"
-	@echo "  wait-for-mongo Wait for MongoDB to accept connections"
-	@echo "  mongo-init     Manually run MongoDB init script"
-	@echo "  install-backend Install backend dependencies if not present"
-	@echo "  generate-prisma Generate Prisma Client from schema"
-	@echo "  init-migration Create and apply initial migration if none exist"
-	@echo "  migrate        Run Prisma migrations on the database"
-	@echo "  reset          Reset the database and load schema using Prisma (WARNING: destroys data)"
-	@echo "  reload         Reload PostgreSQL container and reset DB schema (DANGER: destroys all data!)"
-	@echo "  seed_db_playground  Seed database with playground data (bcrypt-hashed passwords)"
+quick-start-local: install up wait db-migrate db-seed  ## Full local setup with Docker
 	@echo ""
-	@echo "SQL Schema Management:"
-	@echo "  validate-sql        Validate SQL schemas before deployment"
-	@echo "  deploy-supabase     Deploy SQL schemas + seeds to Supabase (DESTRUCTIVE)"
-	@echo "  deploy-supabase-safe Validate then deploy to Supabase"
-	@echo "  prisma-introspect   Introspect Supabase and generate Prisma schema"
-	@echo "  prisma-generate     Generate Prisma Client from introspected schema"
-	@echo "  full-db-setup       Full pipeline: validate → deploy → introspect → generate"
-	@echo "  supabase-tables     List all tables on Supabase"
-	@echo "  supabase-counts     Show row counts for all tables"
+	@echo "✅ Setup complete! Start the backend:"
+	@echo "   cd Back && npm run start:dev"
+
+quick-start-cloud: install supabase-setup db-migrate db-seed  ## Setup with Supabase + MongoDB Atlas
 	@echo ""
-	@echo "Postman/Newman:"
-	@echo "  postman-auth   Run auth collection via Newman"
-	@echo "  postman-all    Run all Postman collections"
-	@echo "  postman-docker Run all collections via Docker"
-	@echo "  postman-report Run collections with HTML report"
-	@echo ""
-	@echo "Diagnostics:"
-	@echo "  diagnostic     Run the diagnostic script (interactive REPL)"
-	@echo "  diagnostic-routines  Check backend routines configuration"
-	@echo "  diagnostic-rgpd      Check RGPD compliance"
-	@echo "  diagnostic-all       Run all diagnostics"
-	@echo ""
-	@echo "Supabase (PostgreSQL):"
-	@echo "  setup-supabase       Configure project to use Supabase (interactive)"
-	@echo "  setup-supabase-full  Full Supabase setup (configure + migrate + seed)"
-	@echo "  setup-local          Configure project to use local Docker database"
-	@echo "  supabase-migrate     Deploy migrations to Supabase"
-	@echo "  supabase-push        Push schema to Supabase (no migration history)"
-	@echo "  supabase-seed        Seed Supabase database"
-	@echo "  supabase-pull        Pull/introspect schema from Supabase"
-	@echo "  supabase-studio      Open Prisma Studio for Supabase"
-	@echo "  supabase-test        Test Supabase connection"
-	@echo ""
-	@echo "MongoDB Analytics (Model/nosql):"
-	@echo "  mongodb-test         Test MongoDB Atlas connection"
-	@echo "  mongodb-init         Initialize collections and TTL indexes"
-	@echo "  mongodb-reset        Reset all analytics (DESTRUCTIVE)"
-	@echo "  mongodb-cleanup      Run storage cleanup (retention policy)"
-	@echo "  mongodb-emergency    Emergency cleanup (halves TTL)"
-	@echo "  mongodb-stats        Show storage statistics"
-	@echo ""
-	@echo "MongoDB Atlas (Legacy):"
-	@echo "  mongo-atlas-test     Test MongoDB Atlas connection"
-	@echo "  mongo-atlas-stats    Show storage statistics (size, collections)"
-	@echo "  mongo-atlas-cleanup  Run storage cleanup (respects retention policy)"
-	@echo "  mongo-atlas-emergency Run emergency cleanup (halves retention)"
-	@echo "  mongo-atlas-init     Initialize collections and TTL indexes"
-	@echo ""
-	@echo "Quick Start:"
-	@echo "  quick-start-local    Full setup with local Docker (new developers)"
-	@echo "  quick-start-supabase Full setup with Supabase + Atlas"
-	@echo "  quick-start-cloud    Full cloud setup (Supabase + MongoDB Atlas)"
-	@echo ""
-	@echo "Cleanup:"
-	@echo "  clean          Remove all containers, networks, and images (keep db volume)"
-	@echo "  fclean         Remove all containers and images (keep volumes)"
-	@echo "  prune          Remove all containers, networks, images, and volumes (including db)"
-	@echo "  destroy        Remove all containers, images, and volumes"
-	@echo "  restore        Install dependencies in both frontend and backend"
-	@echo "  help           Show this help message"
-	@echo ""
-	@echo "${CYAN}=== Development Scripts (scripts/) ===${NC}"
-	@echo ""
-	@echo "Backend Development:"
-	@echo "  dev              Start backend in dev mode (watch)"
-	@echo "  build-backend    Build for production"
-	@echo "  lint             Run ESLint (FIX=1 for auto-fix)"
-	@echo "  compile          TypeScript check (no emit)"
-	@echo "  format           Prettier formatting (CHECK=1 to check only)"
-	@echo "  debug            Start with Node inspector"
-	@echo "  services         Show services summary"
-	@echo ""
-	@echo "Testing:"
-	@echo "  test-unit        Run unit tests"
-	@echo "  test-e2e         Run E2E tests"
-	@echo "  test-all         Run all tests"
-	@echo "  coverage         Run tests with coverage"
-	@echo ""
-	@echo "Database:"
-	@echo "  db-connect       Connect to PostgreSQL"
-	@echo "  db-status        Show DB status & row counts"
-	@echo "  db-seed          Run Prisma seed"
-	@echo "  db-migrate       Run migrations (dev)"
-	@echo "  db-migrate-deploy Run migrations (production)"
-	@echo "  db-reset         Reset database (DESTRUCTIVE!)"
-	@echo "  db-query         Run SQL: make db-query SQL=\"...\""
-	@echo "  db-generate      Generate Prisma client"
-	@echo "  db-studio        Open Prisma Studio"
-	@echo ""
-	@echo "Security:"
-	@echo "  security-audit   NPM audit"
-	@echo "  security-secrets Scan for secrets in code"
-	@echo "  security-headers Check HTTP headers (URL=...)"
-	@echo "  security-deps    Check vulnerable deps"
-	@echo ""
-	@echo "Deployment:"
-	@echo "  deploy-fly       Deploy to Fly.io"
-	@echo "  deploy-logs      View Fly.io logs"
-	@echo "  deploy-status    Check deployment status"
-	@echo "  deploy-check     Pre-deployment checks"
-	@echo ""
-	@echo "Utilities:"
-	@echo "  status           Project status overview"
-	@echo "  doctor           Check dev environment"
-	@echo "  env-show         Show env vars (masked)"
-	@echo "  env-check        Check required env vars"
-	@echo "  install-all      Install all dependencies"
-	@echo "  clean-build      Clean artifacts (DEEP=1 for node_modules)"
+	@echo "✅ Cloud setup complete!"
 
-# ==========================================
-# POSTMAN CLI TARGETS (Official)
-# ==========================================
+# ============================================
+#  🐳 DOCKER MANAGEMENT
+# ============================================
 
-postman-install:  ## Install official Postman CLI
-	./scripts/postman-cli.sh install
+.PHONY: up down restart ps logs docker-clean psql mongosh
 
-postman-login:  ## Login to Postman (opens browser)
-	./scripts/postman-cli.sh login
+up:  ## Start all Docker containers
+	@$(SCRIPTS_PATH)/docker/up.sh
 
-postman-list:  ## List your Postman Cloud collections
-	./scripts/postman-cli.sh list
+down:  ## Stop all Docker containers
+	@$(SCRIPTS_PATH)/docker/down.sh
 
-postman-run:  ## Run collection by ID: make postman-run ID=<collection-id>
-	@if [ -z "$(ID)" ]; then \
-		echo "Usage: make postman-run ID=<collection-id>"; \
-		echo "Get collection ID from Postman UI → Info tab"; \
-		exit 1; \
-	fi
-	./scripts/postman-cli.sh run $(ID)
+restart:  ## Restart Docker containers
+	@$(SCRIPTS_PATH)/docker/restart.sh
 
-postman-local:  ## Run local auth.json collection file
-	./scripts/postman-cli.sh run-local backend/postman/auth.json
+ps:  ## Show container status
+	@$(SCRIPTS_PATH)/docker/ps.sh
 
-postman-local-all:  ## Run all local collection files
-	./scripts/postman-cli.sh run-local backend/postman/auth.json
-	./scripts/postman-cli.sh run-local backend/postman/orders.json
-	./scripts/postman-cli.sh run-local backend/postman/admin.json
+logs:  ## Stream container logs (SERVICE=name for specific)
+	@SERVICE="$(SERVICE)" TAIL="$(TAIL)" $(SCRIPTS_PATH)/docker/logs.sh
 
-# ==========================================
-# SUPABASE CONFIGURATION TARGETS
-# ==========================================
+docker-clean:  ## Remove containers and images (DEEP=1 for volumes)
+	@DEEP="$(DEEP)" $(SCRIPTS_PATH)/docker/clean.sh
 
-setup-env:  ## Create .env from template if it doesn't exist
-	@if [ ! -f "$(BACKEND_PATH)/.env" ]; then \
-		echo "📋 Creating .env from template..."; \
-		cp $(BACKEND_PATH)/.env.example $(BACKEND_PATH)/.env; \
-		echo "✅ Created .env - please edit with your credentials"; \
-	else \
-		echo "ℹ️  .env already exists"; \
-	fi
+docker-check:  ## Run Docker infrastructure check
+	@$(SCRIPTS_PATH)/docker/check_docker.sh
 
-setup-supabase:  ## Configure project to use Supabase (interactive)
-	@chmod +x $(SCRIPTS_PATH)/setup-supabase.sh
-	$(SCRIPTS_PATH)/setup-supabase.sh --supabase
+psql:  ## Open PostgreSQL shell (local Docker)
+	@$(SCRIPTS_PATH)/docker/psql.sh
 
-setup-supabase-full:  ## Full Supabase setup (configure + migrate + seed)
-	@chmod +x $(SCRIPTS_PATH)/setup-supabase.sh
-	$(SCRIPTS_PATH)/setup-supabase.sh --full
+mongosh:  ## Open MongoDB shell (local Docker)
+	@$(SCRIPTS_PATH)/docker/mongosh.sh
 
-setup-local:  ## Configure project to use local Docker database
-	@chmod +x $(SCRIPTS_PATH)/setup-supabase.sh
-	$(SCRIPTS_PATH)/setup-supabase.sh --local
+wait:  ## Wait for database containers to be ready
+	@echo "⏳ Waiting for PostgreSQL..."
+	@until docker exec vite-gourmand-db-1 pg_isready -U postgres 2>/dev/null; do sleep 1; done
+	@echo "⏳ Waiting for MongoDB..."
+	@until docker exec vite-gourmand-mongo-1 mongosh --eval "db.adminCommand('ping')" >/dev/null 2>&1; do sleep 1; done
+	@echo "✅ Databases ready!"
 
-supabase-migrate:  ## Run migrations on Supabase
-	@echo "🔄 Running migrations on Supabase..."
-	cd $(BACKEND_PATH) && $(PRISMA) migrate deploy --schema=src/Model/prisma/schema.prisma
-	@echo "✅ Migrations deployed to Supabase!"
+# ============================================
+#  💻 BACKEND DEVELOPMENT
+# ============================================
 
-supabase-push:  ## Push schema to Supabase (no migration history)
-	@echo "🔄 Pushing schema to Supabase..."
-	cd $(BACKEND_PATH) && $(PRISMA) db push --schema=src/Model/prisma/schema.prisma
-	@echo "✅ Schema pushed to Supabase!"
+.PHONY: dev build lint compile format debug services install
 
-supabase-seed:  ## Seed Supabase database with playground data
-	@echo "🌱 Seeding Supabase database..."
-	cd $(BACKEND_PATH) && npm run seed
-	@echo "✅ Supabase database seeded!"
-
-supabase-pull:  ## Pull schema from Supabase (introspect)
-	@echo "🔍 Pulling schema from Supabase..."
-	cd $(BACKEND_PATH) && $(PRISMA) db pull --schema=src/Model/prisma/schema.prisma
-	@echo "✅ Schema pulled from Supabase!"
-
-supabase-studio:  ## Open Prisma Studio for Supabase
-	@echo "🎨 Opening Prisma Studio..."
-	cd $(BACKEND_PATH) && $(PRISMA) studio --schema=src/Model/prisma/schema.prisma
-
-supabase-test:  ## Test Supabase connection
-	@echo "🔌 Testing Supabase connection..."
-	@chmod +x $(SCRIPTS_PATH)/setup-supabase.sh
-	$(SCRIPTS_PATH)/setup-supabase.sh --test
-
-# ==========================================
-# MONGODB ATLAS TARGETS (Legacy - use mongodb-* instead)
-# ==========================================
-
-mongo-atlas-test:  ## Test MongoDB Atlas connection
-	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
-	$(SCRIPTS_PATH)/mongo-atlas.sh test
-
-mongo-atlas-stats:  ## Show MongoDB Atlas storage statistics
-	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
-	$(SCRIPTS_PATH)/mongo-atlas.sh stats
-
-mongo-atlas-cleanup:  ## Run MongoDB storage cleanup (respects retention policy)
-	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
-	$(SCRIPTS_PATH)/mongo-atlas.sh cleanup
-
-mongo-atlas-emergency:  ## Run emergency cleanup (halves retention periods)
-	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
-	$(SCRIPTS_PATH)/mongo-atlas.sh emergency
-
-mongo-atlas-init:  ## Initialize MongoDB Atlas collections and indexes
-	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
-	$(SCRIPTS_PATH)/mongo-atlas.sh init
-
-# ==========================================
-# MONGODB ANALYTICS (New - Model/nosql)
-# ==========================================
-
-mongodb-test:  ## Test MongoDB Atlas connection (new script)
-	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
-	$(SCRIPTS_PATH)/mongodb-analytics.sh test
-
-mongodb-init:  ## Initialize MongoDB collections and indexes
-	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
-	$(SCRIPTS_PATH)/mongodb-analytics.sh init
-
-mongodb-reset:  ## Reset MongoDB analytics (DESTRUCTIVE!)
-	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
-	$(SCRIPTS_PATH)/mongodb-analytics.sh reset
-
-mongodb-cleanup:  ## Run storage cleanup based on retention policy
-	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
-	$(SCRIPTS_PATH)/mongodb-analytics.sh cleanup
-
-mongodb-emergency:  ## Run emergency cleanup (halves TTL)
-	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
-	$(SCRIPTS_PATH)/mongodb-analytics.sh emergency
-
-mongodb-stats:  ## Show MongoDB storage statistics
-	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
-	$(SCRIPTS_PATH)/mongodb-analytics.sh stats
-
-# ==========================================
-# QUICK START TARGETS
-# ==========================================
-
-quick-start-local:  ## Quick start with local Docker (for new developers)
-	@echo "🚀 Quick Start - Local Development"
-	@echo "=================================="
-	$(MAKE) setup-env
-	$(MAKE) setup-local
-	$(MAKE) up
-	$(MAKE) wait-for-db
-	$(MAKE) wait-for-mongo
-	$(MAKE) install-backend
-	$(MAKE) generate-prisma
-	$(MAKE) migrate
-	$(MAKE) seed_db_playground
-	@echo ""
-	@echo "✅ Setup complete! Run 'cd backend && npm run start:dev' to start the server"
-
-quick-start-supabase:  ## Quick start with Supabase + Atlas (staging/production)
-	@echo "🚀 Quick Start - Supabase + MongoDB Atlas"
-	@echo "=========================================="
-	$(MAKE) setup-env
-	$(MAKE) setup-supabase
-	$(MAKE) install-backend
-	$(MAKE) generate-prisma
-	$(MAKE) supabase-migrate
-	$(MAKE) supabase-seed
-	$(MAKE) mongo-atlas-init
-	@echo ""
-	@echo "✅ Setup complete! Run 'cd backend && npm run start:dev' to start the server"
-
-quick-start-cloud:  ## Full cloud setup (Supabase + MongoDB Atlas)
-	@echo "☁️  Quick Start - Full Cloud Setup"
-	@echo "==================================="
-	$(MAKE) setup-env
-	$(MAKE) install-backend
-	$(MAKE) generate-prisma
-	$(MAKE) supabase-migrate
-	$(MAKE) supabase-seed
-	$(MAKE) mongo-atlas-init
-	$(MAKE) mongo-atlas-test
-	@echo ""
-	@echo "✅ Full cloud setup complete!"
-	@echo "   PostgreSQL: Supabase"
-	@echo "   MongoDB: Atlas"
-	@echo ""
-	@echo "Run 'cd backend && npm run start:dev' to start the server"
-
-# ==========================================
-# SQL SCHEMA MANAGEMENT TARGETS
-# ==========================================
-
-SCRIPTS_PATH = ./vendor/scripts
-
-validate-sql:  ## Validate SQL schemas before deployment
-	@echo "🔍 Validating SQL schemas..."
-	@chmod +x $(SCRIPTS_PATH)/validate-sql.sh
-	$(SCRIPTS_PATH)/validate-sql.sh
-
-deploy-supabase:  ## Deploy SQL schemas + seeds to Supabase (DESTRUCTIVE!)
-	@echo "🚀 Deploying to Supabase (DESTRUCTIVE!)..."
-	@chmod +x $(SCRIPTS_PATH)/deploy-supabase.sh
-	$(SCRIPTS_PATH)/deploy-supabase.sh
-
-deploy-supabase-safe: validate-sql deploy-supabase  ## Validate then deploy to Supabase
-	@echo "✅ Safe deployment complete!"
-
-prisma-introspect:  ## Introspect Supabase and generate Prisma schema
-	@echo "🔍 Introspecting Supabase database..."
-	@chmod +x $(SCRIPTS_PATH)/prisma-introspect.sh
-	$(SCRIPTS_PATH)/prisma-introspect.sh
-
-prisma-generate:  ## Generate Prisma Client from introspected schema
-	@echo "⚙️  Generating Prisma Client..."
-	cd $(BACKEND_PATH) && npx prisma generate --schema=src/Model/prisma/schema.prisma
-
-full-db-setup: validate-sql deploy-supabase prisma-introspect prisma-generate  ## Full pipeline: validate → deploy → introspect → generate
-	@echo ""
-	@echo "✅ Full database setup complete!"
-	@echo "   SQL schemas deployed to Supabase"
-	@echo "   Prisma schema introspected"
-	@echo "   Prisma Client generated"
-
-supabase-tables:  ## List all tables on Supabase
-	@echo "📋 Listing Supabase tables..."
-	@. ./Back/.env && psql "$$DIRECT_URL" -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name;"
-
-supabase-counts:  ## Show row counts for all tables
-	@echo "📊 Row counts for Supabase tables..."
-	@. ./Back/.env && psql "$$DIRECT_URL" -c "SELECT schemaname, relname AS table_name, n_live_tup AS row_count FROM pg_stat_user_tables ORDER BY n_live_tup DESC;"
-
-.PHONY: help restore destroy prune fclean clean diagnostic-all diagnostic-rgpd diagnostic diagnostic-routines seed-test-data test_backend test_backend_flows all up down restart logs psql wait-for-db wait-for-mongo mongo-init mongosh install-backend generate-prisma init-migration migrate reset reload seed_db_playground seed_playground seed_test_data test_backend test_backend_e2e test_backend_orders test_backend_flows postman-install postman-login postman-list postman-run postman-local postman-local-all setup-env setup-supabase setup-supabase-full setup-local supabase-migrate supabase-push supabase-seed supabase-pull supabase-studio supabase-test mongo-atlas-test mongo-atlas-stats mongo-atlas-cleanup mongo-atlas-emergency mongo-atlas-init quick-start-local quick-start-supabase quick-start-cloud validate-sql deploy-supabase deploy-supabase-safe prisma-introspect prisma-generate full-db-setup supabase-tables supabase-counts mongodb-test mongodb-init mongodb-reset mongodb-cleanup mongodb-emergency mongodb-stats
-
-# ==========================================
-# DEVELOPMENT SCRIPTS (scripts/)
-# ==========================================
-
-# --- Backend Development ---
 dev:  ## Start backend in development mode (watch)
-	@./scripts/backend/dev.sh
+	@$(SCRIPTS_PATH)/backend/dev.sh
 
-build-backend:  ## Build backend for production
-	@./scripts/backend/build.sh
+build:  ## Build backend for production
+	@$(SCRIPTS_PATH)/backend/build.sh
 
-lint:  ## Run ESLint on backend (use FIX=1 for auto-fix)
-	@./scripts/backend/lint.sh
+lint:  ## Run ESLint (FIX=1 for auto-fix)
+	@FIX="$(FIX)" $(SCRIPTS_PATH)/backend/lint.sh
 
 compile:  ## TypeScript compile check (no emit)
-	@./scripts/backend/compile.sh
+	@$(SCRIPTS_PATH)/backend/compile.sh
 
-format:  ## Format code with Prettier (use CHECK=1 to check only)
-	@./scripts/backend/format.sh
+format:  ## Format code with Prettier (CHECK=1 to check only)
+	@CHECK="$(CHECK)" $(SCRIPTS_PATH)/backend/format.sh
 
 debug:  ## Start backend with Node inspector
-	@./scripts/backend/debug.sh
+	@$(SCRIPTS_PATH)/backend/debug.sh
 
 services:  ## Show backend services summary
-	@./scripts/backend/services.sh
+	@$(SCRIPTS_PATH)/backend/services.sh
 
-# --- Testing ---
+install:  ## Install all dependencies
+	@$(SCRIPTS_PATH)/utils/install.sh
+
+# ============================================
+#  🧪 TESTING
+# ============================================
+
+.PHONY: test test-unit test-e2e test-all coverage test-postman
+
+test: test-unit  ## Run unit tests (alias)
+
 test-unit:  ## Run unit tests
-	@./scripts/test/unit.sh
+	@$(SCRIPTS_PATH)/test/unit.sh
 
 test-e2e:  ## Run E2E tests
-	@./scripts/test/e2e.sh
+	@$(SCRIPTS_PATH)/test/e2e.sh
 
 test-all:  ## Run all tests (unit + E2E)
-	@./scripts/test/all.sh
+	@$(SCRIPTS_PATH)/test/all.sh
 
 coverage:  ## Run tests with coverage report
-	@./scripts/test/coverage.sh
+	@$(SCRIPTS_PATH)/test/coverage.sh
 
-# --- Database ---
+test-postman:  ## Run Postman collections (ID=collection-id)
+	@$(SCRIPTS_PATH)/test/postman-cli.sh run-local $(BACKEND_PATH)/postman/auth.json
+
+test-full:  ## Run complete test suite with report
+	@$(SCRIPTS_PATH)/test/run_all_tests.sh
+
+# ============================================
+#  🗄️ DATABASE (Prisma)
+# ============================================
+
+.PHONY: db-connect db-status db-seed db-migrate db-reset db-query db-generate db-studio db-push
+
 db-connect:  ## Connect to Supabase PostgreSQL
-	@./scripts/db/connect.sh
+	@$(SCRIPTS_PATH)/db/connect.sh
 
 db-status:  ## Show database status and table counts
-	@./scripts/db/status.sh
+	@$(SCRIPTS_PATH)/db/status.sh
 
 db-seed:  ## Run Prisma seed
-	@./scripts/db/seed.sh
+	@$(SCRIPTS_PATH)/db/seed.sh
 
-db-migrate:  ## Run Prisma migrations (use deploy for production)
-	@./scripts/db/migrate.sh
+db-migrate:  ## Run Prisma migrations (dev mode)
+	@$(SCRIPTS_PATH)/db/migrate.sh
 
-db-migrate-deploy:  ## Run Prisma migrate deploy (production)
-	@./scripts/db/migrate.sh deploy
+db-migrate-deploy:  ## Run Prisma migrations (production)
+	@$(SCRIPTS_PATH)/db/migrate.sh deploy
 
 db-reset:  ## Reset database (DESTRUCTIVE!)
-	@./scripts/db/reset.sh
+	@$(SCRIPTS_PATH)/db/reset.sh
 
-db-query:  ## Run custom SQL query (SQL="SELECT * FROM users")
-	@SQL="$(SQL)" ./scripts/db/query.sh
+db-query:  ## Run SQL query: make db-query SQL="SELECT * FROM users"
+	@SQL="$(SQL)" $(SCRIPTS_PATH)/db/query.sh
 
 db-generate:  ## Generate Prisma client
-	@./scripts/db/generate.sh
+	@$(SCRIPTS_PATH)/db/generate.sh
 
 db-studio:  ## Open Prisma Studio
-	@./scripts/db/studio.sh
+	@$(SCRIPTS_PATH)/db/studio.sh
 
-# --- Security ---
+db-push:  ## Push schema to database (no migration history)
+	cd $(BACKEND_PATH) && npx prisma db push --schema=$(PRISMA_SCHEMA)
+
+# ============================================
+#  🐘 SUPABASE
+# ============================================
+
+.PHONY: supabase-setup supabase-deploy supabase-validate supabase-introspect supabase-tables supabase-counts
+
+supabase-setup:  ## Interactive Supabase setup
+	@$(SCRIPTS_PATH)/supabase/setup-supabase.sh
+
+supabase-deploy:  ## Deploy SQL schemas to Supabase (DESTRUCTIVE!)
+	@$(SCRIPTS_PATH)/supabase/deploy-supabase.sh
+
+supabase-validate:  ## Validate SQL schemas before deployment
+	@$(SCRIPTS_PATH)/supabase/validate-sql.sh
+
+supabase-introspect:  ## Introspect Supabase and generate Prisma schema
+	@$(SCRIPTS_PATH)/supabase/prisma-introspect.sh
+
+supabase-full: supabase-validate supabase-deploy supabase-introspect db-generate  ## Full Supabase pipeline
+	@echo "✅ Full Supabase setup complete!"
+
+supabase-tables:  ## List all tables on Supabase
+	@. $(BACKEND_PATH)/.env && psql "$$DIRECT_URL" -c \
+		"SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;"
+
+supabase-counts:  ## Show row counts for all tables
+	@. $(BACKEND_PATH)/.env && psql "$$DIRECT_URL" -c \
+		"SELECT relname AS table_name, n_live_tup AS rows FROM pg_stat_user_tables ORDER BY n_live_tup DESC;"
+
+# ============================================
+#  🍃 MONGODB ATLAS
+# ============================================
+
+.PHONY: mongodb-test mongodb-init mongodb-reset mongodb-cleanup mongodb-stats
+
+mongodb-test:  ## Test MongoDB Atlas connection
+	@$(SCRIPTS_PATH)/db/mongodb-analytics.sh test
+
+mongodb-init:  ## Initialize MongoDB collections and indexes
+	@$(SCRIPTS_PATH)/db/mongodb-analytics.sh init
+
+mongodb-reset:  ## Reset MongoDB analytics (DESTRUCTIVE!)
+	@$(SCRIPTS_PATH)/db/mongodb-analytics.sh reset
+
+mongodb-cleanup:  ## Run storage cleanup based on retention policy
+	@$(SCRIPTS_PATH)/db/mongodb-analytics.sh cleanup
+
+mongodb-stats:  ## Show MongoDB storage statistics
+	@$(SCRIPTS_PATH)/db/mongodb-analytics.sh stats
+
+# ============================================
+#  🔐 SECURITY
+# ============================================
+
+.PHONY: security-audit security-secrets security-headers security-deps security-all
+
 security-audit:  ## Run npm audit on all packages
-	@./scripts/security/audit.sh
+	@$(SCRIPTS_PATH)/security/audit.sh
 
-security-secrets:  ## Scan code for secrets
-	@./scripts/security/secrets.sh
+security-secrets:  ## Scan code for hardcoded secrets
+	@$(SCRIPTS_PATH)/security/secrets.sh
 
 security-headers:  ## Check HTTP security headers (URL=http://localhost:3000)
-	@URL="$(URL)" ./scripts/security/headers.sh
+	@URL="$(URL)" $(SCRIPTS_PATH)/security/headers.sh
 
 security-deps:  ## Check for vulnerable dependencies
-	@./scripts/security/deps.sh
+	@$(SCRIPTS_PATH)/security/deps.sh
 
-# --- Deployment ---
+security-all: security-audit security-secrets security-deps  ## Run all security checks
+	@echo "✅ All security checks completed!"
+
+# ============================================
+#  🚀 DEPLOYMENT
+# ============================================
+
+.PHONY: deploy deploy-fly deploy-check deploy-status deploy-logs
+
+deploy: deploy-fly  ## Deploy to Fly.io (alias)
+
 deploy-fly:  ## Deploy to Fly.io
-	@./scripts/deploy/fly.sh
-
-deploy-logs:  ## View Fly.io logs
-	@./scripts/deploy/logs.sh
-
-deploy-status:  ## Check Fly.io deployment status
-	@./scripts/deploy/status.sh
+	@$(SCRIPTS_PATH)/deploy/fly.sh
 
 deploy-check:  ## Run pre-deployment checks
-	@./scripts/deploy/check.sh
+	@$(SCRIPTS_PATH)/deploy/check.sh
 
-# --- Utilities ---
+deploy-status:  ## Check Fly.io deployment status
+	@$(SCRIPTS_PATH)/deploy/status.sh
+
+deploy-logs:  ## View Fly.io application logs
+	@$(SCRIPTS_PATH)/deploy/logs.sh
+
+deploy-safe: deploy-check deploy-fly  ## Pre-check then deploy
+	@echo "✅ Safe deployment complete!"
+
+# ============================================
+#  🔍 DIAGNOSTICS
+# ============================================
+
+.PHONY: diagnostic diagnostic-rgpd diagnostic-rgaa diagnostic-code diagnostic-perf
+
+diagnostic:  ## Run all diagnostics
+	@CHECK=all $(SCRIPTS_PATH)/diagnostic/run.sh
+
+diagnostic-rgpd:  ## Check RGPD compliance
+	@CHECK=rgpd $(SCRIPTS_PATH)/diagnostic/run.sh
+
+diagnostic-rgaa:  ## Check RGAA accessibility compliance
+	@CHECK=rgaa $(SCRIPTS_PATH)/diagnostic/run.sh
+
+diagnostic-code:  ## Check code quality
+	@CHECK=code $(SCRIPTS_PATH)/diagnostic/run.sh
+
+diagnostic-perf:  ## Check performance
+	@CHECK=perf $(SCRIPTS_PATH)/diagnostic/run.sh
+
+# ============================================
+#  🛠️ UTILITIES
+# ============================================
+
+.PHONY: status doctor env-show env-check clean
+
 status:  ## Show project status overview
-	@./scripts/utils/status.sh
+	@$(SCRIPTS_PATH)/utils/status.sh
 
 doctor:  ## Check development environment
-	@./scripts/utils/doctor.sh
+	@$(SCRIPTS_PATH)/utils/doctor.sh
 
 env-show:  ## Show environment variables (masked)
-	@./scripts/utils/env.sh show
+	@$(SCRIPTS_PATH)/utils/env.sh show
 
 env-check:  ## Check required environment variables
-	@./scripts/utils/env.sh check
+	@$(SCRIPTS_PATH)/utils/env.sh check
 
-install-all:  ## Install all dependencies
-	@./scripts/utils/install.sh
+clean:  ## Clean build artifacts (DEEP=1 for node_modules)
+	@DEEP="$(DEEP)" $(SCRIPTS_PATH)/utils/clean.sh
 
-clean-build:  ## Clean build artifacts (DEEP=1 for node_modules)
-	@DEEP="$(DEEP)" ./scripts/utils/clean.sh
+# ============================================
+#  📋 HELP
+# ============================================
 
-.PHONY: dev build-backend lint compile format debug services test-unit test-e2e test-all coverage db-connect db-status db-seed db-migrate db-migrate-deploy db-reset db-query db-generate db-studio security-audit security-secrets security-headers security-deps deploy-fly deploy-logs deploy-status deploy-check status doctor env-show env-check install-all clean-build
-
-# Deploy to Fly.io
-.PHONY: deploy
-
-deploy:
-	flyctl deploy --remote-only
-	@echo "Deployment to Fly.io complete!"
+help:  ## Show this help message
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║     🍽️  VITE GOURMAND - Available Commands                    ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "Usage: make <target> [VARIABLE=value]"
+	@echo ""
+	@awk 'BEGIN {FS = ":.*##"} \
+		/^[a-zA-Z_-]+:.*##/ { \
+			printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 \
+		} \
+		/^# ===/ { \
+			gsub(/# /, ""); \
+			gsub(/=/, ""); \
+			printf "\n\033[1;33m%s\033[0m\n", $$0 \
+		}' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "Examples:"
+	@echo "  make quick-start         # Full local setup"
+	@echo "  make dev                 # Start development server"
+	@echo "  make test-all            # Run all tests"
+	@echo "  make lint FIX=1          # Fix linting errors"
+	@echo "  make db-query SQL=\"...\"  # Run custom SQL"
+	@echo "  make logs SERVICE=db     # View specific container logs"
+	@echo ""

@@ -1,1 +1,0 @@
-cd /home/dlesieur/Documents/studi/vite-gourmand/Back/src && for f in $(find . -name "*.service.ts" -not -name "*.spec.ts" -not -path "./Model/*" -not -path "./prisma/*" -not -path "./test/*"); do lines=$(wc -l < "$f"); specfile="${f%.ts}.spec.ts"; has_spec="NO"; [ -f "$specfile" ] && has_spec="YES"; echo "$lines $has_spec $f"; done | sort -rn | head -30
