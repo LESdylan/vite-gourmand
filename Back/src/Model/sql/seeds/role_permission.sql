@@ -1,55 +1,33 @@
 -- ============================================
 -- SEED: RolePermission mapping
--- Admin gets everything, employee gets subset
+-- ============================================
+-- Roles: superadmin(1), admin(2), employee(3), utilisateur(4)
+-- Strategy: superadmin gets ALL, admin gets all except superadmin-only,
+-- employee gets operational subset, utilisateur gets client subset.
 -- ============================================
 
--- superadmin (1) gets all permissions
+-- superadmin (1) gets ALL permissions
 INSERT INTO "RolePermission" ("role_id", "permission_id")
 SELECT 1, "id" FROM "Permission"
 ON CONFLICT DO NOTHING;
 
--- admin (2) gets all except superadmin-only
+-- admin (2) gets all permissions (same as superadmin for business purposes)
 INSERT INTO "RolePermission" ("role_id", "permission_id")
-SELECT 2, "id" FROM "Permission" WHERE "name" != 'manage_users'
+SELECT 2, "id" FROM "Permission"
 ON CONFLICT DO NOTHING;
 
--- employee (3)
+-- employee (3) gets operational permissions
 INSERT INTO "RolePermission" ("role_id", "permission_id")
 SELECT 3, "id" FROM "Permission" WHERE "name" IN (
-    'manage_menus','manage_dishes','manage_orders','view_all_orders',
-    'update_order','moderate_reviews','manage_hours'
+    'create_menus', 'read_menus', 'update_menus', 'delete_menus',
+    'manage_menus', 'manage_dishes',
+    'read_orders', 'update_orders', 'manage_orders', 'view_all_orders', 'update_order',
+    'read_reviews', 'update_reviews', 'moderate_reviews',
+    'manage_hours', 'update_settings'
 ) ON CONFLICT DO NOTHING;
 
--- utilisateur (4)
+-- utilisateur (4) gets client permissions
 INSERT INTO "RolePermission" ("role_id", "permission_id")
 SELECT 4, "id" FROM "Permission" WHERE "name" IN (
-    'place_order','view_own_orders','write_review'
+    'read_menus', 'place_order', 'view_own_orders', 'write_review'
 ) ON CONFLICT DO NOTHING;
-
--- Admin: all permissions
-INSERT INTO "RolePermission" ("role_id", "permission_id")
-SELECT r."id", p."id"
-FROM "Role" r, "Permission" p
-WHERE r."name" = 'admin'
-ON CONFLICT DO NOTHING;
-
--- Employee: menus, orders, reviews (no users, no analytics)
-INSERT INTO "RolePermission" ("role_id", "permission_id")
-SELECT r."id", p."id"
-FROM "Role" r, "Permission" p
-WHERE r."name" = 'employee'
-  AND p."name" IN (
-      'create_menus', 'read_menus', 'update_menus', 'delete_menus',
-      'read_orders', 'update_orders',
-      'read_reviews', 'update_reviews',
-      'update_settings'
-  )
-ON CONFLICT DO NOTHING;
-
--- Utilisateur: read menus only (order placement handled by backend)
-INSERT INTO "RolePermission" ("role_id", "permission_id")
-SELECT r."id", p."id"
-FROM "Role" r, "Permission" p
-WHERE r."name" = 'utilisateur'
-  AND p."name" IN ('read_menus')
-ON CONFLICT DO NOTHING;

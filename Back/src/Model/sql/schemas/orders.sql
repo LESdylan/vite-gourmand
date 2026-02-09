@@ -83,5 +83,5 @@ CREATE TABLE IF NOT EXISTS "DeliveryAssignment" (
     "client_rating"      INT CHECK ("client_rating" BETWEEN 1 AND 5)
 );
 
--- NOTE: LoyaltyAccount, LoyaltyTransaction, and Discount are defined in loyalty.sql
--- which MUST be loaded BEFORE this file in the master script.
+-- NOTE: Discount is defined in loyalty.sql (loaded before this file).
+-- LoyaltyAccount & LoyaltyTransaction are in loyalty_post_order.sql (loaded after).

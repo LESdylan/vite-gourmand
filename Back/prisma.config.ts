@@ -14,9 +14,10 @@ const directUrl = process.env["DIRECT_URL"] || databaseUrl;
 const isSupabase = databaseUrl.includes("supabase") || databaseUrl.includes("pooler");
 
 export default defineConfig({
-  schema: "prisma/schema.prisma",
+  // MVC structure: schema lives in src/Model/prisma/
+  schema: "src/Model/prisma/schema.prisma",
   migrations: {
-    path: "prisma/migrations",
+    path: "src/Model/prisma/migrations",
   },
   datasource: {
     // For Supabase: use DIRECT_URL for migrations (bypasses pgbouncer)

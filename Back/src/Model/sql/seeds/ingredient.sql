@@ -8,7 +8,7 @@ INSERT INTO "Ingredient" ("name","unit","current_stock","min_stock_level","cost_
     ('Homard',          'kg',     8.0,  2.0,  80.00),
     ('Saumon',          'kg',    12.0,  3.0,  25.00),
     ('Riz Arborio',     'kg',    20.0,  5.0,   4.00),
-    ('Crème fraîche',   'litres',15.0,  3.0,   5.00),
+    ('Crème Fraîche',   'litres',15.0,  3.0,   5.00),
     ('Chocolat noir',   'kg',     8.0,  2.0,  18.00),
     ('Framboises',      'kg',     5.0,  1.0,  22.00),
     ('Tomates',         'kg',    25.0,  5.0,   3.00),

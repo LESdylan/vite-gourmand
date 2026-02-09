@@ -27,7 +27,7 @@ POSTGRES_SERVICE = vite-gourmand-db-1
 POSTGRES_VOLUME = pgdata
 PRISMA = npx prisma
 BACKEND_PATH = ./backend
-MIGRATIONS_PATH = $(BACKEND_PATH)/prisma/migrations
+MIGRATIONS_PATH = $(BACKEND_PATH)/src/Model/prisma/migrations
 SCRIPTS_PATH = ./scripts
 
 # Load environment variables from backend/.env
@@ -90,27 +90,27 @@ install-backend:  ## Install backend dependencies if not present
 
 generate-prisma: install-backend  ## Generate Prisma Client from schema
 	@echo "Generating Prisma Client..."
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) generate --schema=prisma/schema.prisma
+	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) generate --schema=src/Model/prisma/schema.prisma
 
 init-migration: install-backend generate-prisma  ## Create and apply initial migration if none exist
 	@if [ ! -d "$(MIGRATIONS_PATH)" ] || [ -z "`ls -A $(MIGRATIONS_PATH) 2>/dev/null | grep -v '^\.\.'`" ]; then \
 		echo "Creating initial migration..."; \
-		cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate dev --name init --schema=prisma/schema.prisma; \
+		cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate dev --name init --schema=src/Model/prisma/schema.prisma; \
 	else \
 		echo "Migration already exists. Skipping initial migration."; \
 	fi
 
 migrate: install-backend generate-prisma  ## Run Prisma migrations on the database
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate deploy --schema=prisma/schema.prisma
+	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate deploy --schema=src/Model/prisma/schema.prisma
 
 reset: install-backend generate-prisma  ## Reset the database and load schema using Prisma (WARNING: destroys data)
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate reset --force --schema=prisma/schema.prisma
+	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate reset --force --schema=src/Model/prisma/schema.prisma
 
 reload:  ## Reload PostgreSQL container and update the database schema (DANGER: destroys all data!)
 	$(DOCKER_COMPOSE) restart db
 	$(MAKE) wait-for-db
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate dev --name reload --schema=prisma/schema.prisma --create-only
-	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate reset --force --schema=prisma/schema.prisma
+	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate dev --name reload --schema=src/Model/prisma/schema.prisma --create-only
+	cd $(BACKEND_PATH) && DATABASE_URL="$(DATABASE_URL)" $(PRISMA) migrate reset --force --schema=src/Model/prisma/schema.prisma
 
 seed_db_playground: wait-for-db  ## Seed database with playground data (bcrypt-hashed passwords)
 	@echo "🌱 Seeding database with playground data..."
@@ -196,6 +196,16 @@ help:  ## Show this help message
 	@echo "  reload         Reload PostgreSQL container and reset DB schema (DANGER: destroys all data!)"
 	@echo "  seed_db_playground  Seed database with playground data (bcrypt-hashed passwords)"
 	@echo ""
+	@echo "SQL Schema Management:"
+	@echo "  validate-sql        Validate SQL schemas before deployment"
+	@echo "  deploy-supabase     Deploy SQL schemas + seeds to Supabase (DESTRUCTIVE)"
+	@echo "  deploy-supabase-safe Validate then deploy to Supabase"
+	@echo "  prisma-introspect   Introspect Supabase and generate Prisma schema"
+	@echo "  prisma-generate     Generate Prisma Client from introspected schema"
+	@echo "  full-db-setup       Full pipeline: validate → deploy → introspect → generate"
+	@echo "  supabase-tables     List all tables on Supabase"
+	@echo "  supabase-counts     Show row counts for all tables"
+	@echo ""
 	@echo "Postman/Newman:"
 	@echo "  postman-auth   Run auth collection via Newman"
 	@echo "  postman-all    Run all Postman collections"
@@ -219,7 +229,15 @@ help:  ## Show this help message
 	@echo "  supabase-studio      Open Prisma Studio for Supabase"
 	@echo "  supabase-test        Test Supabase connection"
 	@echo ""
-	@echo "MongoDB Atlas:"
+	@echo "MongoDB Analytics (Model/nosql):"
+	@echo "  mongodb-test         Test MongoDB Atlas connection"
+	@echo "  mongodb-init         Initialize collections and TTL indexes"
+	@echo "  mongodb-reset        Reset all analytics (DESTRUCTIVE)"
+	@echo "  mongodb-cleanup      Run storage cleanup (retention policy)"
+	@echo "  mongodb-emergency    Emergency cleanup (halves TTL)"
+	@echo "  mongodb-stats        Show storage statistics"
+	@echo ""
+	@echo "MongoDB Atlas (Legacy):"
 	@echo "  mongo-atlas-test     Test MongoDB Atlas connection"
 	@echo "  mongo-atlas-stats    Show storage statistics (size, collections)"
 	@echo "  mongo-atlas-cleanup  Run storage cleanup (respects retention policy)"
@@ -295,12 +313,12 @@ setup-local:  ## Configure project to use local Docker database
 
 supabase-migrate:  ## Run migrations on Supabase
 	@echo "🔄 Running migrations on Supabase..."
-	cd $(BACKEND_PATH) && $(PRISMA) migrate deploy --schema=prisma/schema.prisma
+	cd $(BACKEND_PATH) && $(PRISMA) migrate deploy --schema=src/Model/prisma/schema.prisma
 	@echo "✅ Migrations deployed to Supabase!"
 
 supabase-push:  ## Push schema to Supabase (no migration history)
 	@echo "🔄 Pushing schema to Supabase..."
-	cd $(BACKEND_PATH) && $(PRISMA) db push --schema=prisma/schema.prisma
+	cd $(BACKEND_PATH) && $(PRISMA) db push --schema=src/Model/prisma/schema.prisma
 	@echo "✅ Schema pushed to Supabase!"
 
 supabase-seed:  ## Seed Supabase database with playground data
@@ -310,12 +328,12 @@ supabase-seed:  ## Seed Supabase database with playground data
 
 supabase-pull:  ## Pull schema from Supabase (introspect)
 	@echo "🔍 Pulling schema from Supabase..."
-	cd $(BACKEND_PATH) && $(PRISMA) db pull --schema=prisma/schema.prisma
+	cd $(BACKEND_PATH) && $(PRISMA) db pull --schema=src/Model/prisma/schema.prisma
 	@echo "✅ Schema pulled from Supabase!"
 
 supabase-studio:  ## Open Prisma Studio for Supabase
 	@echo "🎨 Opening Prisma Studio..."
-	cd $(BACKEND_PATH) && $(PRISMA) studio --schema=prisma/schema.prisma
+	cd $(BACKEND_PATH) && $(PRISMA) studio --schema=src/Model/prisma/schema.prisma
 
 supabase-test:  ## Test Supabase connection
 	@echo "🔌 Testing Supabase connection..."
@@ -323,7 +341,7 @@ supabase-test:  ## Test Supabase connection
 	$(SCRIPTS_PATH)/setup-supabase.sh --test
 
 # ==========================================
-# MONGODB ATLAS TARGETS
+# MONGODB ATLAS TARGETS (Legacy - use mongodb-* instead)
 # ==========================================
 
 mongo-atlas-test:  ## Test MongoDB Atlas connection
@@ -345,6 +363,34 @@ mongo-atlas-emergency:  ## Run emergency cleanup (halves retention periods)
 mongo-atlas-init:  ## Initialize MongoDB Atlas collections and indexes
 	@chmod +x $(SCRIPTS_PATH)/mongo-atlas.sh
 	$(SCRIPTS_PATH)/mongo-atlas.sh init
+
+# ==========================================
+# MONGODB ANALYTICS (New - Model/nosql)
+# ==========================================
+
+mongodb-test:  ## Test MongoDB Atlas connection (new script)
+	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
+	$(SCRIPTS_PATH)/mongodb-analytics.sh test
+
+mongodb-init:  ## Initialize MongoDB collections and indexes
+	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
+	$(SCRIPTS_PATH)/mongodb-analytics.sh init
+
+mongodb-reset:  ## Reset MongoDB analytics (DESTRUCTIVE!)
+	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
+	$(SCRIPTS_PATH)/mongodb-analytics.sh reset
+
+mongodb-cleanup:  ## Run storage cleanup based on retention policy
+	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
+	$(SCRIPTS_PATH)/mongodb-analytics.sh cleanup
+
+mongodb-emergency:  ## Run emergency cleanup (halves TTL)
+	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
+	$(SCRIPTS_PATH)/mongodb-analytics.sh emergency
+
+mongodb-stats:  ## Show MongoDB storage statistics
+	@chmod +x $(SCRIPTS_PATH)/mongodb-analytics.sh
+	$(SCRIPTS_PATH)/mongodb-analytics.sh stats
 
 # ==========================================
 # QUICK START TARGETS
@@ -395,7 +441,50 @@ quick-start-cloud:  ## Full cloud setup (Supabase + MongoDB Atlas)
 	@echo ""
 	@echo "Run 'cd backend && npm run start:dev' to start the server"
 
-.PHONY: help restore destroy prune fclean clean diagnostic-all diagnostic-rgpd diagnostic diagnostic-routines seed-test-data test_backend test_backend_flows all up down restart logs psql wait-for-db wait-for-mongo mongo-init mongosh install-backend generate-prisma init-migration migrate reset reload seed_db_playground seed_playground seed_test_data test_backend test_backend_e2e test_backend_orders test_backend_flows postman-install postman-login postman-list postman-run postman-local postman-local-all setup-env setup-supabase setup-supabase-full setup-local supabase-migrate supabase-push supabase-seed supabase-pull supabase-studio supabase-test mongo-atlas-test mongo-atlas-stats mongo-atlas-cleanup mongo-atlas-emergency mongo-atlas-init quick-start-local quick-start-supabase quick-start-cloud
+# ==========================================
+# SQL SCHEMA MANAGEMENT TARGETS
+# ==========================================
+
+SCRIPTS_PATH = ./vendor/scripts
+
+validate-sql:  ## Validate SQL schemas before deployment
+	@echo "🔍 Validating SQL schemas..."
+	@chmod +x $(SCRIPTS_PATH)/validate-sql.sh
+	$(SCRIPTS_PATH)/validate-sql.sh
+
+deploy-supabase:  ## Deploy SQL schemas + seeds to Supabase (DESTRUCTIVE!)
+	@echo "🚀 Deploying to Supabase (DESTRUCTIVE!)..."
+	@chmod +x $(SCRIPTS_PATH)/deploy-supabase.sh
+	$(SCRIPTS_PATH)/deploy-supabase.sh
+
+deploy-supabase-safe: validate-sql deploy-supabase  ## Validate then deploy to Supabase
+	@echo "✅ Safe deployment complete!"
+
+prisma-introspect:  ## Introspect Supabase and generate Prisma schema
+	@echo "🔍 Introspecting Supabase database..."
+	@chmod +x $(SCRIPTS_PATH)/prisma-introspect.sh
+	$(SCRIPTS_PATH)/prisma-introspect.sh
+
+prisma-generate:  ## Generate Prisma Client from introspected schema
+	@echo "⚙️  Generating Prisma Client..."
+	cd $(BACKEND_PATH) && npx prisma generate --schema=src/Model/prisma/schema.prisma
+
+full-db-setup: validate-sql deploy-supabase prisma-introspect prisma-generate  ## Full pipeline: validate → deploy → introspect → generate
+	@echo ""
+	@echo "✅ Full database setup complete!"
+	@echo "   SQL schemas deployed to Supabase"
+	@echo "   Prisma schema introspected"
+	@echo "   Prisma Client generated"
+
+supabase-tables:  ## List all tables on Supabase
+	@echo "📋 Listing Supabase tables..."
+	@. ./Back/.env && psql "$$DIRECT_URL" -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name;"
+
+supabase-counts:  ## Show row counts for all tables
+	@echo "📊 Row counts for Supabase tables..."
+	@. ./Back/.env && psql "$$DIRECT_URL" -c "SELECT schemaname, relname AS table_name, n_live_tup AS row_count FROM pg_stat_user_tables ORDER BY n_live_tup DESC;"
+
+.PHONY: help restore destroy prune fclean clean diagnostic-all diagnostic-rgpd diagnostic diagnostic-routines seed-test-data test_backend test_backend_flows all up down restart logs psql wait-for-db wait-for-mongo mongo-init mongosh install-backend generate-prisma init-migration migrate reset reload seed_db_playground seed_playground seed_test_data test_backend test_backend_e2e test_backend_orders test_backend_flows postman-install postman-login postman-list postman-run postman-local postman-local-all setup-env setup-supabase setup-supabase-full setup-local supabase-migrate supabase-push supabase-seed supabase-pull supabase-studio supabase-test mongo-atlas-test mongo-atlas-stats mongo-atlas-cleanup mongo-atlas-emergency mongo-atlas-init quick-start-local quick-start-supabase quick-start-cloud validate-sql deploy-supabase deploy-supabase-safe prisma-introspect prisma-generate full-db-setup supabase-tables supabase-counts mongodb-test mongodb-init mongodb-reset mongodb-cleanup mongodb-emergency mongodb-stats
 
 # Deploy to Fly.io
 .PHONY: deploy
