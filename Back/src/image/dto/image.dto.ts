@@ -8,7 +8,7 @@ import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 export class CreateMenuImageDto {
   @ApiProperty()
   @IsInt()
-  menu_item_id!: number;
+  menu_id!: number;
 
   @ApiProperty()
   @IsString()
@@ -43,16 +43,6 @@ export class CreateReviewImageDto {
   @IsString()
   @IsUrl()
   image_url!: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  alt_text?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsInt()
-  display_order?: number;
 }
 
 export class UpdateReviewImageDto extends PartialType(CreateReviewImageDto) {}
