@@ -1,5 +1,5 @@
 /**
- * Seed Controller - API endpoints for database seeding
+ * Seed Controller - API endpoints for updating menu images
  */
 import { Controller, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -11,15 +11,15 @@ import { Roles } from '../common';
 export class SeedController {
   constructor(private readonly seedService: SeedService) {}
 
-  @Post('menus')
+  @Post('menu-images')
   @Roles('admin')
-  @ApiOperation({ summary: 'Seed menus with Unsplash images' })
-  @ApiResponse({ status: 201, description: 'Menus seeded successfully' })
-  async seedMenus() {
-    const result = await this.seedService.seedMenusWithImages();
+  @ApiOperation({ summary: 'Update menu images with Unsplash photos' })
+  @ApiResponse({ status: 201, description: 'Menu images updated successfully' })
+  async updateMenuImages() {
+    const result = await this.seedService.updateMenuImages();
     return {
       success: true,
-      message: `Created ${result.created} menus (${result.errors} errors)`,
+      message: `Updated ${result.updated} menu images (${result.errors} errors)`,
       ...result,
     };
   }

@@ -146,6 +146,11 @@ seed_test_data: wait-for-db  ## Seed database with test data (all order statuses
 	cd $(BACKEND_PATH) && npm run seed:test
 	@echo "✅ Test data seeded successfully!"
 
+update-menu-images:  ## Update menu images with real Unsplash photos
+	@echo "📸 Fetching real photos from Unsplash API..."
+	cd $(BACKEND_PATH) && npm run seed:images
+	@echo "✅ Menu images updated!"
+
 diagnostic:  ## Run the diagnostic script (interactive REPL)
 	bash ./scripts/diagnostic.sh
 

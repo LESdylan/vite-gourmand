@@ -22,7 +22,8 @@
     "test:flows": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --testPathPattern=api-flows --runInBand",
     "test:all": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --runInBand",
     "seed": "npx tsx prisma/seed-playground.ts",
-    "seed:test": "npx tsx prisma/seed-test-data.ts"
+    "seed:test": "npx tsx prisma/seed-test-data.ts",
+    "seed:images": "npx tsx scripts/update-menu-images.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.0",

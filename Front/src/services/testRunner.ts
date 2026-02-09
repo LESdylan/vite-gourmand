@@ -192,7 +192,7 @@ export function parseJestOutput(output: string): TestResult[] {
         name,
         suite: currentSuite,
         status: icon === '✓' ? 'passed' : icon === '✕' ? 'failed' : 'idle',
-        duration: duration ? parseInt(duration, 10) : undefined,
+        duration: duration ? Number.parseInt(duration, 10) : undefined,
       });
     }
   }

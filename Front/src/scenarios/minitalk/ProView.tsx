@@ -29,8 +29,8 @@ export const ProView: React.FC<Props> = ({ orders, selectedId, onSelect, onStatu
   const handleDrop = (e: React.DragEvent, targetStatus: OrderStatus) => {
     e.preventDefault();
     setDragOverColumn(null);
-    const orderId = parseInt(e.dataTransfer.getData('orderId'));
-    if (!isNaN(orderId)) {
+    const orderId = Number.parseInt(e.dataTransfer.getData('orderId'));
+    if (!Number.isNaN(orderId)) {
       const order = orders.find(o => o.id === orderId);
       if (order && order.status !== targetStatus) {
         onStatusChange(orderId, targetStatus);

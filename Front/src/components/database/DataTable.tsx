@@ -78,7 +78,7 @@ function formatCell(value: unknown, col: TableColumn): string {
   if (col.name.toLowerCase().includes('date') || col.name.toLowerCase().includes('at')) {
     try {
       const date = new Date(value as string);
-      if (!isNaN(date.getTime())) {
+      if (!Number.isNaN(date.getTime())) {
         return date.toLocaleDateString('fr-FR', {
           day: '2-digit',
           month: '2-digit',

@@ -304,7 +304,7 @@ export default function MenusPage({ setCurrentPage }: MenusPageProps) {
     if (priceMin) filtered = filtered.filter(m => m.pricePerPerson >= parseFloat(priceMin));
     if (selectedTheme && selectedTheme !== 'all') filtered = filtered.filter(m => m.theme === selectedTheme);
     if (selectedDietary && selectedDietary !== 'all') filtered = filtered.filter(m => m.dietary.includes(selectedDietary as DietaryType));
-    if (minPeople) filtered = filtered.filter(m => m.minPersons <= parseInt(minPeople));
+    if (minPeople) filtered = filtered.filter(m => m.minPersons <= Number.parseInt(minPeople));
     return filtered;
   }, [searchQuery, priceMax, priceMin, selectedTheme, selectedDietary, minPeople]);
 
