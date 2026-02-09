@@ -1,7 +1,11 @@
 /**
  * Review Service
  */
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { CreateReviewDto, ModerateReviewDto } from './dto/review.dto';
 import { PaginationDto, buildPaginationMeta } from '../common';
@@ -20,7 +24,9 @@ export class ReviewService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { created_at: 'desc' },
-        include: { User_Publish_user_idToUser: { select: { first_name: true } } },
+        include: {
+          User_Publish_user_idToUser: { select: { first_name: true } },
+        },
       }),
       this.prisma.publish.count({ where }),
     ]);
@@ -38,7 +44,11 @@ export class ReviewService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { created_at: 'asc' },
-        include: { User_Publish_user_idToUser: { select: { first_name: true, email: true } } },
+        include: {
+          User_Publish_user_idToUser: {
+            select: { first_name: true, email: true },
+          },
+        },
       }),
       this.prisma.publish.count({ where }),
     ]);

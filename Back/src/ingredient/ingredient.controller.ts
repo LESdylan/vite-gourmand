@@ -1,11 +1,24 @@
 /**
  * Ingredient Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { IngredientService } from './ingredient.service';
 import { Roles, SafeParseIntPipe } from '../common';
-import { CreateIngredientDto, UpdateIngredientDto, RestockIngredientDto } from './dto/ingredient.dto';
+import {
+  CreateIngredientDto,
+  UpdateIngredientDto,
+  RestockIngredientDto,
+} from './dto/ingredient.dto';
 
 @ApiTags('ingredients')
 @Controller('ingredients')
@@ -46,7 +59,10 @@ export class IngredientController {
   @Put(':id')
   @Roles('admin')
   @ApiOperation({ summary: 'Update ingredient' })
-  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateIngredientDto) {
+  async update(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateIngredientDto,
+  ) {
     return this.ingredientService.update(id, dto);
   }
 
@@ -60,7 +76,10 @@ export class IngredientController {
   @Post(':id/restock')
   @Roles('admin', 'employee')
   @ApiOperation({ summary: 'Restock ingredient' })
-  async restock(@Param('id', SafeParseIntPipe) id: number, @Body() dto: RestockIngredientDto) {
+  async restock(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: RestockIngredientDto,
+  ) {
     return this.ingredientService.restock(id, dto);
   }
 

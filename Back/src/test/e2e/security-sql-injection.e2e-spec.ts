@@ -19,7 +19,7 @@ describe('SQL Injection Prevention (e2e)', () => {
   const sqlPayloads = [
     "' OR '1'='1",
     "'; DROP TABLE users; --",
-    "1; DELETE FROM users",
+    '1; DELETE FROM users',
     "' UNION SELECT * FROM users --",
     "admin'--",
     "1' OR '1' = '1",
@@ -53,8 +53,9 @@ describe('SQL Injection Prevention (e2e)', () => {
   describe('Search/Filter endpoints', () => {
     sqlPayloads.forEach((payload, i) => {
       it(`rejects SQL injection in menu search #${i + 1}`, async () => {
-        const response = await request(app.getHttpServer())
-          .get(`/api/menus?search=${encodeURIComponent(payload)}`);
+        const response = await request(app.getHttpServer()).get(
+          `/api/menus?search=${encodeURIComponent(payload)}`,
+        );
 
         expect([200, 400]).toContain(response.status);
         // Should not crash or expose error details
@@ -76,15 +77,17 @@ describe('SQL Injection Prevention (e2e)', () => {
 
     idPayloads.forEach((payload, i) => {
       it(`rejects SQL injection in menu ID #${i + 1}`, async () => {
-        const response = await request(app.getHttpServer())
-          .get(`/api/menus/${encodeURIComponent(payload)}`);
+        const response = await request(app.getHttpServer()).get(
+          `/api/menus/${encodeURIComponent(payload)}`,
+        );
 
         expect([400, 404]).toContain(response.status);
       });
 
       it(`rejects SQL injection in dish ID #${i + 1}`, async () => {
-        const response = await request(app.getHttpServer())
-          .get(`/api/dishes/${encodeURIComponent(payload)}`);
+        const response = await request(app.getHttpServer()).get(
+          `/api/dishes/${encodeURIComponent(payload)}`,
+        );
 
         expect([400, 404]).toContain(response.status);
       });

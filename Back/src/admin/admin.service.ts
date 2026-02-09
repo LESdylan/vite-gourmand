@@ -1,7 +1,11 @@
 /**
  * Admin Service
  */
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { CreateEmployeeDto } from './dto/admin.dto';
 import * as bcrypt from 'bcrypt';

@@ -58,7 +58,7 @@ async function getCollectionStats(
 ): Promise<CollectionStats> {
   try {
     const coll = db.collection(name);
-    const stats = await db.command({ collStats: name }) as MongoStats;
+    const stats = (await db.command({ collStats: name })) as MongoStats;
     return {
       name,
       count: stats.count ?? 0,

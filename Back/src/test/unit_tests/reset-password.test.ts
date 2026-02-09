@@ -30,7 +30,9 @@ export class ResetPasswordTest extends BaseTest {
   /**
    * Validate password reset request (step 1)
    */
-  private validateResetRequest(data: ResetPasswordRequest): ResetValidationResult {
+  private validateResetRequest(
+    data: ResetPasswordRequest,
+  ): ResetValidationResult {
     const errors: string[] = [];
 
     if (!data.email) {
@@ -48,7 +50,9 @@ export class ResetPasswordTest extends BaseTest {
   /**
    * Validate password reset confirmation (step 2)
    */
-  private validateResetConfirm(data: ResetPasswordConfirm): ResetValidationResult {
+  private validateResetConfirm(
+    data: ResetPasswordConfirm,
+  ): ResetValidationResult {
     const errors: string[] = [];
 
     // Token validation
@@ -84,7 +88,10 @@ export class ResetPasswordTest extends BaseTest {
    * Generate a valid reset token (mock)
    */
   private generateResetToken(): string {
-    return randomString(64, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
+    return randomString(
+      64,
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+    );
   }
 
   async run(): Promise<TestResult> {
@@ -96,7 +103,11 @@ export class ResetPasswordTest extends BaseTest {
       // ===== STEP 1: Request password reset =====
 
       // Valid reset requests
-      const validEmails = ['user@example.com', 'admin@vitegourmand.fr', 'test.user@gmail.com'];
+      const validEmails = [
+        'user@example.com',
+        'admin@vitegourmand.fr',
+        'test.user@gmail.com',
+      ];
       for (const email of validEmails) {
         const result = this.validateResetRequest({ email });
         if (result.isValid) {
@@ -141,34 +152,60 @@ export class ResetPasswordTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Valid confirmation rejected: ${result.errors.join(', ')}`);
+          errors.push(
+            `Valid confirmation rejected: ${result.errors.join(', ')}`,
+          );
         }
       }
 
       // Invalid reset confirmations
       const invalidConfirmations = [
         {
-          data: { token: '', newPassword: 'Test123!', confirmPassword: 'Test123!' },
+          data: {
+            token: '',
+            newPassword: 'Test123!',
+            confirmPassword: 'Test123!',
+          },
           reason: 'Empty token',
         },
         {
-          data: { token: 'short', newPassword: 'Test123!', confirmPassword: 'Test123!' },
+          data: {
+            token: 'short',
+            newPassword: 'Test123!',
+            confirmPassword: 'Test123!',
+          },
           reason: 'Token too short',
         },
         {
-          data: { token: 'invalid@token!', newPassword: 'Test123!', confirmPassword: 'Test123!' },
+          data: {
+            token: 'invalid@token!',
+            newPassword: 'Test123!',
+            confirmPassword: 'Test123!',
+          },
           reason: 'Invalid token characters',
         },
         {
-          data: { token: this.generateResetToken(), newPassword: 'weak', confirmPassword: 'weak' },
+          data: {
+            token: this.generateResetToken(),
+            newPassword: 'weak',
+            confirmPassword: 'weak',
+          },
           reason: 'Weak password',
         },
         {
-          data: { token: this.generateResetToken(), newPassword: 'Test123!', confirmPassword: 'Different456!' },
+          data: {
+            token: this.generateResetToken(),
+            newPassword: 'Test123!',
+            confirmPassword: 'Different456!',
+          },
           reason: 'Passwords do not match',
         },
         {
-          data: { token: this.generateResetToken(), newPassword: '', confirmPassword: '' },
+          data: {
+            token: this.generateResetToken(),
+            newPassword: '',
+            confirmPassword: '',
+          },
           reason: 'Empty passwords',
         },
       ];
@@ -186,7 +223,9 @@ export class ResetPasswordTest extends BaseTest {
       // ===== Complete flow simulation =====
       const completeFlow = async () => {
         // Step 1: Request reset
-        const requestResult = this.validateResetRequest({ email: 'user@example.com' });
+        const requestResult = this.validateResetRequest({
+          email: 'user@example.com',
+        });
         if (!requestResult.isValid) return false;
 
         // Simulate token generation (in real app, sent via email)
@@ -215,14 +254,19 @@ export class ResetPasswordTest extends BaseTest {
 
     if (result.failed === 0) {
       return {
-        ...this.success(`All ${result.passed} password reset validation tests passed`),
+        ...this.success(
+          `All ${result.passed} password reset validation tests passed`,
+        ),
         duration,
         details: { passed: result.passed, failed: result.failed },
       };
     }
 
     return {
-      ...this.failure(`${result.failed} password reset validation tests failed`, result.errors),
+      ...this.failure(
+        `${result.failed} password reset validation tests failed`,
+        result.errors,
+      ),
       duration,
       details: { passed: result.passed, failed: result.failed },
     };
@@ -246,17 +290,35 @@ export class ResetPasswordTest extends BaseTest {
         const expectedValid = testType === 'valid';
         testPassed = result.isValid === expectedValid;
         message = `Reset request (${testType}): ${testPassed ? 'correct' : 'incorrect'}`;
-        details = { email, expectedValid, actualValid: result.isValid, errors: result.errors };
+        details = {
+          email,
+          expectedValid,
+          actualValid: result.isValid,
+          errors: result.errors,
+        };
       } else {
-        const token = testType === 'valid' ? this.generateResetToken() : randomString(10);
-        const password = testType === 'valid' ? randomPassword('strong') : randomPassword('weak');
-        const confirmPassword = testType === 'valid' ? password : randomPassword('weak');
+        const token =
+          testType === 'valid' ? this.generateResetToken() : randomString(10);
+        const password =
+          testType === 'valid'
+            ? randomPassword('strong')
+            : randomPassword('weak');
+        const confirmPassword =
+          testType === 'valid' ? password : randomPassword('weak');
 
-        const result = this.validateResetConfirm({ token, newPassword: password, confirmPassword });
+        const result = this.validateResetConfirm({
+          token,
+          newPassword: password,
+          confirmPassword,
+        });
         const expectedValid = testType === 'valid';
         testPassed = result.isValid === expectedValid;
         message = `Reset confirm (${testType}): ${testPassed ? 'correct' : 'incorrect'}`;
-        details = { expectedValid, actualValid: result.isValid, errors: result.errors };
+        details = {
+          expectedValid,
+          actualValid: result.isValid,
+          errors: result.errors,
+        };
       }
 
       const testResult: TestResult = {

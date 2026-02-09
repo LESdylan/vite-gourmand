@@ -30,7 +30,7 @@ import { DiscountModule } from './discount';
 import { LoyaltyModule } from './loyalty';
 import { IngredientModule } from './ingredient';
 import { DeliveryModule } from './delivery';
-import { NotificationModule } from './notification';
+import { NotificationModule } from './message/notification';
 import { MessageModule } from './message';
 import { SupportModule } from './support';
 import { KanbanModule } from './kanban';
@@ -71,25 +71,26 @@ import {
     }),
     // Rate limiting (Throttler) - disabled in test environment
     ThrottlerModule.forRoot({
-      throttlers: process.env.NODE_ENV === 'test' 
-        ? [] 
-        : [
-            {
-              name: 'short',
-              ttl: 1000, // 1 second
-              limit: 3, // 3 requests per second
-            },
-            {
-              name: 'medium',
-              ttl: 10000, // 10 seconds
-              limit: 20, // 20 requests per 10 seconds
-            },
-            {
-              name: 'long',
-              ttl: 60000, // 1 minute
-              limit: 100, // 100 requests per minute
-            },
-          ],
+      throttlers:
+        process.env.NODE_ENV === 'test'
+          ? []
+          : [
+              {
+                name: 'short',
+                ttl: 1000, // 1 second
+                limit: 3, // 3 requests per second
+              },
+              {
+                name: 'medium',
+                ttl: 10000, // 10 seconds
+                limit: 20, // 20 requests per 10 seconds
+              },
+              {
+                name: 'long',
+                ttl: 60000, // 1 minute
+                limit: 100, // 100 requests per minute
+              },
+            ],
     }),
     // Caching
     CacheModule.register({

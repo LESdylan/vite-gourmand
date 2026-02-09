@@ -1,11 +1,25 @@
 /**
  * Kanban Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { KanbanService } from './kanban.service';
 import { Roles, SafeParseIntPipe, CurrentUser } from '../common';
-import { CreateKanbanColumnDto, UpdateKanbanColumnDto, CreateOrderTagDto, UpdateOrderTagDto } from './dto/kanban.dto';
+import {
+  CreateKanbanColumnDto,
+  UpdateKanbanColumnDto,
+  CreateOrderTagDto,
+  UpdateOrderTagDto,
+} from './dto/kanban.dto';
 import { JwtPayload } from '../common/types/request.types';
 
 @ApiTags('kanban')
@@ -42,14 +56,20 @@ export class KanbanController {
   @Post('columns')
   @Roles('admin')
   @ApiOperation({ summary: 'Create kanban column' })
-  async createColumn(@Body() dto: CreateKanbanColumnDto, @CurrentUser() user: JwtPayload) {
+  async createColumn(
+    @Body() dto: CreateKanbanColumnDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.kanbanService.createColumn(dto, user.sub);
   }
 
   @Put('columns/:id')
   @Roles('admin')
   @ApiOperation({ summary: 'Update kanban column' })
-  async updateColumn(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateKanbanColumnDto) {
+  async updateColumn(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateKanbanColumnDto,
+  ) {
     return this.kanbanService.updateColumn(id, dto);
   }
 
@@ -85,14 +105,20 @@ export class KanbanController {
   @Post('tags')
   @Roles('admin')
   @ApiOperation({ summary: 'Create order tag' })
-  async createTag(@Body() dto: CreateOrderTagDto, @CurrentUser() user: JwtPayload) {
+  async createTag(
+    @Body() dto: CreateOrderTagDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.kanbanService.createTag(dto, user.sub);
   }
 
   @Put('tags/:id')
   @Roles('admin')
   @ApiOperation({ summary: 'Update order tag' })
-  async updateTag(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateOrderTagDto) {
+  async updateTag(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateOrderTagDto,
+  ) {
     return this.kanbanService.updateTag(id, dto);
   }
 

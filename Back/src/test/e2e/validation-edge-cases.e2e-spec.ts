@@ -47,8 +47,8 @@ describe('Input Validation Edge Cases (e2e)', () => {
   describe('Password Validation', () => {
     // Core weak passwords that should definitely be rejected
     const weakPasswords = [
-      '123',          // too short
-      'abc',          // too short
+      '123', // too short
+      'abc', // too short
     ];
 
     weakPasswords.forEach((password, i) => {
@@ -84,8 +84,9 @@ describe('Input Validation Edge Cases (e2e)', () => {
 
     invalidNumbers.forEach((num, i) => {
       it(`rejects invalid numeric ID #${i + 1}: ${num}`, async () => {
-        const response = await request(app.getHttpServer())
-          .get(`/api/menus/${num}`);
+        const response = await request(app.getHttpServer()).get(
+          `/api/menus/${num}`,
+        );
 
         expect([400, 404]).toContain(response.status);
       });
@@ -93,29 +94,27 @@ describe('Input Validation Edge Cases (e2e)', () => {
 
     // Note: 0x1 is sometimes parsed as hex (=1) which may return 200/404
     it('handles hex notation ID', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/0x1');
+      const response = await request(app.getHttpServer()).get('/api/menus/0x1');
       // May be parsed as 1 (valid) or rejected as invalid format
       expect([200, 400, 404]).toContain(response.status);
     });
 
     it('rejects negative ID', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/-1');
+      const response = await request(app.getHttpServer()).get('/api/menus/-1');
 
       expect([400, 404]).toContain(response.status);
     });
 
     it('rejects zero ID', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/0');
+      const response = await request(app.getHttpServer()).get('/api/menus/0');
 
       expect([400, 404]).toContain(response.status);
     });
 
     it('rejects very large ID', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/99999999999999999999');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus/99999999999999999999',
+      );
 
       // 400 = validation, 404 = not found, 500 = Prisma overflow (known issue)
       expect([400, 404, 500]).toContain(response.status);

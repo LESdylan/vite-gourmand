@@ -2,7 +2,11 @@
  * Auth Service - Part 2
  * Helper methods for auth operations
  */
-import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';

@@ -2,7 +2,11 @@
  * Address Service
  * User address management
  */
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
 

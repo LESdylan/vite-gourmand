@@ -25,7 +25,8 @@ describe('API Security (e2e)', () => {
   });
 
   it('rejects expired JWT token', async () => {
-    const expiredToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+    const expiredToken =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
       'eyJzdWIiOjEsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTUxNjIzOTAyMiwiZXhwIjoxNTE2MjM5MDIyfQ.' +
       'invalid-signature';
 
@@ -70,7 +71,9 @@ describe('API Security (e2e)', () => {
     ];
 
     for (const { method, path } of protectedEndpoints) {
-      const response = await (request(app.getHttpServer()) as any)[method](path);
+      const response = await (request(app.getHttpServer()) as any)[method](
+        path,
+      );
       expect(response.status).toBe(401);
     }
   });

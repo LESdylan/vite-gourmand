@@ -1,7 +1,11 @@
 /**
  * Message Service
  */
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { CreateMessageDto, ReplyMessageDto } from './dto/message.dto';
 
@@ -9,14 +13,19 @@ import { CreateMessageDto, ReplyMessageDto } from './dto/message.dto';
 export class MessageService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getInbox(userId: number, options?: { unreadOnly?: boolean; limit?: number; offset?: number }) {
+  async getInbox(
+    userId: number,
+    options?: { unreadOnly?: boolean; limit?: number; offset?: number },
+  ) {
     const where: any = { recipient_id: userId };
     if (options?.unreadOnly) where.is_read = false;
 
     return this.prisma.message.findMany({
       where,
       include: {
-        User_Message_sender_idToUser: { select: { id: true, first_name: true, last_name: true, email: true } },
+        User_Message_sender_idToUser: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
       orderBy: { sent_at: 'desc' },
       take: options?.limit || 50,
@@ -28,7 +37,9 @@ export class MessageService {
     return this.prisma.message.findMany({
       where: { sender_id: userId },
       include: {
-        User_Message_recipient_idToUser: { select: { id: true, first_name: true, last_name: true, email: true } },
+        User_Message_recipient_idToUser: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
       orderBy: { sent_at: 'desc' },
       take: options?.limit || 50,
@@ -40,9 +51,19 @@ export class MessageService {
     const message = await this.prisma.message.findUnique({
       where: { id },
       include: {
-        User_Message_sender_idToUser: { select: { id: true, first_name: true, last_name: true, email: true } },
-        User_Message_recipient_idToUser: { select: { id: true, first_name: true, last_name: true, email: true } },
-        other_Message: { include: { User_Message_sender_idToUser: { select: { id: true, first_name: true, last_name: true } } } },
+        User_Message_sender_idToUser: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
+        User_Message_recipient_idToUser: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
+        other_Message: {
+          include: {
+            User_Message_sender_idToUser: {
+              select: { id: true, first_name: true, last_name: true },
+            },
+          },
+        },
       },
     });
     if (!message) throw new NotFoundException('Message not found');
@@ -54,17 +75,16 @@ export class MessageService {
 
   async getThread(messageId: number, userId: number) {
     const message = await this.findById(messageId, userId);
-    
+
     // Get all messages in thread
     const thread = await this.prisma.message.findMany({
       where: {
-        OR: [
-          { id: messageId },
-          { parent_id: messageId },
-        ],
+        OR: [{ id: messageId }, { parent_id: messageId }],
       },
       include: {
-        User_Message_sender_idToUser: { select: { id: true, first_name: true, last_name: true } },
+        User_Message_sender_idToUser: {
+          select: { id: true, first_name: true, last_name: true },
+        },
       },
       orderBy: { sent_at: 'asc' },
     });
@@ -83,7 +103,9 @@ export class MessageService {
         parent_id: dto.parentId,
       },
       include: {
-        User_Message_recipient_idToUser: { select: { id: true, first_name: true, last_name: true, email: true } },
+        User_Message_recipient_idToUser: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
       },
     });
   }
@@ -92,7 +114,10 @@ export class MessageService {
     const original = await this.findById(messageId, userId);
 
     // Determine recipient (the other person in the conversation)
-    const recipientId = original.sender_id === userId ? original.recipient_id : original.sender_id;
+    const recipientId =
+      original.sender_id === userId
+        ? original.recipient_id
+        : original.sender_id;
 
     return this.prisma.message.create({
       data: {

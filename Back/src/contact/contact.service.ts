@@ -18,7 +18,9 @@ export class ContactService {
   }
 
   async findById(id: number) {
-    const message = await this.prisma.contactMessage.findUnique({ where: { id } });
+    const message = await this.prisma.contactMessage.findUnique({
+      where: { id },
+    });
     if (!message) throw new NotFoundException('Contact message not found');
     return message;
   }

@@ -1,7 +1,7 @@
 /**
  * Session DTOs
  */
-import { IsString, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateSessionDto {

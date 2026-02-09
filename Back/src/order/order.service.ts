@@ -9,7 +9,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreateOrderDto, UpdateOrderDto, OrderFilterDto } from './dto/order.dto';
+import {
+  CreateOrderDto,
+  UpdateOrderDto,
+  OrderFilterDto,
+} from './dto/order.dto';
 import { buildPaginationMeta, JwtPayload } from '../common';
 
 @Injectable()
@@ -133,6 +137,9 @@ export class OrderService {
   }
 
   private getOrderIncludes() {
-    return { User: { select: { email: true, first_name: true } }, OrderMenu: true };
+    return {
+      User: { select: { email: true, first_name: true } },
+      OrderMenu: true,
+    };
   }
 }

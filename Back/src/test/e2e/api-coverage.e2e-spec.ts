@@ -46,8 +46,9 @@ describe('API Endpoint Coverage (e2e)', () => {
     });
 
     it('GET /api/menus with filters', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus?page=1&limit=10');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus?page=1&limit=10',
+      );
       expect(response.status).toBe(200);
     });
   });
@@ -59,8 +60,9 @@ describe('API Endpoint Coverage (e2e)', () => {
     });
 
     it('GET /api/dishes with pagination', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/dishes?page=1&limit=5');
+      const response = await request(app.getHttpServer()).get(
+        '/api/dishes?page=1&limit=5',
+      );
       expect(response.status).toBe(200);
     });
   });
@@ -82,8 +84,9 @@ describe('API Endpoint Coverage (e2e)', () => {
     });
 
     it('GET /api/working-hours returns list', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/working-hours');
+      const response = await request(app.getHttpServer()).get(
+        '/api/working-hours',
+      );
       expect(response.status).toBe(200);
     });
   });

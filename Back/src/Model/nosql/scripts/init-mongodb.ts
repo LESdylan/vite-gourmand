@@ -60,7 +60,7 @@ async function createCollectionIfNotExists(name: string): Promise<void> {
 
 async function createIndexes(
   collectionName: string,
-  indexes: IndexDescription[]
+  indexes: IndexDescription[],
 ): Promise<void> {
   const db = await getDb();
   const collection = db.collection(collectionName);
@@ -74,7 +74,10 @@ async function createIndexes(
         options.expireAfterSeconds = index.expireAfterSeconds;
       }
 
-      const name = await collection.createIndex(index.key as IndexSpecification, options);
+      const name = await collection.createIndex(
+        index.key as IndexSpecification,
+        options,
+      );
       console.log(`  ✅ ${collectionName}: ${name}`);
     } catch (error) {
       if ((error as Error).message.includes('already exists')) {

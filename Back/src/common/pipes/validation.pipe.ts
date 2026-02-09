@@ -18,7 +18,10 @@ interface ValidationError {
 
 @Injectable()
 export class CustomValidationPipe implements PipeTransform {
-  async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
+  async transform(
+    value: unknown,
+    metadata: ArgumentMetadata,
+  ): Promise<unknown> {
     const { metatype } = metadata;
 
     if (!metatype || !this.shouldValidate(metatype)) {
@@ -30,7 +33,12 @@ export class CustomValidationPipe implements PipeTransform {
       throw new BadRequestException({
         message: 'Validation failed',
         error: 'Validation failed',
-        details: [{ field: 'body', errors: ['Request body cannot be null or undefined'] }],
+        details: [
+          {
+            field: 'body',
+            errors: ['Request body cannot be null or undefined'],
+          },
+        ],
       });
     }
 

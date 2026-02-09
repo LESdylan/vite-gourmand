@@ -1,11 +1,24 @@
 /**
  * Delivery Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DeliveryService } from './delivery.service';
 import { Roles, SafeParseIntPipe, CurrentUser } from '../common';
-import { CreateDeliveryAssignmentDto, UpdateDeliveryAssignmentDto, RateDeliveryDto } from './dto/delivery.dto';
+import {
+  CreateDeliveryAssignmentDto,
+  UpdateDeliveryAssignmentDto,
+  RateDeliveryDto,
+} from './dto/delivery.dto';
 import { JwtPayload } from '../common/types/request.types';
 
 @ApiTags('deliveries')
@@ -23,7 +36,9 @@ export class DeliveryController {
   ) {
     return this.deliveryService.findAll({
       status,
-      deliveryPersonId: deliveryPersonId ? parseInt(deliveryPersonId, 10) : undefined,
+      deliveryPersonId: deliveryPersonId
+        ? parseInt(deliveryPersonId, 10)
+        : undefined,
     });
   }
 
@@ -65,7 +80,10 @@ export class DeliveryController {
   @Put(':id')
   @Roles('admin', 'employee')
   @ApiOperation({ summary: 'Update delivery assignment' })
-  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateDeliveryAssignmentDto) {
+  async update(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateDeliveryAssignmentDto,
+  ) {
     return this.deliveryService.update(id, dto);
   }
 
@@ -96,7 +114,10 @@ export class DeliveryController {
   @Post(':id/rate')
   @Roles('client')
   @ApiOperation({ summary: 'Rate delivery (client only)' })
-  async rateDelivery(@Param('id', SafeParseIntPipe) id: number, @Body() dto: RateDeliveryDto) {
+  async rateDelivery(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: RateDeliveryDto,
+  ) {
     return this.deliveryService.rateDelivery(id, dto);
   }
 }

@@ -29,7 +29,10 @@ export class DishService {
   async findById(id: number) {
     const dish = await this.prisma.dish.findUnique({
       where: { id },
-      include: { Allergen: true, DishIngredient: { include: { Ingredient: true } } },
+      include: {
+        Allergen: true,
+        DishIngredient: { include: { Ingredient: true } },
+      },
     });
     if (!dish) throw new NotFoundException('Dish not found');
     return dish;

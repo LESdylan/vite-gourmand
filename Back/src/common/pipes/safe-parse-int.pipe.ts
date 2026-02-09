@@ -14,20 +14,26 @@ const MIN_INT = -2147483648;
 
 @Injectable()
 export class SafeParseIntPipe implements PipeTransform<string, number> {
-  transform(value: string, metadata: ArgumentMetadata): number {
+  transform(value: string, _metadata: ArgumentMetadata): number {
     if (value === undefined || value === null || value === '') {
-      throw new BadRequestException('Validation failed (numeric string is expected)');
+      throw new BadRequestException(
+        'Validation failed (numeric string is expected)',
+      );
     }
 
     // Reject non-numeric strings
     if (!/^-?\d+$/.test(value)) {
-      throw new BadRequestException('Validation failed (numeric string is expected)');
+      throw new BadRequestException(
+        'Validation failed (numeric string is expected)',
+      );
     }
 
     const num = parseInt(value, 10);
 
     if (isNaN(num)) {
-      throw new BadRequestException('Validation failed (numeric string is expected)');
+      throw new BadRequestException(
+        'Validation failed (numeric string is expected)',
+      );
     }
 
     // Check PostgreSQL INT range

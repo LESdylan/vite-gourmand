@@ -1,7 +1,16 @@
 /**
  * Session Controller
  */
-import { Controller, Get, Post, Delete, Body, Param, Query, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Headers,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SessionService } from './session.service';
 import { Roles, SafeParseIntPipe, CurrentUser } from '../common';
@@ -84,7 +93,9 @@ export class SessionController {
   @Post('admin/users/:userId/revoke-all')
   @Roles('admin')
   @ApiOperation({ summary: 'Force revoke all user sessions (admin)' })
-  async adminRevokeAllUserSessions(@Param('userId', SafeParseIntPipe) userId: number) {
+  async adminRevokeAllUserSessions(
+    @Param('userId', SafeParseIntPipe) userId: number,
+  ) {
     return this.sessionService.adminRevokeAllUserSessions(userId);
   }
 

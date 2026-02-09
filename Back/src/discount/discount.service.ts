@@ -1,9 +1,17 @@
 /**
  * Discount Service
  */
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreateDiscountDto, UpdateDiscountDto, ValidateDiscountDto } from './dto/discount.dto';
+import {
+  CreateDiscountDto,
+  UpdateDiscountDto,
+  ValidateDiscountDto,
+} from './dto/discount.dto';
 
 @Injectable()
 export class DiscountService {
@@ -91,7 +99,11 @@ export class DiscountService {
     }
 
     // Check usage limit
-    if (discount.max_uses && discount.current_uses && discount.current_uses >= discount.max_uses) {
+    if (
+      discount.max_uses &&
+      discount.current_uses &&
+      discount.current_uses >= discount.max_uses
+    ) {
       errors.push('Discount code has reached maximum uses');
     }
 

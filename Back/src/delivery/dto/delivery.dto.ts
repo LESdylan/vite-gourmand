@@ -1,7 +1,15 @@
 /**
  * Delivery DTOs
  */
-import { IsString, IsOptional, IsNumber, IsEnum, Min, Max, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+  Min,
+  Max,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum DeliveryStatus {

@@ -4,8 +4,18 @@
  */
 
 import { BaseTest, TestResult, FuzzyTestResult } from './base.test';
-import { EmailValidator, PasswordValidator, PhoneValidator } from '../validators';
-import { TestData, randomEmail, randomPassword, randomPhone, randomString } from '../utils/test-data';
+import {
+  EmailValidator,
+  PasswordValidator,
+  PhoneValidator,
+} from '../validators';
+import {
+  TestData,
+  randomEmail,
+  randomPassword,
+  randomPhone,
+  randomString,
+} from '../utils/test-data';
 
 interface RegistrationData {
   firstName: string;
@@ -24,10 +34,13 @@ interface RegistrationValidationResult {
 
 export class FirstTimeRegistrationTest extends BaseTest {
   name = 'first_time_registration';
-  description = 'Simulate first-time user registration with complete validation';
+  description =
+    'Simulate first-time user registration with complete validation';
   category = 'flow';
 
-  private validateRegistration(data: Partial<RegistrationData>): RegistrationValidationResult {
+  private validateRegistration(
+    data: Partial<RegistrationData>,
+  ): RegistrationValidationResult {
     const errors: Record<string, string[]> = {};
 
     // First name validation
@@ -88,7 +101,10 @@ export class FirstTimeRegistrationTest extends BaseTest {
     return {
       isValid: Object.keys(errors).length === 0,
       errors,
-      data: Object.keys(errors).length === 0 ? (data as RegistrationData) : undefined,
+      data:
+        Object.keys(errors).length === 0
+          ? (data as RegistrationData)
+          : undefined,
     };
   }
 
@@ -108,7 +124,9 @@ export class FirstTimeRegistrationTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Valid user rejected: ${JSON.stringify(user)} - ${JSON.stringify(result.errors)}`);
+          errors.push(
+            `Valid user rejected: ${JSON.stringify(user)} - ${JSON.stringify(result.errors)}`,
+          );
         }
       }
 
@@ -132,27 +150,57 @@ export class FirstTimeRegistrationTest extends BaseTest {
       // Test specific validation scenarios
       const scenarios = [
         {
-          data: { firstName: '', lastName: 'Test', email: 'test@test.com', password: 'Test123!', acceptTerms: true },
+          data: {
+            firstName: '',
+            lastName: 'Test',
+            email: 'test@test.com',
+            password: 'Test123!',
+            acceptTerms: true,
+          },
           shouldPass: false,
           reason: 'Empty first name',
         },
         {
-          data: { firstName: 'Test', lastName: '', email: 'test@test.com', password: 'Test123!', acceptTerms: true },
+          data: {
+            firstName: 'Test',
+            lastName: '',
+            email: 'test@test.com',
+            password: 'Test123!',
+            acceptTerms: true,
+          },
           shouldPass: false,
           reason: 'Empty last name',
         },
         {
-          data: { firstName: 'Test', lastName: 'User', email: 'invalid', password: 'Test123!', acceptTerms: true },
+          data: {
+            firstName: 'Test',
+            lastName: 'User',
+            email: 'invalid',
+            password: 'Test123!',
+            acceptTerms: true,
+          },
           shouldPass: false,
           reason: 'Invalid email',
         },
         {
-          data: { firstName: 'Test', lastName: 'User', email: 'test@test.com', password: 'weak', acceptTerms: true },
+          data: {
+            firstName: 'Test',
+            lastName: 'User',
+            email: 'test@test.com',
+            password: 'weak',
+            acceptTerms: true,
+          },
           shouldPass: false,
           reason: 'Weak password',
         },
         {
-          data: { firstName: 'Test', lastName: 'User', email: 'test@test.com', password: 'Test123!', acceptTerms: false },
+          data: {
+            firstName: 'Test',
+            lastName: 'User',
+            email: 'test@test.com',
+            password: 'Test123!',
+            acceptTerms: false,
+          },
           shouldPass: false,
           reason: 'Terms not accepted',
         },
@@ -176,7 +224,9 @@ export class FirstTimeRegistrationTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Scenario failed: ${scenario.reason} - Expected ${scenario.shouldPass ? 'pass' : 'fail'}`);
+          errors.push(
+            `Scenario failed: ${scenario.reason} - Expected ${scenario.shouldPass ? 'pass' : 'fail'}`,
+          );
         }
       }
 
@@ -185,14 +235,19 @@ export class FirstTimeRegistrationTest extends BaseTest {
 
     if (result.failed === 0) {
       return {
-        ...this.success(`All ${result.passed} registration validation tests passed`),
+        ...this.success(
+          `All ${result.passed} registration validation tests passed`,
+        ),
         duration,
         details: { passed: result.passed, failed: result.failed },
       };
     }
 
     return {
-      ...this.failure(`${result.failed} registration validation tests failed`, result.errors),
+      ...this.failure(
+        `${result.failed} registration validation tests failed`,
+        result.errors,
+      ),
       duration,
       details: { passed: result.passed, failed: result.failed },
     };
@@ -211,8 +266,14 @@ export class FirstTimeRegistrationTest extends BaseTest {
       if (testType === 'valid') {
         // Generate valid registration data
         data = {
-          firstName: randomString(8, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
-          lastName: randomString(10, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+          firstName: randomString(
+            8,
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+          ),
+          lastName: randomString(
+            10,
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+          ),
           email: randomEmail(),
           password: randomPassword('strong'),
           phone: randomPhone(),
@@ -223,8 +284,14 @@ export class FirstTimeRegistrationTest extends BaseTest {
         // Generate invalid registration data
         const invalidType = Math.floor(Math.random() * 5);
         data = {
-          firstName: invalidType === 0 ? '' : randomString(5, 'abcdefghijklmnopqrstuvwxyz'),
-          lastName: invalidType === 1 ? '' : randomString(5, 'abcdefghijklmnopqrstuvwxyz'),
+          firstName:
+            invalidType === 0
+              ? ''
+              : randomString(5, 'abcdefghijklmnopqrstuvwxyz'),
+          lastName:
+            invalidType === 1
+              ? ''
+              : randomString(5, 'abcdefghijklmnopqrstuvwxyz'),
           email: invalidType === 2 ? 'invalid-email' : randomEmail(),
           password: invalidType === 3 ? 'weak' : randomPassword('strong'),
           acceptTerms: invalidType === 4 ? false : true,

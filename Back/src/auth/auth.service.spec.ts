@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma';
 import { PasswordService } from './password.service';

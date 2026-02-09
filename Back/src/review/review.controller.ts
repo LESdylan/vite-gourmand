@@ -1,18 +1,17 @@
 /**
  * Review Controller
  */
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Body,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewService } from './review.service';
-import { Public, Roles, CurrentUser, JwtPayload, PaginationDto, SafeParseIntPipe } from '../common';
+import {
+  Public,
+  Roles,
+  CurrentUser,
+  JwtPayload,
+  PaginationDto,
+  SafeParseIntPipe,
+} from '../common';
 import { CreateReviewDto, ModerateReviewDto } from './dto/review.dto';
 
 @ApiTags('reviews')

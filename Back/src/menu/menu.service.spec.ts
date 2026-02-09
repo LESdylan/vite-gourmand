@@ -136,9 +136,9 @@ describe('MenuService', () => {
     it('should throw if menu not found', async () => {
       (prisma.menu.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.update(999, { title: 'Test' }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update(999, { title: 'Test' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

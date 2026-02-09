@@ -5,7 +5,11 @@ import { Controller, Get, Post, Put, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SupportService } from './support.service';
 import { Roles, SafeParseIntPipe, CurrentUser } from '../common';
-import { CreateSupportTicketDto, UpdateSupportTicketDto, CreateTicketMessageDto } from './dto/support.dto';
+import {
+  CreateSupportTicketDto,
+  UpdateSupportTicketDto,
+  CreateTicketMessageDto,
+} from './dto/support.dto';
 import { JwtPayload } from '../common/types/request.types';
 
 @ApiTags('support')
@@ -30,7 +34,10 @@ export class SupportController {
 
   @Post()
   @ApiOperation({ summary: 'Create a support ticket' })
-  async create(@Body() dto: CreateSupportTicketDto, @CurrentUser() user: JwtPayload) {
+  async create(
+    @Body() dto: CreateSupportTicketDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.supportService.create(user.sub, dto);
   }
 
@@ -106,7 +113,10 @@ export class SupportController {
   @Put(':id')
   @Roles('admin', 'employee')
   @ApiOperation({ summary: 'Update ticket' })
-  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateSupportTicketDto) {
+  async update(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateSupportTicketDto,
+  ) {
     return this.supportService.update(id, dto);
   }
 
@@ -123,7 +133,10 @@ export class SupportController {
   @Post(':id/take')
   @Roles('admin', 'employee')
   @ApiOperation({ summary: 'Take ownership of ticket' })
-  async takeTicket(@Param('id', SafeParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  async takeTicket(
+    @Param('id', SafeParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.supportService.assignTicket(id, user.sub);
   }
 

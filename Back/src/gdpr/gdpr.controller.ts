@@ -1,11 +1,25 @@
 /**
  * GDPR Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { GdprService } from './gdpr.service';
-import { Roles, SafeParseIntPipe, CurrentUser, Public } from '../common';
-import { CreateUserConsentDto, UpdateUserConsentDto, CreateDataDeletionRequestDto, ProcessDataDeletionRequestDto } from './dto/gdpr.dto';
+import { Roles, SafeParseIntPipe, CurrentUser } from '../common';
+import {
+  CreateUserConsentDto,
+  UpdateUserConsentDto,
+  CreateDataDeletionRequestDto,
+  ProcessDataDeletionRequestDto,
+} from './dto/gdpr.dto';
 import { JwtPayload } from '../common/types/request.types';
 
 @ApiTags('gdpr')
@@ -26,14 +40,20 @@ export class GdprController {
   @Get('consent/:type')
   @Roles('user', 'admin', 'employee')
   @ApiOperation({ summary: 'Get specific consent' })
-  async getConsent(@Param('type') type: string, @CurrentUser() user: JwtPayload) {
+  async getConsent(
+    @Param('type') type: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.gdprService.getUserConsent(user.sub, type);
   }
 
   @Post('consent')
   @Roles('user', 'admin', 'employee')
   @ApiOperation({ summary: 'Set consent' })
-  async setConsent(@Body() dto: CreateUserConsentDto, @CurrentUser() user: JwtPayload) {
+  async setConsent(
+    @Body() dto: CreateUserConsentDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.gdprService.setUserConsent(user.sub, dto);
   }
 
@@ -69,7 +89,10 @@ export class GdprController {
   @Post('deletion-request')
   @Roles('user', 'admin', 'employee')
   @ApiOperation({ summary: 'Request account deletion (right to be forgotten)' })
-  async createDeletionRequest(@Body() dto: CreateDataDeletionRequestDto, @CurrentUser() user: JwtPayload) {
+  async createDeletionRequest(
+    @Body() dto: CreateDataDeletionRequestDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.gdprService.createDeletionRequest(user.sub, dto);
   }
 

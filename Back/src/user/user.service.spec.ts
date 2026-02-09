@@ -97,9 +97,9 @@ describe('UserService', () => {
     it('should throw if user not found during update', async () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.update(999, { firstName: 'Test' }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update(999, { firstName: 'Test' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

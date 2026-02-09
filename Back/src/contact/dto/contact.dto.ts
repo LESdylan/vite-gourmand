@@ -1,8 +1,8 @@
 /**
  * Contact DTOs
  */
-import { IsString, IsEmail, IsOptional, MaxLength } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsEmail, MaxLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateContactMessageDto {
   @ApiProperty({ example: 'Question about catering' })

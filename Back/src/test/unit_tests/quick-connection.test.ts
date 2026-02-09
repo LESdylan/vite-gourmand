@@ -41,7 +41,10 @@ export class QuickConnectionTest extends BaseTest {
   /**
    * Validate OAuth token response format
    */
-  private validateTokenResponse(token: Partial<OAuthTokenResponse>): { isValid: boolean; errors: string[] } {
+  private validateTokenResponse(token: Partial<OAuthTokenResponse>): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (!token.access_token) {
@@ -68,7 +71,9 @@ export class QuickConnectionTest extends BaseTest {
   /**
    * Validate Google user info response
    */
-  private validateUserInfo(userInfo: Partial<GoogleUserInfo>): OAuthValidationResult {
+  private validateUserInfo(
+    userInfo: Partial<GoogleUserInfo>,
+  ): OAuthValidationResult {
     const errors: string[] = [];
 
     // Sub (unique ID) validation
@@ -103,7 +108,9 @@ export class QuickConnectionTest extends BaseTest {
   /**
    * Generate mock Google user info
    */
-  private generateMockGoogleUser(valid: boolean = true): Partial<GoogleUserInfo> {
+  private generateMockGoogleUser(
+    valid: boolean = true,
+  ): Partial<GoogleUserInfo> {
     if (valid) {
       return {
         sub: randomString(21, '0123456789'),
@@ -123,9 +130,17 @@ export class QuickConnectionTest extends BaseTest {
         case 1:
           return { sub: randomString(21, '0123456789'), email_verified: true }; // Missing email
         case 2:
-          return { sub: randomString(21, '0123456789'), email: randomEmail(), email_verified: false }; // Unverified
+          return {
+            sub: randomString(21, '0123456789'),
+            email: randomEmail(),
+            email_verified: false,
+          }; // Unverified
         default:
-          return { sub: randomString(21, '0123456789'), email: 'invalid-email', email_verified: true }; // Bad email
+          return {
+            sub: randomString(21, '0123456789'),
+            email: 'invalid-email',
+            email_verified: true,
+          }; // Bad email
       }
     }
   }
@@ -133,14 +148,22 @@ export class QuickConnectionTest extends BaseTest {
   /**
    * Generate mock OAuth token response
    */
-  private generateMockTokenResponse(valid: boolean = true): Partial<OAuthTokenResponse> {
+  private generateMockTokenResponse(
+    valid: boolean = true,
+  ): Partial<OAuthTokenResponse> {
     if (valid) {
       return {
-        access_token: randomString(100, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-'),
+        access_token: randomString(
+          100,
+          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-',
+        ),
         token_type: 'Bearer',
         expires_in: 3600,
         scope: 'openid email profile',
-        id_token: randomString(200, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-'),
+        id_token: randomString(
+          200,
+          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-',
+        ),
       };
     } else {
       const invalidType = Math.floor(Math.random() * 4);
@@ -148,11 +171,26 @@ export class QuickConnectionTest extends BaseTest {
         case 0:
           return { token_type: 'Bearer', expires_in: 3600, scope: 'email' }; // Missing token
         case 1:
-          return { access_token: 'short', token_type: 'Bearer', expires_in: 3600, scope: 'email' }; // Short token
+          return {
+            access_token: 'short',
+            token_type: 'Bearer',
+            expires_in: 3600,
+            scope: 'email',
+          }; // Short token
         case 2:
-          return { access_token: randomString(100), token_type: 'Basic' as 'Bearer', expires_in: 3600, scope: 'email' }; // Wrong type
+          return {
+            access_token: randomString(100),
+            token_type: 'Basic' as 'Bearer',
+            expires_in: 3600,
+            scope: 'email',
+          }; // Wrong type
         default:
-          return { access_token: randomString(100), token_type: 'Bearer', expires_in: 3600, scope: 'profile' }; // Missing email scope
+          return {
+            access_token: randomString(100),
+            token_type: 'Bearer',
+            expires_in: 3600,
+            scope: 'profile',
+          }; // Missing email scope
       }
     }
   }
@@ -223,12 +261,14 @@ export class QuickConnectionTest extends BaseTest {
         // Step 2: Token exchange
         const tokenResponse = this.generateMockTokenResponse(true);
         const tokenValidation = this.validateTokenResponse(tokenResponse);
-        if (!tokenValidation.isValid) return { success: false, error: 'Token validation failed' };
+        if (!tokenValidation.isValid)
+          return { success: false, error: 'Token validation failed' };
 
         // Step 3: Get user info
         const userInfo = this.generateMockGoogleUser(true);
         const userValidation = this.validateUserInfo(userInfo);
-        if (!userValidation.isValid) return { success: false, error: 'User validation failed' };
+        if (!userValidation.isValid)
+          return { success: false, error: 'User validation failed' };
 
         // Step 4: Create or link local account
         // (In real implementation, this would check DB and create/link user)
@@ -251,9 +291,21 @@ export class QuickConnectionTest extends BaseTest {
 
       // Test with special email domains
       const specialEmails = [
-        { sub: '123456789012345678901', email: 'user@gmail.com', email_verified: true },
-        { sub: '123456789012345678901', email: 'user@googlemail.com', email_verified: true },
-        { sub: '123456789012345678901', email: 'user.name+tag@gmail.com', email_verified: true },
+        {
+          sub: '123456789012345678901',
+          email: 'user@gmail.com',
+          email_verified: true,
+        },
+        {
+          sub: '123456789012345678901',
+          email: 'user@googlemail.com',
+          email_verified: true,
+        },
+        {
+          sub: '123456789012345678901',
+          email: 'user.name+tag@gmail.com',
+          email_verified: true,
+        },
       ];
 
       for (const user of specialEmails) {
@@ -278,7 +330,10 @@ export class QuickConnectionTest extends BaseTest {
     }
 
     return {
-      ...this.failure(`${result.failed} OAuth validation tests failed`, result.errors),
+      ...this.failure(
+        `${result.failed} OAuth validation tests failed`,
+        result.errors,
+      ),
       duration,
       details: { passed: result.passed, failed: result.failed },
     };
@@ -302,14 +357,22 @@ export class QuickConnectionTest extends BaseTest {
         const expectedValid = testType === 'valid';
         testPassed = result.isValid === expectedValid;
         message = `Token validation (${testType}): ${testPassed ? 'correct' : 'incorrect'}`;
-        details = { expectedValid, actualValid: result.isValid, errors: result.errors };
+        details = {
+          expectedValid,
+          actualValid: result.isValid,
+          errors: result.errors,
+        };
       } else {
         const user = this.generateMockGoogleUser(testType === 'valid');
         const result = this.validateUserInfo(user);
         const expectedValid = testType === 'valid';
         testPassed = result.isValid === expectedValid;
         message = `User info validation (${testType}): ${testPassed ? 'correct' : 'incorrect'}`;
-        details = { expectedValid, actualValid: result.isValid, errors: result.errors };
+        details = {
+          expectedValid,
+          actualValid: result.isValid,
+          errors: result.errors,
+        };
       }
 
       const testResult: TestResult = {

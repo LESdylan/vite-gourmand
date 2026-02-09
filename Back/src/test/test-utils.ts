@@ -25,9 +25,7 @@ export async function createTestApp(): Promise<INestApplication> {
   const app = moduleFixture.createNestApplication({ logger: ['error'] });
   app.setGlobalPrefix('api');
   app.enableCors();
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, transform: true }),
-  );
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   await app.init();
   return app;

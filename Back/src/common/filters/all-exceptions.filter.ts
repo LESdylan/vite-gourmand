@@ -33,7 +33,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const { status, message, error } = this.parseException(exception);
     this.logException(exception, request, status);
 
-    const errorResponse = this.buildErrorResponse(request, status, message, error);
+    const errorResponse = this.buildErrorResponse(
+      request,
+      status,
+      message,
+      error,
+    );
     response.status(status).json(errorResponse);
   }
 

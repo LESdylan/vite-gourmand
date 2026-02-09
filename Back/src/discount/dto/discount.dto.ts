@@ -1,7 +1,16 @@
 /**
  * Discount DTOs
  */
-import { IsString, IsOptional, IsNumber, IsBoolean, IsDateString, IsEnum, Min, Max, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  Min,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum DiscountType {
@@ -24,12 +33,18 @@ export class CreateDiscountDto {
   @IsEnum(DiscountType)
   type!: DiscountType;
 
-  @ApiProperty({ example: 15, description: 'Value (percentage or fixed amount)' })
+  @ApiProperty({
+    example: 15,
+    description: 'Value (percentage or fixed amount)',
+  })
   @IsNumber()
   @Min(0)
   value!: number;
 
-  @ApiPropertyOptional({ example: 50, description: 'Minimum order amount to apply discount' })
+  @ApiPropertyOptional({
+    example: 50,
+    description: 'Minimum order amount to apply discount',
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)

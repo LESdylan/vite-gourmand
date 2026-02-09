@@ -1,7 +1,13 @@
 /**
  * Admin DTOs
  */
-import { IsString, IsEmail, IsNumber, MinLength, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsNumber,
+  MinLength,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateEmployeeDto {

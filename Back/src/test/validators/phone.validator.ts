@@ -90,21 +90,32 @@ export class PhoneValidator {
   /**
    * Validate a phone number
    */
-  static validate(phone: string, options?: { country?: string; strict?: boolean }): PhoneValidationResult {
+  static validate(
+    phone: string,
+    options?: { country?: string; strict?: boolean },
+  ): PhoneValidationResult {
     const errors: string[] = [];
     const opts = { country: 'FR', strict: false, ...options };
 
     // Basic checks
     if (!phone || typeof phone !== 'string') {
-      return { isValid: false, phone: phone || '', errors: ['Phone number is required'] };
+      return {
+        isValid: false,
+        phone: phone || '',
+        errors: ['Phone number is required'],
+      };
     }
 
     const cleanedPhone = this.cleanNumber(phone);
 
     // Check for non-numeric characters (except leading +)
-    const numericPart = cleanedPhone.startsWith('+') ? cleanedPhone.substring(1) : cleanedPhone;
+    const numericPart = cleanedPhone.startsWith('+')
+      ? cleanedPhone.substring(1)
+      : cleanedPhone;
     if (!/^\d+$/.test(numericPart)) {
-      errors.push('Phone number must contain only digits (and optional + prefix)');
+      errors.push(
+        'Phone number must contain only digits (and optional + prefix)',
+      );
     }
 
     // Length checks
@@ -157,7 +168,11 @@ export class PhoneValidator {
       }
 
       // Validate against country pattern
-      if (errors.length === 0 && opts.strict && !countryConfig.pattern.test(cleanedPhone)) {
+      if (
+        errors.length === 0 &&
+        opts.strict &&
+        !countryConfig.pattern.test(cleanedPhone)
+      ) {
         errors.push(`Invalid phone number format for ${countryConfig.name}`);
       }
     } else {
@@ -206,7 +221,10 @@ export class PhoneValidator {
     // French formatting: 06 12 34 56 78
     if (country === 'FR' && result.nationalNumber.length === 9) {
       const num = '0' + result.nationalNumber;
-      return num.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+      return num.replace(
+        /(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/,
+        '$1 $2 $3 $4 $5',
+      );
     }
 
     return phone;
@@ -220,7 +238,9 @@ export class PhoneValidator {
     if (!countryConfig?.mobilePatterns) return false;
 
     const cleanedPhone = this.cleanNumber(phone);
-    return countryConfig.mobilePatterns.some((pattern) => pattern.test(cleanedPhone));
+    return countryConfig.mobilePatterns.some((pattern) =>
+      pattern.test(cleanedPhone),
+    );
   }
 
   /**
@@ -230,7 +250,10 @@ export class PhoneValidator {
     const cleanedPhone = this.cleanNumber(phone);
 
     for (const [code, config] of Object.entries(this.COUNTRIES)) {
-      if (cleanedPhone.startsWith(config.code) || cleanedPhone.startsWith('00' + config.code.substring(1))) {
+      if (
+        cleanedPhone.startsWith(config.code) ||
+        cleanedPhone.startsWith('00' + config.code.substring(1))
+      ) {
         return code;
       }
     }

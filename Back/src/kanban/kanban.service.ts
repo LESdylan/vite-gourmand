@@ -3,7 +3,12 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreateKanbanColumnDto, UpdateKanbanColumnDto, CreateOrderTagDto, UpdateOrderTagDto } from './dto/kanban.dto';
+import {
+  CreateKanbanColumnDto,
+  UpdateKanbanColumnDto,
+  CreateOrderTagDto,
+  UpdateOrderTagDto,
+} from './dto/kanban.dto';
 
 @Injectable()
 export class KanbanService {
@@ -26,8 +31,10 @@ export class KanbanService {
 
   async createColumn(dto: CreateKanbanColumnDto, userId?: number) {
     // Get max position
-    const maxPos = await this.prisma.kanbanColumn.aggregate({ _max: { position: true } });
-    const position = dto.position ?? ((maxPos._max.position || 0) + 1);
+    const maxPos = await this.prisma.kanbanColumn.aggregate({
+      _max: { position: true },
+    });
+    const position = dto.position ?? (maxPos._max.position || 0) + 1;
 
     return this.prisma.kanbanColumn.create({
       data: {
@@ -65,7 +72,7 @@ export class KanbanService {
       this.prisma.kanbanColumn.update({
         where: { id },
         data: { position: index },
-      })
+      }),
     );
     await this.prisma.$transaction(updates);
     return this.findAllColumns();
@@ -130,10 +137,14 @@ export class KanbanService {
   // Kanban board view
   async getKanbanBoard() {
     const columns = await this.findAllColumns({ activeOnly: true });
-    
+
     // Get orders grouped by status
     const orders = await this.prisma.order.findMany({
-      where: { status: { in: columns.map(c => c.mapped_status).filter(Boolean) as string[] } },
+      where: {
+        status: {
+          in: columns.map((c) => c.mapped_status).filter(Boolean) as string[],
+        },
+      },
       include: {
         User: { select: { id: true, first_name: true, last_name: true } },
         OrderOrderTag: { include: { OrderTag: true } },
@@ -141,9 +152,9 @@ export class KanbanService {
       orderBy: { order_date: 'desc' },
     });
 
-    return columns.map(column => ({
+    return columns.map((column) => ({
       ...column,
-      orders: orders.filter(o => o.status === column.mapped_status),
+      orders: orders.filter((o) => o.status === column.mapped_status),
     }));
   }
 }

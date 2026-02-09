@@ -20,7 +20,9 @@ export class StatsService {
   }
 
   private async getUserStats() {
-    const total = await this.prisma.user.count({ where: { is_deleted: false } });
+    const total = await this.prisma.user.count({
+      where: { is_deleted: false },
+    });
     const newThisMonth = await this.prisma.user.count({
       where: {
         is_deleted: false,

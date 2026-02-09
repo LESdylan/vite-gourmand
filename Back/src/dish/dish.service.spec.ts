@@ -128,9 +128,9 @@ describe('DishService', () => {
     it('should throw if dish not found', async () => {
       (prisma.dish.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.update(999, { title: 'Test' }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update(999, { title: 'Test' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

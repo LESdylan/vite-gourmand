@@ -156,7 +156,11 @@ describe('OrderService', () => {
         qty: 3,
       });
 
-      const result = await service.update(1, { specialInstructions: 'No nuts' }, mockUser);
+      const result = await service.update(
+        1,
+        { specialInstructions: 'No nuts' },
+        mockUser,
+      );
 
       expect(prisma.order.update).toHaveBeenCalled();
     });

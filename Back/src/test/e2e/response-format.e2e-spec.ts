@@ -34,18 +34,14 @@ describe('Response Format (e2e)', () => {
   });
 
   it('should include path in response', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api')
-      .expect(200);
+    const response = await request(app.getHttpServer()).get('/api').expect(200);
 
     expect(response.body.success).toBe(true);
     expect(response.body).toHaveProperty('path');
   });
 
   it('should include CORS headers', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api')
-      .expect(200);
+    const response = await request(app.getHttpServer()).get('/api').expect(200);
 
     expect(response.headers).toHaveProperty('access-control-allow-origin');
   });

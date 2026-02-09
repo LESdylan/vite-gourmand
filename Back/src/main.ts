@@ -23,17 +23,22 @@ async function bootstrap() {
 
   // Security headers with Helmet
   // Configured to allow Google Identity Services (popup-based OAuth)
-  app.use(helmet({
-    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow Google OAuth popup
-    crossOriginEmbedderPolicy: false, // Disable for Google scripts
-  }));
+  app.use(
+    helmet({
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow Google OAuth popup
+      crossOriginEmbedderPolicy: false, // Disable for Google scripts
+    }),
+  );
 
   // Response compression for better performance
   app.use(compression());
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: process.env.FRONTEND_URL || ['http://localhost:5173', 'http://localhost:5174'],
+    origin: process.env.FRONTEND_URL || [
+      'http://localhost:5173',
+      'http://localhost:5174',
+    ],
     credentials: true,
   });
 
@@ -43,7 +48,9 @@ async function bootstrap() {
   // Swagger API Documentation
   const config = new DocumentBuilder()
     .setTitle('Vite Gourmand API')
-    .setDescription('API documentation for the Vite Gourmand restaurant ordering platform')
+    .setDescription(
+      'API documentation for the Vite Gourmand restaurant ordering platform',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('auth', 'Authentication endpoints')
@@ -58,7 +65,7 @@ async function bootstrap() {
   if (process.env.NODE_ENV === 'production') {
     const spaPublicPath = join(__dirname, '..', '..', 'public');
     const indexPath = join(spaPublicPath, 'index.html');
-    
+
     if (existsSync(indexPath)) {
       logger.log(`📄 SPA index.html found at: ${indexPath}`);
       app.use((req: Request, res: Response, next: NextFunction) => {

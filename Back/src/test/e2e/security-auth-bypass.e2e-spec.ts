@@ -45,7 +45,8 @@ describe('Authentication Bypass Prevention (e2e)', () => {
 
     it('rejects token with modified algorithm', async () => {
       // Token with "alg": "none"
-      const noneToken = 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOjEsInJvbGUiOiJhZG1pbiJ9.';
+      const noneToken =
+        'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOjEsInJvbGUiOiJhZG1pbiJ9.';
 
       const response = await request(app.getHttpServer())
         .get('/api/users/me')
@@ -56,7 +57,8 @@ describe('Authentication Bypass Prevention (e2e)', () => {
 
     it('rejects token with modified payload', async () => {
       // Tampered token
-      const tamperedToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxNjIzOTAyMn0.tampered';
+      const tamperedToken =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJhZG1pbiIsImlhdCI6MTUxNjIzOTAyMn0.tampered';
 
       const response = await request(app.getHttpServer())
         .get('/api/users/me')

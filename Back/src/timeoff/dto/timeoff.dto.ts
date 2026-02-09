@@ -1,7 +1,7 @@
 /**
  * Time Off DTOs
  */
-import { IsString, IsOptional, IsDateString, IsEnum, IsInt } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
 export enum TimeOffRequestType {
@@ -37,10 +37,14 @@ export class CreateTimeOffRequestDto {
   reason?: string;
 }
 
-export class UpdateTimeOffRequestDto extends PartialType(CreateTimeOffRequestDto) {}
+export class UpdateTimeOffRequestDto extends PartialType(
+  CreateTimeOffRequestDto,
+) {}
 
 export class DecideTimeOffRequestDto {
-  @ApiProperty({ enum: [TimeOffRequestStatus.APPROVED, TimeOffRequestStatus.REJECTED] })
+  @ApiProperty({
+    enum: [TimeOffRequestStatus.APPROVED, TimeOffRequestStatus.REJECTED],
+  })
   @IsEnum(TimeOffRequestStatus)
   status!: TimeOffRequestStatus.APPROVED | TimeOffRequestStatus.REJECTED;
 

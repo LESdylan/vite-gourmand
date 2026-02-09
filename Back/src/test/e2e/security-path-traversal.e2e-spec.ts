@@ -32,8 +32,9 @@ describe('Path Traversal Prevention (e2e)', () => {
   describe('Menu ID Path Traversal', () => {
     traversalPayloads.forEach((payload, i) => {
       it(`blocks path traversal #${i + 1}`, async () => {
-        const response = await request(app.getHttpServer())
-          .get(`/api/menus/${encodeURIComponent(payload)}`);
+        const response = await request(app.getHttpServer()).get(
+          `/api/menus/${encodeURIComponent(payload)}`,
+        );
 
         expect([400, 404]).toContain(response.status);
         expect(response.text).not.toContain('root:');
@@ -44,8 +45,9 @@ describe('Path Traversal Prevention (e2e)', () => {
   describe('Dish ID Path Traversal', () => {
     traversalPayloads.slice(0, 5).forEach((payload, i) => {
       it(`blocks path traversal #${i + 1}`, async () => {
-        const response = await request(app.getHttpServer())
-          .get(`/api/dishes/${encodeURIComponent(payload)}`);
+        const response = await request(app.getHttpServer()).get(
+          `/api/dishes/${encodeURIComponent(payload)}`,
+        );
 
         expect([400, 404]).toContain(response.status);
       });
@@ -55,8 +57,9 @@ describe('Path Traversal Prevention (e2e)', () => {
   describe('Query Parameter Path Traversal', () => {
     traversalPayloads.slice(0, 5).forEach((payload, i) => {
       it(`blocks path traversal in search #${i + 1}`, async () => {
-        const response = await request(app.getHttpServer())
-          .get(`/api/menus?search=${encodeURIComponent(payload)}`);
+        const response = await request(app.getHttpServer()).get(
+          `/api/menus?search=${encodeURIComponent(payload)}`,
+        );
 
         expect([200, 400]).toContain(response.status);
         expect(response.text).not.toContain('root:');

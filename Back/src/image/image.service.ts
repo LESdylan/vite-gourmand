@@ -1,300 +1,66 @@
 /**
- * Image Service
+ * Image Service - Facade delegating to MenuImage and ReviewImage services
  */
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../prisma';
-import { CreateMenuImageDto, UpdateMenuImageDto, CreateReviewImageDto, UpdateReviewImageDto } from './dto/image.dto';
+import { Injectable } from '@nestjs/common';
+import { MenuImageService } from './menu-image.service';
+import { ReviewImageService } from './review-image.service';
+import {
+  CreateMenuImageDto,
+  UpdateMenuImageDto,
+  CreateReviewImageDto,
+} from './dto/image.dto';
 
 @Injectable()
 export class ImageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private menuImageService: MenuImageService,
+    private reviewImageService: ReviewImageService,
+  ) {}
 
-  // ============ Menu Images ============
-
-  /**
-   * Get all images for a menu
-   */
-  async getMenuItemImages(menuId: number) {
-    return this.prisma.menuImage.findMany({
-      where: { menu_id: menuId },
-      orderBy: [{ is_primary: 'desc' }, { display_order: 'asc' }],
-    });
+  // Menu Images - delegate to MenuImageService
+  getMenuItemImages(menuId: number) {
+    return this.menuImageService.findByMenu(menuId);
+  }
+  getMenuImageById(id: number) {
+    return this.menuImageService.findById(id);
+  }
+  createMenuImage(dto: CreateMenuImageDto) {
+    return this.menuImageService.create(dto);
+  }
+  updateMenuImage(id: number, dto: UpdateMenuImageDto) {
+    return this.menuImageService.update(id, dto);
+  }
+  setMenuImageAsPrimary(id: number) {
+    return this.menuImageService.setPrimary(id);
+  }
+  deleteMenuImage(id: number) {
+    return this.menuImageService.delete(id);
+  }
+  reorderMenuImages(menuId: number, ids: number[]) {
+    return this.menuImageService.reorder(menuId, ids);
   }
 
-  /**
-   * Get menu image by ID
-   */
-  async getMenuImageById(id: number) {
-    const image = await this.prisma.menuImage.findUnique({
-      where: { id },
-    });
-
-    if (!image) {
-      throw new NotFoundException('Menu image not found');
-    }
-
-    return image;
+  // Review Images - delegate to ReviewImageService
+  getReviewImages(reviewId: number) {
+    return this.reviewImageService.findByReview(reviewId);
   }
-
-  /**
-   * Create menu image
-   */
-  async createMenuImage(dto: CreateMenuImageDto) {
-    // Verify menu exists
-    const menu = await this.prisma.menu.findUnique({
-      where: { id: dto.menu_id },
-    });
-
-    if (!menu) {
-      throw new NotFoundException('Menu not found');
-    }
-
-    // If this is primary, unset other primary images
-    if (dto.is_primary) {
-      await this.prisma.menuImage.updateMany({
-        where: { menu_id: dto.menu_id, is_primary: true },
-        data: { is_primary: false },
-      });
-    }
-
-    return this.prisma.menuImage.create({
-      data: {
-        menu_id: dto.menu_id,
-        image_url: dto.image_url,
-        alt_text: dto.alt_text,
-        is_primary: dto.is_primary ?? false,
-        display_order: dto.display_order ?? 0,
-      },
-    });
+  getReviewImageById(id: number) {
+    return this.reviewImageService.findById(id);
   }
-
-  /**
-   * Update menu image
-   */
-  async updateMenuImage(id: number, dto: UpdateMenuImageDto) {
-    const image = await this.prisma.menuImage.findUnique({
-      where: { id },
-    });
-
-    if (!image) {
-      throw new NotFoundException('Menu image not found');
-    }
-
-    // If setting as primary, unset other primary images
-    if (dto.is_primary) {
-      await this.prisma.menuImage.updateMany({
-        where: {
-          menu_id: image.menu_id,
-          is_primary: true,
-          id: { not: id },
-        },
-        data: { is_primary: false },
-      });
-    }
-
-    return this.prisma.menuImage.update({
-      where: { id },
-      data: dto,
-    });
+  createReviewImage(dto: CreateReviewImageDto, userId: number) {
+    return this.reviewImageService.create(dto, userId);
   }
-
-  /**
-   * Set image as primary
-   */
-  async setMenuImageAsPrimary(id: number) {
-    const image = await this.prisma.menuImage.findUnique({
-      where: { id },
-    });
-
-    if (!image) {
-      throw new NotFoundException('Menu image not found');
-    }
-
-    // Unset other primary images
-    await this.prisma.menuImage.updateMany({
-      where: { menu_id: image.menu_id, is_primary: true },
-      data: { is_primary: false },
-    });
-
-    return this.prisma.menuImage.update({
-      where: { id },
-      data: { is_primary: true },
-    });
+  createReviewImageAdmin(dto: CreateReviewImageDto) {
+    return this.reviewImageService.createAdmin(dto);
   }
-
-  /**
-   * Delete menu image
-   */
-  async deleteMenuImage(id: number) {
-    const image = await this.prisma.menuImage.findUnique({
-      where: { id },
-    });
-
-    if (!image) {
-      throw new NotFoundException('Menu image not found');
-    }
-
-    return this.prisma.menuImage.delete({
-      where: { id },
-    });
+  updateReviewImage(id: number) {
+    // Review images only have a URL; "updating" returns the current image
+    return this.reviewImageService.findById(id);
   }
-
-  /**
-   * Reorder menu images
-   */
-  async reorderMenuImages(menuItemId: number, imageIds: number[]) {
-    const updates = imageIds.map((imageId, index) =>
-      this.prisma.menuImage.update({
-        where: { id: imageId },
-        data: { display_order: index },
-      }),
-    );
-
-    await this.prisma.$transaction(updates);
-    return this.getMenuItemImages(menuItemId);
+  deleteReviewImage(id: number, userId: number) {
+    return this.reviewImageService.delete(id, userId);
   }
-
-  // ============ Review Images ============
-
-  /**
-   * Get all images for a review
-   */
-  async getReviewImages(reviewId: number) {
-    return this.prisma.reviewImage.findMany({
-      where: { review_id: reviewId },
-      orderBy: { uploaded_at: 'asc' },
-    });
-  }
-
-  /**
-   * Get review image by ID
-   */
-  async getReviewImageById(id: number) {
-    const image = await this.prisma.reviewImage.findUnique({
-      where: { id },
-    });
-
-    if (!image) {
-      throw new NotFoundException('Review image not found');
-    }
-
-    return image;
-  }
-
-  /**
-   * Create review image
-   */
-  async createReviewImage(dto: CreateReviewImageDto, userId: number) {
-    // Verify review exists and belongs to user
-    const review = await this.prisma.publish.findUnique({
-      where: { id: dto.review_id },
-    });
-
-    if (!review) {
-      throw new NotFoundException('Review not found');
-    }
-
-    if (review.user_id !== userId) {
-      throw new ForbiddenException('You can only add images to your own reviews');
-    }
-
-    // Count existing images (limit to 5)
-    const existingCount = await this.prisma.reviewImage.count({
-      where: { review_id: dto.review_id },
-    });
-
-    if (existingCount >= 5) {
-      throw new BadRequestException('Maximum 5 images per review');
-    }
-
-    return this.prisma.reviewImage.create({
-      data: {
-        review_id: dto.review_id,
-        image_url: dto.image_url,
-      },
-    });
-  }
-
-  /**
-   * Create review image (admin)
-   */
-  async createReviewImageAdmin(dto: CreateReviewImageDto) {
-    // Verify review exists
-    const review = await this.prisma.publish.findUnique({
-      where: { id: dto.review_id },
-    });
-
-    if (!review) {
-      throw new NotFoundException('Review not found');
-    }
-
-    return this.prisma.reviewImage.create({
-      data: {
-        review_id: dto.review_id,
-        image_url: dto.image_url,
-      },
-    });
-  }
-
-  /**
-   * Update review image
-   */
-  async updateReviewImage(id: number, dto: UpdateReviewImageDto, userId: number) {
-    const image = await this.prisma.reviewImage.findUnique({
-      where: { id },
-      include: { Publish: true },
-    });
-
-    if (!image) {
-      throw new NotFoundException('Review image not found');
-    }
-
-    if (image.Publish.user_id !== userId) {
-      throw new ForbiddenException('You can only modify images on your own reviews');
-    }
-
-    return this.prisma.reviewImage.update({
-      where: { id },
-      data: dto,
-    });
-  }
-
-  /**
-   * Delete review image
-   */
-  async deleteReviewImage(id: number, userId: number) {
-    const image = await this.prisma.reviewImage.findUnique({
-      where: { id },
-      include: { Publish: true },
-    });
-
-    if (!image) {
-      throw new NotFoundException('Review image not found');
-    }
-
-    if (image.Publish.user_id !== userId) {
-      throw new ForbiddenException('You can only delete images on your own reviews');
-    }
-
-    return this.prisma.reviewImage.delete({
-      where: { id },
-    });
-  }
-
-  /**
-   * Delete review image (admin)
-   */
-  async deleteReviewImageAdmin(id: number) {
-    const image = await this.prisma.reviewImage.findUnique({
-      where: { id },
-    });
-
-    if (!image) {
-      throw new NotFoundException('Review image not found');
-    }
-
-    return this.prisma.reviewImage.delete({
-      where: { id },
-    });
+  deleteReviewImageAdmin(id: number) {
+    return this.reviewImageService.deleteAdmin(id);
   }
 }

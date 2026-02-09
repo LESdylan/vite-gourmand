@@ -48,7 +48,10 @@ export class AuthService {
   async resetPassword(token: string, newPassword: string) {
     const userId = await this.tokenService.validatePasswordResetToken(token);
     const hash = await this.passwordService.hash(newPassword);
-    await this.prisma.user.update({ where: { id: userId }, data: { password: hash } });
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hash },
+    });
     return { message: 'Password reset successful' };
   }
 
@@ -56,7 +59,10 @@ export class AuthService {
     const user = await this.findUserById(userId);
     await this.passwordService.verify(current, user.password);
     const hash = await this.passwordService.hash(newPass);
-    await this.prisma.user.update({ where: { id: userId }, data: { password: hash } });
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hash },
+    });
     return { message: 'Password changed successfully' };
   }
 

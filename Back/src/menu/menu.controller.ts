@@ -14,7 +14,13 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { MenuService } from './menu.service';
-import { Public, Roles, CurrentUser, JwtPayload, PaginationDto, SafeParseIntPipe } from '../common';
+import {
+  Public,
+  Roles,
+  CurrentUser,
+  JwtPayload,
+  SafeParseIntPipe,
+} from '../common';
 import { CreateMenuDto, UpdateMenuDto, MenuFilterDto } from './dto/menu.dto';
 
 @ApiTags('menus')

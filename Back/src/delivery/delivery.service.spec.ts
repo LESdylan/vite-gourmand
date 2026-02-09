@@ -61,7 +61,9 @@ describe('DeliveryService', () => {
 
   describe('findAll', () => {
     it('should return all deliveries', async () => {
-      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([mockDelivery]);
+      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([
+        mockDelivery,
+      ]);
 
       const result = await service.findAll();
 
@@ -69,7 +71,9 @@ describe('DeliveryService', () => {
     });
 
     it('should filter by status', async () => {
-      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([mockDelivery]);
+      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([
+        mockDelivery,
+      ]);
 
       await service.findAll({ status: 'assigned' });
 
@@ -81,7 +85,9 @@ describe('DeliveryService', () => {
     });
 
     it('should filter by delivery person', async () => {
-      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([mockDelivery]);
+      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([
+        mockDelivery,
+      ]);
 
       await service.findAll({ deliveryPersonId: 2 });
 
@@ -95,7 +101,9 @@ describe('DeliveryService', () => {
 
   describe('findById', () => {
     it('should return a delivery by id', async () => {
-      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(mockDelivery);
+      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
 
       const result = await service.findById(1);
 
@@ -103,7 +111,9 @@ describe('DeliveryService', () => {
     });
 
     it('should throw NotFoundException if not found', async () => {
-      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       await expect(service.findById(999)).rejects.toThrow(NotFoundException);
     });
@@ -111,7 +121,9 @@ describe('DeliveryService', () => {
 
   describe('findByOrderId', () => {
     it('should return delivery for an order', async () => {
-      (prisma.deliveryAssignment.findFirst as jest.Mock).mockResolvedValue(mockDelivery);
+      (prisma.deliveryAssignment.findFirst as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
 
       const result = await service.findByOrderId(1);
 
@@ -119,7 +131,9 @@ describe('DeliveryService', () => {
     });
 
     it('should return null if not found', async () => {
-      (prisma.deliveryAssignment.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.deliveryAssignment.findFirst as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       const result = await service.findByOrderId(999);
 
@@ -135,7 +149,9 @@ describe('DeliveryService', () => {
         vehicleType: 'car',
       };
       (prisma.order.findUnique as jest.Mock).mockResolvedValue({ id: 2 });
-      (prisma.deliveryAssignment.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.deliveryAssignment.findFirst as jest.Mock).mockResolvedValue(
+        null,
+      );
       (prisma.deliveryAssignment.create as jest.Mock).mockResolvedValue({
         id: 2,
         order_id: 2,
@@ -153,26 +169,36 @@ describe('DeliveryService', () => {
     it('should throw NotFoundException if order not found', async () => {
       (prisma.order.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.create({ orderId: 999, deliveryPersonId: 1 })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.create({ orderId: 999, deliveryPersonId: 1 }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException if assignment already exists', async () => {
       (prisma.order.findUnique as jest.Mock).mockResolvedValue({ id: 1 });
-      (prisma.deliveryAssignment.findFirst as jest.Mock).mockResolvedValue(mockDelivery);
+      (prisma.deliveryAssignment.findFirst as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
 
-      await expect(service.create({ orderId: 1, deliveryPersonId: 1 })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.create({ orderId: 1, deliveryPersonId: 1 }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('update', () => {
     it('should update a delivery assignment', async () => {
-      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(mockDelivery);
+      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
       (prisma.deliveryAssignment.update as jest.Mock).mockResolvedValue({
         ...mockDelivery,
         delivery_notes: 'Updated notes',
       });
 
-      const result = await service.update(1, { deliveryNotes: 'Updated notes' });
+      const result = await service.update(1, {
+        deliveryNotes: 'Updated notes',
+      });
 
       expect(result.delivery_notes).toBe('Updated notes');
     });
@@ -180,7 +206,9 @@ describe('DeliveryService', () => {
 
   describe('markPickedUp', () => {
     it('should mark delivery as picked up', async () => {
-      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(mockDelivery);
+      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
       (prisma.deliveryAssignment.update as jest.Mock).mockResolvedValue({
         ...mockDelivery,
         status: 'picked_up',
@@ -196,7 +224,9 @@ describe('DeliveryService', () => {
 
   describe('markDelivered', () => {
     it('should mark delivery as delivered', async () => {
-      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(mockDelivery);
+      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
       (prisma.deliveryAssignment.update as jest.Mock).mockResolvedValue({
         ...mockDelivery,
         status: 'delivered',
@@ -204,7 +234,10 @@ describe('DeliveryService', () => {
         proof_photo_url: 'https://example.com/photo.jpg',
       });
 
-      const result = await service.markDelivered(1, 'https://example.com/photo.jpg');
+      const result = await service.markDelivered(
+        1,
+        'https://example.com/photo.jpg',
+      );
 
       expect(result.status).toBe('delivered');
       expect(result.delivered_at).toBeDefined();
@@ -213,7 +246,9 @@ describe('DeliveryService', () => {
 
   describe('rateDelivery', () => {
     it('should rate a delivery', async () => {
-      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(mockDelivery);
+      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
       (prisma.deliveryAssignment.update as jest.Mock).mockResolvedValue({
         ...mockDelivery,
         client_rating: 5,
@@ -227,7 +262,9 @@ describe('DeliveryService', () => {
 
   describe('getMyDeliveries', () => {
     it('should return deliveries for delivery person', async () => {
-      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([mockDelivery]);
+      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([
+        mockDelivery,
+      ]);
 
       const result = await service.getMyDeliveries(2);
 
@@ -237,7 +274,9 @@ describe('DeliveryService', () => {
 
   describe('getPendingDeliveries', () => {
     it('should return pending deliveries', async () => {
-      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([mockDelivery]);
+      (prisma.deliveryAssignment.findMany as jest.Mock).mockResolvedValue([
+        mockDelivery,
+      ]);
 
       const result = await service.getPendingDeliveries();
 
@@ -247,8 +286,12 @@ describe('DeliveryService', () => {
 
   describe('delete', () => {
     it('should delete a delivery assignment', async () => {
-      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(mockDelivery);
-      (prisma.deliveryAssignment.delete as jest.Mock).mockResolvedValue(mockDelivery);
+      (prisma.deliveryAssignment.findUnique as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
+      (prisma.deliveryAssignment.delete as jest.Mock).mockResolvedValue(
+        mockDelivery,
+      );
 
       const result = await service.delete(1);
 

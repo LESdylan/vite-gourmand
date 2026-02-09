@@ -1,7 +1,15 @@
 /**
  * Contact Controller
  */
-import { Controller, Get, Post, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ContactService } from './contact.service';
 import { Public, Roles, SafeParseIntPipe } from '../common';

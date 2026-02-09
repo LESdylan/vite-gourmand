@@ -48,13 +48,20 @@ export class EmailValidator {
   /**
    * Validate an email address
    */
-  static validate(email: string, options?: { strict?: boolean; rejectDisposable?: boolean }): EmailValidationResult {
+  static validate(
+    email: string,
+    options?: { strict?: boolean; rejectDisposable?: boolean },
+  ): EmailValidationResult {
     const errors: string[] = [];
     const opts = { strict: true, rejectDisposable: false, ...options };
 
     // Basic checks
     if (!email || typeof email !== 'string') {
-      return { isValid: false, email: email || '', errors: ['Email is required'] };
+      return {
+        isValid: false,
+        email: email || '',
+        errors: ['Email is required'],
+      };
     }
 
     const trimmedEmail = email.trim().toLowerCase();
@@ -122,7 +129,9 @@ export class EmailValidator {
     const domainParts = domain.split('.');
     const tld = domainParts[domainParts.length - 1];
     if (!tld || tld.length < 2) {
-      errors.push('Invalid top-level domain (TLD must be at least 2 characters)');
+      errors.push(
+        'Invalid top-level domain (TLD must be at least 2 characters)',
+      );
     }
     if (tld && /^\d+$/.test(tld)) {
       errors.push('TLD cannot be purely numeric');

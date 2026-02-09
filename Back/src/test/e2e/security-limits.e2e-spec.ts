@@ -45,8 +45,9 @@ describe('Request Limits (e2e)', () => {
   describe('URL Length Limits', () => {
     it('handles very long URL', async () => {
       const longParam = 'a'.repeat(5000);
-      const response = await request(app.getHttpServer())
-        .get(`/api/menus?search=${longParam}`);
+      const response = await request(app.getHttpServer()).get(
+        `/api/menus?search=${longParam}`,
+      );
 
       expect([200, 400, 414]).toContain(response.status);
     });

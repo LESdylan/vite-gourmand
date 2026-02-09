@@ -39,14 +39,16 @@ describe('Edge Cases and Boundaries (e2e)', () => {
     });
 
     it('handles ID = MAX_INT', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/2147483647');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus/2147483647',
+      );
       expect([400, 404]).toContain(response.status);
     });
 
     it('handles ID = MAX_INT + 1', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/2147483648');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus/2147483648',
+      );
       // 400 = validation error, 404 = not found, 500 = Prisma integer overflow (known issue)
       expect([400, 404, 500]).toContain(response.status);
     });
@@ -116,20 +118,23 @@ describe('Edge Cases and Boundaries (e2e)', () => {
 
   describe('Pagination Boundaries', () => {
     it('handles page = 0', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus?page=0');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus?page=0',
+      );
       expect([200, 400]).toContain(response.status);
     });
 
     it('handles limit = 0', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus?limit=0');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus?limit=0',
+      );
       expect([200, 400]).toContain(response.status);
     });
 
     it('handles very high page', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus?page=999999');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus?page=999999',
+      );
       expect(response.status).toBe(200);
     });
   });

@@ -1,7 +1,14 @@
 /**
  * Support Ticket DTOs
  */
-import { IsString, IsOptional, IsNumber, IsEnum, IsBoolean, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+  IsBoolean,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum TicketCategory {
@@ -71,7 +78,10 @@ export class CreateTicketMessageDto {
   @IsString()
   body!: string;
 
-  @ApiPropertyOptional({ example: false, description: 'Internal note (not visible to customer)' })
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Internal note (not visible to customer)',
+  })
   @IsOptional()
   @IsBoolean()
   isInternal?: boolean;

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { PrismaService } from '../prisma';
+import { PrismaService } from '../../prisma';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -47,7 +47,9 @@ describe('NotificationService', () => {
 
   describe('findAll', () => {
     it('should return user notifications', async () => {
-      (prisma.notification.findMany as jest.Mock).mockResolvedValue([mockNotification]);
+      (prisma.notification.findMany as jest.Mock).mockResolvedValue([
+        mockNotification,
+      ]);
 
       const result = await service.findAll(1);
 
@@ -60,7 +62,9 @@ describe('NotificationService', () => {
     });
 
     it('should filter by unread only', async () => {
-      (prisma.notification.findMany as jest.Mock).mockResolvedValue([mockNotification]);
+      (prisma.notification.findMany as jest.Mock).mockResolvedValue([
+        mockNotification,
+      ]);
 
       await service.findAll(1, { unreadOnly: true });
 
@@ -72,7 +76,9 @@ describe('NotificationService', () => {
     });
 
     it('should respect limit and offset', async () => {
-      (prisma.notification.findMany as jest.Mock).mockResolvedValue([mockNotification]);
+      (prisma.notification.findMany as jest.Mock).mockResolvedValue([
+        mockNotification,
+      ]);
 
       await service.findAll(1, { limit: 10, offset: 5 });
 
@@ -87,7 +93,9 @@ describe('NotificationService', () => {
 
   describe('findById', () => {
     it('should return a notification by id', async () => {
-      (prisma.notification.findUnique as jest.Mock).mockResolvedValue(mockNotification);
+      (prisma.notification.findUnique as jest.Mock).mockResolvedValue(
+        mockNotification,
+      );
 
       const result = await service.findById(1);
 
@@ -116,7 +124,9 @@ describe('NotificationService', () => {
 
   describe('markAsRead', () => {
     it('should mark notification as read', async () => {
-      (prisma.notification.findUnique as jest.Mock).mockResolvedValue(mockNotification);
+      (prisma.notification.findUnique as jest.Mock).mockResolvedValue(
+        mockNotification,
+      );
       (prisma.notification.update as jest.Mock).mockResolvedValue({
         ...mockNotification,
         is_read: true,
@@ -132,7 +142,9 @@ describe('NotificationService', () => {
     it('should throw NotFoundException if notification not found', async () => {
       (prisma.notification.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.markAsRead(999, 1)).rejects.toThrow(NotFoundException);
+      await expect(service.markAsRead(999, 1)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException if notification belongs to another user', async () => {
@@ -147,7 +159,9 @@ describe('NotificationService', () => {
 
   describe('markAllAsRead', () => {
     it('should mark all user notifications as read', async () => {
-      (prisma.notification.updateMany as jest.Mock).mockResolvedValue({ count: 5 });
+      (prisma.notification.updateMany as jest.Mock).mockResolvedValue({
+        count: 5,
+      });
 
       const result = await service.markAllAsRead(1);
 
@@ -191,7 +205,9 @@ describe('NotificationService', () => {
         body: 'System maintenance tonight',
         type: 'system',
       };
-      (prisma.notification.createMany as jest.Mock).mockResolvedValue({ count: 3 });
+      (prisma.notification.createMany as jest.Mock).mockResolvedValue({
+        count: 3,
+      });
 
       const result = await service.createBulk(bulkDto);
 
@@ -201,8 +217,12 @@ describe('NotificationService', () => {
 
   describe('delete', () => {
     it('should delete a notification', async () => {
-      (prisma.notification.findUnique as jest.Mock).mockResolvedValue(mockNotification);
-      (prisma.notification.delete as jest.Mock).mockResolvedValue(mockNotification);
+      (prisma.notification.findUnique as jest.Mock).mockResolvedValue(
+        mockNotification,
+      );
+      (prisma.notification.delete as jest.Mock).mockResolvedValue(
+        mockNotification,
+      );
 
       const result = await service.delete(1, 1);
 
@@ -227,7 +247,9 @@ describe('NotificationService', () => {
 
   describe('deleteAll', () => {
     it('should delete all notifications for user', async () => {
-      (prisma.notification.deleteMany as jest.Mock).mockResolvedValue({ count: 10 });
+      (prisma.notification.deleteMany as jest.Mock).mockResolvedValue({
+        count: 10,
+      });
 
       const result = await service.deleteAll(1);
 

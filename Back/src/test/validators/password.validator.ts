@@ -15,7 +15,12 @@ export interface PasswordValidationResult {
   crackTime: CrackTimeEstimate;
 }
 
-export type PasswordStrength = 'very_weak' | 'weak' | 'fair' | 'strong' | 'very_strong';
+export type PasswordStrength =
+  | 'very_weak'
+  | 'weak'
+  | 'fair'
+  | 'strong'
+  | 'very_strong';
 
 export interface PasswordCriteria {
   minLength: boolean;
@@ -39,27 +44,117 @@ export class PasswordValidator {
    * Common passwords blacklist (top 100)
    */
   private static readonly BLACKLIST = new Set([
-    'password', '123456', '12345678', 'qwerty', 'abc123', 'monkey', 'master',
-    'dragon', 'letmein', 'baseball', 'iloveyou', 'trustno1', 'sunshine',
-    'princess', 'admin', 'welcome', 'shadow', 'superman', 'michael', 'football',
-    '123456789', '12345', '1234567', 'password1', '1234567890', 'qwerty123',
-    'qwertyuiop', '111111', '123123', '000000', 'password123', 'admin123',
-    'root', 'toor', 'pass', 'test', 'guest', 'master123', 'changeme',
-    'passw0rd', 'p@ssw0rd', 'p@ssword', 'login', 'access', 'hello', 'charlie',
-    'donald', 'loveme', 'hockey', 'ranger', 'thomas', 'killer', 'george',
-    'computer', 'michelle', 'jennifer', 'amanda', 'ashley', 'nicole', 'jessica',
-    'hunter', 'pepper', 'joshua', 'zxcvbn', 'asdfgh', 'qazwsx', 'password!',
-    '1q2w3e4r', '1qaz2wsx', 'qweasd', 'aaaaaa', 'secret', 'solo', 'matrix',
+    'password',
+    '123456',
+    '12345678',
+    'qwerty',
+    'abc123',
+    'monkey',
+    'master',
+    'dragon',
+    'letmein',
+    'baseball',
+    'iloveyou',
+    'trustno1',
+    'sunshine',
+    'princess',
+    'admin',
+    'welcome',
+    'shadow',
+    'superman',
+    'michael',
+    'football',
+    '123456789',
+    '12345',
+    '1234567',
+    'password1',
+    '1234567890',
+    'qwerty123',
+    'qwertyuiop',
+    '111111',
+    '123123',
+    '000000',
+    'password123',
+    'admin123',
+    'root',
+    'toor',
+    'pass',
+    'test',
+    'guest',
+    'master123',
+    'changeme',
+    'passw0rd',
+    'p@ssw0rd',
+    'p@ssword',
+    'login',
+    'access',
+    'hello',
+    'charlie',
+    'donald',
+    'loveme',
+    'hockey',
+    'ranger',
+    'thomas',
+    'killer',
+    'george',
+    'computer',
+    'michelle',
+    'jennifer',
+    'amanda',
+    'ashley',
+    'nicole',
+    'jessica',
+    'hunter',
+    'pepper',
+    'joshua',
+    'zxcvbn',
+    'asdfgh',
+    'qazwsx',
+    'password!',
+    '1q2w3e4r',
+    '1qaz2wsx',
+    'qweasd',
+    'aaaaaa',
+    'secret',
+    'solo',
+    'matrix',
   ]);
 
   /**
    * Keyboard patterns to detect
    */
   private static readonly KEYBOARD_PATTERNS = [
-    'qwerty', 'qwertz', 'azerty', 'asdf', 'zxcv', 'qwer', 'wasd',
-    '1234', '2345', '3456', '4567', '5678', '6789', '7890', '0987',
-    '9876', '8765', '7654', '6543', '5432', '4321', 'abcd', 'bcde',
-    'cdef', 'defg', 'efgh', 'fghi', 'ghij', 'hijk', 'ijkl', 'jklm',
+    'qwerty',
+    'qwertz',
+    'azerty',
+    'asdf',
+    'zxcv',
+    'qwer',
+    'wasd',
+    '1234',
+    '2345',
+    '3456',
+    '4567',
+    '5678',
+    '6789',
+    '7890',
+    '0987',
+    '9876',
+    '8765',
+    '7654',
+    '6543',
+    '5432',
+    '4321',
+    'abcd',
+    'bcde',
+    'cdef',
+    'defg',
+    'efgh',
+    'fghi',
+    'ghij',
+    'hijk',
+    'ijkl',
+    'jklm',
   ];
 
   /**
@@ -91,7 +186,8 @@ export class PasswordValidator {
     if (/[a-z]/.test(password)) charsetSize += this.CHARSET_SIZES.lowercase;
     if (/[A-Z]/.test(password)) charsetSize += this.CHARSET_SIZES.uppercase;
     if (/[0-9]/.test(password)) charsetSize += this.CHARSET_SIZES.numbers;
-    if (/[^a-zA-Z0-9]/.test(password)) charsetSize += this.CHARSET_SIZES.special;
+    if (/[^a-zA-Z0-9]/.test(password))
+      charsetSize += this.CHARSET_SIZES.special;
 
     if (charsetSize === 0) return 0;
 
@@ -116,9 +212,12 @@ export class PasswordValidator {
       if (seconds < 86400) return `${Math.round(seconds / 3600)} hours`;
       if (seconds < 2592000) return `${Math.round(seconds / 86400)} days`;
       if (seconds < 31536000) return `${Math.round(seconds / 2592000)} months`;
-      if (seconds < 3153600000) return `${Math.round(seconds / 31536000)} years`;
-      if (seconds < 3.154e+12) return `${Math.round(seconds / 31536000 / 1000)} thousand years`;
-      if (seconds < 3.154e+15) return `${Math.round(seconds / 31536000 / 1e6)} million years`;
+      if (seconds < 3153600000)
+        return `${Math.round(seconds / 31536000)} years`;
+      if (seconds < 3.154e12)
+        return `${Math.round(seconds / 31536000 / 1000)} thousand years`;
+      if (seconds < 3.154e15)
+        return `${Math.round(seconds / 31536000 / 1e6)} million years`;
       return 'centuries';
     };
 
@@ -171,7 +270,10 @@ export class PasswordValidator {
   /**
    * Calculate password score (0-5)
    */
-  private static calculateScore(criteria: PasswordCriteria, entropy: number): number {
+  private static calculateScore(
+    criteria: PasswordCriteria,
+    entropy: number,
+  ): number {
     let score = 0;
 
     // Each criterion adds to score
@@ -206,7 +308,10 @@ export class PasswordValidator {
   /**
    * Generate improvement suggestions
    */
-  private static getSuggestions(criteria: PasswordCriteria, password: string): string[] {
+  private static getSuggestions(
+    criteria: PasswordCriteria,
+    password: string,
+  ): string[] {
     const suggestions: string[] = [];
 
     if (!criteria.minLength) {
@@ -243,9 +348,16 @@ export class PasswordValidator {
   /**
    * Validate a password
    */
-  static validate(password: string, options?: { minLength?: number; minScore?: number }): PasswordValidationResult {
+  static validate(
+    password: string,
+    options?: { minLength?: number; minScore?: number },
+  ): PasswordValidationResult {
     const errors: string[] = [];
-    const opts = { minLength: this.CONFIG.minLength, minScore: this.CONFIG.minScore, ...options };
+    const opts = {
+      minLength: this.CONFIG.minLength,
+      minScore: this.CONFIG.minScore,
+      ...options,
+    };
 
     // Basic checks
     if (!password || typeof password !== 'string') {
@@ -267,7 +379,11 @@ export class PasswordValidator {
           notInBlacklist: false,
         },
         entropy: 0,
-        crackTime: { online: 'instantly', offlineSlow: 'instantly', offlineFast: 'instantly' },
+        crackTime: {
+          online: 'instantly',
+          offlineSlow: 'instantly',
+          offlineFast: 'instantly',
+        },
       };
     }
 
@@ -288,7 +404,9 @@ export class PasswordValidator {
       errors.push(`Password must be at least ${opts.minLength} characters`);
     }
     if (password.length > this.CONFIG.maxLength) {
-      errors.push(`Password must be less than ${this.CONFIG.maxLength} characters`);
+      errors.push(
+        `Password must be less than ${this.CONFIG.maxLength} characters`,
+      );
     }
     if (!criteria.hasLowercase) {
       errors.push('Password must contain lowercase letters');
@@ -314,7 +432,8 @@ export class PasswordValidator {
     const suggestions = this.getSuggestions(criteria, password);
 
     // Determine validity
-    const isValid = score >= opts.minScore && criteria.notInBlacklist && criteria.minLength;
+    const isValid =
+      score >= opts.minScore && criteria.notInBlacklist && criteria.minLength;
 
     return {
       isValid,

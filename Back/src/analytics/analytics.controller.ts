@@ -2,7 +2,12 @@
  * Analytics Controller
  */
 import { Controller, Get, Post, Body, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AnalyticsService, AnalyticsEvent } from './analytics.service';
 import { Roles } from '../common';
 
@@ -14,7 +19,14 @@ export class AnalyticsController {
 
   @Post('track')
   @ApiOperation({ summary: 'Track an analytics event' })
-  async track(@Body() body: { eventType: string; data?: Record<string, any>; userId?: string }): Promise<{ success: boolean }> {
+  async track(
+    @Body()
+    body: {
+      eventType: string;
+      data?: Record<string, any>;
+      userId?: string;
+    },
+  ): Promise<{ success: boolean }> {
     await this.service.trackEvent({
       eventType: body.eventType,
       userId: body.userId,
@@ -28,7 +40,10 @@ export class AnalyticsController {
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Get events by type' })
   @ApiOkResponse({ description: 'List of events' })
-  async getEvents(@Query('type') type: string, @Query('limit') limit?: number): Promise<AnalyticsEvent[]> {
+  async getEvents(
+    @Query('type') type: string,
+    @Query('limit') limit?: number,
+  ): Promise<AnalyticsEvent[]> {
     return this.service.getEventsByType(type, limit);
   }
 
@@ -36,7 +51,9 @@ export class AnalyticsController {
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Get event statistics' })
   @ApiOkResponse({ description: 'Event statistics' })
-  async getStats(@Query('days') days?: number): Promise<Record<string, number>> {
+  async getStats(
+    @Query('days') days?: number,
+  ): Promise<Record<string, number>> {
     return this.service.getEventStats(days);
   }
 }

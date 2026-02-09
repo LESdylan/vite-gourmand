@@ -1,419 +1,105 @@
 /**
- * Role & Permission Service
+ * Role Service - Manage user roles (CRUD only)
  */
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreatePermissionDto, UpdatePermissionDto, CreateRoleDto, UpdateRoleDto } from './dto/role.dto';
+import { CreateRoleDto, UpdateRoleDto } from './dto/role.dto';
 
 @Injectable()
 export class RoleService {
   constructor(private prisma: PrismaService) {}
 
-  // ============ Permissions ============
-
-  /**
-   * Get all permissions
-   */
-  async findAllPermissions() {
-    return this.prisma.permission.findMany({
-      orderBy: { name: 'asc' },
-    });
-  }
-
-  /**
-   * Get permission by ID
-   */
-  async findPermissionById(id: number) {
-    const permission = await this.prisma.permission.findUnique({
-      where: { id },
-      include: {
-        RolePermission: {
-          include: {
-            Role: true,
-          },
-        },
-      },
-    });
-
-    if (!permission) {
-      throw new NotFoundException('Permission not found');
-    }
-
-    return permission;
-  }
-
-  /**
-   * Get permission by name
-   */
-  async findPermissionByName(name: string) {
-    return this.prisma.permission.findUnique({
-      where: { name },
-    });
-  }
-
-  /**
-   * Create permission
-   */
-  async createPermission(dto: CreatePermissionDto) {
-    // Check for duplicate name
-    const existing = await this.prisma.permission.findUnique({
-      where: { name: dto.name },
-    });
-
-    if (existing) {
-      throw new ConflictException('Permission with this name already exists');
-    }
-
-    return this.prisma.permission.create({
-      data: {
-        name: dto.name,
-        resource: dto.resource ?? '',
-        action: dto.action ?? '',
-      },
-    });
-  }
-
-  /**
-   * Update permission
-   */
-  async updatePermission(id: number, dto: UpdatePermissionDto) {
-    const permission = await this.prisma.permission.findUnique({
-      where: { id },
-    });
-
-    if (!permission) {
-      throw new NotFoundException('Permission not found');
-    }
-
-    // Check for duplicate name
-    if (dto.name && dto.name !== permission.name) {
-      const existing = await this.prisma.permission.findUnique({
-        where: { name: dto.name },
-      });
-
-      if (existing) {
-        throw new ConflictException('Permission with this name already exists');
-      }
-    }
-
-    return this.prisma.permission.update({
-      where: { id },
-      data: dto,
-    });
-  }
-
-  /**
-   * Delete permission
-   */
-  async deletePermission(id: number) {
-    const permission = await this.prisma.permission.findUnique({
-      where: { id },
-    });
-
-    if (!permission) {
-      throw new NotFoundException('Permission not found');
-    }
-
-    // Remove from all roles first
-    await this.prisma.rolePermission.deleteMany({
-      where: { permission_id: id },
-    });
-
-    return this.prisma.permission.delete({
-      where: { id },
-    });
-  }
-
-  // ============ Roles ============
-
-  /**
-   * Get all roles
-   */
-  async findAllRoles() {
+  /** Get all roles with permissions count */
+  async findAll() {
     return this.prisma.role.findMany({
       include: {
-        RolePermission: {
-          include: {
-            Permission: true,
-          },
-        },
-        _count: {
-          select: { User: true },
-        },
+        RolePermission: { include: { Permission: true } },
+        _count: { select: { User: true } },
       },
       orderBy: { name: 'asc' },
     });
   }
 
-  /**
-   * Get role by ID
-   */
-  async findRoleById(id: number) {
+  /** Get role by ID */
+  async findById(id: number) {
     const role = await this.prisma.role.findUnique({
       where: { id },
       include: {
-        RolePermission: {
-          include: {
-            Permission: true,
-          },
-        },
+        RolePermission: { include: { Permission: true } },
         User: {
-          select: {
-            id: true,
-            email: true,
-            first_name: true,
-            last_name: true,
-          },
+          select: { id: true, email: true, first_name: true, last_name: true },
         },
       },
     });
-
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-
+    if (!role) throw new NotFoundException('Role not found');
     return role;
   }
 
-  /**
-   * Get role by name
-   */
-  async findRoleByName(name: string) {
+  /** Get role by name */
+  async findByName(name: string) {
     return this.prisma.role.findUnique({
       where: { name },
-      include: {
-        RolePermission: {
-          include: {
-            Permission: true,
-          },
-        },
-      },
+      include: { RolePermission: { include: { Permission: true } } },
     });
   }
 
-  /**
-   * Create role
-   */
-  async createRole(dto: CreateRoleDto) {
-    // Check for duplicate name
-    const existing = await this.prisma.role.findUnique({
-      where: { name: dto.name },
-    });
-
-    if (existing) {
-      throw new ConflictException('Role with this name already exists');
-    }
-
+  /** Create role */
+  async create(dto: CreateRoleDto) {
+    await this.checkDuplicate(dto.name);
     const role = await this.prisma.role.create({
-      data: {
-        name: dto.name,
-        description: dto.description,
-      },
+      data: { name: dto.name, description: dto.description },
     });
-
-    // Assign permissions if provided
-    if (dto.permissionIds && dto.permissionIds.length > 0) {
-      await this.prisma.rolePermission.createMany({
-        data: dto.permissionIds.map((permissionId) => ({
-          role_id: role.id,
-          permission_id: permissionId,
-        })),
-      });
-    }
-
-    return this.findRoleById(role.id);
+    if (dto.permissionIds?.length)
+      await this.linkPermissions(role.id, dto.permissionIds);
+    return this.findById(role.id);
   }
 
-  /**
-   * Update role
-   */
-  async updateRole(id: number, dto: UpdateRoleDto) {
-    const role = await this.prisma.role.findUnique({
-      where: { id },
-    });
-
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-
-    // Check for duplicate name
-    if (dto.name && dto.name !== role.name) {
-      const existing = await this.prisma.role.findUnique({
-        where: { name: dto.name },
-      });
-
-      if (existing) {
-        throw new ConflictException('Role with this name already exists');
-      }
-    }
-
-    // Update role basic info
+  /** Update role */
+  async update(id: number, dto: UpdateRoleDto) {
+    const role = await this.findById(id);
+    if (dto.name && dto.name !== role.name) await this.checkDuplicate(dto.name);
     await this.prisma.role.update({
       where: { id },
-      data: {
-        name: dto.name,
-        description: dto.description,
-      },
+      data: { name: dto.name, description: dto.description },
     });
-
-    // Update permissions if provided
-    if (dto.permissionIds) {
-      // Remove all existing permissions
-      await this.prisma.rolePermission.deleteMany({
-        where: { role_id: id },
-      });
-
-      // Add new permissions
-      if (dto.permissionIds.length > 0) {
-        await this.prisma.rolePermission.createMany({
-          data: dto.permissionIds.map((permissionId) => ({
-            role_id: id,
-            permission_id: permissionId,
-          })),
-        });
-      }
-    }
-
-    return this.findRoleById(id);
+    if (dto.permissionIds) await this.replacePermissions(id, dto.permissionIds);
+    return this.findById(id);
   }
 
-  /**
-   * Delete role
-   */
-  async deleteRole(id: number) {
+  /** Delete role */
+  async delete(id: number) {
     const role = await this.prisma.role.findUnique({
       where: { id },
-      include: {
-        _count: {
-          select: { User: true },
-        },
-      },
+      include: { _count: { select: { User: true } } },
     });
-
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-
-    if (role._count.User > 0) {
+    if (!role) throw new NotFoundException('Role not found');
+    if (role._count.User > 0)
       throw new ConflictException('Cannot delete role with assigned users');
-    }
-
-    // Remove all permissions
-    await this.prisma.rolePermission.deleteMany({
-      where: { role_id: id },
-    });
-
-    return this.prisma.role.delete({
-      where: { id },
-    });
+    await this.prisma.rolePermission.deleteMany({ where: { role_id: id } });
+    return this.prisma.role.delete({ where: { id } });
   }
 
-  /**
-   * Assign permissions to role
-   */
-  async assignPermissions(roleId: number, permissionIds: number[]) {
-    const role = await this.prisma.role.findUnique({
-      where: { id: roleId },
-    });
-
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-
-    // Get existing permissions
-    const existingPermissions = await this.prisma.rolePermission.findMany({
-      where: { role_id: roleId },
-      select: { permission_id: true },
-    });
-
-    const existingIds = existingPermissions.map((p: { permission_id: number }) => p.permission_id);
-    const newIds = permissionIds.filter((id) => !existingIds.includes(id));
-
-    if (newIds.length > 0) {
-      await this.prisma.rolePermission.createMany({
-        data: newIds.map((permissionId) => ({
-          role_id: roleId,
-          permission_id: permissionId,
-        })),
-      });
-    }
-
-    return this.findRoleById(roleId);
+  private async checkDuplicate(name: string) {
+    const exists = await this.prisma.role.findUnique({ where: { name } });
+    if (exists) throw new ConflictException('Role name already exists');
   }
 
-  /**
-   * Remove permissions from role
-   */
-  async removePermissions(roleId: number, permissionIds: number[]) {
-    const role = await this.prisma.role.findUnique({
-      where: { id: roleId },
-    });
-
-    if (!role) {
-      throw new NotFoundException('Role not found');
-    }
-
-    await this.prisma.rolePermission.deleteMany({
-      where: {
+  private async linkPermissions(roleId: number, permissionIds: number[]) {
+    await this.prisma.rolePermission.createMany({
+      data: permissionIds.map((pid) => ({
         role_id: roleId,
-        permission_id: { in: permissionIds },
-      },
+        permission_id: pid,
+      })),
     });
-
-    return this.findRoleById(roleId);
   }
 
-  /**
-   * Check if user has permission
-   */
-  async userHasPermission(userId: number, permissionName: string): Promise<boolean> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        Role: {
-          include: {
-            RolePermission: {
-              include: {
-                Permission: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!user || !user.Role) {
-      return false;
-    }
-
-    return user.Role.RolePermission.some(
-      (rp) => rp.Permission.name === permissionName,
-    );
-  }
-
-  /**
-   * Get user permissions
-   */
-  async getUserPermissions(userId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        Role: {
-          include: {
-            RolePermission: {
-              include: {
-                Permission: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!user || !user.Role) {
-      return [];
-    }
-
-    return user.Role.RolePermission.map((rp) => rp.Permission);
+  private async replacePermissions(roleId: number, permissionIds: number[]) {
+    await this.prisma.rolePermission.deleteMany({ where: { role_id: roleId } });
+    if (permissionIds.length > 0)
+      await this.linkPermissions(roleId, permissionIds);
   }
 }

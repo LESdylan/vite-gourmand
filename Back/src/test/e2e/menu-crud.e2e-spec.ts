@@ -45,8 +45,9 @@ describe('Menu CRUD (e2e)', () => {
 
     if (list.body.data?.length > 0) {
       const id = list.body.data[0].id;
-      const response = await request(app.getHttpServer())
-        .get(`/api/menus/${id}`);
+      const response = await request(app.getHttpServer()).get(
+        `/api/menus/${id}`,
+      );
 
       expect(response.status).toBe(200);
       expect(response.body.data).toHaveProperty('name');

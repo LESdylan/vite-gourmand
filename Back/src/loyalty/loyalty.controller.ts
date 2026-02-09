@@ -15,7 +15,9 @@ export class LoyaltyController {
   constructor(private readonly loyaltyService: LoyaltyService) {}
 
   @Get('me')
-  @ApiOperation({ summary: 'Get current user loyalty account and recent transactions' })
+  @ApiOperation({
+    summary: 'Get current user loyalty account and recent transactions',
+  })
   async getMyAccount(@CurrentUser() user: JwtPayload) {
     return this.loyaltyService.getAccountWithTransactions(user.sub);
   }
@@ -35,7 +37,10 @@ export class LoyaltyController {
 
   @Post('me/redeem')
   @ApiOperation({ summary: 'Redeem loyalty points' })
-  async redeemPoints(@CurrentUser() user: JwtPayload, @Body() dto: RedeemPointsDto) {
+  async redeemPoints(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: RedeemPointsDto,
+  ) {
     return this.loyaltyService.redeemPoints(user.sub, dto);
   }
 
@@ -73,6 +78,10 @@ export class LoyaltyController {
     @Param('userId', SafeParseIntPipe) userId: number,
     @Body() body: { points: number; description: string },
   ) {
-    return this.loyaltyService.addBonusPoints(userId, body.points, body.description);
+    return this.loyaltyService.addBonusPoints(
+      userId,
+      body.points,
+      body.description,
+    );
   }
 }

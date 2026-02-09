@@ -47,7 +47,10 @@ export class DishController {
   @Roles('admin', 'manager')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update dish' })
-  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateDishDto) {
+  async update(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateDishDto,
+  ) {
     return this.dishService.update(id, dto);
   }
 

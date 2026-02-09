@@ -1,11 +1,23 @@
 /**
  * Image Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ImageService } from './image.service';
 import { Roles, SafeParseIntPipe, CurrentUser, Public } from '../common';
-import { CreateMenuImageDto, UpdateMenuImageDto, CreateReviewImageDto, UpdateReviewImageDto } from './dto/image.dto';
+import {
+  CreateMenuImageDto,
+  UpdateMenuImageDto,
+  CreateReviewImageDto,
+} from './dto/image.dto';
 import { JwtPayload } from '../common/types/request.types';
 
 @ApiTags('images')
@@ -19,7 +31,9 @@ export class ImageController {
   @Get('menu/:menuItemId')
   @Public()
   @ApiOperation({ summary: 'Get images for menu item' })
-  async getMenuItemImages(@Param('menuItemId', SafeParseIntPipe) menuItemId: number) {
+  async getMenuItemImages(
+    @Param('menuItemId', SafeParseIntPipe) menuItemId: number,
+  ) {
     return this.imageService.getMenuItemImages(menuItemId);
   }
 
@@ -99,13 +113,11 @@ export class ImageController {
 
   @Put('review/:id')
   @Roles('user', 'admin', 'employee')
-  @ApiOperation({ summary: 'Update my review image' })
-  async updateReviewImage(
-    @Param('id', SafeParseIntPipe) id: number,
-    @Body() dto: UpdateReviewImageDto,
-    @CurrentUser() user: JwtPayload,
-  ) {
-    return this.imageService.updateReviewImage(id, dto, user.sub);
+  @ApiOperation({
+    summary: 'Get review image (review images cannot be updated)',
+  })
+  async updateReviewImage(@Param('id', SafeParseIntPipe) id: number) {
+    return this.imageService.updateReviewImage(id);
   }
 
   @Delete('review/:id')

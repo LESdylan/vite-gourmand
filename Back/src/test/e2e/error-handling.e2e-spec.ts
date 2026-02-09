@@ -37,8 +37,9 @@ describe('Error Handling (e2e)', () => {
   });
 
   it('should return consistent 404 error format', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/nonexistent-route');
+    const response = await request(app.getHttpServer()).get(
+      '/api/nonexistent-route',
+    );
 
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty('success', false);
@@ -46,8 +47,9 @@ describe('Error Handling (e2e)', () => {
   });
 
   it('should not expose stack traces', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/nonexistent-route');
+    const response = await request(app.getHttpServer()).get(
+      '/api/nonexistent-route',
+    );
 
     expect(response.body.stack).toBeUndefined();
   });

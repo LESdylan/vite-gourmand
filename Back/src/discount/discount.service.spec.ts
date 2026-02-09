@@ -99,7 +99,9 @@ describe('DiscountService', () => {
     it('should throw NotFoundException if code not found', async () => {
       (prisma.discount.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.findByCode('INVALID')).rejects.toThrow(NotFoundException);
+      await expect(service.findByCode('INVALID')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -140,7 +142,10 @@ describe('DiscountService', () => {
     it('should validate a valid discount code', async () => {
       (prisma.discount.findUnique as jest.Mock).mockResolvedValue(mockDiscount);
 
-      const result = await service.validate({ code: 'SAVE20', orderAmount: 100 });
+      const result = await service.validate({
+        code: 'SAVE20',
+        orderAmount: 100,
+      });
 
       expect(result.valid).toBe(true);
       expect(result.discount).toBeDefined();
@@ -156,7 +161,9 @@ describe('DiscountService', () => {
 
     it('should reject if max uses exceeded', async () => {
       const exhaustedDiscount = { ...mockDiscount, current_uses: 100 };
-      (prisma.discount.findUnique as jest.Mock).mockResolvedValue(exhaustedDiscount);
+      (prisma.discount.findUnique as jest.Mock).mockResolvedValue(
+        exhaustedDiscount,
+      );
 
       await expect(
         service.validate({ code: 'SAVE20', orderAmount: 100 }),
@@ -165,7 +172,9 @@ describe('DiscountService', () => {
 
     it('should reject inactive discount', async () => {
       const inactiveDiscount = { ...mockDiscount, is_active: false };
-      (prisma.discount.findUnique as jest.Mock).mockResolvedValue(inactiveDiscount);
+      (prisma.discount.findUnique as jest.Mock).mockResolvedValue(
+        inactiveDiscount,
+      );
 
       await expect(
         service.validate({ code: 'SAVE20', orderAmount: 100 }),

@@ -78,7 +78,9 @@ describe('KanbanService', () => {
   describe('Columns', () => {
     describe('findAllColumns', () => {
       it('should return all columns ordered by position', async () => {
-        (prisma.kanbanColumn.findMany as jest.Mock).mockResolvedValue([mockColumn]);
+        (prisma.kanbanColumn.findMany as jest.Mock).mockResolvedValue([
+          mockColumn,
+        ]);
 
         const result = await service.findAllColumns();
 
@@ -90,7 +92,9 @@ describe('KanbanService', () => {
       });
 
       it('should filter by active only', async () => {
-        (prisma.kanbanColumn.findMany as jest.Mock).mockResolvedValue([mockColumn]);
+        (prisma.kanbanColumn.findMany as jest.Mock).mockResolvedValue([
+          mockColumn,
+        ]);
 
         await service.findAllColumns({ activeOnly: true });
 
@@ -103,7 +107,9 @@ describe('KanbanService', () => {
 
     describe('findColumnById', () => {
       it('should return a column by id', async () => {
-        (prisma.kanbanColumn.findUnique as jest.Mock).mockResolvedValue(mockColumn);
+        (prisma.kanbanColumn.findUnique as jest.Mock).mockResolvedValue(
+          mockColumn,
+        );
 
         const result = await service.findColumnById(1);
 
@@ -113,7 +119,9 @@ describe('KanbanService', () => {
       it('should throw NotFoundException if not found', async () => {
         (prisma.kanbanColumn.findUnique as jest.Mock).mockResolvedValue(null);
 
-        await expect(service.findColumnById(999)).rejects.toThrow(NotFoundException);
+        await expect(service.findColumnById(999)).rejects.toThrow(
+          NotFoundException,
+        );
       });
     });
 
@@ -124,7 +132,9 @@ describe('KanbanService', () => {
           mappedStatus: 'in_progress',
           color: '#2196F3',
         };
-        (prisma.kanbanColumn.aggregate as jest.Mock).mockResolvedValue({ _max: { position: 1 } });
+        (prisma.kanbanColumn.aggregate as jest.Mock).mockResolvedValue({
+          _max: { position: 1 },
+        });
         (prisma.kanbanColumn.create as jest.Mock).mockResolvedValue({
           id: 2,
           ...createDto,
@@ -141,7 +151,9 @@ describe('KanbanService', () => {
 
     describe('updateColumn', () => {
       it('should update a column', async () => {
-        (prisma.kanbanColumn.findUnique as jest.Mock).mockResolvedValue(mockColumn);
+        (prisma.kanbanColumn.findUnique as jest.Mock).mockResolvedValue(
+          mockColumn,
+        );
         (prisma.kanbanColumn.update as jest.Mock).mockResolvedValue({
           ...mockColumn,
           name: 'Updated Name',
@@ -155,7 +167,9 @@ describe('KanbanService', () => {
 
     describe('deleteColumn', () => {
       it('should delete a column', async () => {
-        (prisma.kanbanColumn.findUnique as jest.Mock).mockResolvedValue(mockColumn);
+        (prisma.kanbanColumn.findUnique as jest.Mock).mockResolvedValue(
+          mockColumn,
+        );
         (prisma.kanbanColumn.delete as jest.Mock).mockResolvedValue(mockColumn);
 
         const result = await service.deleteColumn(1);
@@ -167,7 +181,9 @@ describe('KanbanService', () => {
     describe('reorderColumns', () => {
       it('should reorder columns', async () => {
         (prisma.$transaction as jest.Mock).mockResolvedValue([]);
-        (prisma.kanbanColumn.findMany as jest.Mock).mockResolvedValue([mockColumn]);
+        (prisma.kanbanColumn.findMany as jest.Mock).mockResolvedValue([
+          mockColumn,
+        ]);
 
         await service.reorderColumns([2, 1]);
 
@@ -199,7 +215,9 @@ describe('KanbanService', () => {
       it('should throw NotFoundException if not found', async () => {
         (prisma.orderTag.findUnique as jest.Mock).mockResolvedValue(null);
 
-        await expect(service.findTagById(999)).rejects.toThrow(NotFoundException);
+        await expect(service.findTagById(999)).rejects.toThrow(
+          NotFoundException,
+        );
       });
     });
 
@@ -246,7 +264,9 @@ describe('KanbanService', () => {
   describe('Order Tags', () => {
     describe('getOrderTags', () => {
       it('should return tags for an order', async () => {
-        (prisma.orderOrderTag.findMany as jest.Mock).mockResolvedValue([mockOrderTag]);
+        (prisma.orderOrderTag.findMany as jest.Mock).mockResolvedValue([
+          mockOrderTag,
+        ]);
 
         const result = await service.getOrderTags(1);
 
@@ -257,7 +277,9 @@ describe('KanbanService', () => {
 
     describe('addTagToOrder', () => {
       it('should add a tag to an order', async () => {
-        (prisma.orderOrderTag.create as jest.Mock).mockResolvedValue(mockOrderTag);
+        (prisma.orderOrderTag.create as jest.Mock).mockResolvedValue(
+          mockOrderTag,
+        );
 
         const result = await service.addTagToOrder(1, 1);
 
@@ -268,7 +290,9 @@ describe('KanbanService', () => {
 
     describe('removeTagFromOrder', () => {
       it('should remove a tag from an order', async () => {
-        (prisma.orderOrderTag.delete as jest.Mock).mockResolvedValue(mockOrderTag);
+        (prisma.orderOrderTag.delete as jest.Mock).mockResolvedValue(
+          mockOrderTag,
+        );
 
         const result = await service.removeTagFromOrder(1, 1);
 
@@ -282,7 +306,12 @@ describe('KanbanService', () => {
       it('should return full kanban board with columns and orders', async () => {
         const columns = [
           { ...mockColumn, id: 1, name: 'Pending', mapped_status: 'pending' },
-          { ...mockColumn, id: 2, name: 'In Progress', mapped_status: 'in_progress' },
+          {
+            ...mockColumn,
+            id: 2,
+            name: 'In Progress',
+            mapped_status: 'in_progress',
+          },
         ];
         const orders = [
           { id: 1, status: 'pending', OrderOrderTag: [mockOrderTag] },

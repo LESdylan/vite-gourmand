@@ -14,9 +14,15 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { AddressService } from './address.service';
-import { CurrentUser, Roles, JwtPayload, PaginationDto, SafeParseIntPipe } from '../common';
+import {
+  CurrentUser,
+  Roles,
+  JwtPayload,
+  PaginationDto,
+  SafeParseIntPipe,
+} from '../common';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
+import { UpdateAddressDto } from './dto/address.dto';
 
 @ApiTags('users')
 @Controller('users')

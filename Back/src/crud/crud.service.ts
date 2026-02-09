@@ -39,7 +39,10 @@ export class CrudService {
     return (this.prisma as unknown as Record<string, PrismaModel>)[model];
   }
 
-  async findAll<T>(model: string, options: FindOptions = {}): Promise<PaginatedResult<T>> {
+  async findAll<T>(
+    model: string,
+    options: FindOptions = {},
+  ): Promise<PaginatedResult<T>> {
     const { page = 1, limit = 20, where = {}, orderBy = {}, include } = options;
     const skip = (page - 1) * limit;
     const prismaModel = this.getModel(model);
@@ -66,7 +69,11 @@ export class CrudService {
     };
   }
 
-  async findOne<T>(model: string, id: string, include?: Record<string, unknown>): Promise<T | null> {
+  async findOne<T>(
+    model: string,
+    id: string,
+    include?: Record<string, unknown>,
+  ): Promise<T | null> {
     const prismaModel = this.getModel(model);
     return prismaModel.findUnique({
       where: { id },
@@ -79,7 +86,11 @@ export class CrudService {
     return prismaModel.create({ data }) as Promise<T>;
   }
 
-  async update<T>(model: string, id: string, data: Record<string, unknown>): Promise<T> {
+  async update<T>(
+    model: string,
+    id: string,
+    data: Record<string, unknown>,
+  ): Promise<T> {
     const prismaModel = this.getModel(model);
     return prismaModel.update({
       where: { id },
@@ -92,7 +103,10 @@ export class CrudService {
     await prismaModel.delete({ where: { id } });
   }
 
-  async exists(model: string, where: Record<string, unknown>): Promise<boolean> {
+  async exists(
+    model: string,
+    where: Record<string, unknown>,
+  ): Promise<boolean> {
     const prismaModel = this.getModel(model);
     const count = await prismaModel.count({ where });
     return count > 0;

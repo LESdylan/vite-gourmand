@@ -21,7 +21,11 @@ export class ThemeService {
 
   async create(dto: CreateThemeDto) {
     return this.prisma.theme.create({
-      data: { name: dto.name, description: dto.description, icon_url: dto.iconUrl },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        icon_url: dto.iconUrl,
+      },
     });
   }
 
@@ -29,7 +33,11 @@ export class ThemeService {
     await this.ensureExists(id);
     return this.prisma.theme.update({
       where: { id },
-      data: { name: dto.name, description: dto.description, icon_url: dto.iconUrl },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        icon_url: dto.iconUrl,
+      },
     });
   }
 

@@ -1,7 +1,15 @@
 /**
  * Theme Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ThemeService } from './theme.service';
 import { Public, Roles, SafeParseIntPipe } from '../common';
@@ -38,7 +46,10 @@ export class ThemeController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update theme' })
-  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateThemeDto) {
+  async update(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateThemeDto,
+  ) {
     return this.themeService.update(id, dto);
   }
 

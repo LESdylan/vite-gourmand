@@ -1,11 +1,24 @@
 /**
  * Time Off Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TimeOffService } from './timeoff.service';
 import { Roles, SafeParseIntPipe, CurrentUser } from '../common';
-import { CreateTimeOffRequestDto, UpdateTimeOffRequestDto, DecideTimeOffRequestDto } from './dto/timeoff.dto';
+import {
+  CreateTimeOffRequestDto,
+  UpdateTimeOffRequestDto,
+  DecideTimeOffRequestDto,
+} from './dto/timeoff.dto';
 import { JwtPayload } from '../common/types/request.types';
 
 @ApiTags('time-off')
@@ -26,7 +39,10 @@ export class TimeOffController {
   @Post()
   @Roles('employee')
   @ApiOperation({ summary: 'Create time off request' })
-  async createRequest(@Body() dto: CreateTimeOffRequestDto, @CurrentUser() user: JwtPayload) {
+  async createRequest(
+    @Body() dto: CreateTimeOffRequestDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.timeoffService.createRequest(dto, user.sub);
   }
 
@@ -44,7 +60,10 @@ export class TimeOffController {
   @Post(':id/cancel')
   @Roles('employee')
   @ApiOperation({ summary: 'Cancel my time off request' })
-  async cancelRequest(@Param('id', SafeParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  async cancelRequest(
+    @Param('id', SafeParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.timeoffService.cancelRequest(id, user.sub);
   }
 
@@ -76,7 +95,10 @@ export class TimeOffController {
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ) {
-    return this.timeoffService.getSchedule(new Date(startDate), new Date(endDate));
+    return this.timeoffService.getSchedule(
+      new Date(startDate),
+      new Date(endDate),
+    );
   }
 
   @Get(':id')

@@ -39,7 +39,10 @@ export class MutationStrategy {
           const charCode = input.charCodeAt(pos);
           const bitPos = Math.floor(Math.random() * 8);
           const newCharCode = charCode ^ (1 << bitPos);
-          mutated = input.substring(0, pos) + String.fromCharCode(newCharCode) + input.substring(pos + 1);
+          mutated =
+            input.substring(0, pos) +
+            String.fromCharCode(newCharCode) +
+            input.substring(pos + 1);
           description = `Flipped bit ${bitPos} at position ${pos}`;
         }
         break;
@@ -48,7 +51,8 @@ export class MutationStrategy {
         if (input.length > 0) {
           const pos = Math.floor(Math.random() * input.length);
           const newChar = String.fromCharCode(Math.floor(Math.random() * 256));
-          mutated = input.substring(0, pos) + newChar + input.substring(pos + 1);
+          mutated =
+            input.substring(0, pos) + newChar + input.substring(pos + 1);
           description = `Replaced byte at position ${pos}`;
         }
         break;
@@ -57,7 +61,8 @@ export class MutationStrategy {
         {
           const pos = Math.floor(Math.random() * (input.length + 1));
           const insertChars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
-          const toInsert = insertChars[Math.floor(Math.random() * insertChars.length)];
+          const toInsert =
+            insertChars[Math.floor(Math.random() * insertChars.length)];
           mutated = input.substring(0, pos) + toInsert + input.substring(pos);
           description = `Inserted '${toInsert}' at position ${pos}`;
         }
@@ -75,8 +80,10 @@ export class MutationStrategy {
         if (input.length > 0) {
           const pos = Math.floor(Math.random() * input.length);
           const replaceChars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-          const replacement = replaceChars[Math.floor(Math.random() * replaceChars.length)];
-          mutated = input.substring(0, pos) + replacement + input.substring(pos + 1);
+          const replacement =
+            replaceChars[Math.floor(Math.random() * replaceChars.length)];
+          mutated =
+            input.substring(0, pos) + replacement + input.substring(pos + 1);
           description = `Replaced character at position ${pos} with '${replacement}'`;
         }
         break;
@@ -85,7 +92,10 @@ export class MutationStrategy {
         if (input.length > 1) {
           const pos = Math.floor(Math.random() * (input.length - 1));
           mutated =
-            input.substring(0, pos) + input[pos + 1] + input[pos] + input.substring(pos + 2);
+            input.substring(0, pos) +
+            input[pos + 1] +
+            input[pos] +
+            input.substring(pos + 2);
           description = `Swapped characters at positions ${pos} and ${pos + 1}`;
         }
         break;
@@ -93,7 +103,10 @@ export class MutationStrategy {
       case 'duplicate':
         if (input.length > 0) {
           const start = Math.floor(Math.random() * input.length);
-          const len = Math.min(Math.floor(Math.random() * 10) + 1, input.length - start);
+          const len = Math.min(
+            Math.floor(Math.random() * 10) + 1,
+            input.length - start,
+          );
           const toDuplicate = input.substring(start, start + len);
           mutated = input + toDuplicate;
           description = `Duplicated '${toDuplicate}' at end`;
@@ -111,9 +124,9 @@ export class MutationStrategy {
       case 'extend':
         {
           const extendChars = 'AAAA\x00\xFF\n\r\t';
-          const toAdd = extendChars[Math.floor(Math.random() * extendChars.length)].repeat(
-            Math.floor(Math.random() * 100) + 1,
-          );
+          const toAdd = extendChars[
+            Math.floor(Math.random() * extendChars.length)
+          ].repeat(Math.floor(Math.random() * 100) + 1);
           mutated = input + toAdd;
           description = `Extended with ${toAdd.length} characters`;
         }
@@ -124,8 +137,11 @@ export class MutationStrategy {
           const pos = Math.floor(Math.random() * input.length);
           const char = input[pos];
           const newChar =
-            char === char.toUpperCase() ? char.toLowerCase() : char.toUpperCase();
-          mutated = input.substring(0, pos) + newChar + input.substring(pos + 1);
+            char === char.toUpperCase()
+              ? char.toLowerCase()
+              : char.toUpperCase();
+          mutated =
+            input.substring(0, pos) + newChar + input.substring(pos + 1);
           description = `Changed case at position ${pos}`;
         }
         break;
@@ -143,7 +159,8 @@ export class MutationStrategy {
             'й', // Cyrillic
           ];
           const pos = Math.floor(Math.random() * (input.length + 1));
-          const toInsert = unicodeChars[Math.floor(Math.random() * unicodeChars.length)];
+          const toInsert =
+            unicodeChars[Math.floor(Math.random() * unicodeChars.length)];
           mutated = input.substring(0, pos) + toInsert + input.substring(pos);
           description = `Inserted unicode at position ${pos}`;
         }
@@ -168,7 +185,8 @@ export class MutationStrategy {
             '\0',
           ];
           const pos = Math.floor(Math.random() * (input.length + 1));
-          const toInsert = specialChars[Math.floor(Math.random() * specialChars.length)];
+          const toInsert =
+            specialChars[Math.floor(Math.random() * specialChars.length)];
           mutated = input.substring(0, pos) + toInsert + input.substring(pos);
           description = `Inserted special char at position ${pos}`;
         }
@@ -207,7 +225,8 @@ export class MutationStrategy {
     const descriptions: string[] = [];
 
     for (let i = 0; i < count; i++) {
-      const type = mutationTypes[Math.floor(Math.random() * mutationTypes.length)];
+      const type =
+        mutationTypes[Math.floor(Math.random() * mutationTypes.length)];
       const result = this.mutate(current, type);
       current = result.mutated;
       appliedMutations.push(type);
@@ -225,7 +244,10 @@ export class MutationStrategy {
   /**
    * Generate variations of a valid input
    */
-  static generateVariations(input: string, count: number = 10): MutationResult[] {
+  static generateVariations(
+    input: string,
+    count: number = 10,
+  ): MutationResult[] {
     const results: MutationResult[] = [];
 
     for (let i = 0; i < count; i++) {

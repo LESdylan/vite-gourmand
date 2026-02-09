@@ -54,8 +54,12 @@ export function randomPassword(
       case 'weak':
         return randomString(6, 'abcdefghijklmnopqrstuvwxyz');
       case 'medium':
-        return randomString(8, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') +
-          randomString(2, '0123456789');
+        return (
+          randomString(
+            8,
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+          ) + randomString(2, '0123456789')
+        );
       case 'strong':
       default:
         return (
@@ -81,11 +85,14 @@ export function randomPassword(
   if (opts.includeNumbers) charset += '0123456789';
   if (opts.includeSpecial) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
 
-  const length = Math.floor(Math.random() * (opts.maxLength - opts.minLength + 1)) + opts.minLength;
+  const length =
+    Math.floor(Math.random() * (opts.maxLength - opts.minLength + 1)) +
+    opts.minLength;
 
   // Ensure at least one of each required character type
   let password = '';
-  if (opts.includeUppercase) password += randomString(1, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  if (opts.includeUppercase)
+    password += randomString(1, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
   if (opts.includeNumbers) password += randomString(1, '0123456789');
   if (opts.includeSpecial) password += randomString(1, '!@#$%^&*()_+-=');
   password += randomString(1, 'abcdefghijklmnopqrstuvwxyz');
@@ -106,7 +113,9 @@ export function randomPassword(
 /**
  * Generate a random phone number
  */
-export function randomPhone(format: 'FR' | 'US' | 'international' = 'FR'): string {
+export function randomPhone(
+  format: 'FR' | 'US' | 'international' = 'FR',
+): string {
   switch (format) {
     case 'FR':
       // French mobile: 06 or 07 + 8 digits
@@ -127,7 +136,9 @@ export function randomPhone(format: 'FR' | 'US' | 'international' = 'FR'): strin
  * Generate a valid credit card number using Luhn algorithm
  * @param typeOrPrefix - Either a card type ('visa', 'mastercard', 'amex') or a prefix string ('4', '51', '37', etc.)
  */
-export function generateValidCreditCard(typeOrPrefix: 'visa' | 'mastercard' | 'amex' | string = 'visa'): string {
+export function generateValidCreditCard(
+  typeOrPrefix: 'visa' | 'mastercard' | 'amex' | string = 'visa',
+): string {
   let prefix: string;
   let length: number;
 
@@ -144,13 +155,21 @@ export function generateValidCreditCard(typeOrPrefix: 'visa' | 'mastercard' | 'a
     case '53':
     case '54':
     case '55':
-      prefix = typeOrPrefix === 'mastercard' ? '5' + Math.floor(Math.random() * 5 + 1).toString() : typeOrPrefix;
+      prefix =
+        typeOrPrefix === 'mastercard'
+          ? '5' + Math.floor(Math.random() * 5 + 1).toString()
+          : typeOrPrefix;
       length = 16;
       break;
     case 'amex':
     case '34':
     case '37':
-      prefix = typeOrPrefix === 'amex' ? (Math.random() > 0.5 ? '34' : '37') : typeOrPrefix;
+      prefix =
+        typeOrPrefix === 'amex'
+          ? Math.random() > 0.5
+            ? '34'
+            : '37'
+          : typeOrPrefix;
       length = 15;
       break;
     case '6011': // Discover
@@ -268,15 +287,27 @@ export const TestData = {
 
   passwords: {
     strong: [
-      { password: 'MySecureP@ssw0rd!', reason: 'Mixed case, numbers, special chars, long' },
+      {
+        password: 'MySecureP@ssw0rd!',
+        reason: 'Mixed case, numbers, special chars, long',
+      },
       { password: 'C0mpl3x#Passw0rd', reason: 'All character types, 16 chars' },
       { password: 'Tr0ub4dor&3horse', reason: 'XKCD style with complexity' },
       { password: '9K#mP2$vL8@nQ4!w', reason: 'High entropy random' },
-      { password: 'CorrectHorseBattery1!', reason: 'Passphrase with complexity' },
+      {
+        password: 'CorrectHorseBattery1!',
+        reason: 'Passphrase with complexity',
+      },
     ],
     medium: [
-      { password: 'Password123', reason: 'Common pattern but meets basic requirements' },
-      { password: 'MyPassword1', reason: 'Meets length, has uppercase and number' },
+      {
+        password: 'Password123',
+        reason: 'Common pattern but meets basic requirements',
+      },
+      {
+        password: 'MyPassword1',
+        reason: 'Meets length, has uppercase and number',
+      },
       { password: 'Abcdef123!', reason: 'Short but has all types' },
       { password: 'Welcome2024', reason: 'Dictionary word with number' },
     ],
@@ -370,8 +401,16 @@ export const TestData = {
     valid: [
       { number: '4111111111111111', type: 'visa', name: 'Test Visa' },
       { number: '4012888888881881', type: 'visa', name: 'Test Visa 2' },
-      { number: '5555555555554444', type: 'mastercard', name: 'Test Mastercard' },
-      { number: '5105105105105100', type: 'mastercard', name: 'Test Mastercard 2' },
+      {
+        number: '5555555555554444',
+        type: 'mastercard',
+        name: 'Test Mastercard',
+      },
+      {
+        number: '5105105105105100',
+        type: 'mastercard',
+        name: 'Test Mastercard 2',
+      },
       { number: '378282246310005', type: 'amex', name: 'Test Amex' },
       { number: '371449635398431', type: 'amex', name: 'Test Amex 2' },
     ],
@@ -423,7 +462,7 @@ export const TestData = {
     "admin'--",
     "' OR 1=1--",
     "'; EXEC xp_cmdshell('dir'); --",
-    "1; UPDATE users SET admin=1 WHERE id=1",
+    '1; UPDATE users SET admin=1 WHERE id=1',
   ],
 
   // XSS test strings

@@ -50,9 +50,11 @@ describe('IngredientService', () => {
 
   describe('findAll', () => {
     it('should return all ingredients', async () => {
-      (prisma.ingredient.findMany as jest.Mock).mockResolvedValue([mockIngredient]);
+      (prisma.ingredient.findMany as jest.Mock).mockResolvedValue([
+        mockIngredient,
+      ]);
 
-      const result = await service.findAll() as any[];
+      const result = (await service.findAll()) as any[];
 
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Tomatoes');
@@ -69,7 +71,9 @@ describe('IngredientService', () => {
 
   describe('findById', () => {
     it('should return an ingredient by id', async () => {
-      (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(mockIngredient);
+      (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(
+        mockIngredient,
+      );
 
       const result = await service.findById(1);
 
@@ -109,7 +113,9 @@ describe('IngredientService', () => {
 
   describe('update', () => {
     it('should update an ingredient', async () => {
-      (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(mockIngredient);
+      (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(
+        mockIngredient,
+      );
       (prisma.ingredient.update as jest.Mock).mockResolvedValue({
         ...mockIngredient,
         current_stock: 100,
@@ -123,13 +129,17 @@ describe('IngredientService', () => {
     it('should throw NotFoundException if not found', async () => {
       (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.update(999, { name: 'Test' })).rejects.toThrow(NotFoundException);
+      await expect(service.update(999, { name: 'Test' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('delete', () => {
     it('should delete an ingredient', async () => {
-      (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(mockIngredient);
+      (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(
+        mockIngredient,
+      );
       (prisma.ingredient.delete as jest.Mock).mockResolvedValue(mockIngredient);
 
       const result = await service.delete(1);
@@ -157,7 +167,9 @@ describe('IngredientService', () => {
 
   describe('restock', () => {
     it('should add stock to ingredient', async () => {
-      (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(mockIngredient);
+      (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(
+        mockIngredient,
+      );
       (prisma.ingredient.update as jest.Mock).mockResolvedValue({
         ...mockIngredient,
         current_stock: 70,
@@ -171,7 +183,9 @@ describe('IngredientService', () => {
     it('should throw NotFoundException if ingredient not found', async () => {
       (prisma.ingredient.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.restock(999, { quantity: 20 })).rejects.toThrow(NotFoundException);
+      await expect(service.restock(999, { quantity: 20 })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

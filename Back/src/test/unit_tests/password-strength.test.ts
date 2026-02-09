@@ -25,18 +25,24 @@ export class PasswordStrengthTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Strong password failed: '${test.password}' (${test.reason}) - Score: ${validation.score}`);
+          errors.push(
+            `Strong password failed: '${test.password}' (${test.reason}) - Score: ${validation.score}`,
+          );
         }
       }
 
       // Test medium passwords - should have score 2-3
       for (const test of TestData.passwords.medium) {
-        const validation = PasswordValidator.validate(test.password, { minScore: 1 });
+        const validation = PasswordValidator.validate(test.password, {
+          minScore: 1,
+        });
         if (validation.score >= 2 && validation.score <= 4) {
           passed++;
         } else {
           failed++;
-          errors.push(`Medium password unexpected score: '${test.password}' (${test.reason}) - Score: ${validation.score}, Expected: 2-3`);
+          errors.push(
+            `Medium password unexpected score: '${test.password}' (${test.reason}) - Score: ${validation.score}, Expected: 2-3`,
+          );
         }
       }
 
@@ -47,7 +53,9 @@ export class PasswordStrengthTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Weak password passed unexpectedly: '${test.password}' (${test.reason}) - Score: ${validation.score}`);
+          errors.push(
+            `Weak password passed unexpectedly: '${test.password}' (${test.reason}) - Score: ${validation.score}`,
+          );
         }
       }
 
@@ -72,11 +80,16 @@ export class PasswordStrengthTest extends BaseTest {
 
       for (const test of entropyTests) {
         const validation = PasswordValidator.validate(test.password);
-        if (validation.entropy >= test.minEntropy && validation.entropy <= test.maxEntropy) {
+        if (
+          validation.entropy >= test.minEntropy &&
+          validation.entropy <= test.maxEntropy
+        ) {
           passed++;
         } else {
           failed++;
-          errors.push(`Entropy for '${test.password}': ${validation.entropy} bits, expected ${test.minEntropy}-${test.maxEntropy}`);
+          errors.push(
+            `Entropy for '${test.password}': ${validation.entropy} bits, expected ${test.minEntropy}-${test.maxEntropy}`,
+          );
         }
       }
 
@@ -88,13 +101,18 @@ export class PasswordStrengthTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Generated password not strong enough: Score ${validation.score}`);
+          errors.push(
+            `Generated password not strong enough: Score ${validation.score}`,
+          );
         }
       }
 
       // Test crack time estimation
       const validation = PasswordValidator.validate('MySecureP@ssw0rd!');
-      if (validation.crackTime.online !== 'instantly' && validation.crackTime.offlineFast !== 'instantly') {
+      if (
+        validation.crackTime.online !== 'instantly' &&
+        validation.crackTime.offlineFast !== 'instantly'
+      ) {
         passed++;
       } else {
         failed++;
@@ -113,7 +131,10 @@ export class PasswordStrengthTest extends BaseTest {
     }
 
     return {
-      ...this.failure(`${result.failed} password strength tests failed`, result.errors),
+      ...this.failure(
+        `${result.failed} password strength tests failed`,
+        result.errors,
+      ),
       duration,
       details: { passed: result.passed, failed: result.failed },
     };
@@ -124,7 +145,9 @@ export class PasswordStrengthTest extends BaseTest {
     const failedCases: TestResult[] = [];
 
     for (let i = 0; i < iterations; i++) {
-      const strength = (['weak', 'medium', 'strong'] as const)[Math.floor(Math.random() * 3)];
+      const strength = (['weak', 'medium', 'strong'] as const)[
+        Math.floor(Math.random() * 3)
+      ];
       const password = randomPassword(strength);
 
       const validation = PasswordValidator.validate(password);
@@ -148,7 +171,9 @@ export class PasswordStrengthTest extends BaseTest {
           break;
       }
 
-      const testPassed = validation.score >= expectedMinScore && validation.score <= expectedMaxScore;
+      const testPassed =
+        validation.score >= expectedMinScore &&
+        validation.score <= expectedMaxScore;
 
       const testResult: TestResult = {
         name: `fuzzy_password_${i + 1}`,

@@ -98,3 +98,37 @@ webpage
 - It's a genuine, real-world project I could reason about
 - it rewards careful thought about APIs, ownership, and semantics
 - It's fun to see it get closer and closer to real project that we could use daily
+
+
+🚨 VOS DATES D’EXAMEN - RAPPEL DEADLINES ECF & DOSSIER PROFESSIONNEL 
+Promotion JUIN / JUILLET 2026 - Session ÉTÉ 2026 
+ 
+Cette publication s’adresse aux apprenants positionnés sur la session Été 2026 et ayant complété le formulaire d’inscription à l’examen. 
+ 
+Vous trouverez ci-dessous les deadlines obligatoires liées au passage de votre examen : 
+ 
+◼ 🚨 ECF finale - Session Été 2026 
+👉 Jeudi 19 février 2026 à 23h59 (heure de Paris) 
+ 
+◼ Dossier professionnel / Dossier projet 
+👉 Vendredi 1er mai 2026 à 23h59 (heure de Paris) 
+ 
+⚠️ Tout dépôt hors délai ne pourra pas être pris en compte. 
+ 
+Avant de déposer votre ECF finale, votre Dossier professionnel ou votre Dossier projet, merci de respecter les bons réflexes suivants : 
+ 
+→ Utiliser le modèle de copie s’il est mis à disposition dans l’onglet « Évaluations » 
+ 
+→ Relire attentivement votre travail et vérifier le respect des consignes (exemple : captures d’écran demandées, lisibilité, etc.) 
+ 
+→ Déposer un fichier unique au format PDF, comprenant l’ensemble des pages attendues 
+ 
+→ Vérifier que vous déposez la bonne copie au bon endroit dans l’onglet « Évaluations » 
+ 
+💡 Je vous invite à visionner le replay des lives examens animés par votre formateur référent Christian Lohez.  
+ 
+💬 En cas de question, rendez-vous dans votre onglet 
+Forum > Questions sur vos parcours. 
+Pour une question générale, pensez également à consulter la FAQ. 
+
+https://faq.studi.fr/article-categories/evaluation_examens/

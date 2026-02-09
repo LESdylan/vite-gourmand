@@ -31,7 +31,10 @@ export class DbMailConnectionTest extends BaseTest {
   /**
    * Validate database connection configuration
    */
-  private validateDbConfig(config: Partial<ConnectionConfig>): { isValid: boolean; errors: string[] } {
+  private validateDbConfig(config: Partial<ConnectionConfig>): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Host validation
@@ -61,7 +64,10 @@ export class DbMailConnectionTest extends BaseTest {
     }
 
     // Timeout
-    if (config.timeout !== undefined && (config.timeout < 0 || config.timeout > 300000)) {
+    if (
+      config.timeout !== undefined &&
+      (config.timeout < 0 || config.timeout > 300000)
+    ) {
       errors.push('Timeout must be between 0 and 300000ms');
     }
 
@@ -71,7 +77,10 @@ export class DbMailConnectionTest extends BaseTest {
   /**
    * Validate mail (SMTP) connection configuration
    */
-  private validateMailConfig(config: Partial<ConnectionConfig>): { isValid: boolean; errors: string[] } {
+  private validateMailConfig(config: Partial<ConnectionConfig>): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Host validation
@@ -85,7 +94,10 @@ export class DbMailConnectionTest extends BaseTest {
     const validPorts = [25, 465, 587, 2525];
     if (!config.port) {
       errors.push('SMTP port is required');
-    } else if (!validPorts.includes(config.port) && (config.port < 1 || config.port > 65535)) {
+    } else if (
+      !validPorts.includes(config.port) &&
+      (config.port < 1 || config.port > 65535)
+    ) {
       errors.push('Invalid SMTP port');
     }
 
@@ -105,7 +117,9 @@ export class DbMailConnectionTest extends BaseTest {
   /**
    * Simulate database connection (mock)
    */
-  private async simulateDbConnection(config: ConnectionConfig): Promise<ConnectionResult> {
+  private async simulateDbConnection(
+    config: ConnectionConfig,
+  ): Promise<ConnectionResult> {
     const validation = this.validateDbConfig(config);
     if (!validation.isValid) {
       return { isConnected: false, error: validation.errors.join(', ') };
@@ -140,7 +154,9 @@ export class DbMailConnectionTest extends BaseTest {
   /**
    * Simulate mail connection (mock)
    */
-  private async simulateMailConnection(config: ConnectionConfig): Promise<ConnectionResult> {
+  private async simulateMailConnection(
+    config: ConnectionConfig,
+  ): Promise<ConnectionResult> {
     const validation = this.validateMailConfig(config);
     if (!validation.isValid) {
       return { isConnected: false, error: validation.errors.join(', ') };
@@ -182,9 +198,26 @@ export class DbMailConnectionTest extends BaseTest {
 
       // Valid database configs
       const validDbConfigs: ConnectionConfig[] = [
-        { host: 'localhost', port: 5432, database: 'vitegourmand', user: 'postgres', password: 'secret' },
-        { host: 'db.example.com', port: 5432, database: 'production', ssl: true, timeout: 5000 },
-        { host: '192.168.1.100', port: 3306, database: 'mysql_db', user: 'root' },
+        {
+          host: 'localhost',
+          port: 5432,
+          database: 'vitegourmand',
+          user: 'postgres',
+          password: 'secret',
+        },
+        {
+          host: 'db.example.com',
+          port: 5432,
+          database: 'production',
+          ssl: true,
+          timeout: 5000,
+        },
+        {
+          host: '192.168.1.100',
+          port: 3306,
+          database: 'mysql_db',
+          user: 'root',
+        },
       ];
 
       for (const config of validDbConfigs) {
@@ -220,8 +253,19 @@ export class DbMailConnectionTest extends BaseTest {
 
       // Valid mail configs
       const validMailConfigs: ConnectionConfig[] = [
-        { host: 'smtp.gmail.com', port: 587, user: 'user@gmail.com', password: 'password' },
-        { host: 'smtp.example.com', port: 465, ssl: true, user: 'admin', password: 'secret' },
+        {
+          host: 'smtp.gmail.com',
+          port: 587,
+          user: 'user@gmail.com',
+          password: 'password',
+        },
+        {
+          host: 'smtp.example.com',
+          port: 465,
+          ssl: true,
+          user: 'admin',
+          password: 'secret',
+        },
         { host: 'mail.local', port: 25 },
       ];
 
@@ -231,7 +275,9 @@ export class DbMailConnectionTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Valid mail config rejected: ${result.errors.join(', ')}`);
+          errors.push(
+            `Valid mail config rejected: ${result.errors.join(', ')}`,
+          );
         }
       }
 
@@ -294,10 +340,13 @@ export class DbMailConnectionTest extends BaseTest {
 
       // ===== Connection String Parsing =====
 
-      const parseConnectionString = (url: string): Partial<ConnectionConfig> | null => {
+      const parseConnectionString = (
+        url: string,
+      ): Partial<ConnectionConfig> | null => {
         try {
           // Format: postgresql://user:password@host:port/database
-          const regex = /^(?:postgresql|postgres|mysql):\/\/(?:([^:]+):([^@]+)@)?([^:\/]+):(\d+)\/(.+)$/;
+          const regex =
+            /^(?:postgresql|postgres|mysql):\/\/(?:([^:]+):([^@]+)@)?([^:\/]+):(\d+)\/(.+)$/;
           const match = url.match(regex);
 
           if (!match) return null;
@@ -315,8 +364,14 @@ export class DbMailConnectionTest extends BaseTest {
       };
 
       const connectionStrings = [
-        { url: 'postgresql://postgres:secret@localhost:5432/vitegourmand', shouldParse: true },
-        { url: 'mysql://root:password@db.example.com:3306/mydb', shouldParse: true },
+        {
+          url: 'postgresql://postgres:secret@localhost:5432/vitegourmand',
+          shouldParse: true,
+        },
+        {
+          url: 'mysql://root:password@db.example.com:3306/mydb',
+          shouldParse: true,
+        },
         { url: 'invalid-connection-string', shouldParse: false },
         { url: 'http://not-a-db:5432/test', shouldParse: false },
       ];
@@ -349,7 +404,10 @@ export class DbMailConnectionTest extends BaseTest {
     }
 
     return {
-      ...this.failure(`${result.failed} connection tests failed`, result.errors),
+      ...this.failure(
+        `${result.failed} connection tests failed`,
+        result.errors,
+      ),
       duration,
       details: { passed: result.passed, failed: result.failed },
     };
@@ -394,7 +452,11 @@ export class DbMailConnectionTest extends BaseTest {
           passed: testPassed,
           message: `DB config (${testType}): ${testPassed ? 'correct' : 'incorrect'}`,
           duration: 0,
-          details: { expectedValid, actualValid: result.isValid, errors: result.errors },
+          details: {
+            expectedValid,
+            actualValid: result.isValid,
+            errors: result.errors,
+          },
         });
 
         if (!testPassed) {
@@ -430,7 +492,11 @@ export class DbMailConnectionTest extends BaseTest {
           passed: testPassed,
           message: `Mail config (${testType}): ${testPassed ? 'correct' : 'incorrect'}`,
           duration: 0,
-          details: { expectedValid, actualValid: result.isValid, errors: result.errors },
+          details: {
+            expectedValid,
+            actualValid: result.isValid,
+            errors: result.errors,
+          },
         });
 
         if (!testPassed) {

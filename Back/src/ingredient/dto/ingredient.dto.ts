@@ -1,7 +1,13 @@
 /**
  * Ingredient DTOs
  */
-import { IsString, IsOptional, IsNumber, Min, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateIngredientDto {

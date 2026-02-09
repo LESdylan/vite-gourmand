@@ -5,7 +5,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { UpdateWorkingHoursDto } from './dto/working-hours.dto';
 
-const DAY_ORDER = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+const DAY_ORDER = [
+  'Lundi',
+  'Mardi',
+  'Mercredi',
+  'Jeudi',
+  'Vendredi',
+  'Samedi',
+  'Dimanche',
+];
 
 @Injectable()
 export class WorkingHoursService {
@@ -21,7 +29,8 @@ export class WorkingHoursService {
       where: { day },
     });
 
-    if (!existing) throw new NotFoundException(`Working hours for ${day} not found`);
+    if (!existing)
+      throw new NotFoundException(`Working hours for ${day} not found`);
 
     return this.prisma.workingHours.update({
       where: { day },
@@ -30,6 +39,8 @@ export class WorkingHoursService {
   }
 
   private sortByDayOrder(hours: { day: string }[]) {
-    return hours.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
+    return hours.sort(
+      (a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day),
+    );
   }
 }

@@ -1,9 +1,13 @@
 /**
  * Loyalty Service
  */
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreateLoyaltyTransactionDto, RedeemPointsDto, LoyaltyTransactionType } from './dto/loyalty.dto';
+import {
+  CreateLoyaltyTransactionDto,
+  RedeemPointsDto,
+  LoyaltyTransactionType,
+} from './dto/loyalty.dto';
 
 @Injectable()
 export class LoyaltyService {
@@ -42,7 +46,11 @@ export class LoyaltyService {
 
   async getAllAccounts(options?: { limit?: number; offset?: number }) {
     return this.prisma.loyaltyAccount.findMany({
-      include: { User: { select: { id: true, email: true, first_name: true, last_name: true } } },
+      include: {
+        User: {
+          select: { id: true, email: true, first_name: true, last_name: true },
+        },
+      },
       orderBy: { balance: 'desc' },
       take: options?.limit || 50,
       skip: options?.offset || 0,
@@ -80,7 +88,11 @@ export class LoyaltyService {
     return transaction;
   }
 
-  async earnPointsFromOrder(userId: number, orderId: number, orderAmount: number) {
+  async earnPointsFromOrder(
+    userId: number,
+    orderId: number,
+    orderAmount: number,
+  ) {
     const points = Math.floor(orderAmount * this.POINTS_PER_EURO);
     return this.earnPoints(userId, {
       points,
@@ -132,7 +144,10 @@ export class LoyaltyService {
     });
   }
 
-  async getTransactionHistory(userId: number, options?: { limit?: number; offset?: number }) {
+  async getTransactionHistory(
+    userId: number,
+    options?: { limit?: number; offset?: number },
+  ) {
     const account = await this.getAccount(userId);
     return this.prisma.loyaltyTransaction.findMany({
       where: { loyalty_account_id: account.id },

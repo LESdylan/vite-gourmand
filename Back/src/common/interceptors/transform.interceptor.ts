@@ -22,9 +22,10 @@ export interface ApiResponse<T> {
 }
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, ApiResponse<T>>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,
@@ -32,9 +33,9 @@ export class TransformInterceptor<T>
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
-    return next.handle().pipe(
-      map((data) => this.transform(data, request, response)),
-    );
+    return next
+      .handle()
+      .pipe(map((data) => this.transform(data, request, response)));
   }
 
   private transform(
@@ -55,7 +56,10 @@ export class TransformInterceptor<T>
   private getMessage(method: string, statusCode: number): string {
     const messages: Record<string, Record<number, string>> = {
       GET: { 200: 'Data retrieved successfully' },
-      POST: { 201: 'Resource created successfully', 200: 'Operation successful' },
+      POST: {
+        201: 'Resource created successfully',
+        200: 'Operation successful',
+      },
       PUT: { 200: 'Resource updated successfully' },
       PATCH: { 200: 'Resource updated successfully' },
       DELETE: { 200: 'Resource deleted successfully' },

@@ -1,7 +1,15 @@
 /**
  * Diet Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DietService } from './diet.service';
 import { Public, Roles, SafeParseIntPipe } from '../common';
@@ -38,7 +46,10 @@ export class DietController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update diet' })
-  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateDietDto) {
+  async update(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateDietDto,
+  ) {
     return this.dietService.update(id, dto);
   }
 

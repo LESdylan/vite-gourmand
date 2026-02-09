@@ -19,7 +19,9 @@ import { GoogleStrategy } from './strategies/google.strategy';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET') || 'fallback-secret-change-in-production',
+        secret:
+          config.get<string>('JWT_SECRET') ||
+          'fallback-secret-change-in-production',
         signOptions: { expiresIn: '7d' as const },
       }),
       inject: [ConfigService],

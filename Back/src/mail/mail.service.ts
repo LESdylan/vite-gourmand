@@ -57,7 +57,10 @@ export class MailService {
     });
   }
 
-  async sendOrderConfirmation(email: string, orderNumber: string): Promise<boolean> {
+  async sendOrderConfirmation(
+    email: string,
+    orderNumber: string,
+  ): Promise<boolean> {
     return this.send({
       to: email,
       subject: `Order Confirmed - ${orderNumber}`,

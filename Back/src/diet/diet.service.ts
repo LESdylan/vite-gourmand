@@ -21,7 +21,11 @@ export class DietService {
 
   async create(dto: CreateDietDto) {
     return this.prisma.diet.create({
-      data: { name: dto.name, description: dto.description, icon_url: dto.iconUrl },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        icon_url: dto.iconUrl,
+      },
     });
   }
 
@@ -29,7 +33,11 @@ export class DietService {
     await this.ensureExists(id);
     return this.prisma.diet.update({
       where: { id },
-      data: { name: dto.name, description: dto.description, icon_url: dto.iconUrl },
+      data: {
+        name: dto.name,
+        description: dto.description,
+        icon_url: dto.iconUrl,
+      },
     });
   }
 

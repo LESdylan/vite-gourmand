@@ -1,271 +1,58 @@
 /**
- * Session Service
+ * Session Service - Facade for user and admin session operations
  */
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../prisma';
+import { Injectable } from '@nestjs/common';
+import { UserSessionService } from './user-session.service';
+import { AdminSessionService } from './admin-session.service';
 import { CreateSessionDto } from './dto/session.dto';
 
 @Injectable()
 export class SessionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private userSessionService: UserSessionService,
+    private adminSessionService: AdminSessionService,
+  ) {}
 
-  /**
-   * Create a new session
-   */
-  async createSession(userId: number, dto: CreateSessionDto) {
-    // Default expiration: 7 days
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    return this.prisma.userSession.create({
-      data: {
-        user_id: userId,
-        session_token: dto.token,
-        user_agent: dto.device_info,
-        ip_address: dto.ip_address,
-        expires_at: expiresAt,
-      },
-    });
+  // User operations - delegate to UserSessionService
+  createSession(userId: number, dto: CreateSessionDto) {
+    return this.userSessionService.create(userId, dto);
+  }
+  getSessionByToken(token: string) {
+    return this.userSessionService.getByToken(token);
+  }
+  getUserSessions(userId: number, currentToken?: string) {
+    return this.userSessionService.getUserSessions(userId, currentToken);
+  }
+  validateSession(token: string) {
+    return this.userSessionService.validate(token);
+  }
+  revokeSession(sessionId: number, userId: number) {
+    return this.userSessionService.revoke(sessionId, userId);
+  }
+  revokeAllSessions(userId: number, exceptToken?: string) {
+    return this.userSessionService.revokeAll(userId, exceptToken);
+  }
+  extendSession(token: string, days?: number) {
+    return this.userSessionService.extend(token, days);
   }
 
-  /**
-   * Get session by token
-   */
-  async getSessionByToken(token: string) {
-    return this.prisma.userSession.findUnique({
-      where: { session_token: token },
-      include: {
-        User: {
-          select: {
-            id: true,
-            email: true,
-            first_name: true,
-            last_name: true,
-            Role: true,
-          },
-        },
-      },
-    });
+  // Admin operations - delegate to AdminSessionService
+  getActiveSessions(userId: number) {
+    return this.adminSessionService.getActiveSessions(userId);
   }
-
-  /**
-   * Get all sessions for user
-   */
-  async getUserSessions(userId: number, currentToken?: string) {
-    const sessions = await this.prisma.userSession.findMany({
-      where: { user_id: userId },
-      select: {
-        id: true,
-        user_agent: true,
-        ip_address: true,
-        created_at: true,
-        expires_at: true,
-        session_token: true,
-      },
-      orderBy: { created_at: 'desc' },
-    });
-
-    // Mark the current session
-    return sessions.map((session) => ({
-      id: session.id,
-      device_info: session.user_agent,
-      ip_address: session.ip_address,
-      created_at: session.created_at,
-      expires_at: session.expires_at,
-      is_current: currentToken ? session.session_token === currentToken : false,
-    }));
+  cleanupExpiredSessions() {
+    return this.adminSessionService.cleanupExpired();
   }
-
-  /**
-   * Get active sessions for user
-   */
-  async getActiveSessions(userId: number) {
-    return this.prisma.userSession.findMany({
-      where: {
-        user_id: userId,
-        expires_at: { gt: new Date() },
-      },
-      select: {
-        id: true,
-        user_agent: true,
-        ip_address: true,
-        created_at: true,
-        expires_at: true,
-      },
-      orderBy: { created_at: 'desc' },
-    });
+  getSessionStats() {
+    return this.adminSessionService.getStats();
   }
-
-  /**
-   * Validate session token
-   */
-  async validateSession(token: string) {
-    const session = await this.prisma.userSession.findUnique({
-      where: { session_token: token },
-    });
-
-    if (!session) {
-      return { valid: false, reason: 'Session not found' };
-    }
-
-    if (session.expires_at < new Date()) {
-      // Clean up expired session
-      await this.prisma.userSession.delete({ where: { id: session.id } });
-      return { valid: false, reason: 'Session expired' };
-    }
-
-    return { valid: true, userId: session.user_id };
+  getAllSessions(options: { userId?: number; active?: boolean }) {
+    return this.adminSessionService.getAll(options);
   }
-
-  /**
-   * Revoke specific session
-   */
-  async revokeSession(sessionId: number, userId: number) {
-    const session = await this.prisma.userSession.findUnique({
-      where: { id: sessionId },
-    });
-
-    if (!session) {
-      throw new NotFoundException('Session not found');
-    }
-
-    if (session.user_id !== userId) {
-      throw new ForbiddenException('Cannot revoke other user\'s sessions');
-    }
-
-    return this.prisma.userSession.delete({
-      where: { id: sessionId },
-    });
+  adminRevokeSession(sessionId: number) {
+    return this.adminSessionService.forceRevoke(sessionId);
   }
-
-  /**
-   * Revoke all sessions for user (except current)
-   */
-  async revokeAllSessions(userId: number, exceptToken?: string) {
-    const where: any = { user_id: userId };
-
-    if (exceptToken) {
-      where.session_token = { not: exceptToken };
-    }
-
-    return this.prisma.userSession.deleteMany({ where });
-  }
-
-  /**
-   * Extend session expiration
-   */
-  async extendSession(token: string, days: number = 7) {
-    const session = await this.prisma.userSession.findUnique({
-      where: { session_token: token },
-    });
-
-    if (!session) {
-      throw new NotFoundException('Session not found');
-    }
-
-    const newExpiration = new Date();
-    newExpiration.setDate(newExpiration.getDate() + days);
-
-    return this.prisma.userSession.update({
-      where: { id: session.id },
-      data: { expires_at: newExpiration },
-    });
-  }
-
-  /**
-   * Clean up expired sessions (scheduled job)
-   */
-  async cleanupExpiredSessions() {
-    const result = await this.prisma.userSession.deleteMany({
-      where: {
-        expires_at: { lt: new Date() },
-      },
-    });
-
-    return { deletedCount: result.count };
-  }
-
-  /**
-   * Get session count by user (admin)
-   */
-  async getSessionStats() {
-    const total = await this.prisma.userSession.count();
-    const active = await this.prisma.userSession.count({
-      where: { expires_at: { gt: new Date() } },
-    });
-    const expired = total - active;
-
-    const byUser = await this.prisma.userSession.groupBy({
-      by: ['user_id'],
-      _count: { id: true },
-      where: { expires_at: { gt: new Date() } },
-    });
-
-    return {
-      total,
-      active,
-      expired,
-      usersWithActiveSessions: byUser.length,
-    };
-  }
-
-  /**
-   * Get all sessions (admin)
-   */
-  async getAllSessions(options: { userId?: number; active?: boolean }) {
-    const where: any = {};
-
-    if (options.userId) {
-      where.user_id = options.userId;
-    }
-
-    if (options.active !== undefined) {
-      if (options.active) {
-        where.expires_at = { gt: new Date() };
-      } else {
-        where.expires_at = { lt: new Date() };
-      }
-    }
-
-    return this.prisma.userSession.findMany({
-      where,
-      include: {
-        User: {
-          select: {
-            id: true,
-            email: true,
-            first_name: true,
-            last_name: true,
-          },
-        },
-      },
-      orderBy: { created_at: 'desc' },
-    });
-  }
-
-  /**
-   * Force revoke session (admin)
-   */
-  async adminRevokeSession(sessionId: number) {
-    const session = await this.prisma.userSession.findUnique({
-      where: { id: sessionId },
-    });
-
-    if (!session) {
-      throw new NotFoundException('Session not found');
-    }
-
-    return this.prisma.userSession.delete({
-      where: { id: sessionId },
-    });
-  }
-
-  /**
-   * Force revoke all sessions for user (admin)
-   */
-  async adminRevokeAllUserSessions(userId: number) {
-    return this.prisma.userSession.deleteMany({
-      where: { user_id: userId },
-    });
+  adminRevokeAllUserSessions(userId: number) {
+    return this.adminSessionService.forceRevokeAll(userId);
   }
 }

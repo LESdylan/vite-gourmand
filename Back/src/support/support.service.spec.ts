@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { SupportService } from './support.service';
 import { PrismaService } from '../prisma';
-import { TicketCategory, TicketPriority, TicketStatus } from './dto/support.dto';
+import {
+  TicketCategory,
+  TicketPriority,
+  TicketStatus,
+} from './dto/support.dto';
 
 describe('SupportService', () => {
   let service: SupportService;
@@ -75,7 +79,9 @@ describe('SupportService', () => {
 
   describe('findAll', () => {
     it('should return tickets', async () => {
-      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([mockTicket]);
+      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([
+        mockTicket,
+      ]);
 
       const result = await service.findAll();
 
@@ -83,7 +89,9 @@ describe('SupportService', () => {
     });
 
     it('should filter by status', async () => {
-      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([mockTicket]);
+      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([
+        mockTicket,
+      ]);
 
       await service.findAll({ status: 'open' });
 
@@ -95,7 +103,9 @@ describe('SupportService', () => {
     });
 
     it('should filter by assignedTo', async () => {
-      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([mockTicket]);
+      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([
+        mockTicket,
+      ]);
 
       await service.findAll({ assignedTo: 3 });
 
@@ -109,7 +119,9 @@ describe('SupportService', () => {
 
   describe('getMyTickets', () => {
     it('should return user tickets', async () => {
-      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([mockTicket]);
+      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([
+        mockTicket,
+      ]);
 
       const result = await service.getMyTickets(1);
 
@@ -119,7 +131,9 @@ describe('SupportService', () => {
 
   describe('findById', () => {
     it('should return a ticket by id', async () => {
-      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(mockTicket);
+      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(
+        mockTicket,
+      );
 
       const result = await service.findById(1);
 
@@ -135,7 +149,9 @@ describe('SupportService', () => {
 
   describe('findByTicketNumber', () => {
     it('should return a ticket by ticket number', async () => {
-      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(mockTicket);
+      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(
+        mockTicket,
+      );
 
       const result = await service.findByTicketNumber('TK202401-ABC123');
 
@@ -145,7 +161,9 @@ describe('SupportService', () => {
     it('should throw NotFoundException if not found', async () => {
       (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.findByTicketNumber('INVALID')).rejects.toThrow(NotFoundException);
+      await expect(service.findByTicketNumber('INVALID')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -174,8 +192,12 @@ describe('SupportService', () => {
 
   describe('addMessage', () => {
     it('should add a message to a ticket', async () => {
-      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(mockTicket);
-      (prisma.ticketMessage.create as jest.Mock).mockResolvedValue(mockTicketMessage);
+      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(
+        mockTicket,
+      );
+      (prisma.ticketMessage.create as jest.Mock).mockResolvedValue(
+        mockTicketMessage,
+      );
 
       const result = await service.addMessage(1, 1, {
         body: 'Additional details',
@@ -187,19 +209,25 @@ describe('SupportService', () => {
 
   describe('update', () => {
     it('should update ticket status', async () => {
-      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(mockTicket);
+      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(
+        mockTicket,
+      );
       (prisma.supportTicket.update as jest.Mock).mockResolvedValue({
         ...mockTicket,
         status: 'in_progress',
       });
 
-      const result = await service.update(1, { status: TicketStatus.IN_PROGRESS });
+      const result = await service.update(1, {
+        status: TicketStatus.IN_PROGRESS,
+      });
 
       expect(result.status).toBe('in_progress');
     });
 
     it('should set resolved_at when status is resolved', async () => {
-      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(mockTicket);
+      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(
+        mockTicket,
+      );
       (prisma.supportTicket.update as jest.Mock).mockResolvedValue({
         ...mockTicket,
         status: 'resolved',
@@ -215,7 +243,9 @@ describe('SupportService', () => {
 
   describe('assignTicket', () => {
     it('should assign ticket to staff member', async () => {
-      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(mockTicket);
+      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(
+        mockTicket,
+      );
       (prisma.supportTicket.update as jest.Mock).mockResolvedValue({
         ...mockTicket,
         assigned_to: 3,
@@ -231,7 +261,9 @@ describe('SupportService', () => {
 
   describe('resolveTicket', () => {
     it('should resolve a ticket', async () => {
-      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(mockTicket);
+      (prisma.supportTicket.findUnique as jest.Mock).mockResolvedValue(
+        mockTicket,
+      );
       (prisma.supportTicket.update as jest.Mock).mockResolvedValue({
         ...mockTicket,
         status: 'resolved',
@@ -294,7 +326,9 @@ describe('SupportService', () => {
 
   describe('getOpenTickets', () => {
     it('should return open tickets', async () => {
-      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([mockTicket]);
+      (prisma.supportTicket.findMany as jest.Mock).mockResolvedValue([
+        mockTicket,
+      ]);
 
       const result = await service.getOpenTickets();
 

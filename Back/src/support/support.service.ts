@@ -1,10 +1,18 @@
 /**
  * Support Service
  */
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreateSupportTicketDto, UpdateSupportTicketDto, CreateTicketMessageDto, TicketStatus } from './dto/support.dto';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  CreateSupportTicketDto,
+  UpdateSupportTicketDto,
+  CreateTicketMessageDto,
+  TicketStatus,
+} from './dto/support.dto';
 
 @Injectable()
 export class SupportService {
@@ -17,7 +25,13 @@ export class SupportService {
     return `${prefix}-${random}`;
   }
 
-  async findAll(options?: { status?: string; assignedTo?: number; createdBy?: number; limit?: number; offset?: number }) {
+  async findAll(options?: {
+    status?: string;
+    assignedTo?: number;
+    createdBy?: number;
+    limit?: number;
+    offset?: number;
+  }) {
     const where: any = {};
     if (options?.status) where.status = options.status;
     if (options?.assignedTo) where.assigned_to = options.assignedTo;
@@ -26,8 +40,12 @@ export class SupportService {
     return this.prisma.supportTicket.findMany({
       where,
       include: {
-        User_SupportTicket_created_byToUser: { select: { id: true, first_name: true, last_name: true, email: true } },
-        User_SupportTicket_assigned_toToUser: { select: { id: true, first_name: true, last_name: true } },
+        User_SupportTicket_created_byToUser: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
+        User_SupportTicket_assigned_toToUser: {
+          select: { id: true, first_name: true, last_name: true },
+        },
         TicketMessage: {
           take: 1,
           orderBy: { created_at: 'desc' },
@@ -43,10 +61,22 @@ export class SupportService {
     const ticket = await this.prisma.supportTicket.findUnique({
       where: { id },
       include: {
-        User_SupportTicket_created_byToUser: { select: { id: true, first_name: true, last_name: true, email: true, phone_number: true } },
-        User_SupportTicket_assigned_toToUser: { select: { id: true, first_name: true, last_name: true } },
+        User_SupportTicket_created_byToUser: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            phone_number: true,
+          },
+        },
+        User_SupportTicket_assigned_toToUser: {
+          select: { id: true, first_name: true, last_name: true },
+        },
         TicketMessage: {
-          include: { User: { select: { id: true, first_name: true, last_name: true } } },
+          include: {
+            User: { select: { id: true, first_name: true, last_name: true } },
+          },
           orderBy: { created_at: 'asc' },
         },
       },
@@ -59,10 +89,14 @@ export class SupportService {
     const ticket = await this.prisma.supportTicket.findUnique({
       where: { ticket_number: ticketNumber },
       include: {
-        User_SupportTicket_created_byToUser: { select: { id: true, first_name: true, last_name: true, email: true } },
+        User_SupportTicket_created_byToUser: {
+          select: { id: true, first_name: true, last_name: true, email: true },
+        },
         TicketMessage: {
           where: { is_internal: false },
-          include: { User: { select: { id: true, first_name: true, last_name: true } } },
+          include: {
+            User: { select: { id: true, first_name: true, last_name: true } },
+          },
           orderBy: { created_at: 'asc' },
         },
       },
@@ -101,12 +135,18 @@ export class SupportService {
       where: { id },
       data,
       include: {
-        User_SupportTicket_assigned_toToUser: { select: { id: true, first_name: true, last_name: true } },
+        User_SupportTicket_assigned_toToUser: {
+          select: { id: true, first_name: true, last_name: true },
+        },
       },
     });
   }
 
-  async addMessage(ticketId: number, userId: number, dto: CreateTicketMessageDto) {
+  async addMessage(
+    ticketId: number,
+    userId: number,
+    dto: CreateTicketMessageDto,
+  ) {
     await this.findById(ticketId);
 
     return this.prisma.ticketMessage.create({
@@ -122,11 +162,17 @@ export class SupportService {
     });
   }
 
-  async getMyTickets(userId: number, options?: { limit?: number; offset?: number }) {
+  async getMyTickets(
+    userId: number,
+    options?: { limit?: number; offset?: number },
+  ) {
     return this.findAll({ createdBy: userId, ...options });
   }
 
-  async getAssignedTickets(userId: number, options?: { limit?: number; offset?: number }) {
+  async getAssignedTickets(
+    userId: number,
+    options?: { limit?: number; offset?: number },
+  ) {
     return this.findAll({ assignedTo: userId, ...options });
   }
 
@@ -135,7 +181,10 @@ export class SupportService {
   }
 
   async assignTicket(ticketId: number, assigneeId: number) {
-    return this.update(ticketId, { assignedTo: assigneeId, status: TicketStatus.IN_PROGRESS });
+    return this.update(ticketId, {
+      assignedTo: assigneeId,
+      status: TicketStatus.IN_PROGRESS,
+    });
   }
 
   async resolveTicket(ticketId: number) {
@@ -154,6 +203,12 @@ export class SupportService {
       this.prisma.supportTicket.count({ where: { status: 'closed' } }),
     ]);
 
-    return { open, inProgress, resolved, closed, total: open + inProgress + resolved + closed };
+    return {
+      open,
+      inProgress,
+      resolved,
+      closed,
+      total: open + inProgress + resolved + closed,
+    };
   }
 }

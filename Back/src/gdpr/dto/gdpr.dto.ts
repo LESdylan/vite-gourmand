@@ -1,8 +1,8 @@
 /**
  * GDPR DTOs
  */
-import { IsString, IsOptional, IsBoolean, IsEnum, IsInt } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { IsString, IsOptional, IsBoolean, IsEnum } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum ConsentType {
   MARKETING = 'marketing',
@@ -42,7 +42,13 @@ export class CreateDataDeletionRequestDto {
 }
 
 export class ProcessDataDeletionRequestDto {
-  @ApiProperty({ enum: [DataDeletionStatus.IN_PROGRESS, DataDeletionStatus.COMPLETED, DataDeletionStatus.REJECTED] })
+  @ApiProperty({
+    enum: [
+      DataDeletionStatus.IN_PROGRESS,
+      DataDeletionStatus.COMPLETED,
+      DataDeletionStatus.REJECTED,
+    ],
+  })
   @IsEnum(DataDeletionStatus)
   status!: DataDeletionStatus;
 

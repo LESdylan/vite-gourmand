@@ -1,12 +1,23 @@
 /**
  * Notification Controller
  */
-import { Controller, Get, Post, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationService } from './notification.service';
-import { Roles, SafeParseIntPipe, CurrentUser } from '../common';
-import { CreateNotificationDto, BulkNotificationDto } from './dto/notification.dto';
-import { JwtPayload } from '../common/types/request.types';
+import { Roles, SafeParseIntPipe, CurrentUser } from '../../common';
+import {
+  CreateNotificationDto,
+  BulkNotificationDto,
+} from './dto/notification.dto';
+import { JwtPayload } from '../../common/types/request.types';
 
 @ApiTags('notifications')
 @Controller('notifications')
@@ -44,7 +55,10 @@ export class NotificationController {
 
   @Post(':id/read')
   @ApiOperation({ summary: 'Mark notification as read' })
-  async markAsRead(@Param('id', SafeParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  async markAsRead(
+    @Param('id', SafeParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.notificationService.markAsRead(id, user.sub);
   }
 
@@ -56,7 +70,10 @@ export class NotificationController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete notification' })
-  async delete(@Param('id', SafeParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  async delete(
+    @Param('id', SafeParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.notificationService.delete(id, user.sub);
   }
 

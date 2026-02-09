@@ -56,7 +56,10 @@ export class AnalyticsService implements OnModuleInit {
     }
   }
 
-  async getEventsByType(eventType: string, limit = 100): Promise<AnalyticsEvent[]> {
+  async getEventsByType(
+    eventType: string,
+    limit = 100,
+  ): Promise<AnalyticsEvent[]> {
     const collection = this.getCollection('events');
     if (!collection) return [];
 
@@ -65,7 +68,7 @@ export class AnalyticsService implements OnModuleInit {
       .sort({ timestamp: -1 })
       .limit(limit)
       .toArray();
-    
+
     return docs as unknown as AnalyticsEvent[];
   }
 
@@ -76,15 +79,20 @@ export class AnalyticsService implements OnModuleInit {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const result = await collection.aggregate([
-      { $match: { timestamp: { $gte: since } } },
-      { $group: { _id: '$eventType', count: { $sum: 1 } } },
-    ]).toArray();
+    const result = await collection
+      .aggregate([
+        { $match: { timestamp: { $gte: since } } },
+        { $group: { _id: '$eventType', count: { $sum: 1 } } },
+      ])
+      .toArray();
 
-    return result.reduce((acc, r) => {
-      acc[r._id as string] = r.count;
-      return acc;
-    }, {} as Record<string, number>);
+    return result.reduce(
+      (acc, r) => {
+        acc[r._id as string] = r.count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
   }
 
   async disconnect(): Promise<void> {

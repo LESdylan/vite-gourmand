@@ -39,7 +39,9 @@ describe('ContactService', () => {
 
   describe('findAll', () => {
     it('should return contact messages', async () => {
-      (prisma.contactMessage.findMany as jest.Mock).mockResolvedValue([mockContactMessage]);
+      (prisma.contactMessage.findMany as jest.Mock).mockResolvedValue([
+        mockContactMessage,
+      ]);
 
       const result = await service.findAll();
 
@@ -47,7 +49,9 @@ describe('ContactService', () => {
     });
 
     it('should support limit and offset', async () => {
-      (prisma.contactMessage.findMany as jest.Mock).mockResolvedValue([mockContactMessage]);
+      (prisma.contactMessage.findMany as jest.Mock).mockResolvedValue([
+        mockContactMessage,
+      ]);
 
       await service.findAll({ limit: 10, offset: 5 });
 
@@ -61,7 +65,9 @@ describe('ContactService', () => {
 
   describe('findById', () => {
     it('should return a contact message by id', async () => {
-      (prisma.contactMessage.findUnique as jest.Mock).mockResolvedValue(mockContactMessage);
+      (prisma.contactMessage.findUnique as jest.Mock).mockResolvedValue(
+        mockContactMessage,
+      );
 
       const result = await service.findById(1);
 
@@ -99,8 +105,12 @@ describe('ContactService', () => {
 
   describe('delete', () => {
     it('should delete a contact message', async () => {
-      (prisma.contactMessage.findUnique as jest.Mock).mockResolvedValue(mockContactMessage);
-      (prisma.contactMessage.delete as jest.Mock).mockResolvedValue(mockContactMessage);
+      (prisma.contactMessage.findUnique as jest.Mock).mockResolvedValue(
+        mockContactMessage,
+      );
+      (prisma.contactMessage.delete as jest.Mock).mockResolvedValue(
+        mockContactMessage,
+      );
 
       const result = await service.delete(1);
 

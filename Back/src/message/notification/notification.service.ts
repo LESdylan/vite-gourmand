@@ -2,14 +2,20 @@
  * Notification Service
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma';
-import { CreateNotificationDto, BulkNotificationDto } from './dto/notification.dto';
+import { PrismaService } from '../../prisma';
+import {
+  CreateNotificationDto,
+  BulkNotificationDto,
+} from './dto/notification.dto';
 
 @Injectable()
 export class NotificationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(userId: number, options?: { unreadOnly?: boolean; limit?: number; offset?: number }) {
+  async findAll(
+    userId: number,
+    options?: { unreadOnly?: boolean; limit?: number; offset?: number },
+  ) {
     const where: any = { user_id: userId };
     if (options?.unreadOnly) where.is_read = false;
 
@@ -22,7 +28,9 @@ export class NotificationService {
   }
 
   async findById(id: number) {
-    const notification = await this.prisma.notification.findUnique({ where: { id } });
+    const notification = await this.prisma.notification.findUnique({
+      where: { id },
+    });
     if (!notification) throw new NotFoundException('Notification not found');
     return notification;
   }
@@ -94,15 +102,36 @@ export class NotificationService {
   // Helper to send common notification types
   async notifyOrderStatus(userId: number, orderId: number, status: string) {
     const messages: Record<string, { title: string; body: string }> = {
-      confirmed: { title: 'Commande confirmée', body: `Votre commande #${orderId} a été confirmée` },
-      preparing: { title: 'En préparation', body: `Votre commande #${orderId} est en cours de préparation` },
-      ready: { title: 'Commande prête', body: `Votre commande #${orderId} est prête` },
-      delivering: { title: 'En livraison', body: `Votre commande #${orderId} est en cours de livraison` },
-      delivered: { title: 'Commande livrée', body: `Votre commande #${orderId} a été livrée` },
-      cancelled: { title: 'Commande annulée', body: `Votre commande #${orderId} a été annulée` },
+      confirmed: {
+        title: 'Commande confirmée',
+        body: `Votre commande #${orderId} a été confirmée`,
+      },
+      preparing: {
+        title: 'En préparation',
+        body: `Votre commande #${orderId} est en cours de préparation`,
+      },
+      ready: {
+        title: 'Commande prête',
+        body: `Votre commande #${orderId} est prête`,
+      },
+      delivering: {
+        title: 'En livraison',
+        body: `Votre commande #${orderId} est en cours de livraison`,
+      },
+      delivered: {
+        title: 'Commande livrée',
+        body: `Votre commande #${orderId} a été livrée`,
+      },
+      cancelled: {
+        title: 'Commande annulée',
+        body: `Votre commande #${orderId} a été annulée`,
+      },
     };
 
-    const msg = messages[status] || { title: 'Mise à jour', body: `Statut de votre commande: ${status}` };
+    const msg = messages[status] || {
+      title: 'Mise à jour',
+      body: `Statut de votre commande: ${status}`,
+    };
 
     return this.create({
       userId,

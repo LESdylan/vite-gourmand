@@ -70,16 +70,16 @@ describe('API Response Contract (e2e)', () => {
     });
 
     it('401 has error format', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/users/me');
+      const response = await request(app.getHttpServer()).get('/api/users/me');
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
     });
 
     it('404 has error format', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/99999');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus/99999',
+      );
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
@@ -94,8 +94,9 @@ describe('API Response Contract (e2e)', () => {
     });
 
     it('errors return JSON content type', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/invalid');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus/invalid',
+      );
 
       expect(response.headers['content-type']).toContain('application/json');
     });
@@ -126,14 +127,14 @@ describe('API Response Contract (e2e)', () => {
     });
 
     it('unauthorized returns 401', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/users/me');
+      const response = await request(app.getHttpServer()).get('/api/users/me');
       expect(response.status).toBe(401);
     });
 
     it('not found returns 404', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/nonexistent');
+      const response = await request(app.getHttpServer()).get(
+        '/api/nonexistent',
+      );
       expect(response.status).toBe(404);
     });
   });

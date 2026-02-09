@@ -12,7 +12,7 @@ export class MenuService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(filters: MenuFilterDto) {
-    const { page = 1, limit = 20, dietId, themeId, status } = filters;
+    const { page = 1, limit = 20 } = filters;
     const skip = (page - 1) * limit;
     const where = this.buildWhereClause(filters);
 
@@ -93,7 +93,10 @@ export class MenuService {
     await this.ensureExists(id);
     return this.prisma.menu.update({
       where: { id },
-      data: { status, published_at: status === 'published' ? new Date() : null },
+      data: {
+        status,
+        published_at: status === 'published' ? new Date() : null,
+      },
     });
   }
 
@@ -104,7 +107,9 @@ export class MenuService {
 
   private buildWhereClause(filters: MenuFilterDto) {
     return {
-      ...(filters.status ? { status: filters.status } : { status: 'published' }),
+      ...(filters.status
+        ? { status: filters.status }
+        : { status: 'published' }),
       ...(filters.dietId && { diet_id: filters.dietId }),
       ...(filters.themeId && { theme_id: filters.themeId }),
     };

@@ -2,7 +2,13 @@
  * Register DTO
  * Validation for user registration
  */
-import { IsEmail, IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class RegisterDto {

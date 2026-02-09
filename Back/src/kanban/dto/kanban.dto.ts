@@ -1,7 +1,14 @@
 /**
  * Kanban DTOs
  */
-import { IsString, IsOptional, IsNumber, IsBoolean, MaxLength, Matches } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  MaxLength,
+  Matches,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateKanbanColumnDto {
@@ -10,7 +17,10 @@ export class CreateKanbanColumnDto {
   @MaxLength(100)
   name!: string;
 
-  @ApiPropertyOptional({ example: 'preparing', description: 'Mapped order status' })
+  @ApiPropertyOptional({
+    example: 'preparing',
+    description: 'Mapped order status',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(30)

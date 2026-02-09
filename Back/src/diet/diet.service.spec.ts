@@ -68,7 +68,11 @@ describe('DietService', () => {
 
   describe('create', () => {
     it('should create a new diet', async () => {
-      const dto = { name: 'Keto', description: 'Low carb', iconUrl: 'keto.png' };
+      const dto = {
+        name: 'Keto',
+        description: 'Low carb',
+        iconUrl: 'keto.png',
+      };
       (prisma.diet.create as jest.Mock).mockResolvedValue({
         id: 3,
         name: dto.name,
@@ -99,9 +103,9 @@ describe('DietService', () => {
     it('should throw if diet not found', async () => {
       (prisma.diet.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.update(999, { name: 'Test' }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update(999, { name: 'Test' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

@@ -55,8 +55,9 @@ describe('Data Leak Prevention (e2e)', () => {
 
   describe('Error Message Security', () => {
     it('does not expose SQL errors', async () => {
-      const response = await request(app.getHttpServer())
-        .get("/api/menus/' OR 1=1--");
+      const response = await request(app.getHttpServer()).get(
+        "/api/menus/' OR 1=1--",
+      );
 
       expect(response.text).not.toContain('SELECT');
       expect(response.text).not.toContain('FROM');
@@ -64,8 +65,9 @@ describe('Data Leak Prevention (e2e)', () => {
     });
 
     it('does not expose stack traces', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/nonexistent-endpoint');
+      const response = await request(app.getHttpServer()).get(
+        '/api/nonexistent-endpoint',
+      );
 
       expect(response.text).not.toContain('at Object.');
       expect(response.text).not.toContain('.ts:');

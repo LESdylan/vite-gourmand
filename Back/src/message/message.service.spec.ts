@@ -202,7 +202,9 @@ describe('MessageService', () => {
     it('should throw ForbiddenException if not recipient', async () => {
       (prisma.message.findUnique as jest.Mock).mockResolvedValue(mockMessage);
 
-      await expect(service.markAsRead(1, 1)).rejects.toThrow(ForbiddenException);
+      await expect(service.markAsRead(1, 1)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -225,10 +227,7 @@ describe('MessageService', () => {
 
   describe('getThread', () => {
     it('should return message thread', async () => {
-      const thread = [
-        mockMessage,
-        { ...mockMessage, id: 2, parent_id: 1 },
-      ];
+      const thread = [mockMessage, { ...mockMessage, id: 2, parent_id: 1 }];
       (prisma.message.findUnique as jest.Mock).mockResolvedValue(mockMessage);
       (prisma.message.findMany as jest.Mock).mockResolvedValue(thread);
 

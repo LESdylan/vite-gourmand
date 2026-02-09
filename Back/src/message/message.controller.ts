@@ -1,7 +1,15 @@
 /**
  * Message Controller
  */
-import { Controller, Get, Post, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { MessageService } from './message.service';
 import { SafeParseIntPipe, CurrentUser } from '../common';
@@ -51,13 +59,19 @@ export class MessageController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get message by ID' })
-  async findOne(@Param('id', SafeParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  async findOne(
+    @Param('id', SafeParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.messageService.findById(id, user.sub);
   }
 
   @Get(':id/thread')
   @ApiOperation({ summary: 'Get message thread' })
-  async getThread(@Param('id', SafeParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  async getThread(
+    @Param('id', SafeParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.messageService.getThread(id, user.sub);
   }
 
@@ -79,13 +93,19 @@ export class MessageController {
 
   @Post(':id/read')
   @ApiOperation({ summary: 'Mark message as read' })
-  async markAsRead(@Param('id', SafeParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  async markAsRead(
+    @Param('id', SafeParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.messageService.markAsRead(id, user.sub);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a message' })
-  async delete(@Param('id', SafeParseIntPipe) id: number, @CurrentUser() user: JwtPayload) {
+  async delete(
+    @Param('id', SafeParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.messageService.delete(id, user.sub);
   }
 }

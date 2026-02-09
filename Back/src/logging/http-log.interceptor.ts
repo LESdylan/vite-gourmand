@@ -27,8 +27,24 @@ export class HttpLogInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap({
-        next: () => this.logSuccess(method, url, response.statusCode, startTime, clientIp, userAgent),
-        error: (error) => this.logError(method, url, error.status || 500, startTime, clientIp, userAgent),
+        next: () =>
+          this.logSuccess(
+            method,
+            url,
+            response.statusCode,
+            startTime,
+            clientIp,
+            userAgent,
+          ),
+        error: (error) =>
+          this.logError(
+            method,
+            url,
+            error.status || 500,
+            startTime,
+            clientIp,
+            userAgent,
+          ),
       }),
     );
   }

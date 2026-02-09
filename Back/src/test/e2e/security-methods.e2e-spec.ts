@@ -37,8 +37,9 @@ describe('HTTP Method Security (e2e)', () => {
     });
 
     it('ignores _method query parameter', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/1?_method=DELETE');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus/1?_method=DELETE',
+      );
 
       expect([200, 404]).toContain(response.status);
     });
@@ -54,8 +55,7 @@ describe('HTTP Method Security (e2e)', () => {
     // Note: CONNECT method test skipped - supertest causes socket hang up
     // CONNECT is typically used for HTTPS tunneling and not supported by supertest
     it('rejects unsupported custom method', async () => {
-      const response = await request(app.getHttpServer())
-        .options('/api');
+      const response = await request(app.getHttpServer()).options('/api');
 
       expect([200, 204, 404, 405]).toContain(response.status);
     });
@@ -63,8 +63,9 @@ describe('HTTP Method Security (e2e)', () => {
 
   describe('Method Restrictions', () => {
     it('GET /api/auth/login returns 404', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/auth/login');
+      const response = await request(app.getHttpServer()).get(
+        '/api/auth/login',
+      );
 
       expect([404]).toContain(response.status);
     });

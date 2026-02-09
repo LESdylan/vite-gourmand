@@ -17,8 +17,9 @@ describe('Working Hours (e2e)', () => {
   });
 
   it('GET /api/working-hours is public', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/working-hours');
+    const response = await request(app.getHttpServer()).get(
+      '/api/working-hours',
+    );
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
@@ -26,8 +27,9 @@ describe('Working Hours (e2e)', () => {
   });
 
   it('GET /api/working-hours returns all days', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/working-hours');
+    const response = await request(app.getHttpServer()).get(
+      '/api/working-hours',
+    );
 
     if (response.body.data?.length > 0) {
       const item = response.body.data[0];

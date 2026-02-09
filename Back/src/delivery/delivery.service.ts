@@ -1,9 +1,18 @@
 /**
  * Delivery Service
  */
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreateDeliveryAssignmentDto, UpdateDeliveryAssignmentDto, RateDeliveryDto, DeliveryStatus } from './dto/delivery.dto';
+import {
+  CreateDeliveryAssignmentDto,
+  UpdateDeliveryAssignmentDto,
+  RateDeliveryDto,
+  DeliveryStatus,
+} from './dto/delivery.dto';
 
 @Injectable()
 export class DeliveryService {
@@ -12,13 +21,30 @@ export class DeliveryService {
   async findAll(options?: { status?: string; deliveryPersonId?: number }) {
     const where: any = {};
     if (options?.status) where.status = options.status;
-    if (options?.deliveryPersonId) where.delivery_person_id = options.deliveryPersonId;
+    if (options?.deliveryPersonId)
+      where.delivery_person_id = options.deliveryPersonId;
 
     return this.prisma.deliveryAssignment.findMany({
       where,
       include: {
-        Order: { select: { id: true, order_number: true, delivery_address: true, delivery_city: true, delivery_date: true, delivery_hour: true } },
-        User: { select: { id: true, first_name: true, last_name: true, phone_number: true } },
+        Order: {
+          select: {
+            id: true,
+            order_number: true,
+            delivery_address: true,
+            delivery_city: true,
+            delivery_date: true,
+            delivery_hour: true,
+          },
+        },
+        User: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            phone_number: true,
+          },
+        },
       },
       orderBy: { assigned_at: 'desc' },
     });
@@ -29,7 +55,15 @@ export class DeliveryService {
       where: { id },
       include: {
         Order: true,
-        User: { select: { id: true, first_name: true, last_name: true, phone_number: true, email: true } },
+        User: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            phone_number: true,
+            email: true,
+          },
+        },
       },
     });
     if (!delivery) throw new NotFoundException('Delivery assignment not found');
@@ -40,19 +74,31 @@ export class DeliveryService {
     return this.prisma.deliveryAssignment.findFirst({
       where: { order_id: orderId },
       include: {
-        User: { select: { id: true, first_name: true, last_name: true, phone_number: true } },
+        User: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            phone_number: true,
+          },
+        },
       },
     });
   }
 
   async create(dto: CreateDeliveryAssignmentDto) {
     // Check if order exists
-    const order = await this.prisma.order.findUnique({ where: { id: dto.orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: dto.orderId },
+    });
     if (!order) throw new NotFoundException('Order not found');
 
     // Check if assignment already exists
     const existing = await this.findByOrderId(dto.orderId);
-    if (existing) throw new BadRequestException('Delivery assignment already exists for this order');
+    if (existing)
+      throw new BadRequestException(
+        'Delivery assignment already exists for this order',
+      );
 
     return this.prisma.deliveryAssignment.create({
       data: {
@@ -63,7 +109,9 @@ export class DeliveryService {
         status: 'assigned',
       },
       include: {
-        Order: { select: { id: true, order_number: true, delivery_address: true } },
+        Order: {
+          select: { id: true, order_number: true, delivery_address: true },
+        },
         User: { select: { id: true, first_name: true, last_name: true } },
       },
     });
@@ -73,11 +121,14 @@ export class DeliveryService {
     await this.findById(id);
 
     const data: any = {};
-    if (dto.deliveryPersonId !== undefined) data.delivery_person_id = dto.deliveryPersonId;
+    if (dto.deliveryPersonId !== undefined)
+      data.delivery_person_id = dto.deliveryPersonId;
     if (dto.vehicleType !== undefined) data.vehicle_type = dto.vehicleType;
     if (dto.status !== undefined) data.status = dto.status;
-    if (dto.deliveryNotes !== undefined) data.delivery_notes = dto.deliveryNotes;
-    if (dto.proofPhotoUrl !== undefined) data.proof_photo_url = dto.proofPhotoUrl;
+    if (dto.deliveryNotes !== undefined)
+      data.delivery_notes = dto.deliveryNotes;
+    if (dto.proofPhotoUrl !== undefined)
+      data.proof_photo_url = dto.proofPhotoUrl;
 
     // Update timestamps based on status
     if (dto.status === DeliveryStatus.PICKED_UP) data.picked_up_at = new Date();

@@ -1,11 +1,24 @@
 /**
  * Discount Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DiscountService } from './discount.service';
 import { Public, Roles, SafeParseIntPipe, CurrentUser } from '../common';
-import { CreateDiscountDto, UpdateDiscountDto, ValidateDiscountDto } from './dto/discount.dto';
+import {
+  CreateDiscountDto,
+  UpdateDiscountDto,
+  ValidateDiscountDto,
+} from './dto/discount.dto';
 import { JwtPayload } from '../common/types/request.types';
 
 @ApiTags('discounts')
@@ -35,7 +48,10 @@ export class DiscountController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new discount' })
-  async create(@Body() dto: CreateDiscountDto, @CurrentUser() user: JwtPayload) {
+  async create(
+    @Body() dto: CreateDiscountDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return this.discountService.create(dto, user.sub);
   }
 
@@ -43,7 +59,10 @@ export class DiscountController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update discount' })
-  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateDiscountDto) {
+  async update(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateDiscountDto,
+  ) {
     return this.discountService.update(id, dto);
   }
 

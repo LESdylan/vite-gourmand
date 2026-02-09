@@ -4,7 +4,11 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { PaginationDto, buildPaginationMeta, PaginatedResponse } from '../common';
+import {
+  PaginationDto,
+  buildPaginationMeta,
+  PaginatedResponse,
+} from '../common';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
@@ -20,8 +24,15 @@ export class UserService {
     return this.sanitize(user);
   }
 
-  async findAll(pagination: PaginationDto): Promise<PaginatedResponse<unknown>> {
-    const { page = 1, limit = 20, sortBy = 'created_at', sortOrder = 'desc' } = pagination;
+  async findAll(
+    pagination: PaginationDto,
+  ): Promise<PaginatedResponse<unknown>> {
+    const {
+      page = 1,
+      limit = 20,
+      sortBy = 'created_at',
+      sortOrder = 'desc',
+    } = pagination;
     const skip = (page - 1) * limit;
 
     const [users, total] = await Promise.all([

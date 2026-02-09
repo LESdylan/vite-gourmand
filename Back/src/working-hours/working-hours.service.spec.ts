@@ -99,7 +99,10 @@ describe('WorkingHoursService', () => {
         closing: '22:00',
       });
 
-      const result = await service.update('Lundi', { opening: '08:00', closing: '22:00' });
+      const result = await service.update('Lundi', {
+        opening: '08:00',
+        closing: '22:00',
+      });
 
       expect(result.opening).toBe('08:00');
     });
@@ -114,7 +117,10 @@ describe('WorkingHoursService', () => {
         closing: '23:00',
       });
 
-      const result = await service.update('Lundi', { opening: '09:00', closing: '23:00' });
+      const result = await service.update('Lundi', {
+        opening: '09:00',
+        closing: '23:00',
+      });
 
       expect(result.closing).toBe('23:00');
     });

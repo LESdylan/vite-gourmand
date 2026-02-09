@@ -1,7 +1,12 @@
 /**
  * Review Image Service - Handles images for reviews (Publish model)
  */
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { CreateReviewImageDto } from './dto/image.dto';
 

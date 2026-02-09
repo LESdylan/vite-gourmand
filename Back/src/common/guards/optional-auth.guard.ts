@@ -18,10 +18,7 @@ export class OptionalAuthGuard extends AuthGuard('jwt') {
   /**
    * Don't throw on auth failure - just return null user
    */
-  handleRequest<TUser>(
-    _err: Error | null,
-    user: TUser | false,
-  ): TUser | null {
+  handleRequest<TUser>(_err: Error | null, user: TUser | false): TUser | null {
     return user || null;
   }
 }

@@ -25,7 +25,9 @@ export class EmailValidationTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Expected valid: ${email} - Errors: ${validation.errors.join(', ')}`);
+          errors.push(
+            `Expected valid: ${email} - Errors: ${validation.errors.join(', ')}`,
+          );
         }
       }
 
@@ -36,7 +38,9 @@ export class EmailValidationTest extends BaseTest {
           passed++;
         } else {
           failed++;
-          errors.push(`Expected invalid: ${emailData.email} (${emailData.reason})`);
+          errors.push(
+            `Expected invalid: ${emailData.email} (${emailData.reason})`,
+          );
         }
       }
 
@@ -52,7 +56,10 @@ export class EmailValidationTest extends BaseTest {
     }
 
     return {
-      ...this.failure(`${result.failed} email validations failed`, result.errors),
+      ...this.failure(
+        `${result.failed} email validations failed`,
+        result.errors,
+      ),
       duration,
       details: { passed: result.passed, failed: result.failed },
     };
@@ -104,7 +111,12 @@ export class EmailValidationTest extends BaseTest {
           ? `Email '${email}' validated correctly`
           : `Email '${email}' expected ${expectedValid ? 'valid' : 'invalid'} but got ${validation.isValid ? 'valid' : 'invalid'}`,
         duration: 0,
-        details: { email, expectedValid, actualValid: validation.isValid, errors: validation.errors },
+        details: {
+          email,
+          expectedValid,
+          actualValid: validation.isValid,
+          errors: validation.errors,
+        },
       };
 
       results.push(testResult);

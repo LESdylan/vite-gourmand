@@ -1,7 +1,15 @@
 /**
  * Allergen Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AllergenService } from './allergen.service';
 import { Public, Roles, SafeParseIntPipe } from '../common';
@@ -38,7 +46,10 @@ export class AllergenController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update allergen' })
-  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateAllergenDto) {
+  async update(
+    @Param('id', SafeParseIntPipe) id: number,
+    @Body() dto: UpdateAllergenDto,
+  ) {
     return this.allergenService.update(id, dto);
   }
 

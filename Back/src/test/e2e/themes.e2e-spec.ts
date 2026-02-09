@@ -29,8 +29,9 @@ describe('Themes (e2e)', () => {
 
     if (listRes.body.data?.length > 0) {
       const id = listRes.body.data[0].id;
-      const response = await request(app.getHttpServer())
-        .get(`/api/themes/${id}`);
+      const response = await request(app.getHttpServer()).get(
+        `/api/themes/${id}`,
+      );
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -39,8 +40,9 @@ describe('Themes (e2e)', () => {
   });
 
   it('GET /api/themes/:id invalid returns 404', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/themes/99999');
+    const response = await request(app.getHttpServer()).get(
+      '/api/themes/99999',
+    );
 
     expect(response.status).toBe(404);
   });

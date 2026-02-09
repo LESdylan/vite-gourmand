@@ -30,8 +30,9 @@ describe('Admin API (e2e)', () => {
 
   describe('GET /api/admin/users', () => {
     it('should require authentication', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/admin/users');
+      const response = await request(app.getHttpServer()).get(
+        '/api/admin/users',
+      );
 
       expect(response.status).toBe(401);
     });

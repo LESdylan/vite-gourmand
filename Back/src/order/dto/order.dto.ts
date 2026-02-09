@@ -10,7 +10,6 @@ import {
   Min,
   Matches,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../common';
 
@@ -33,12 +32,12 @@ export class CreateOrderDto {
   @Min(1)
   personNumber!: number;
 
-  @ApiProperty({ example: 100.00 })
+  @ApiProperty({ example: 100.0 })
   @IsNumber()
   @Min(0)
   menuPrice!: number;
 
-  @ApiProperty({ example: 115.00 })
+  @ApiProperty({ example: 115.0 })
   @IsNumber()
   @Min(0)
   totalPrice!: number;
@@ -68,7 +67,15 @@ export class UpdateOrderDto {
 
 export class OrderFilterDto extends PaginationDto {
   @ApiPropertyOptional({
-    enum: ['pending', 'confirmed', 'preparing', 'ready', 'delivering', 'delivered', 'cancelled'],
+    enum: [
+      'pending',
+      'confirmed',
+      'preparing',
+      'ready',
+      'delivering',
+      'delivered',
+      'cancelled',
+    ],
   })
   @IsOptional()
   @IsString()

@@ -57,7 +57,9 @@ export class Fuzzer {
    * Generate random string
    */
   randomString(length: number, charset?: string): string {
-    const chars = charset || 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+      charset ||
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
       result += chars[this.randomInt(0, chars.length - 1)];
@@ -164,7 +166,10 @@ export class Fuzzer {
       case 'random':
       default:
         const length = this.randomInt(0, 20);
-        return this.randomChoice(['+', '0', '']) + this.randomString(length, '0123456789 -().+');
+        return (
+          this.randomChoice(['+', '0', '']) +
+          this.randomString(length, '0123456789 -().+')
+        );
     }
   }
 
@@ -187,8 +192,13 @@ export class Fuzzer {
         // Start with valid card and mutate
         const validCard = '4111111111111111';
         const pos = this.randomInt(0, validCard.length - 1);
-        const newDigit = ((parseInt(validCard[pos]) + this.randomInt(1, 9)) % 10).toString();
-        return validCard.substring(0, pos) + newDigit + validCard.substring(pos + 1);
+        const newDigit = (
+          (parseInt(validCard[pos]) + this.randomInt(1, 9)) %
+          10
+        ).toString();
+        return (
+          validCard.substring(0, pos) + newDigit + validCard.substring(pos + 1)
+        );
 
       case 'injection':
         return this.randomChoice([
@@ -265,7 +275,10 @@ export class Fuzzer {
   /**
    * Fuzz any string input
    */
-  fuzzString(strategy: FuzzStrategy = 'mixed', options?: { maxLength?: number }): string {
+  fuzzString(
+    strategy: FuzzStrategy = 'mixed',
+    options?: { maxLength?: number },
+  ): string {
     const maxLen = options?.maxLength || 1000;
 
     switch (strategy) {

@@ -13,7 +13,16 @@ export interface CreditCardValidationResult {
   issuer?: string;
 }
 
-export type CreditCardType = 'Visa' | 'Mastercard' | 'AmEx' | 'Discover' | 'DinersClub' | 'JCB' | 'UnionPay' | 'Maestro' | 'Unknown';
+export type CreditCardType =
+  | 'Visa'
+  | 'Mastercard'
+  | 'AmEx'
+  | 'Discover'
+  | 'DinersClub'
+  | 'JCB'
+  | 'UnionPay'
+  | 'Maestro'
+  | 'Unknown';
 
 /**
  * Card type configuration
@@ -50,7 +59,9 @@ export class CreditCardValidator {
     },
     {
       name: 'Discover',
-      patterns: [/^6(?:011|5|4[4-9]|22(?:1(?:2[6-9]|[3-9])|[2-8]|9(?:[01]|2[0-5])))/],
+      patterns: [
+        /^6(?:011|5|4[4-9]|22(?:1(?:2[6-9]|[3-9])|[2-8]|9(?:[01]|2[0-5])))/,
+      ],
       lengths: [16, 19],
       cvvLength: 3,
     },
@@ -174,13 +185,20 @@ export class CreditCardValidator {
   /**
    * Validate a credit card number
    */
-  static validate(cardNumber: string, options?: { strict?: boolean }): CreditCardValidationResult {
+  static validate(
+    cardNumber: string,
+    options?: { strict?: boolean },
+  ): CreditCardValidationResult {
     const errors: string[] = [];
     const opts = { strict: true, ...options };
 
     // Basic checks
     if (!cardNumber || typeof cardNumber !== 'string') {
-      return { isValid: false, cardNumber: cardNumber || '', errors: ['Card number is required'] };
+      return {
+        isValid: false,
+        cardNumber: cardNumber || '',
+        errors: ['Card number is required'],
+      };
     }
 
     const cleanedNumber = this.cleanNumber(cardNumber);
@@ -210,7 +228,9 @@ export class CreditCardValidator {
     // Validate length for specific card type
     if (cardConfig && opts.strict) {
       if (!cardConfig.lengths.includes(cleanedNumber.length)) {
-        errors.push(`Invalid length for ${cardType}: expected ${cardConfig.lengths.join(' or ')} digits, got ${cleanedNumber.length}`);
+        errors.push(
+          `Invalid length for ${cardType}: expected ${cardConfig.lengths.join(' or ')} digits, got ${cleanedNumber.length}`,
+        );
       }
     }
 
@@ -220,7 +240,10 @@ export class CreditCardValidator {
     }
 
     // Calculate check digit for reference
-    const checkDigit = cleanedNumber.length > 0 ? parseInt(cleanedNumber[cleanedNumber.length - 1], 10) : undefined;
+    const checkDigit =
+      cleanedNumber.length > 0
+        ? parseInt(cleanedNumber[cleanedNumber.length - 1], 10)
+        : undefined;
 
     // Determine issuer
     let issuer: string | undefined;

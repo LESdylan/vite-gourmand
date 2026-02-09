@@ -3,14 +3,18 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { CreateIngredientDto, UpdateIngredientDto, RestockIngredientDto } from './dto/ingredient.dto';
+import {
+  CreateIngredientDto,
+  UpdateIngredientDto,
+  RestockIngredientDto,
+} from './dto/ingredient.dto';
 
 @Injectable()
 export class IngredientService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(options?: { lowStockOnly?: boolean }) {
-    let where = {};
+    const where = {};
     if (options?.lowStockOnly) {
       // Using raw query to compare fields - Prisma doesn't support direct field comparison
       return this.prisma.$queryRaw`
@@ -26,7 +30,9 @@ export class IngredientService {
   }
 
   async findById(id: number) {
-    const ingredient = await this.prisma.ingredient.findUnique({ where: { id } });
+    const ingredient = await this.prisma.ingredient.findUnique({
+      where: { id },
+    });
     if (!ingredient) throw new NotFoundException('Ingredient not found');
     return ingredient;
   }

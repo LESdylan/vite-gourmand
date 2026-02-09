@@ -51,8 +51,9 @@ describe('Unicode and Encoding Security (e2e)', () => {
     });
 
     it('handles emoji in search', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus?search=🍕');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus?search=🍕',
+      );
 
       // 200 = success (emoji allowed), 400 = validation rejects emoji
       expect([200, 400]).toContain(response.status);
@@ -82,15 +83,17 @@ describe('Unicode and Encoding Security (e2e)', () => {
 
   describe('Double Encoding', () => {
     it('handles double URL encoding', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/%252e%252e%252f');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus/%252e%252e%252f',
+      );
 
       expect([400, 404]).toContain(response.status);
     });
 
     it('handles triple URL encoding', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/api/menus/%25252e%25252e');
+      const response = await request(app.getHttpServer()).get(
+        '/api/menus/%25252e%25252e',
+      );
 
       expect([400, 404]).toContain(response.status);
     });

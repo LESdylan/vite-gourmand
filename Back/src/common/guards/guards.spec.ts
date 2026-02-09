@@ -8,7 +8,9 @@ describe('RolesGuard', () => {
   let guard: RolesGuard;
   let reflector: jest.Mocked<Reflector>;
 
-  const createMockExecutionContext = (user?: { role: string }): ExecutionContext => {
+  const createMockExecutionContext = (user?: {
+    role: string;
+  }): ExecutionContext => {
     return {
       switchToHttp: () => ({
         getRequest: () => ({ user }),

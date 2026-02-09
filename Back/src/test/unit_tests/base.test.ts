@@ -63,7 +63,9 @@ export abstract class BaseTest {
           failedCases.push(result);
         }
       } catch (error) {
-        const errorResult = this.failure(`Iteration ${i + 1} threw error: ${error}`);
+        const errorResult = this.failure(
+          `Iteration ${i + 1} threw error: ${error}`,
+        );
         results.push(errorResult);
         failedCases.push(errorResult);
       }
@@ -81,7 +83,10 @@ export abstract class BaseTest {
   /**
    * Create a success result
    */
-  protected success(message: string, details?: Record<string, unknown>): TestResult {
+  protected success(
+    message: string,
+    details?: Record<string, unknown>,
+  ): TestResult {
     return {
       name: this.name,
       passed: true,
@@ -94,7 +99,11 @@ export abstract class BaseTest {
   /**
    * Create a failure result
    */
-  protected failure(message: string, errors?: string[], details?: Record<string, unknown>): TestResult {
+  protected failure(
+    message: string,
+    errors?: string[],
+    details?: Record<string, unknown>,
+  ): TestResult {
     return {
       name: this.name,
       passed: false,
@@ -119,14 +128,19 @@ export abstract class BaseTest {
    */
   protected assertEqual<T>(actual: T, expected: T, message: string): void {
     if (actual !== expected) {
-      throw new Error(`Assertion failed: ${message}. Expected: ${expected}, Got: ${actual}`);
+      throw new Error(
+        `Assertion failed: ${message}. Expected: ${expected}, Got: ${actual}`,
+      );
     }
   }
 
   /**
    * Assert throws helper
    */
-  protected async assertThrows(fn: () => Promise<unknown>, message: string): Promise<void> {
+  protected async assertThrows(
+    fn: () => Promise<unknown>,
+    message: string,
+  ): Promise<void> {
     let threw = false;
     try {
       await fn();
@@ -134,14 +148,18 @@ export abstract class BaseTest {
       threw = true;
     }
     if (!threw) {
-      throw new Error(`Assertion failed: ${message}. Expected function to throw.`);
+      throw new Error(
+        `Assertion failed: ${message}. Expected function to throw.`,
+      );
     }
   }
 
   /**
    * Measure execution time
    */
-  protected async measure<T>(fn: () => Promise<T>): Promise<{ result: T; duration: number }> {
+  protected async measure<T>(
+    fn: () => Promise<T>,
+  ): Promise<{ result: T; duration: number }> {
     const start = performance.now();
     const result = await fn();
     const duration = Math.round(performance.now() - start);
@@ -176,7 +194,11 @@ export class TestRegistry {
     return Array.from(categories);
   }
 
-  static listTests(): { name: string; description: string; category: string }[] {
+  static listTests(): {
+    name: string;
+    description: string;
+    category: string;
+  }[] {
     return this.getAll().map((t) => ({
       name: t.name,
       description: t.description,

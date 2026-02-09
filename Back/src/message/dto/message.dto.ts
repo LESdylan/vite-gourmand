@@ -1,7 +1,13 @@
 /**
  * Message DTOs
  */
-import { IsString, IsOptional, IsNumber, IsEnum, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum MessagePriority {
@@ -31,7 +37,10 @@ export class CreateMessageDto {
   @IsEnum(MessagePriority)
   priority?: MessagePriority;
 
-  @ApiPropertyOptional({ example: 1, description: 'Parent message ID for replies' })
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Parent message ID for replies',
+  })
   @IsOptional()
   @IsNumber()
   parentId?: number;

@@ -54,7 +54,9 @@ describe('LoyaltyService', () => {
 
   describe('getAccount', () => {
     it('should return existing loyalty account', async () => {
-      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
+      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
 
       const result = await service.getAccount(1);
 
@@ -79,9 +81,15 @@ describe('LoyaltyService', () => {
 
   describe('getAccountWithTransactions', () => {
     it('should return account with transactions', async () => {
-      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyTransaction.findMany as jest.Mock).mockResolvedValue([mockTransaction]);
+      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyTransaction.findMany as jest.Mock).mockResolvedValue([
+        mockTransaction,
+      ]);
 
       const result = await service.getAccountWithTransactions(1);
 
@@ -92,7 +100,9 @@ describe('LoyaltyService', () => {
 
   describe('getAllAccounts', () => {
     it('should return all loyalty accounts', async () => {
-      (prisma.loyaltyAccount.findMany as jest.Mock).mockResolvedValue([mockLoyaltyAccount]);
+      (prisma.loyaltyAccount.findMany as jest.Mock).mockResolvedValue([
+        mockLoyaltyAccount,
+      ]);
 
       const result = await service.getAllAccounts();
 
@@ -102,9 +112,15 @@ describe('LoyaltyService', () => {
 
   describe('earnPoints', () => {
     it('should add points to account', async () => {
-      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyTransaction.create as jest.Mock).mockResolvedValue(mockTransaction);
+      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyTransaction.create as jest.Mock).mockResolvedValue(
+        mockTransaction,
+      );
       (prisma.loyaltyAccount.update as jest.Mock).mockResolvedValue({
         ...mockLoyaltyAccount,
         balance: 600,
@@ -133,10 +149,18 @@ describe('LoyaltyService', () => {
 
   describe('earnPointsFromOrder', () => {
     it('should calculate and add points from order', async () => {
-      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyTransaction.create as jest.Mock).mockResolvedValue(mockTransaction);
-      (prisma.loyaltyAccount.update as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
+      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyTransaction.create as jest.Mock).mockResolvedValue(
+        mockTransaction,
+      );
+      (prisma.loyaltyAccount.update as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
 
       const result = await service.earnPointsFromOrder(1, 123, 50); // 50€ = 500 points
 
@@ -146,8 +170,12 @@ describe('LoyaltyService', () => {
 
   describe('redeemPoints', () => {
     it('should redeem points for discount', async () => {
-      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
+      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
       (prisma.loyaltyTransaction.create as jest.Mock).mockResolvedValue({
         ...mockTransaction,
         points: -200,
@@ -175,7 +203,9 @@ describe('LoyaltyService', () => {
         balance: 100,
       });
 
-      await expect(service.redeemPoints(1, { points: 500 })).rejects.toThrow(BadRequestException);
+      await expect(service.redeemPoints(1, { points: 500 })).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -190,8 +220,12 @@ describe('LoyaltyService', () => {
 
   describe('addBonusPoints', () => {
     it('should add bonus points to user account', async () => {
-      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
+      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
       (prisma.loyaltyTransaction.create as jest.Mock).mockResolvedValue({
         ...mockTransaction,
         type: 'bonus',
@@ -210,9 +244,15 @@ describe('LoyaltyService', () => {
 
   describe('getTransactionHistory', () => {
     it('should return transaction history for user', async () => {
-      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(mockLoyaltyAccount);
-      (prisma.loyaltyTransaction.findMany as jest.Mock).mockResolvedValue([mockTransaction]);
+      (prisma.loyaltyAccount.findUnique as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyAccount.create as jest.Mock).mockResolvedValue(
+        mockLoyaltyAccount,
+      );
+      (prisma.loyaltyTransaction.findMany as jest.Mock).mockResolvedValue([
+        mockTransaction,
+      ]);
 
       const result = await service.getTransactionHistory(1);
 
