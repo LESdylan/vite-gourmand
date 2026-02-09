@@ -61,8 +61,8 @@ describe('AdminService', () => {
       const dto = {
         email: 'employee@test.com',
         password: 'password123',
-        firstname: 'Jane',
-        lastname: 'Doe',
+        firstName: 'Jane',
+        lastName: 'Doe',
         roleId: 3,
       };
       (prisma.user.create as jest.Mock).mockResolvedValue({

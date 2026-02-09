@@ -25,37 +25,39 @@ export class GdprService {
    * Get specific consent for user
    */
   async getUserConsent(userId: number, consentType: string) {
-    return this.prisma.userConsent.findUnique({
+    return this.prisma.userConsent.findFirst({
       where: {
-        user_id_consent_type: {
-          user_id: userId,
-          consent_type: consentType,
-        },
+        user_id: userId,
+        consent_type: consentType,
       },
     });
   }
 
   /**
-   * Set user consent (upsert)
+   * Set user consent (create or update)
    */
   async setUserConsent(userId: number, dto: CreateUserConsentDto) {
-    return this.prisma.userConsent.upsert({
-      where: {
-        user_id_consent_type: {
-          user_id: userId,
-          consent_type: dto.consent_type,
+    const existing = await this.prisma.userConsent.findFirst({
+      where: { user_id: userId, consent_type: dto.consent_type },
+    });
+
+    if (existing) {
+      return this.prisma.userConsent.update({
+        where: { id: existing.id },
+        data: {
+          is_granted: dto.consented,
+          granted_at: dto.consented ? new Date() : null,
+          revoked_at: dto.consented ? null : new Date(),
         },
-      },
-      update: {
-        consented: dto.consented,
-        consented_at: dto.consented ? new Date() : null,
-        withdrawn_at: dto.consented ? null : new Date(),
-      },
-      create: {
+      });
+    }
+
+    return this.prisma.userConsent.create({
+      data: {
         user_id: userId,
         consent_type: dto.consent_type,
-        consented: dto.consented,
-        consented_at: dto.consented ? new Date() : null,
+        is_granted: dto.consented,
+        granted_at: dto.consented ? new Date() : null,
       },
     });
   }
@@ -64,12 +66,10 @@ export class GdprService {
    * Update consent
    */
   async updateConsent(userId: number, consentType: string, dto: UpdateUserConsentDto) {
-    const consent = await this.prisma.userConsent.findUnique({
+    const consent = await this.prisma.userConsent.findFirst({
       where: {
-        user_id_consent_type: {
-          user_id: userId,
-          consent_type: consentType,
-        },
+        user_id: userId,
+        consent_type: consentType,
       },
     });
 
@@ -78,16 +78,11 @@ export class GdprService {
     }
 
     return this.prisma.userConsent.update({
-      where: {
-        user_id_consent_type: {
-          user_id: userId,
-          consent_type: consentType,
-        },
-      },
+      where: { id: consent.id },
       data: {
-        consented: dto.consented,
-        consented_at: dto.consented ? new Date() : consent.consented_at,
-        withdrawn_at: dto.consented ? null : new Date(),
+        is_granted: dto.consented,
+        granted_at: dto.consented ? new Date() : consent.granted_at,
+        revoked_at: dto.consented ? null : new Date(),
       },
     });
   }
@@ -102,8 +97,8 @@ export class GdprService {
         consent_type: { not: 'essential' },
       },
       data: {
-        consented: false,
-        withdrawn_at: new Date(),
+        is_granted: false,
+        revoked_at: new Date(),
       },
     });
   }
@@ -178,7 +173,7 @@ export class GdprService {
     return this.prisma.dataDeletionRequest.findMany({
       where,
       include: {
-        user: {
+        User_DataDeletionRequest_user_idToUser: {
           select: {
             id: true,
             email: true,
@@ -187,7 +182,7 @@ export class GdprService {
             created_at: true,
           },
         },
-        processedBy: {
+        User_DataDeletionRequest_processed_byToUser: {
           select: {
             id: true,
             first_name: true,
@@ -213,23 +208,16 @@ export class GdprService {
     const request = await this.prisma.dataDeletionRequest.findUnique({
       where: { id },
       include: {
-        user: {
+        User_DataDeletionRequest_user_idToUser: {
           select: {
             id: true,
             email: true,
             first_name: true,
             last_name: true,
             created_at: true,
-            // Include related data counts
-            _count: {
-              select: {
-                orders: true,
-                reviews: true,
-              },
-            },
           },
         },
-        processedBy: {
+        User_DataDeletionRequest_processed_byToUser: {
           select: {
             id: true,
             first_name: true,
@@ -269,7 +257,7 @@ export class GdprService {
     };
 
     // If completed, perform actual data deletion/anonymization
-    if (dto.status === DataDeletionStatus.COMPLETED) {
+    if (dto.status === DataDeletionStatus.COMPLETED && request.user_id) {
       await this.performDataDeletion(request.user_id);
     }
 
@@ -294,8 +282,7 @@ export class GdprService {
           email: anonymizedEmail,
           first_name: 'Deleted',
           last_name: 'User',
-          phone: null,
-          profile_picture: null,
+          phone_number: null,
           is_active: false,
         },
       }),
@@ -308,21 +295,21 @@ export class GdprService {
         where: { user_id: userId },
       }),
       // Delete addresses
-      this.prisma.address.deleteMany({
+      this.prisma.userAddress.deleteMany({
         where: { user_id: userId },
       }),
       // Delete loyalty account and transactions
       this.prisma.loyaltyTransaction.deleteMany({
-        where: { account: { user_id: userId } },
+        where: { LoyaltyAccount: { user_id: userId } },
       }),
       this.prisma.loyaltyAccount.deleteMany({
         where: { user_id: userId },
       }),
       // Anonymize reviews (keep ratings but remove personal info)
-      this.prisma.review.updateMany({
+      this.prisma.publish.updateMany({
         where: { user_id: userId },
         data: {
-          comment: '[Deleted by user request]',
+          description: '[Deleted by user request]',
         },
       }),
     ]);
@@ -335,17 +322,13 @@ export class GdprService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        addresses: true,
-        orders: {
+        UserAddress: true,
+        Order: true,
+        Publish_Publish_user_idToUser: true,
+        UserConsent: true,
+        LoyaltyAccount: {
           include: {
-            items: true,
-          },
-        },
-        reviews: true,
-        consents: true,
-        loyaltyAccount: {
-          include: {
-            transactions: true,
+            LoyaltyTransaction: true,
           },
         },
       },
@@ -356,7 +339,7 @@ export class GdprService {
     }
 
     // Remove sensitive data from export
-    const { password_hash, ...exportData } = user;
+    const { password, ...exportData } = user;
 
     return {
       exportedAt: new Date().toISOString(),

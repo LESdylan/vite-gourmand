@@ -27,9 +27,9 @@ export class RoleService {
     const permission = await this.prisma.permission.findUnique({
       where: { id },
       include: {
-        roles: {
+        RolePermission: {
           include: {
-            role: true,
+            Role: true,
           },
         },
       },
@@ -67,9 +67,8 @@ export class RoleService {
     return this.prisma.permission.create({
       data: {
         name: dto.name,
-        description: dto.description,
-        resource: dto.resource,
-        action: dto.action,
+        resource: dto.resource ?? '',
+        action: dto.action ?? '',
       },
     });
   }
@@ -133,13 +132,13 @@ export class RoleService {
   async findAllRoles() {
     return this.prisma.role.findMany({
       include: {
-        permissions: {
+        RolePermission: {
           include: {
-            permission: true,
+            Permission: true,
           },
         },
         _count: {
-          select: { users: true },
+          select: { User: true },
         },
       },
       orderBy: { name: 'asc' },
@@ -153,12 +152,12 @@ export class RoleService {
     const role = await this.prisma.role.findUnique({
       where: { id },
       include: {
-        permissions: {
+        RolePermission: {
           include: {
-            permission: true,
+            Permission: true,
           },
         },
-        users: {
+        User: {
           select: {
             id: true,
             email: true,
@@ -183,9 +182,9 @@ export class RoleService {
     return this.prisma.role.findUnique({
       where: { name },
       include: {
-        permissions: {
+        RolePermission: {
           include: {
-            permission: true,
+            Permission: true,
           },
         },
       },
@@ -286,7 +285,7 @@ export class RoleService {
       where: { id },
       include: {
         _count: {
-          select: { users: true },
+          select: { User: true },
         },
       },
     });
@@ -295,7 +294,7 @@ export class RoleService {
       throw new NotFoundException('Role not found');
     }
 
-    if (role._count.users > 0) {
+    if (role._count.User > 0) {
       throw new ConflictException('Cannot delete role with assigned users');
     }
 
@@ -371,11 +370,11 @@ export class RoleService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        userRole: {
+        Role: {
           include: {
-            permissions: {
+            RolePermission: {
               include: {
-                permission: true,
+                Permission: true,
               },
             },
           },
@@ -383,12 +382,12 @@ export class RoleService {
       },
     });
 
-    if (!user || !user.userRole) {
+    if (!user || !user.Role) {
       return false;
     }
 
-    return user.userRole.permissions.some(
-      (rp: { permission: { name: string } }) => rp.permission.name === permissionName,
+    return user.Role.RolePermission.some(
+      (rp) => rp.Permission.name === permissionName,
     );
   }
 
@@ -399,11 +398,11 @@ export class RoleService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        userRole: {
+        Role: {
           include: {
-            permissions: {
+            RolePermission: {
               include: {
-                permission: true,
+                Permission: true,
               },
             },
           },
@@ -411,10 +410,10 @@ export class RoleService {
       },
     });
 
-    if (!user || !user.userRole) {
+    if (!user || !user.Role) {
       return [];
     }
 
-    return user.userRole.permissions.map((rp: { permission: { id: number; name: string; description: string | null; resource: string | null; action: string | null } }) => rp.permission);
+    return user.Role.RolePermission.map((rp) => rp.Permission);
   }
 }

@@ -52,7 +52,7 @@ describe('IngredientService', () => {
     it('should return all ingredients', async () => {
       (prisma.ingredient.findMany as jest.Mock).mockResolvedValue([mockIngredient]);
 
-      const result = await service.findAll();
+      const result = await service.findAll() as any[];
 
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Tomatoes');

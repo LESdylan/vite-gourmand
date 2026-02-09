@@ -20,8 +20,8 @@ export class SessionService {
     return this.prisma.userSession.create({
       data: {
         user_id: userId,
-        token: dto.token,
-        device_info: dto.device_info,
+        session_token: dto.token,
+        user_agent: dto.device_info,
         ip_address: dto.ip_address,
         expires_at: expiresAt,
       },
@@ -33,15 +33,15 @@ export class SessionService {
    */
   async getSessionByToken(token: string) {
     return this.prisma.userSession.findUnique({
-      where: { token },
+      where: { session_token: token },
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             email: true,
             first_name: true,
             last_name: true,
-            role: true,
+            Role: true,
           },
         },
       },
@@ -56,23 +56,23 @@ export class SessionService {
       where: { user_id: userId },
       select: {
         id: true,
-        device_info: true,
+        user_agent: true,
         ip_address: true,
         created_at: true,
         expires_at: true,
-        token: true,
+        session_token: true,
       },
       orderBy: { created_at: 'desc' },
     });
 
     // Mark the current session
-    return sessions.map((session: { id: number; device_info: string | null; ip_address: string | null; created_at: Date; expires_at: Date; token: string }) => ({
+    return sessions.map((session) => ({
       id: session.id,
-      device_info: session.device_info,
+      device_info: session.user_agent,
       ip_address: session.ip_address,
       created_at: session.created_at,
       expires_at: session.expires_at,
-      is_current: currentToken ? session.token === currentToken : false,
+      is_current: currentToken ? session.session_token === currentToken : false,
     }));
   }
 
@@ -87,7 +87,7 @@ export class SessionService {
       },
       select: {
         id: true,
-        device_info: true,
+        user_agent: true,
         ip_address: true,
         created_at: true,
         expires_at: true,
@@ -101,7 +101,7 @@ export class SessionService {
    */
   async validateSession(token: string) {
     const session = await this.prisma.userSession.findUnique({
-      where: { token },
+      where: { session_token: token },
     });
 
     if (!session) {
@@ -145,7 +145,7 @@ export class SessionService {
     const where: any = { user_id: userId };
 
     if (exceptToken) {
-      where.token = { not: exceptToken };
+      where.session_token = { not: exceptToken };
     }
 
     return this.prisma.userSession.deleteMany({ where });
@@ -156,7 +156,7 @@ export class SessionService {
    */
   async extendSession(token: string, days: number = 7) {
     const session = await this.prisma.userSession.findUnique({
-      where: { token },
+      where: { session_token: token },
     });
 
     if (!session) {
@@ -230,7 +230,7 @@ export class SessionService {
     return this.prisma.userSession.findMany({
       where,
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             email: true,

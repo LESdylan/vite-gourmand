@@ -63,7 +63,7 @@ describe('Edge Cases and Boundaries (e2e)', () => {
     it('handles null body', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/auth/login')
-        .send(null);
+        .send(null as any);
       // 400 = validation, 415 = unsupported media, 500 = validation pipe null check (known issue)
       expect([400, 415, 500]).toContain(response.status);
     });

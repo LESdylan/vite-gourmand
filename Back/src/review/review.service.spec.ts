@@ -9,8 +9,8 @@ describe('ReviewService', () => {
 
   const mockReview = {
     id: 1,
-    rating: 5,
-    comment: 'Great service!',
+    note: 5,
+    description: 'Great service!',
     status: 'approved',
     user_id: 1,
     created_at: new Date(),
@@ -88,7 +88,7 @@ describe('ReviewService', () => {
 
   describe('create', () => {
     it('should create a new review', async () => {
-      const dto = { rating: 5, comment: 'Amazing!' };
+      const dto = { note: 5, description: 'Amazing!' };
       (prisma.publish.create as jest.Mock).mockResolvedValue({
         id: 2,
         ...dto,
@@ -97,7 +97,7 @@ describe('ReviewService', () => {
 
       const result = await service.create(1, dto);
 
-      expect(result.rating).toBe(5);
+      expect(result.note).toBe(5);
       expect(prisma.publish.create).toHaveBeenCalled();
     });
   });

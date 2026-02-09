@@ -19,8 +19,8 @@ describe('OrderService', () => {
     User: { firstname: 'John' },
   };
 
-  const mockUser = { sub: 1, role: 'client' };
-  const mockAdmin = { sub: 2, role: 'admin' };
+  const mockUser = { sub: 1, role: 'client', email: 'client@test.com' };
+  const mockAdmin = { sub: 2, role: 'admin', email: 'admin@test.com' };
 
   beforeEach(async () => {
     const mockPrisma = {
@@ -115,7 +115,7 @@ describe('OrderService', () => {
 
     it('should throw forbidden for non-owner non-admin', async () => {
       (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder);
-      const otherUser = { sub: 99, role: 'client' };
+      const otherUser = { sub: 99, role: 'client', email: 'other@test.com' };
 
       await expect(service.findById(1, otherUser)).rejects.toThrow(
         ForbiddenException,
@@ -125,14 +125,21 @@ describe('OrderService', () => {
 
   describe('create', () => {
     it('should create a new order', async () => {
-      const dto = { menuId: 1, qty: 2, deliveryDate: new Date() };
+      const dto = {
+        deliveryDate: '2024-06-15',
+        deliveryHour: '12:00',
+        deliveryAddress: '123 Main Street',
+        personNumber: 4,
+        menuPrice: 100,
+        totalPrice: 115,
+      };
       (prisma.menu.findUnique as jest.Mock).mockResolvedValue({
         id: 1,
         price_per_person: 25,
       });
       (prisma.order.create as jest.Mock).mockResolvedValue({
-        id: 2,
         ...mockOrder,
+        id: 2,
       });
 
       const result = await service.create(1, dto);
@@ -149,17 +156,17 @@ describe('OrderService', () => {
         qty: 3,
       });
 
-      const result = await service.update(1, { qty: 3 }, mockUser);
+      const result = await service.update(1, { specialInstructions: 'No nuts' }, mockUser);
 
       expect(prisma.order.update).toHaveBeenCalled();
     });
 
     it('should throw forbidden for non-owner', async () => {
       (prisma.order.findUnique as jest.Mock).mockResolvedValue(mockOrder);
-      const otherUser = { sub: 99, role: 'client' };
+      const otherUser = { sub: 99, role: 'client', email: 'other@test.com' };
 
       await expect(
-        service.update(1, { qty: 3 }, otherUser),
+        service.update(1, { specialInstructions: 'No nuts' }, otherUser),
       ).rejects.toThrow(ForbiddenException);
     });
   });

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { TimeOffService } from './timeoff.service';
 import { PrismaService } from '../prisma';
+import { TimeOffRequestType, TimeOffRequestStatus } from './dto/timeoff.dto';
 
 describe('TimeOffService', () => {
   let service: TimeOffService;
@@ -119,7 +120,7 @@ describe('TimeOffService', () => {
   describe('createRequest', () => {
     it('should create a new time off request', async () => {
       const createDto = {
-        request_type: 'sick',
+        request_type: TimeOffRequestType.SICK_LEAVE,
         start_date: '2024-07-01',
         end_date: '2024-07-02',
         reason: 'Not feeling well',
@@ -143,7 +144,7 @@ describe('TimeOffService', () => {
 
     it('should throw BadRequestException if end_date before start_date', async () => {
       const createDto = {
-        request_type: 'vacation',
+        request_type: TimeOffRequestType.VACATION,
         start_date: '2024-07-05',
         end_date: '2024-07-01',
         reason: 'Invalid dates',
@@ -154,7 +155,7 @@ describe('TimeOffService', () => {
 
     it('should throw BadRequestException if overlapping request exists', async () => {
       const createDto = {
-        request_type: 'vacation',
+        request_type: TimeOffRequestType.VACATION,
         start_date: '2024-06-03',
         end_date: '2024-06-07',
         reason: 'Overlapping request',
@@ -242,7 +243,7 @@ describe('TimeOffService', () => {
         decided_at: new Date(),
       });
 
-      const result = await service.decideRequest(1, { status: 'approved' }, 2);
+      const result = await service.decideRequest(1, { status: TimeOffRequestStatus.APPROVED }, 2);
 
       expect(result.status).toBe('approved');
       expect(result.decided_by).toBe(2);
@@ -257,7 +258,7 @@ describe('TimeOffService', () => {
         decided_at: new Date(),
       });
 
-      const result = await service.decideRequest(1, { status: 'rejected' }, 2);
+      const result = await service.decideRequest(1, { status: TimeOffRequestStatus.REJECTED }, 2);
 
       expect(result.status).toBe('rejected');
       expect(result.decided_by).toBe(2);
@@ -266,7 +267,7 @@ describe('TimeOffService', () => {
     it('should throw NotFoundException if request not found', async () => {
       (prisma.timeOffRequest.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.decideRequest(999, { status: 'approved' }, 2)).rejects.toThrow(NotFoundException);
+      await expect(service.decideRequest(999, { status: TimeOffRequestStatus.APPROVED }, 2)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException if not pending', async () => {
@@ -275,7 +276,7 @@ describe('TimeOffService', () => {
         status: 'cancelled',
       });
 
-      await expect(service.decideRequest(1, { status: 'approved' }, 2)).rejects.toThrow(BadRequestException);
+      await expect(service.decideRequest(1, { status: TimeOffRequestStatus.APPROVED }, 2)).rejects.toThrow(BadRequestException);
     });
   });
 

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { SupportService } from './support.service';
 import { PrismaService } from '../prisma';
+import { TicketCategory, TicketPriority, TicketStatus } from './dto/support.dto';
 
 describe('SupportService', () => {
   let service: SupportService;
@@ -153,8 +154,8 @@ describe('SupportService', () => {
       const createDto = {
         subject: 'New Issue',
         description: 'Description of the issue',
-        category: 'billing',
-        priority: 'low',
+        category: TicketCategory.ORDER,
+        priority: TicketPriority.LOW,
       };
       (prisma.supportTicket.create as jest.Mock).mockResolvedValue({
         id: 2,
@@ -192,7 +193,7 @@ describe('SupportService', () => {
         status: 'in_progress',
       });
 
-      const result = await service.update(1, { status: 'in_progress' });
+      const result = await service.update(1, { status: TicketStatus.IN_PROGRESS });
 
       expect(result.status).toBe('in_progress');
     });
@@ -205,7 +206,7 @@ describe('SupportService', () => {
         resolved_at: new Date(),
       });
 
-      const result = await service.update(1, { status: 'resolved' });
+      const result = await service.update(1, { status: TicketStatus.RESOLVED });
 
       expect(result.status).toBe('resolved');
       expect(result.resolved_at).toBeDefined();

@@ -108,8 +108,8 @@ describe('MenuService', () => {
         themeId: 1,
       };
       (prisma.menu.create as jest.Mock).mockResolvedValue({
-        id: 2,
         ...mockMenu,
+        id: 2,
         title: dto.title,
       });
 

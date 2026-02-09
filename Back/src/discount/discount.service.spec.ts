@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { DiscountService } from './discount.service';
 import { PrismaService } from '../prisma';
+import { DiscountType } from './dto/discount.dto';
 
 describe('DiscountService', () => {
   let service: DiscountService;
@@ -106,7 +107,7 @@ describe('DiscountService', () => {
     it('should create a discount', async () => {
       const createDto = {
         code: 'NEW10',
-        type: 'percentage' as const,
+        type: DiscountType.PERCENTAGE,
         value: 10,
       };
       (prisma.discount.create as jest.Mock).mockResolvedValue({
