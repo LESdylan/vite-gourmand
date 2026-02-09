@@ -7,7 +7,7 @@ import * as path from 'path';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AnalyticsModule } from './mongo';
+import { AnalyticsModule } from './analytics';
 import { PrismaModule } from './prisma';
 import { AuthModule } from './auth';
 import { MenuModule } from './menu';
