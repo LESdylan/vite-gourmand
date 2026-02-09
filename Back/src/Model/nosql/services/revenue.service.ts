@@ -23,7 +23,7 @@ export async function recordRevenue(
   orderValue: number,
   personCount: number,
   deliveryPrice: number,
-  discountAmount: number,
+  discountAmount: number
 ): Promise<void> {
   const collection = await getCollection();
   const period = getCurrentMonth();
@@ -41,7 +41,7 @@ export async function recordRevenue(
       $set: { menuTitle, updatedAt: new Date() },
       $setOnInsert: { createdAt: new Date() },
     },
-    { upsert: true },
+    { upsert: true }
   );
 
   // Update average order value
@@ -51,22 +51,15 @@ export async function recordRevenue(
 /**
  * Update average order value for a menu
  */
-async function updateAverageOrderValue(
-  menuId: number,
-  period: string,
-): Promise<void> {
+async function updateAverageOrderValue(menuId: number, period: string): Promise<void> {
   const collection = await getCollection();
-  const doc = await collection.findOne({
-    menuId,
-    period,
-    periodType: 'monthly',
-  });
+  const doc = await collection.findOne({ menuId, period, periodType: 'monthly' });
 
   if (doc && doc.orderCount > 0) {
     const avg = doc.totalRevenue / doc.orderCount;
     await collection.updateOne(
       { menuId, period, periodType: 'monthly' },
-      { $set: { averageOrderValue: avg } },
+      { $set: { averageOrderValue: avg } }
     );
   }
 }
@@ -76,26 +69,14 @@ async function updateAverageOrderValue(
  */
 export async function getRevenueByMenu(
   startPeriod: string,
-  endPeriod: string,
-): Promise<
-  Array<{
-    menuId: number;
-    menuTitle: string;
-    totalRevenue: number;
-    orderCount: number;
-  }>
-> {
+  endPeriod: string
+): Promise<Array<{ menuId: number; menuTitle: string; totalRevenue: number; orderCount: number }>> {
   const db = await getDb();
   const collection = db.collection<RevenueByMenu>(COLLECTIONS.REVENUE_BY_MENU);
 
-  return collection
-    .aggregate([
-      {
-        $match: {
-          periodType: 'monthly',
-          period: { $gte: startPeriod, $lte: endPeriod },
-        },
-      },
+  const result = await collection
+    .aggregate<{ menuId: number; menuTitle: string; totalRevenue: number; orderCount: number }>([
+      { $match: { periodType: 'monthly', period: { $gte: startPeriod, $lte: endPeriod } } },
       {
         $group: {
           _id: { menuId: '$menuId', menuTitle: '$menuTitle' },
@@ -117,6 +98,8 @@ export async function getRevenueByMenu(
       },
     ])
     .toArray();
+
+  return result;
 }
 
 /**
@@ -124,10 +107,8 @@ export async function getRevenueByMenu(
  */
 export async function getMenuRevenueTrend(
   menuId: number,
-  limit = 12,
-): Promise<
-  Array<{ period: string; totalRevenue: number; orderCount: number }>
-> {
+  limit = 12
+): Promise<Array<{ period: string; totalRevenue: number; orderCount: number }>> {
   const collection = await getCollection();
 
   return collection
@@ -161,10 +142,8 @@ export async function getTopRevenueMenus(limit = 10): Promise<RevenueByMenu[]> {
  * Compare all menus for a period (bar chart data)
  */
 export async function compareMenus(
-  period: string,
-): Promise<
-  Array<{ menuTitle: string; orderCount: number; totalRevenue: number }>
-> {
+  period: string
+): Promise<Array<{ menuTitle: string; orderCount: number; totalRevenue: number }>> {
   const collection = await getCollection();
 
   return collection

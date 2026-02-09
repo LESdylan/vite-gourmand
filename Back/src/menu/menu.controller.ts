@@ -11,11 +11,10 @@ import {
   Body,
   Param,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { MenuService } from './menu.service';
-import { Public, Roles, CurrentUser, JwtPayload, PaginationDto } from '../common';
+import { Public, Roles, CurrentUser, JwtPayload, PaginationDto, SafeParseIntPipe } from '../common';
 import { CreateMenuDto, UpdateMenuDto, MenuFilterDto } from './dto/menu.dto';
 
 @ApiTags('menus')
@@ -33,7 +32,7 @@ export class MenuController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get menu by ID' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', SafeParseIntPipe) id: number) {
     return this.menuService.findById(id);
   }
 
@@ -50,7 +49,7 @@ export class MenuController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update menu' })
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', SafeParseIntPipe) id: number,
     @Body() dto: UpdateMenuDto,
   ) {
     return this.menuService.update(id, dto);
@@ -60,7 +59,7 @@ export class MenuController {
   @Roles('admin', 'manager')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete menu' })
-  async delete(@Param('id', ParseIntPipe) id: number) {
+  async delete(@Param('id', SafeParseIntPipe) id: number) {
     return this.menuService.delete(id);
   }
 
@@ -68,7 +67,7 @@ export class MenuController {
   @Roles('admin', 'manager')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Publish menu' })
-  async publish(@Param('id', ParseIntPipe) id: number) {
+  async publish(@Param('id', SafeParseIntPipe) id: number) {
     return this.menuService.publish(id);
   }
 
@@ -76,7 +75,7 @@ export class MenuController {
   @Roles('admin', 'manager')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Unpublish menu' })
-  async unpublish(@Param('id', ParseIntPipe) id: number) {
+  async unpublish(@Param('id', SafeParseIntPipe) id: number) {
     return this.menuService.unpublish(id);
   }
 }

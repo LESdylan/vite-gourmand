@@ -25,6 +25,15 @@ export class CustomValidationPipe implements PipeTransform {
       return value;
     }
 
+    // Handle null/undefined values
+    if (value === null || value === undefined) {
+      throw new BadRequestException({
+        message: 'Validation failed',
+        error: 'Validation failed',
+        details: [{ field: 'body', errors: ['Request body cannot be null or undefined'] }],
+      });
+    }
+
     const object = plainToInstance(metatype, value);
     const errors = await validate(object, {
       whitelist: true,

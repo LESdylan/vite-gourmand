@@ -9,13 +9,12 @@ import {
   Delete,
   Body,
   Param,
-  ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { AddressService } from './address.service';
-import { CurrentUser, Roles, JwtPayload, PaginationDto } from '../common';
+import { CurrentUser, Roles, JwtPayload, PaginationDto, SafeParseIntPipe } from '../common';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
 
@@ -60,7 +59,7 @@ export class UserController {
   @ApiOperation({ summary: 'Update address' })
   async updateAddress(
     @CurrentUser() user: JwtPayload,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', SafeParseIntPipe) id: number,
     @Body() dto: UpdateAddressDto,
   ) {
     return this.addressService.update(user.sub, id, dto);
@@ -77,7 +76,7 @@ export class UserController {
   @Get(':id')
   @Roles('admin', 'manager')
   @ApiOperation({ summary: 'Get user by ID (admin)' })
-  async getUserById(@Param('id', ParseIntPipe) id: number) {
+  async getUserById(@Param('id', SafeParseIntPipe) id: number) {
     return this.userService.findById(id);
   }
 }

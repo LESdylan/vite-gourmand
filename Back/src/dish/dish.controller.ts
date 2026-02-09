@@ -10,11 +10,10 @@ import {
   Body,
   Param,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { DishService } from './dish.service';
-import { Public, Roles, PaginationDto } from '../common';
+import { Public, Roles, PaginationDto, SafeParseIntPipe } from '../common';
 import { CreateDishDto, UpdateDishDto } from './dto/dish.dto';
 
 @ApiTags('dishes')
@@ -32,7 +31,7 @@ export class DishController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get dish by ID' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', SafeParseIntPipe) id: number) {
     return this.dishService.findById(id);
   }
 
@@ -48,7 +47,7 @@ export class DishController {
   @Roles('admin', 'manager')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update dish' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDishDto) {
+  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateDishDto) {
     return this.dishService.update(id, dto);
   }
 
@@ -56,7 +55,7 @@ export class DishController {
   @Roles('admin', 'manager')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete dish' })
-  async delete(@Param('id', ParseIntPipe) id: number) {
+  async delete(@Param('id', SafeParseIntPipe) id: number) {
     return this.dishService.delete(id);
   }
 }

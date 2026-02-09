@@ -17,10 +17,10 @@
     "test:watch": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --watch --runInBand",
     "test:cov": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --coverage --runInBand",
     "test:debug": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./test/jest-e2e.json --runInBand",
-    "test:orders": "jest --config ./test/jest-e2e.json --testPathPattern=order",
-    "test:flows": "jest --config ./test/jest-e2e.json --testPathPattern=api-flows",
-    "test:all": "jest --config ./test/jest-e2e.json --runInBand",
+    "test:e2e": "node --max-old-space-size=1024 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --runInBand",
+    "test:orders": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --testPathPattern=order --runInBand",
+    "test:flows": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --testPathPattern=api-flows --runInBand",
+    "test:all": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --runInBand",
     "seed": "npx tsx prisma/seed-playground.ts",
     "seed:test": "npx tsx prisma/seed-test-data.ts"
   },
@@ -69,6 +69,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.7",
     "@types/nodemailer": "^7.0.9",
     "@types/passport-jwt": "^4.0.1",
@@ -81,7 +82,7 @@
     "globals": "^16.0.0",
     "jest": "^30.0.0",
     "prettier": "^3.4.2",
-    "prisma": "^7.3.0",
+    "prisma": "^6.19.2",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
@@ -108,7 +109,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testPathIgnorePatterns": [
-      "<rootDir>/test/cli_test/tests/"
+      "<rootDir>/test/cli_test/tests/",
+      "<rootDir>/src/test/unit_tests/",
+      "<rootDir>/src/test/fuzzy/",
+      "<rootDir>/src/test/validators/"
     ],
     "testEnvironment": "node",
     "testEnvironmentOptions": {

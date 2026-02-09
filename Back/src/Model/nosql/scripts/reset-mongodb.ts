@@ -6,6 +6,7 @@
  * Run via: npx tsx src/Model/nosql/scripts/reset-mongodb.ts
  */
 
+import { IndexDescription, IndexSpecification } from 'mongodb';
 import { MongoAnalytics, getDb } from '../client/mongo-analytics.client';
 import { COLLECTIONS } from '../collections';
 import { INDEX_DEFINITIONS } from '../collections/indexes';
@@ -65,11 +66,7 @@ async function dropCollectionSafe(name: string): Promise<void> {
 
 async function createIndexes(
   collectionName: string,
-  indexes: {
-    key: Record<string, number>;
-    unique?: boolean;
-    expireAfterSeconds?: number;
-  }[],
+  indexes: IndexDescription[]
 ): Promise<void> {
   const db = await getDb();
   const collection = db.collection(collectionName);
@@ -82,7 +79,7 @@ async function createIndexes(
       options.expireAfterSeconds = index.expireAfterSeconds;
     }
 
-    const name = await collection.createIndex(index.key, options);
+    const name = await collection.createIndex(index.key as IndexSpecification, options);
     console.log(`  ✅ ${collectionName}: ${name}`);
   }
 }

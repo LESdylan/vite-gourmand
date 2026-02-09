@@ -58,8 +58,7 @@ async function getCollectionStats(
 ): Promise<CollectionStats> {
   try {
     const coll = db.collection(name);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const stats = await (coll.stats() as Promise<MongoStats>);
+    const stats = await db.command({ collStats: name }) as MongoStats;
     return {
       name,
       count: stats.count ?? 0,

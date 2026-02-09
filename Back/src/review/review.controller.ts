@@ -9,11 +9,10 @@ import {
   Body,
   Param,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewService } from './review.service';
-import { Public, Roles, CurrentUser, JwtPayload, PaginationDto } from '../common';
+import { Public, Roles, CurrentUser, JwtPayload, PaginationDto, SafeParseIntPipe } from '../common';
 import { CreateReviewDto, ModerateReviewDto } from './dto/review.dto';
 
 @ApiTags('reviews')
@@ -31,7 +30,7 @@ export class ReviewController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get review by ID' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', SafeParseIntPipe) id: number) {
     return this.reviewService.findById(id);
   }
 
@@ -56,7 +55,7 @@ export class ReviewController {
   @ApiOperation({ summary: 'Moderate review' })
   async moderate(
     @CurrentUser() user: JwtPayload,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', SafeParseIntPipe) id: number,
     @Body() dto: ModerateReviewDto,
   ) {
     return this.reviewService.moderate(id, user.sub, dto);

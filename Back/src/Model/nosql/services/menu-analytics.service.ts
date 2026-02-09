@@ -22,7 +22,7 @@ async function getCollection() {
 export async function incrementViewCount(
   menuId: number,
   menuTitle: string,
-  periodType: 'daily' | 'weekly' | 'monthly' = 'daily',
+  periodType: 'daily' | 'weekly' | 'monthly' = 'daily'
 ): Promise<void> {
   const collection = await getCollection();
   const period = getCurrentPeriod(periodType);
@@ -34,7 +34,7 @@ export async function incrementViewCount(
       $set: { menuTitle, updatedAt: new Date() },
       $setOnInsert: { createdAt: new Date(), orderCount: 0, totalRevenue: 0 },
     },
-    { upsert: true },
+    { upsert: true }
   );
 }
 
@@ -46,13 +46,13 @@ export async function recordOrder(
   menuTitle: string,
   revenue: number,
   diet?: string,
-  theme?: string,
+  theme?: string
 ): Promise<void> {
   const collection = await getCollection();
   const period = getCurrentPeriod('daily');
   const hour = new Date().getHours();
 
-  const update: Record<string, unknown> = {
+  const update: Record<string, Record<string, unknown>> = {
     $inc: { orderCount: 1, totalRevenue: revenue },
     $set: { menuTitle, updatedAt: new Date() },
     $addToSet: { peakHours: hour },
@@ -61,9 +61,11 @@ export async function recordOrder(
   if (diet) update.$inc[`ordersByDiet.${diet}`] = 1;
   if (theme) update.$inc[`ordersByTheme.${theme}`] = 1;
 
-  await collection.updateOne({ menuId, period, periodType: 'daily' }, update, {
-    upsert: true,
-  });
+  await collection.updateOne(
+    { menuId, period, periodType: 'daily' },
+    update,
+    { upsert: true }
+  );
 }
 
 /**
@@ -71,16 +73,12 @@ export async function recordOrder(
  */
 export async function updateRating(
   menuId: number,
-  rating: number,
+  rating: number
 ): Promise<void> {
   const collection = await getCollection();
   const period = getCurrentPeriod('monthly');
 
-  const doc = await collection.findOne({
-    menuId,
-    period,
-    periodType: 'monthly',
-  });
+  const doc = await collection.findOne({ menuId, period, periodType: 'monthly' });
   const currentCount = doc?.ratingCount || 0;
   const currentAvg = doc?.averageRating || 0;
   const newCount = currentCount + 1;
@@ -89,13 +87,9 @@ export async function updateRating(
   await collection.updateOne(
     { menuId, period, periodType: 'monthly' },
     {
-      $set: {
-        averageRating: newAvg,
-        ratingCount: newCount,
-        updatedAt: new Date(),
-      },
+      $set: { averageRating: newAvg, ratingCount: newCount, updatedAt: new Date() },
     },
-    { upsert: true },
+    { upsert: true }
   );
 }
 
@@ -104,7 +98,7 @@ export async function updateRating(
  */
 export async function getTopMenus(
   periodType: 'daily' | 'weekly' | 'monthly',
-  limit = 10,
+  limit = 10
 ): Promise<MenuAnalytics[]> {
   const collection = await getCollection();
   const period = getCurrentPeriod(periodType);
@@ -137,15 +131,7 @@ function getISOWeek(date: Date): number {
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
   const week1 = new Date(d.getFullYear(), 0, 4);
-  return (
-    1 +
-    Math.round(
-      ((d.getTime() - week1.getTime()) / 86400000 -
-        3 +
-        ((week1.getDay() + 6) % 7)) /
-        7,
-    )
-  );
+  return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
 }
 
 export const MenuAnalyticsService = {

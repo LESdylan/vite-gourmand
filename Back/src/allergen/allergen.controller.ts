@@ -1,10 +1,10 @@
 /**
  * Allergen Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AllergenService } from './allergen.service';
-import { Public, Roles } from '../common';
+import { Public, Roles, SafeParseIntPipe } from '../common';
 import { CreateAllergenDto, UpdateAllergenDto } from './dto/allergen.dto';
 
 @ApiTags('allergens')
@@ -22,7 +22,7 @@ export class AllergenController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get allergen by ID' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', SafeParseIntPipe) id: number) {
     return this.allergenService.findById(id);
   }
 
@@ -38,7 +38,7 @@ export class AllergenController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update allergen' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAllergenDto) {
+  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateAllergenDto) {
     return this.allergenService.update(id, dto);
   }
 
@@ -46,7 +46,7 @@ export class AllergenController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete allergen' })
-  async delete(@Param('id', ParseIntPipe) id: number) {
+  async delete(@Param('id', SafeParseIntPipe) id: number) {
     return this.allergenService.delete(id);
   }
 }

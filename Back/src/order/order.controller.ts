@@ -10,12 +10,11 @@ import {
   Body,
   Param,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { OrderStatusService } from './order-status.service';
-import { CurrentUser, Roles, JwtPayload, PaginationDto } from '../common';
+import { CurrentUser, Roles, JwtPayload, PaginationDto, SafeParseIntPipe } from '../common';
 import { CreateOrderDto, UpdateOrderDto, OrderFilterDto } from './dto/order.dto';
 import { UpdateStatusDto } from './dto/status.dto';
 
@@ -44,7 +43,7 @@ export class OrderController {
   @ApiOperation({ summary: 'Get order by ID' })
   async findOne(
     @CurrentUser() user: JwtPayload,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', SafeParseIntPipe) id: number,
   ) {
     return this.orderService.findById(id, user);
   }
@@ -59,7 +58,7 @@ export class OrderController {
   @ApiOperation({ summary: 'Update order (before confirmation only)' })
   async update(
     @CurrentUser() user: JwtPayload,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', SafeParseIntPipe) id: number,
     @Body() dto: UpdateOrderDto,
   ) {
     return this.orderService.update(id, dto, user);
@@ -69,7 +68,7 @@ export class OrderController {
   @Roles('admin', 'manager', 'employee')
   @ApiOperation({ summary: 'Update order status' })
   async updateStatus(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', SafeParseIntPipe) id: number,
     @Body() dto: UpdateStatusDto,
   ) {
     return this.statusService.updateStatus(id, dto.status, dto.notes);
@@ -77,7 +76,7 @@ export class OrderController {
 
   @Get(':id/history')
   @ApiOperation({ summary: 'Get order status history' })
-  async getHistory(@Param('id', ParseIntPipe) id: number) {
+  async getHistory(@Param('id', SafeParseIntPipe) id: number) {
     return this.statusService.getHistory(id);
   }
 
@@ -85,7 +84,7 @@ export class OrderController {
   @ApiOperation({ summary: 'Cancel order' })
   async cancel(
     @CurrentUser() user: JwtPayload,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', SafeParseIntPipe) id: number,
     @Body() body: { reason: string },
   ) {
     return this.orderService.cancel(id, user, body.reason);

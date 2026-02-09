@@ -1,10 +1,10 @@
 /**
  * Theme Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ThemeService } from './theme.service';
-import { Public, Roles } from '../common';
+import { Public, Roles, SafeParseIntPipe } from '../common';
 import { CreateThemeDto, UpdateThemeDto } from './dto/theme.dto';
 
 @ApiTags('themes')
@@ -22,7 +22,7 @@ export class ThemeController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get theme by ID' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('id', SafeParseIntPipe) id: number) {
     return this.themeService.findById(id);
   }
 
@@ -38,7 +38,7 @@ export class ThemeController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update theme' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateThemeDto) {
+  async update(@Param('id', SafeParseIntPipe) id: number, @Body() dto: UpdateThemeDto) {
     return this.themeService.update(id, dto);
   }
 
@@ -46,7 +46,7 @@ export class ThemeController {
   @Roles('admin')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete theme' })
-  async delete(@Param('id', ParseIntPipe) id: number) {
+  async delete(@Param('id', SafeParseIntPipe) id: number) {
     return this.themeService.delete(id);
   }
 }

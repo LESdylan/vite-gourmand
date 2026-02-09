@@ -1,11 +1,11 @@
 /**
  * Admin Controller
  */
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { StatsService } from './stats.service';
-import { Roles } from '../common';
+import { Roles, SafeParseIntPipe } from '../common';
 import { CreateEmployeeDto, UpdateRoleDto } from './dto/admin.dto';
 
 @ApiTags('admin')
@@ -39,7 +39,7 @@ export class AdminController {
   @Put('users/:id/role')
   @ApiOperation({ summary: 'Update user role' })
   async updateRole(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', SafeParseIntPipe) id: number,
     @Body() dto: UpdateRoleDto,
   ) {
     return this.adminService.updateUserRole(id, dto.roleId);
@@ -47,7 +47,7 @@ export class AdminController {
 
   @Put('users/:id/toggle-active')
   @ApiOperation({ summary: 'Toggle user active status' })
-  async toggleActive(@Param('id', ParseIntPipe) id: number) {
+  async toggleActive(@Param('id', SafeParseIntPipe) id: number) {
     return this.adminService.toggleUserActive(id);
   }
 

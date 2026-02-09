@@ -18,6 +18,7 @@ export * from './interceptors/transform.interceptor';
 
 // Pipes
 export * from './pipes/validation.pipe';
+export * from './pipes/safe-parse-int.pipe';
 
 // Decorators
 export * from './decorators/public.decorator';
