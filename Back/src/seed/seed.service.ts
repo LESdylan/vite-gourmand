@@ -28,7 +28,7 @@ const MENU_IMAGE_QUERIES: Record<string, string> = {
   // Mediterranean
   'Paella Valenciana': 'paella spanish seafood rice',
   'Mezzé Libanais': 'mezze lebanese hummus falafel',
-  'Tajine d\'Agneau': 'tagine lamb moroccan apricot',
+  "Tajine d'Agneau": 'tagine lamb moroccan apricot',
   'Moussaka Grecque': 'moussaka greek eggplant',
   'Antipasti Italien': 'antipasti italian charcuterie cheese',
   // Asian Fusion

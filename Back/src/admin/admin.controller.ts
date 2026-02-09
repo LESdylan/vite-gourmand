@@ -6,7 +6,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { StatsService } from './stats.service';
 import { Roles, SafeParseIntPipe } from '../common';
-import { CreateEmployeeDto, UpdateRoleDto } from './dto/admin.dto';
+import { CreateEmployeeDto, UpdateUserRoleDto } from './dto/admin.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -40,7 +40,7 @@ export class AdminController {
   @ApiOperation({ summary: 'Update user role' })
   async updateRole(
     @Param('id', SafeParseIntPipe) id: number,
-    @Body() dto: UpdateRoleDto,
+    @Body() dto: UpdateUserRoleDto,
   ) {
     return this.adminService.updateUserRole(id, dto.roleId);
   }

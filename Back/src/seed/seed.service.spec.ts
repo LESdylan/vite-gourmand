@@ -5,8 +5,6 @@ import { UnsplashService } from '../unsplash';
 
 describe('SeedService', () => {
   let service: SeedService;
-  let prisma: PrismaService;
-  let unsplash: UnsplashService;
 
   const mockPrisma = {
     menu: {
@@ -33,8 +31,6 @@ describe('SeedService', () => {
     }).compile();
 
     service = module.get<SeedService>(SeedService);
-    prisma = module.get<PrismaService>(PrismaService);
-    unsplash = module.get<UnsplashService>(UnsplashService);
   });
 
   afterEach(() => {

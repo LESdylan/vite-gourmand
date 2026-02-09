@@ -34,7 +34,7 @@ export class CreateEmployeeDto {
   roleId!: number;
 }
 
-export class UpdateRoleDto {
+export class UpdateUserRoleDto {
   @ApiProperty({ example: 2, description: 'New role ID' })
   @IsNumber()
   roleId!: number;
