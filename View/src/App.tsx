@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { PortalAuthProvider, ProtectedRoute, Unauthorized } from './portal_dashboard'
+import { ResetPasswordPage } from './portal_dashboard/ResetPasswordPage'
 import './App.css'
 
 // Lazy load components
@@ -42,6 +43,7 @@ function App() {
             
             {/* Portal & Auth */}
             <Route path="/portal" element={<Portal />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             
             {/* Unified Dashboard - SPA with role switching */}

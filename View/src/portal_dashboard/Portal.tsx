@@ -7,11 +7,11 @@
 import { Navigate } from 'react-router-dom';
 import { usePortalAuth } from './PortalAuthContext';
 import { PortalLoginForm } from './PortalLoginForm';
-import { ChefHat, LayoutDashboard, BarChart3, Users, ShoppingBag } from 'lucide-react';
+import { ChefHat, UtensilsCrossed, Clock, Sparkles, Star } from 'lucide-react';
 import './Portal.css';
 
-// Dashboard preview image from Unsplash (elegant dashboard/analytics theme)
-const DASHBOARD_PREVIEW = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&q=80';
+// Restaurant ambiance image - warm, inviting
+const RESTAURANT_PREVIEW = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&auto=format&q=80';
 
 export function Portal() {
   const { isAuthenticated, isLoading, user } = usePortalAuth();
@@ -35,58 +35,58 @@ export function Portal() {
       </div>
 
       <div className="portal-split-layout">
-        {/* Left side - Dashboard preview */}
+        {/* Left side - Restaurant preview */}
         <div className="portal-preview">
           <div className="portal-preview-content">
             <div className="portal-preview-badge">
-              <LayoutDashboard size={14} />
-              <span>Tableau de bord</span>
+              <Star size={14} />
+              <span>Expérience culinaire</span>
             </div>
             <h2 className="portal-preview-title">
-              Gérez votre activité<br />
-              <span className="portal-preview-title-accent">en toute simplicité</span>
+              La gastronomie<br />
+              <span className="portal-preview-title-accent">à portée de clic</span>
             </h2>
             <p className="portal-preview-desc">
-              Accédez à votre espace personnel pour gérer vos commandes, 
-              suivre vos statistiques et piloter votre restaurant.
+              Connectez-vous pour commander vos plats préférés, 
+              gérer vos réservations et découvrir nos nouvelles créations du chef.
             </p>
             
             {/* Feature highlights */}
             <div className="portal-preview-features">
               <div className="portal-preview-feature">
                 <div className="portal-preview-feature-icon">
-                  <BarChart3 size={18} />
+                  <UtensilsCrossed size={20} />
                 </div>
                 <div>
-                  <span className="portal-preview-feature-title">Analytics</span>
-                  <span className="portal-preview-feature-desc">Statistiques en temps réel</span>
+                  <span className="portal-preview-feature-title">Menus raffinés</span>
+                  <span className="portal-preview-feature-desc">Produits frais et de saison</span>
                 </div>
               </div>
               <div className="portal-preview-feature">
                 <div className="portal-preview-feature-icon">
-                  <ShoppingBag size={18} />
+                  <Clock size={20} />
                 </div>
                 <div>
-                  <span className="portal-preview-feature-title">Commandes</span>
-                  <span className="portal-preview-feature-desc">Suivi et gestion</span>
+                  <span className="portal-preview-feature-title">Livraison express</span>
+                  <span className="portal-preview-feature-desc">Service rapide et soigné</span>
                 </div>
               </div>
               <div className="portal-preview-feature">
                 <div className="portal-preview-feature-icon">
-                  <Users size={18} />
+                  <Sparkles size={20} />
                 </div>
                 <div>
-                  <span className="portal-preview-feature-title">Équipe</span>
-                  <span className="portal-preview-feature-desc">Gestion du personnel</span>
+                  <span className="portal-preview-feature-title">Points fidélité</span>
+                  <span className="portal-preview-feature-desc">Récompenses exclusives</span>
                 </div>
               </div>
             </div>
 
-            {/* Dashboard image mockup */}
+            {/* Restaurant image mockup */}
             <div className="portal-preview-mockup">
               <img 
-                src={DASHBOARD_PREVIEW} 
-                alt="Aperçu du tableau de bord" 
+                src={RESTAURANT_PREVIEW} 
+                alt="Ambiance restaurant Vite & Gourmand" 
                 className="portal-preview-image"
               />
               <div className="portal-preview-image-overlay" />
@@ -103,7 +103,7 @@ export function Portal() {
                 <ChefHat size={28} />
               </div>
               <h1 className="portal-brand-name">Vite & Gourmand</h1>
-              <p className="portal-brand-tagline">Espace personnel</p>
+              <p className="portal-brand-tagline">Votre espace personnel</p>
             </div>
 
             {/* Login/Register form */}

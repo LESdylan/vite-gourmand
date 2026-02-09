@@ -103,6 +103,12 @@ export async function forgotPassword(email: string): Promise<{ message: string }
   return wrapper.data;
 }
 
+/** Verify reset token validity */
+export async function verifyResetToken(token: string): Promise<{ valid: boolean; message: string }> {
+  const wrapper = await apiRequest<ApiWrapper<{ valid: boolean; message: string }>>(`/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`);
+  return wrapper.data;
+}
+
 /** Reset password with token */
 export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
   const wrapper = await apiRequest<ApiWrapper<{ message: string }>>('/api/auth/reset-password', {

@@ -253,10 +253,13 @@ export function PortalLoginForm() {
         {mode === 'login' && (
           <form onSubmit={handleLogin} className="pf-form" noValidate>
             {/* Remember me banner */}
-            {rememberMeData && (
+            {rememberMeData && email === rememberMeData.email && (
               <div className="pf-remember-banner">
                 <span>👋 Bon retour, {rememberMeData.name} !</span>
-                <button type="button" onClick={() => setEmail('')}>Changer</button>
+                <button type="button" onClick={() => {
+                  setEmail('');
+                  setRemember(false);
+                }}>Changer de compte</button>
               </div>
             )}
 

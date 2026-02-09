@@ -1,7 +1,8 @@
 /**
  * Mail Service
+ * Uses Titan Email SMTP for sending emails
  */
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
@@ -9,41 +10,87 @@ interface MailOptions {
   to: string;
   subject: string;
   html: string;
+  text?: string;
 }
 
 @Injectable()
-export class MailService {
+export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private transporter!: nodemailer.Transporter;
+  private readonly fromEmail: string;
 
   constructor(private readonly config: ConfigService) {
+    this.fromEmail = this.config.get<string>('TITAN_EMAIL', 'devfast@archicode.codes');
     this.initTransporter();
   }
 
+  async onModuleInit() {
+    try {
+      await this.transporter.verify();
+      this.logger.log('SMTP transporter verified — ready to send emails');
+    } catch (err) {
+      this.logger.error('SMTP transporter verification failed', (err as Error).message);
+    }
+  }
+
   private initTransporter() {
+    const host = this.config.get<string>('TITAN_SMTP_HOST', 'smtp.titan.email');
+    const portRaw = this.config.get<string>('TITAN_SMTP_PORT', '465');
+    const port = Number(portRaw);
+    const user = this.config.get<string>('TITAN_EMAIL');
+    const pass = this.config.get<string>('TITAN_PASSWORD');
+    const secure = port === 465;
+
+    this.logger.log(`Initializing mail transporter: ${host}:${port} (secure=${secure}) user=${user}`);
+
     this.transporter = nodemailer.createTransport({
-      host: this.config.get<string>('MAIL_HOST'),
-      port: this.config.get<number>('MAIL_PORT'),
-      secure: false,
-      auth: {
-        user: this.config.get<string>('MAIL_USER'),
-        pass: this.config.get<string>('MAIL_APP_PASSWORD'),
-      },
+      host,
+      port,
+      secure,
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 30000,
     });
   }
 
+  /** Strip HTML tags to produce a plain-text fallback */
+  private htmlToText(html: string): string {
+    return html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<\/div>/gi, '\n')
+      .replace(/<\/h[1-6]>/gi, '\n\n')
+      .replace(/<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/gi, '$2 ($1)')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&#?\w+;/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
   async send(options: MailOptions): Promise<boolean> {
+    const plainText = options.text || this.htmlToText(options.html);
     try {
-      await this.transporter.sendMail({
-        from: this.config.get<string>('MAIL_FROM', 'noreply@vitegourmand.fr'),
+      const info = await this.transporter.sendMail({
+        from: this.fromEmail,
         to: options.to,
         subject: options.subject,
+        text: plainText,
         html: options.html,
       });
-      this.logger.log(`Email sent to ${options.to}`);
+      this.logger.log(
+        `Email sent to ${options.to} — id=${info.messageId} response="${info.response}" accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)}`,
+      );
       return true;
     } catch (error) {
-      this.logger.error(`Failed to send email to ${options.to}`, error);
+      this.logger.error(`Failed to send email to ${options.to}`);
+      this.logger.error(error);
       return false;
     }
   }
@@ -70,11 +117,56 @@ export class MailService {
 
   private getPasswordResetTemplate(url: string): string {
     return `
-      <h1>Reset Your Password</h1>
-      <p>Click the link below to reset your password:</p>
-      <a href="${url}">${url}</a>
-      <p>This link expires in 1 hour.</p>
-    `;
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #faf7f5; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+    .header { background: linear-gradient(135deg, #722F37 0%, #8a3a44 100%); padding: 30px; text-align: center; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 28px; }
+    .content { padding: 40px 30px; color: #333; }
+    .content h2 { color: #722F37; margin: 0 0 20px; }
+    .content p { line-height: 1.6; margin: 0 0 16px; }
+    .btn { display: inline-block; background: #722F37; color: #ffffff !important; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+    .link-box { background: #f5f0ed; padding: 15px; border-radius: 8px; word-break: break-all; font-size: 12px; color: #666; margin: 20px 0; }
+    .warning { background: #fff8f0; border-left: 4px solid #D4AF37; padding: 15px; margin: 20px 0; font-size: 14px; color: #666; }
+    .footer { background: #f5f0ed; padding: 20px 30px; text-align: center; font-size: 12px; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔐 Réinitialisation de mot de passe</h1>
+    </div>
+    <div class="content">
+      <h2>Bonjour,</h2>
+      <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte Vite & Gourmand.</p>
+      
+      <p>Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :</p>
+      <a href="${url}" class="btn">🔑 Réinitialiser mon mot de passe</a>
+      
+      <p>Ou copiez ce lien dans votre navigateur :</p>
+      <div class="link-box">${url}</div>
+      
+      <div class="warning">
+        <strong>⚠️ Important :</strong><br>
+        Ce lien expirera dans <strong>1 heure</strong>.<br>
+        Si vous n'avez pas demandé cette réinitialisation, ignorez simplement cet email.
+      </div>
+      
+      <p style="font-size: 14px; color: #666;">
+        Pour votre sécurité, ne partagez jamais ce lien avec personne.
+      </p>
+    </div>
+    <div class="footer">
+      <p>© ${new Date().getFullYear()} Vite & Gourmand - Tous droits réservés</p>
+      <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+    </div>
+  </div>
+</body>
+</html>`;
   }
 
   private getOrderConfirmationTemplate(orderNumber: string): string {
