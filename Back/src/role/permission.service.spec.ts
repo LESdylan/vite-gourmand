@@ -88,7 +88,10 @@ describe('PermissionService', () => {
 
   describe('update', () => {
     it('should update a permission', async () => {
-      mockPrisma.permission.findUnique.mockResolvedValue(mockPermission);
+      // First call for findById, second for findByName (should return null for different name)
+      mockPrisma.permission.findUnique
+        .mockResolvedValueOnce(mockPermission)
+        .mockResolvedValueOnce(null);
       mockPrisma.permission.update.mockResolvedValue({
         ...mockPermission,
         name: 'updated',

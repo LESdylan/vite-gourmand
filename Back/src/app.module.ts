@@ -35,11 +35,12 @@ import { MessageModule } from './message';
 import { SupportModule } from './support';
 import { KanbanModule } from './kanban';
 import { TimeOffModule } from './timeoff';
-// Temporarily disabled - require schema alignment
-// import { GdprModule } from './gdpr';
-// import { SessionModule } from './session';
-// import { ImageModule } from './image';
-// import { RoleModule } from './role';
+import { GdprModule } from './gdpr';
+import { SessionModule } from './session';
+import { ImageModule } from './image';
+import { RoleModule } from './role';
+import { UnsplashModule } from './unsplash';
+import { SeedModule } from './seed';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -130,11 +131,12 @@ import {
     SupportModule,
     KanbanModule,
     TimeOffModule,
-    // Temporarily disabled - require schema alignment
-    // GdprModule,
-    // SessionModule,
-    // ImageModule,
-    // RoleModule,
+    GdprModule,
+    SessionModule,
+    ImageModule,
+    RoleModule,
+    UnsplashModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [

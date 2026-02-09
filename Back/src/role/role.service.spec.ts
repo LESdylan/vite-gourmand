@@ -79,7 +79,11 @@ describe('RoleService', () => {
 
   describe('update', () => {
     it('should update a role', async () => {
-      mockPrisma.role.findUnique.mockResolvedValue(mockRole);
+      // First call for findById, second for checkDuplicate (should return null for new name)
+      mockPrisma.role.findUnique
+        .mockResolvedValueOnce(mockRole)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ ...mockRole, name: 'updated' });
       mockPrisma.role.update.mockResolvedValue({
         ...mockRole,
         name: 'updated',
