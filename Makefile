@@ -261,6 +261,54 @@ help:  ## Show this help message
 	@echo "  destroy        Remove all containers, images, and volumes"
 	@echo "  restore        Install dependencies in both frontend and backend"
 	@echo "  help           Show this help message"
+	@echo ""
+	@echo "${CYAN}=== Development Scripts (scripts/) ===${NC}"
+	@echo ""
+	@echo "Backend Development:"
+	@echo "  dev              Start backend in dev mode (watch)"
+	@echo "  build-backend    Build for production"
+	@echo "  lint             Run ESLint (FIX=1 for auto-fix)"
+	@echo "  compile          TypeScript check (no emit)"
+	@echo "  format           Prettier formatting (CHECK=1 to check only)"
+	@echo "  debug            Start with Node inspector"
+	@echo "  services         Show services summary"
+	@echo ""
+	@echo "Testing:"
+	@echo "  test-unit        Run unit tests"
+	@echo "  test-e2e         Run E2E tests"
+	@echo "  test-all         Run all tests"
+	@echo "  coverage         Run tests with coverage"
+	@echo ""
+	@echo "Database:"
+	@echo "  db-connect       Connect to PostgreSQL"
+	@echo "  db-status        Show DB status & row counts"
+	@echo "  db-seed          Run Prisma seed"
+	@echo "  db-migrate       Run migrations (dev)"
+	@echo "  db-migrate-deploy Run migrations (production)"
+	@echo "  db-reset         Reset database (DESTRUCTIVE!)"
+	@echo "  db-query         Run SQL: make db-query SQL=\"...\""
+	@echo "  db-generate      Generate Prisma client"
+	@echo "  db-studio        Open Prisma Studio"
+	@echo ""
+	@echo "Security:"
+	@echo "  security-audit   NPM audit"
+	@echo "  security-secrets Scan for secrets in code"
+	@echo "  security-headers Check HTTP headers (URL=...)"
+	@echo "  security-deps    Check vulnerable deps"
+	@echo ""
+	@echo "Deployment:"
+	@echo "  deploy-fly       Deploy to Fly.io"
+	@echo "  deploy-logs      View Fly.io logs"
+	@echo "  deploy-status    Check deployment status"
+	@echo "  deploy-check     Pre-deployment checks"
+	@echo ""
+	@echo "Utilities:"
+	@echo "  status           Project status overview"
+	@echo "  doctor           Check dev environment"
+	@echo "  env-show         Show env vars (masked)"
+	@echo "  env-check        Check required env vars"
+	@echo "  install-all      Install all dependencies"
+	@echo "  clean-build      Clean artifacts (DEEP=1 for node_modules)"
 
 # ==========================================
 # POSTMAN CLI TARGETS (Official)
@@ -490,6 +538,120 @@ supabase-counts:  ## Show row counts for all tables
 	@. ./Back/.env && psql "$$DIRECT_URL" -c "SELECT schemaname, relname AS table_name, n_live_tup AS row_count FROM pg_stat_user_tables ORDER BY n_live_tup DESC;"
 
 .PHONY: help restore destroy prune fclean clean diagnostic-all diagnostic-rgpd diagnostic diagnostic-routines seed-test-data test_backend test_backend_flows all up down restart logs psql wait-for-db wait-for-mongo mongo-init mongosh install-backend generate-prisma init-migration migrate reset reload seed_db_playground seed_playground seed_test_data test_backend test_backend_e2e test_backend_orders test_backend_flows postman-install postman-login postman-list postman-run postman-local postman-local-all setup-env setup-supabase setup-supabase-full setup-local supabase-migrate supabase-push supabase-seed supabase-pull supabase-studio supabase-test mongo-atlas-test mongo-atlas-stats mongo-atlas-cleanup mongo-atlas-emergency mongo-atlas-init quick-start-local quick-start-supabase quick-start-cloud validate-sql deploy-supabase deploy-supabase-safe prisma-introspect prisma-generate full-db-setup supabase-tables supabase-counts mongodb-test mongodb-init mongodb-reset mongodb-cleanup mongodb-emergency mongodb-stats
+
+# ==========================================
+# DEVELOPMENT SCRIPTS (scripts/)
+# ==========================================
+
+# --- Backend Development ---
+dev:  ## Start backend in development mode (watch)
+	@./scripts/backend/dev.sh
+
+build-backend:  ## Build backend for production
+	@./scripts/backend/build.sh
+
+lint:  ## Run ESLint on backend (use FIX=1 for auto-fix)
+	@./scripts/backend/lint.sh
+
+compile:  ## TypeScript compile check (no emit)
+	@./scripts/backend/compile.sh
+
+format:  ## Format code with Prettier (use CHECK=1 to check only)
+	@./scripts/backend/format.sh
+
+debug:  ## Start backend with Node inspector
+	@./scripts/backend/debug.sh
+
+services:  ## Show backend services summary
+	@./scripts/backend/services.sh
+
+# --- Testing ---
+test-unit:  ## Run unit tests
+	@./scripts/test/unit.sh
+
+test-e2e:  ## Run E2E tests
+	@./scripts/test/e2e.sh
+
+test-all:  ## Run all tests (unit + E2E)
+	@./scripts/test/all.sh
+
+coverage:  ## Run tests with coverage report
+	@./scripts/test/coverage.sh
+
+# --- Database ---
+db-connect:  ## Connect to Supabase PostgreSQL
+	@./scripts/db/connect.sh
+
+db-status:  ## Show database status and table counts
+	@./scripts/db/status.sh
+
+db-seed:  ## Run Prisma seed
+	@./scripts/db/seed.sh
+
+db-migrate:  ## Run Prisma migrations (use deploy for production)
+	@./scripts/db/migrate.sh
+
+db-migrate-deploy:  ## Run Prisma migrate deploy (production)
+	@./scripts/db/migrate.sh deploy
+
+db-reset:  ## Reset database (DESTRUCTIVE!)
+	@./scripts/db/reset.sh
+
+db-query:  ## Run custom SQL query (SQL="SELECT * FROM users")
+	@SQL="$(SQL)" ./scripts/db/query.sh
+
+db-generate:  ## Generate Prisma client
+	@./scripts/db/generate.sh
+
+db-studio:  ## Open Prisma Studio
+	@./scripts/db/studio.sh
+
+# --- Security ---
+security-audit:  ## Run npm audit on all packages
+	@./scripts/security/audit.sh
+
+security-secrets:  ## Scan code for secrets
+	@./scripts/security/secrets.sh
+
+security-headers:  ## Check HTTP security headers (URL=http://localhost:3000)
+	@URL="$(URL)" ./scripts/security/headers.sh
+
+security-deps:  ## Check for vulnerable dependencies
+	@./scripts/security/deps.sh
+
+# --- Deployment ---
+deploy-fly:  ## Deploy to Fly.io
+	@./scripts/deploy/fly.sh
+
+deploy-logs:  ## View Fly.io logs
+	@./scripts/deploy/logs.sh
+
+deploy-status:  ## Check Fly.io deployment status
+	@./scripts/deploy/status.sh
+
+deploy-check:  ## Run pre-deployment checks
+	@./scripts/deploy/check.sh
+
+# --- Utilities ---
+status:  ## Show project status overview
+	@./scripts/utils/status.sh
+
+doctor:  ## Check development environment
+	@./scripts/utils/doctor.sh
+
+env-show:  ## Show environment variables (masked)
+	@./scripts/utils/env.sh show
+
+env-check:  ## Check required environment variables
+	@./scripts/utils/env.sh check
+
+install-all:  ## Install all dependencies
+	@./scripts/utils/install.sh
+
+clean-build:  ## Clean build artifacts (DEEP=1 for node_modules)
+	@DEEP="$(DEEP)" ./scripts/utils/clean.sh
+
+.PHONY: dev build-backend lint compile format debug services test-unit test-e2e test-all coverage db-connect db-status db-seed db-migrate db-migrate-deploy db-reset db-query db-generate db-studio security-audit security-secrets security-headers security-deps deploy-fly deploy-logs deploy-status deploy-check status doctor env-show env-check install-all clean-build
 
 # Deploy to Fly.io
 .PHONY: deploy

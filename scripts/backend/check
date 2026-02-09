@@ -1,0 +1,1 @@
+cd /home/dlesieur/Documents/studi/vite-gourmand/Back && for f in $(find src -name "*.service.ts" ! -name "*.spec.ts" 2>/dev/null | sort); do lines=$(wc -l < "$f"); spec="${f%.ts}.spec.ts"; hasspec="NO"; [ -f "$spec" ] && hasspec="YES"; printf "%4d lines, spec: %s - %s\n" "$lines" "$hasspec" "$f"; done | sort -rn | head -20
