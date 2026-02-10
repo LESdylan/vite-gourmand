@@ -14,6 +14,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../common';
 
 export class CreateOrderDto {
+  @ApiPropertyOptional({ example: 1, description: 'ID of the menu being ordered' })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  menuId?: number;
+
   @ApiProperty({ example: '2024-06-15' })
   @IsDateString()
   deliveryDate!: string;

@@ -5,8 +5,6 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { usePublicData } from '../contexts/PublicDataContext';
 
-const DAY_ORDER = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     email: '',

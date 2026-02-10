@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { PortalAuthProvider, ProtectedRoute, Unauthorized } from './portal_dashboard'
 import { ResetPasswordPage } from './portal_dashboard/ResetPasswordPage'
+import { ToastProvider } from './contexts/ToastContext'
 import './App.css'
 
 // Lazy load components
@@ -35,6 +36,7 @@ function LoadingSpinner() {
 function App() {
   return (
     <BrowserRouter>
+      <ToastProvider>
       <PortalAuthProvider>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
@@ -67,6 +69,7 @@ function App() {
           </Routes>
         </Suspense>
       </PortalAuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

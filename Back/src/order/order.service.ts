@@ -70,7 +70,7 @@ export class OrderService {
 
   async create(userId: number, dto: CreateOrderDto) {
     const orderNumber = this.generateOrderNumber();
-    return this.prisma.order.create({
+    const order = await this.prisma.order.create({
       data: {
         order_number: orderNumber,
         user_id: userId,
@@ -84,6 +84,19 @@ export class OrderService {
       },
       include: this.getOrderIncludes(),
     });
+
+    // Link menu to order via OrderMenu junction table
+    if (dto.menuId) {
+      await this.prisma.orderMenu.create({
+        data: {
+          order_id: order.id,
+          menu_id: dto.menuId,
+          quantity: 1,
+        },
+      });
+    }
+
+    return order;
   }
 
   async update(id: number, dto: UpdateOrderDto, user: JwtPayload) {

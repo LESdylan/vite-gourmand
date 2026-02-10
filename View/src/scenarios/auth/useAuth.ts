@@ -5,11 +5,13 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as authService from '../../services/auth';
+import { useToast } from '../../contexts/ToastContext';
 import type { AuthMode, FormState, FormErrors } from './types';
 import { initialFormState } from './types';
 
 export function useAuth() {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [mode, setMode] = useState<AuthMode>('login');
   const [form, setForm] = useState<FormState>(initialFormState);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -58,6 +60,7 @@ export function useAuth() {
       switch (mode) {
         case 'login':
           await authService.login({ email: form.email, password: form.password });
+          addToast('Connexion réussie ! Bienvenue.', 'success');
           navigate('/');
           break;
         case 'register':
@@ -67,15 +70,19 @@ export function useAuth() {
             firstName: form.name,
             telephoneNumber: form.phone || undefined,
           });
+          addToast('Inscription réussie ! Bienvenue sur Vite Gourmand.', 'success');
           navigate('/');
           break;
         case 'forgot':
           await authService.forgotPassword(form.email);
           setSuccess('Email de réinitialisation envoyé !');
+          addToast('Un email de réinitialisation a été envoyé à votre adresse.', 'success', 7000);
           break;
       }
     } catch (err) {
-      setErrors({ general: err instanceof Error ? err.message : 'Une erreur est survenue' });
+      const msg = err instanceof Error ? err.message : 'Une erreur est survenue';
+      setErrors({ general: msg });
+      addToast(msg, 'error');
     } finally {
       setLoading(false);
     }

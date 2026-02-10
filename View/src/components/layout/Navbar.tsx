@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { useNotifications } from '../../contexts/NotificationContext';
 
-export type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
+export type Page = 'home' | 'menu' | 'contact' | 'order' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
 
 export type UserType = {
   id: string;

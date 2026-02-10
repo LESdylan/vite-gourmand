@@ -11,6 +11,7 @@ import HomePage from './Home';
 import MenusPage from './Menus';
 import ContactPage from './Contact';
 import LegalPage from './LegalPage';
+import OrderPage from './OrderPage';
 import Navbar, { type Page, type UserType } from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import PromoBanner from '../components/layout/PromoBanner';
@@ -33,7 +34,9 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   const [displayedPage, setDisplayedPage] = useState<Page>('home');
   const [promotions, setPromotions] = useState<ActivePromotion[]>([]);
   const [bannerHeight, setBannerHeight] = useState(0);
+  const [orderMenuId, setOrderMenuId] = useState<number | null>(null);
   const mainRef = useRef<HTMLElement>(null);
+  const currentPageRef = useRef<Page>('home');
 
   const handleBannerHeightChange = useCallback((h: number) => {
     setBannerHeight(h);
@@ -51,20 +54,25 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   }, []);
 
   // Smooth page transition: fade out → switch → fade in
-  const handlePageChange = (newPage: Page) => {
-    if (newPage === currentPage) return;
+  const handlePageChange = useCallback((newPage: Page) => {
+    if (newPage === currentPageRef.current) return;
+    currentPageRef.current = newPage;
     setIsTransitioning(true);
-    // After fade out completes, swap content and fade in
     setTimeout(() => {
       setCurrentPage(newPage);
       setDisplayedPage(newPage);
       window.scrollTo({ top: 0 });
-      // Small delay to let new content render, then fade in
       requestAnimationFrame(() => {
         setIsTransitioning(false);
       });
     }, 150);
-  };
+  }, []);
+
+  // Handler for ordering from menus page
+  const handleOrderMenu = useCallback((menuId: number) => {
+    setOrderMenuId(menuId);
+    handlePageChange('order');
+  }, [handlePageChange]);
 
   // Render the current page content based on internal navigation state
   const renderPage = () => {
@@ -75,7 +83,15 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
       case 'menu':
         return (
           <>
-            <MenusPage setCurrentPage={handlePageChange} />
+            <MenusPage setCurrentPage={handlePageChange} onOrderMenu={handleOrderMenu} />
+            <Footer setCurrentPage={handlePageChange} />
+          </>
+        );
+      
+      case 'order':
+        return (
+          <>
+            <OrderPage setCurrentPage={handlePageChange} preSelectedMenuId={orderMenuId} />
             <Footer setCurrentPage={handlePageChange} />
           </>
         );

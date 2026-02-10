@@ -29,12 +29,23 @@ export interface MenuImage {
   is_primary: boolean;
 }
 
+export interface DishAllergen {
+  dish_id: number;
+  allergen_id: number;
+  Allergen: {
+    id: number;
+    name: string;
+    icon_url: string | null;
+  };
+}
+
 export interface Dish {
   id: number;
   title: string;
   description: string | null;
   photo_url: string | null;
   course_type: 'entrée' | 'plat' | 'dessert';
+  DishAllergen?: DishAllergen[];
 }
 
 export interface MenuFromAPI {
@@ -61,14 +72,17 @@ export interface MenuFromAPI {
 // Frontend-friendly format
 export interface Menu {
   id: string;
+  numericId: number;
   name: string;
   theme: string;
+  themeId: number | null;
   description: string;
   dietary: string[];
   minPersons: number;
   maxPersons: number;
   pricePerPerson: number;
   image: string;
+  images: MenuImage[];
   allergens: string[];
   deliveryNotes?: string;
   stockQuantity: number;
@@ -123,6 +137,9 @@ function transformMenu(apiMenu: MenuFromAPI): Menu {
   const firstImage = apiMenu.MenuImage?.[0];
   const imageUrl = primaryImage?.image_url || firstImage?.image_url || FALLBACK_IMAGE;
 
+  // All images sorted by display_order
+  const images = [...(apiMenu.MenuImage || [])].sort((a, b) => a.display_order - b.display_order);
+
   // Group dishes by course type
   const entrees = apiMenu.Dish?.filter(d => d.course_type === 'entrée') || [];
   const mains = apiMenu.Dish?.filter(d => d.course_type === 'plat') || [];
@@ -134,17 +151,32 @@ function transformMenu(apiMenu: MenuFromAPI): Menu {
     dietary.push(apiMenu.Diet.name.toLowerCase());
   }
 
+  // Extract allergens from all dishes (deduplicated)
+  const allergenSet = new Set<string>();
+  for (const dish of apiMenu.Dish || []) {
+    if (dish.DishAllergen) {
+      for (const da of dish.DishAllergen) {
+        if (da.Allergen?.name) {
+          allergenSet.add(da.Allergen.name);
+        }
+      }
+    }
+  }
+
   return {
     id: `m${apiMenu.id.toString().padStart(3, '0')}`,
+    numericId: apiMenu.id,
     name: apiMenu.title,
     theme: apiMenu.Theme?.name || 'Non défini',
+    themeId: apiMenu.theme_id,
     description: apiMenu.description || '',
     dietary: dietary.length > 0 ? dietary : ['classique'],
     minPersons: apiMenu.person_min,
     maxPersons: apiMenu.person_min * 5, // Estimate max based on min
     pricePerPerson: Number(apiMenu.price_per_person),
     image: imageUrl,
-    allergens: [], // Would need separate allergen fetching
+    images,
+    allergens: [...allergenSet].sort(),
     deliveryNotes: apiMenu.conditions || undefined,
     stockQuantity: apiMenu.remaining_qty,
     dishes: {

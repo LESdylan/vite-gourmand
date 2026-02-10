@@ -6,6 +6,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { resetPassword, verifyResetToken } from '../services/auth';
+import { useToast } from '../contexts/ToastContext';
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, ArrowRight, ChefHat, Loader2 } from 'lucide-react';
 import './PortalLogin.css';
 
@@ -28,6 +29,7 @@ function isPasswordValid(pw: string): boolean {
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const token = searchParams.get('token');
 
   // Token verification state
@@ -93,10 +95,13 @@ export function ResetPasswordPage() {
     try {
       await resetPassword(token, password);
       setSuccess(true);
+      addToast('Mot de passe modifié avec succès !', 'success', 7000);
       // Redirect to portal after 3 seconds
       setTimeout(() => navigate('/portal'), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Échec de la réinitialisation. Le lien a peut-être expiré.');
+      const msg = err instanceof Error ? err.message : 'Échec de la réinitialisation. Le lien a peut-être expiré.';
+      setError(msg);
+      addToast(msg, 'error');
     } finally {
       setIsLoading(false);
     }

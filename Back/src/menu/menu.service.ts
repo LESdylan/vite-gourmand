@@ -116,6 +116,19 @@ export class MenuService {
   }
 
   private getMenuIncludes() {
-    return { Diet: true, Theme: true, MenuImage: true, Dish: true };
+    return {
+      Diet: true,
+      Theme: true,
+      MenuImage: true,
+      Dish: {
+        include: {
+          DishAllergen: {
+            include: {
+              Allergen: true,
+            },
+          },
+        },
+      },
+    };
   }
 }

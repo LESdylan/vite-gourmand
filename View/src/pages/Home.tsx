@@ -11,7 +11,7 @@ import { usePublicData } from '../contexts/PublicDataContext';
 import type { ReviewStats, SiteInfo } from '../services/public';
 
 // Page types for internal navigation
-export type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
+export type Page = 'home' | 'menu' | 'contact' | 'order' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
 
 type HomePageProps = {
   setCurrentPage: (page: Page) => void;
