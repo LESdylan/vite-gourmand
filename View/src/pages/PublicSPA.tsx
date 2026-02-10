@@ -6,7 +6,7 @@
  * Smooth transitions between pages give the impression of content changing
  * rather than navigating to a new page.
  */
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import HomePage from './Home';
 import MenusPage from './Menus';
 import ContactPage from './Contact';
@@ -30,7 +30,16 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [displayedPage, setDisplayedPage] = useState<Page>('home');
   const [promotions, setPromotions] = useState<ActivePromotion[]>([]);
+  const [bannerHeight, setBannerHeight] = useState(0);
   const mainRef = useRef<HTMLElement>(null);
+
+  const handleBannerHeightChange = useCallback((h: number) => {
+    setBannerHeight(h);
+  }, []);
+
+  const handleBannerDismiss = useCallback(() => {
+    setBannerHeight(0);
+  }, []);
 
   // Fetch active promotions on mount (lightweight, only 1 call)
   useEffect(() => {
@@ -102,18 +111,22 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
     }
   };
 
+  // Total fixed header height = banner + navbar (h-14 = 56px, sm:h-16 = 64px)
+  const navHeight = 56; // matches h-14, sm uses 64 but 56 is safe minimum
+
   return (
     <PublicDataProvider>
       <div className="min-h-screen bg-[#FFF8F0]">
-        {/* Promotional banner — sticky above navigation */}
-        <PromoBanner promotions={promotions} />
+        {/* Promotional banner — fixed at very top */}
+        <PromoBanner promotions={promotions} onDismiss={handleBannerDismiss} onHeightChange={handleBannerHeightChange} />
 
-        {/* Navigation - always visible, fixed position */}
+        {/* Navigation — fixed, sits right below the banner */}
         <Navbar
           currentPage={currentPage}
           setCurrentPage={handlePageChange}
           user={user}
           onLogout={onLogout}
+          topOffset={bannerHeight}
         />
         
         {/* Main content with smooth transition */}
@@ -121,7 +134,8 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
           ref={mainRef}
           className={`transition-opacity duration-150 ease-in-out ${
             isTransitioning ? 'opacity-0' : 'opacity-100'
-          } ${currentPage === 'home' ? '' : 'pt-14 sm:pt-16'}`}
+          }`}
+          style={currentPage !== 'home' ? { paddingTop: `${bannerHeight + navHeight}px` } : undefined}
         >
           {renderPage()}
         </main>

@@ -5,19 +5,37 @@
  * Auto-rotates between active promotions if there are multiple.
  * Dismissible per-session. Includes discount code copy-to-clipboard.
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, ChevronRight, Sparkles, Tag, Copy, Check } from 'lucide-react';
 import type { ActivePromotion } from '../../services/public';
 
 interface PromoBannerProps {
   promotions: ActivePromotion[];
+  onDismiss?: () => void;
+  onHeightChange?: (height: number) => void;
 }
 
-export default function PromoBanner({ promotions }: PromoBannerProps) {
+export default function PromoBanner({ promotions, onDismiss, onHeightChange }: PromoBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const bannerElRef = useRef<HTMLDivElement>(null);
+
+  // Report height to parent whenever visibility changes
+  useEffect(() => {
+    if (!isVisible || dismissed || promotions.length === 0) {
+      onHeightChange?.(0);
+      return;
+    }
+    // Measure after render + transition
+    const timer = setTimeout(() => {
+      if (bannerElRef.current) {
+        onHeightChange?.(bannerElRef.current.offsetHeight);
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [isVisible, dismissed, promotions.length, onHeightChange]);
 
   // Fade in on mount
   useEffect(() => {
@@ -50,8 +68,9 @@ export default function PromoBanner({ promotions }: PromoBannerProps) {
 
   return (
     <div
-      className={`relative z-[60] transition-all duration-500 ${
-        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      ref={bannerElRef}
+      className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 overflow-hidden ${
+        isVisible ? 'opacity-100' : 'opacity-0 -translate-y-full'
       }`}
       style={{
         background: `linear-gradient(135deg, ${promo.bg_color}, ${adjustBrightness(promo.bg_color, -15)})`,
@@ -69,14 +88,14 @@ export default function PromoBanner({ promotions }: PromoBannerProps) {
       />
 
       <div className="relative max-w-[min(90rem,95vw)] mx-auto px-4 sm:px-6 lg:px-12">
-        <div className="flex items-center justify-center gap-3 py-2.5 sm:py-3 min-h-[44px]">
+        <div className="flex items-center justify-center gap-2 sm:gap-3 py-1 sm:py-1.5 min-h-[28px] sm:min-h-[32px]">
           {/* Sparkle icon */}
-          <Sparkles className="w-4 h-4 flex-shrink-0 animate-pulse hidden sm:block" />
+          <Sparkles className="w-3 h-3 flex-shrink-0 animate-pulse hidden sm:block" />
 
           {/* Badge */}
           {promo.badge_text && (
             <span
-              className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0"
+              className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-px rounded-full flex-shrink-0"
               style={{
                 backgroundColor: `${promo.text_color}20`,
                 border: `1px solid ${promo.text_color}30`,
@@ -87,7 +106,7 @@ export default function PromoBanner({ promotions }: PromoBannerProps) {
           )}
 
           {/* Main text */}
-          <span className="text-xs sm:text-sm font-medium text-center leading-tight line-clamp-1">
+          <span className="text-[11px] sm:text-xs font-medium text-center leading-tight line-clamp-1">
             {promo.short_text || promo.title}
           </span>
 
@@ -95,7 +114,7 @@ export default function PromoBanner({ promotions }: PromoBannerProps) {
           {discountCode && (
             <button
               onClick={() => copyCode(discountCode)}
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-md transition-all duration-200 hover:scale-105 flex-shrink-0"
+              className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md transition-all duration-200 hover:scale-105 flex-shrink-0"
               style={{
                 backgroundColor: `${promo.text_color}15`,
                 border: `1px dashed ${promo.text_color}40`,
@@ -116,7 +135,7 @@ export default function PromoBanner({ promotions }: PromoBannerProps) {
           {promo.link_url && promo.link_label && (
             <a
               href={promo.link_url}
-              className="hidden md:inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full transition-all duration-200 hover:scale-105 flex-shrink-0"
+              className="hidden md:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full transition-all duration-200 hover:scale-105 flex-shrink-0"
               style={{
                 backgroundColor: promo.text_color,
                 color: promo.bg_color,
@@ -150,13 +169,16 @@ export default function PromoBanner({ promotions }: PromoBannerProps) {
           <button
             onClick={() => {
               setIsVisible(false);
-              setTimeout(() => setDismissed(true), 300);
+              setTimeout(() => {
+                setDismissed(true);
+                onDismiss?.();
+              }, 300);
             }}
             className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all duration-200 hover:scale-110"
             style={{ backgroundColor: `${promo.text_color}15` }}
             aria-label="Fermer la bannière promotionnelle"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3 h-3" />
           </button>
         </div>
       </div>

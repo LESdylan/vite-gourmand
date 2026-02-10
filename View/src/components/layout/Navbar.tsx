@@ -21,6 +21,7 @@ type NavbarProps = {
   user?: UserType | null;
   onLogout?: () => void;
   isDemoMode?: boolean;
+  topOffset?: number;
 };
 
 export default function Navbar({ 
@@ -28,7 +29,8 @@ export default function Navbar({
   setCurrentPage, 
   user = null, 
   onLogout,
-  isDemoMode = false 
+  isDemoMode = false,
+  topOffset = 0,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -73,11 +75,12 @@ export default function Navbar({
   return (
     <>
       <nav 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
+        className={`fixed left-0 right-0 z-50 transition-all duration-200 ${
           solid 
             ? 'bg-white shadow-sm' 
             : 'bg-black/20 backdrop-blur-sm'
         }`}
+        style={{ top: `${topOffset}px` }}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center h-14 sm:h-16">

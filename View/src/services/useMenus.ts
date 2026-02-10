@@ -3,7 +3,7 @@
  * React hook for fetching and managing menu data from the API
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import * as menuService from './menus';
 import type { Menu, MenuFilters, PaginationMeta, Theme, Diet } from './menus';
 
@@ -32,17 +32,20 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
   const [diets, setDiets] = useState<Diet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<MenuFilters>(initialFilters);
+
+  // Use ref for filters to avoid re-creating callbacks on every filter change
+  const filtersRef = useRef<MenuFilters>(initialFilters);
 
   const fetchMenus = useCallback(async (newFilters?: MenuFilters) => {
+    if (newFilters) {
+      filtersRef.current = newFilters;
+    }
+    
     setIsLoading(true);
     setError(null);
     
-    const activeFilters = newFilters || filters;
-    if (newFilters) setFilters(newFilters);
-    
     try {
-      const result = await menuService.getMenus(activeFilters);
+      const result = await menuService.getMenus(filtersRef.current);
       setMenus(result.menus);
       setMeta(result.meta);
     } catch (e) {
@@ -51,7 +54,7 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, []);
 
   const fetchThemes = useCallback(async () => {
     try {
@@ -72,13 +75,29 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
   }, []);
 
   const refetch = useCallback(async () => {
-    await Promise.all([fetchMenus(), fetchThemes(), fetchDiets()]);
-  }, [fetchMenus, fetchThemes, fetchDiets]);
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Fetch all in parallel, but ensure isLoading reflects menu fetch state
+      const [menuResult] = await Promise.all([
+        menuService.getMenus(filtersRef.current),
+        menuService.getThemes().then(setThemes).catch(e => console.error('Error fetching themes:', e)),
+        menuService.getDiets().then(setDiets).catch(e => console.error('Error fetching diets:', e)),
+      ]);
+      setMenus(menuResult.menus);
+      setMeta(menuResult.meta);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to fetch menus');
+      console.error('Error fetching menus:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  // Initial fetch
+  // Initial fetch — stable refetch reference, no re-runs
   useEffect(() => {
     refetch();
-  }, []);
+  }, [refetch]);
 
   return {
     menus,

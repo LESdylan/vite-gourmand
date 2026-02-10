@@ -369,7 +369,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
 // ========================================
 function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; loading: boolean; stats: ReviewStats | null }) {
   const [isVisible, setIsVisible] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -384,22 +384,22 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
     return () => observer.disconnect();
   }, []);
 
-  // Infinite scroll via requestAnimationFrame for buttery-smooth animation
+  // Infinite scroll via requestAnimationFrame — runs once, reads isPausedRef
   useEffect(() => {
     if (!trackRef.current || reviews.length === 0) return;
 
     let offset = 0;
     let animId: number;
-    const speed = 0.5; // px per frame (~30px/s at 60fps)
+    const speed = 0.4; // px per frame (~24px/s at 60fps)
 
     const animate = () => {
       if (!trackRef.current) return;
 
-      if (!isPaused) {
+      if (!isPausedRef.current) {
         offset += speed;
         // Each "set" of reviews is half the scrollWidth (we duplicate once)
         const halfWidth = trackRef.current.scrollWidth / 2;
-        if (offset >= halfWidth) offset = 0;
+        if (offset >= halfWidth) offset -= halfWidth; // seamless wrap
         trackRef.current.style.transform = `translateX(-${offset}px)`;
       }
 
@@ -408,7 +408,7 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
 
     animId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animId);
-  }, [isPaused, reviews.length]);
+  }, [reviews.length]);
 
   // Duplicate reviews once for seamless loop
   const loopedReviews = [...reviews, ...reviews];
@@ -497,8 +497,8 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
             isVisible ? 'opacity-100' : 'opacity-0'
           }`}
           style={{ transitionDelay: '300ms' }}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
+          onMouseEnter={() => { isPausedRef.current = true; }}
+          onMouseLeave={() => { isPausedRef.current = false; }}
           role="region"
           aria-label="Avis clients — survolez pour mettre en pause le défilement"
         >
@@ -515,7 +515,7 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
             {loopedReviews.map((review, idx) => (
               <article
                 key={`${review.id}-${idx}`}
-                className="w-[280px] sm:w-[320px] flex-shrink-0 select-none"
+                className="w-[240px] sm:w-[280px] flex-shrink-0 select-none"
               >
                 <div className="bg-white rounded-2xl p-5 sm:p-6 h-full border border-[#1A1A1A]/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-xl hover:border-[#722F37]/20 transition-all duration-300 hover:-translate-y-1 group">
                   {/* Top row: rating + badge */}

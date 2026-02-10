@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useMenus } from '../services/useMenus';
 import type { Menu } from '../services/menus';
 import { getAllThemes, getAllDietaryTypes, type DietaryType } from '../data/menus';
+import LazyImage from '../components/ui/LazyImage';
 import type { Page } from './Home';
 
 type MenusPageProps = {
@@ -255,11 +256,10 @@ function MenuCard({ menu, onDetailClick }: { menu: Menu; onDetailClick: (m: Menu
     <article className="group bg-white rounded-2xl border border-[#1A1A1A]/5 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-[#722F37]/8 hover:-translate-y-0.5">
       {/* Image */}
       <div className="relative h-44 sm:h-48 overflow-hidden">
-        <img
+        <LazyImage
           src={menu.image}
           alt={menu.name}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
