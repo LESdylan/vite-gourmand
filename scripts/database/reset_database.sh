@@ -13,7 +13,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 BACKEND_DIR="$PROJECT_ROOT/Back"
 SQL_DIR="$BACKEND_DIR/src/Model/sql"
 SCRIPTS_DIR="$PROJECT_ROOT/scripts"
@@ -89,9 +89,13 @@ run_sql() {
         return 0
     fi
     log "$label → $(basename "$file")"
-    if ! psql "$DIRECT_URL" -v ON_ERROR_STOP=1 -f "$file" 2>&1 | grep -v "^INSERT\|^CREATE\|^DROP\|^NOTICE\|^COMMENT" || true; then
+    # Run psql with ON_ERROR_STOP for real error detection, filter noise
+    local output
+    output=$(psql "$DIRECT_URL" -v ON_ERROR_STOP=1 -f "$file" 2>&1) || {
+        # Show only the actual ERROR lines
+        echo "$output" | grep -E "ERROR:" | head -5
         error "Failed on: $file"
-    fi
+    }
 }
 
 SCHEMAS_DIR="$SQL_DIR/schemas"
@@ -104,8 +108,8 @@ ok "All objects dropped"
 
 # ── 3. Create schemas (order matters for FK) ─────────
 section "3/7 — Creating Schemas"
-run_sql "$SCHEMAS_DIR/orgnanization.sql" "🏢 Company & Organization"
 run_sql "$SCHEMAS_DIR/auth.sql"          "🔐 Auth & Users"
+run_sql "$SCHEMAS_DIR/orgnanization.sql" "🏢 Company & Organization"
 run_sql "$SCHEMAS_DIR/gpdr.sql"          "🛡️  GDPR"
 run_sql "$SCHEMAS_DIR/menu.sql"          "📋 Menu Management"
 run_sql "$SCHEMAS_DIR/loyalty.sql"       "🎁 Discounts (pre-order)"

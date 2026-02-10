@@ -105,7 +105,7 @@ export class SiteInfoService {
         slogan: mainCompany.slogan,
         description: mainCompany.description,
       },
-      owners: owners.map((o) => ({
+      owners: owners.map((o: OwnerInfo) => ({
         firstName: o.first_name,
         lastName: o.last_name,
         role: o.role,
@@ -153,7 +153,7 @@ export class SiteInfoService {
         slogan: "Traiteur d'exception pour tous vos événements",
         description: null,
       },
-      owners: owners.map((o) => ({
+      owners: owners.map((o: { first_name: string; last_name: string | null }) => ({
         firstName: o.first_name,
         lastName: o.last_name,
         role: 'owner',

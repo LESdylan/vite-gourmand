@@ -3,6 +3,7 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
+import { KanbanColumn, Order } from '@prisma/client';
 import {
   CreateKanbanColumnDto,
   UpdateKanbanColumnDto,
@@ -142,7 +143,7 @@ export class KanbanService {
     const orders = await this.prisma.order.findMany({
       where: {
         status: {
-          in: columns.map((c) => c.mapped_status).filter(Boolean) as string[],
+          in: columns.map((c: KanbanColumn) => c.mapped_status).filter(Boolean) as string[],
         },
       },
       include: {
@@ -152,9 +153,9 @@ export class KanbanService {
       orderBy: { order_date: 'desc' },
     });
 
-    return columns.map((column) => ({
+    return columns.map((column: KanbanColumn) => ({
       ...column,
-      orders: orders.filter((o) => o.status === column.mapped_status),
+      orders: orders.filter((o: Order) => o.status === column.mapped_status),
     }));
   }
 }

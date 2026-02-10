@@ -68,6 +68,6 @@ export class PrismaService
       WHERE schemaname = 'public' 
       AND tablename NOT LIKE '_prisma%'
     `;
-    return result.map((r) => r.tablename);
+    return result.map((r: { tablename: string }) => r.tablename);
   }
 }

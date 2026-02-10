@@ -14,6 +14,56 @@ model Allergen {
   Dish         Dish[]         @relation("DishAllergens")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Company {
+  id                  Int                   @id @default(autoincrement())
+  name                String                @db.VarChar(255)
+  slogan              String?               @db.VarChar(255)
+  description         String?
+  first_opening_date  DateTime              @db.Date
+  address             String
+  city                String                @db.VarChar(100)
+  postal_code         String                @db.VarChar(10)
+  country             String?               @default("France") @db.VarChar(100)
+  phone               String                @db.VarChar(20)
+  email               String                @db.VarChar(255)
+  website             String?               @db.VarChar(255)
+  siret               String?               @unique @db.VarChar(14)
+  logo_url            String?               @db.VarChar(255)
+  is_active           Boolean?              @default(true)
+  created_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  CompanyOwner        CompanyOwner[]
+  CompanyWorkingHours CompanyWorkingHours[]
+  Event               Event[]
+
+  @@index([is_active], map: "idx_company_active")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model CompanyOwner {
+  company_id Int
+  user_id    Int
+  role       String?   @default("owner") @db.VarChar(50)
+  joined_at  DateTime? @default(now()) @db.Timestamptz(6)
+  is_primary Boolean?  @default(false)
+  Company    Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([company_id, user_id])
+  @@index([user_id], map: "idx_company_owner_user")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model CompanyWorkingHours {
+  company_id       Int
+  working_hours_id Int
+  Company          Company      @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  WorkingHours     WorkingHours @relation(fields: [working_hours_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([company_id, working_hours_id])
+}
+
 model ContactMessage {
   id          Int       @id @default(autoincrement())
   title       String    @db.VarChar(255)
@@ -113,6 +163,24 @@ model DishIngredient {
   Ingredient    Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([dish_id, ingredient_id])
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Event {
+  id          Int       @id @default(autoincrement())
+  company_id  Int
+  name        String    @db.VarChar(255)
+  description String?
+  event_type  String?   @db.VarChar(50)
+  guest_count Int?
+  event_date  DateTime  @db.Date
+  location    String?   @db.VarChar(255)
+  is_public   Boolean?  @default(true)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  Company     Company   @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([company_id], map: "idx_event_company")
+  @@index([event_date(sort: Desc)], map: "idx_event_date")
 }
 
 model Ingredient {
@@ -479,6 +547,7 @@ model User {
   created_at                                                 DateTime?             @default(now()) @db.Timestamptz(6)
   updated_at                                                 DateTime?             @default(now()) @db.Timestamptz(6)
   last_login_at                                              DateTime?             @db.Timestamptz(6)
+  CompanyOwner                                               CompanyOwner[]
   DataDeletionRequest_DataDeletionRequest_processed_byToUser DataDeletionRequest[] @relation("DataDeletionRequest_processed_byToUser")
   DataDeletionRequest_DataDeletionRequest_user_idToUser      DataDeletionRequest[] @relation("DataDeletionRequest_user_idToUser")
   DeliveryAssignment                                         DeliveryAssignment[]
@@ -554,8 +623,9 @@ model UserSession {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model WorkingHours {
-  id      Int    @id @default(autoincrement())
-  day     String @unique @db.VarChar(15)
-  opening String @db.VarChar(5)
-  closing String @db.VarChar(5)
+  id                  Int                   @id @default(autoincrement())
+  day                 String                @unique @db.VarChar(15)
+  opening             String                @db.VarChar(5)
+  closing             String                @db.VarChar(5)
+  CompanyWorkingHours CompanyWorkingHours[]
 }

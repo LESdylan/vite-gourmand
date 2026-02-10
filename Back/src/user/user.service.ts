@@ -4,12 +4,15 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
+import { User, Role } from '@prisma/client';
 import {
   PaginationDto,
   buildPaginationMeta,
   PaginatedResponse,
 } from '../common';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+
+type UserWithRole = User & { Role: Role | null };
 
 @Injectable()
 export class UserService {
@@ -47,7 +50,7 @@ export class UserService {
     ]);
 
     return {
-      items: users.map((u) => this.sanitize(u)),
+      items: users.map((u: UserWithRole) => this.sanitize(u)),
       meta: buildPaginationMeta(page, limit, total),
     };
   }

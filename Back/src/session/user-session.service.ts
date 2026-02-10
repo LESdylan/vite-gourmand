@@ -60,7 +60,17 @@ export class UserSessionService {
       },
       orderBy: { created_at: 'desc' },
     });
-    return sessions.map((s) => ({
+
+    interface SessionRow {
+      id: number;
+      user_agent: string | null;
+      ip_address: string | null;
+      created_at: Date | null;
+      expires_at: Date;
+      session_token: string;
+    }
+
+    return sessions.map((s: SessionRow) => ({
       id: s.id,
       device_info: s.user_agent,
       ip_address: s.ip_address,
