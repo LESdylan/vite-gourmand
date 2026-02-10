@@ -114,20 +114,21 @@ model Diet {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Discount {
-  id               Int       @id @default(autoincrement())
-  code             String    @unique @db.VarChar(50)
+  id               Int         @id @default(autoincrement())
+  code             String      @unique @db.VarChar(50)
   description      String?
-  type             String    @db.VarChar(20)
-  value            Decimal   @db.Decimal(10, 2)
-  min_order_amount Decimal?  @db.Decimal(10, 2)
+  type             String      @db.VarChar(20)
+  value            Decimal     @db.Decimal(10, 2)
+  min_order_amount Decimal?    @db.Decimal(10, 2)
   max_uses         Int?
-  current_uses     Int?      @default(0)
-  valid_from       DateTime? @db.Date
-  valid_until      DateTime? @db.Date
-  is_active        Boolean?  @default(true)
+  current_uses     Int?        @default(0)
+  valid_from       DateTime?   @db.Date
+  valid_until      DateTime?   @db.Date
+  is_active        Boolean?    @default(true)
   created_by       Int?
-  User             User?     @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  User             User?       @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Order            Order[]
+  Promotion        Promotion[]
 }
 
 model Dish {
@@ -426,6 +427,33 @@ model Permission {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Promotion {
+  id            Int             @id @default(autoincrement())
+  title         String          @db.VarChar(150)
+  description   String?
+  short_text    String?         @db.VarChar(255)
+  type          String          @default("banner") @db.VarChar(30)
+  image_url     String?
+  link_url      String?
+  link_label    String?         @db.VarChar(80)
+  badge_text    String?         @db.VarChar(40)
+  bg_color      String?         @default("#722F37") @db.VarChar(20)
+  text_color    String?         @default("#FFFFFF") @db.VarChar(20)
+  discount_id   Int?
+  priority      Int?            @default(0)
+  is_active     Boolean?        @default(true)
+  is_public     Boolean?        @default(true)
+  start_date    DateTime        @default(now()) @db.Timestamp(6)
+  end_date      DateTime?       @db.Timestamp(6)
+  created_by    Int?
+  created_at    DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?       @default(now()) @db.Timestamp(6)
+  User          User?           @relation(fields: [created_by], references: [id], onUpdate: NoAction)
+  Discount      Discount?       @relation(fields: [discount_id], references: [id], onUpdate: NoAction)
+  UserPromotion UserPromotion[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model Publish {
   id                              Int           @id @default(autoincrement())
@@ -561,6 +589,7 @@ model User {
   Order                                                      Order[]
   OrderTag                                                   OrderTag[]
   PasswordResetToken                                         PasswordResetToken[]
+  Promotion                                                  Promotion[]
   Publish_Publish_moderated_byToUser                         Publish[]             @relation("Publish_moderated_byToUser")
   Publish_Publish_user_idToUser                              Publish[]             @relation("Publish_user_idToUser")
   SupportTicket_SupportTicket_assigned_toToUser              SupportTicket[]       @relation("SupportTicket_assigned_toToUser")
@@ -571,6 +600,7 @@ model User {
   Role                                                       Role?                 @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   UserAddress                                                UserAddress[]
   UserConsent                                                UserConsent[]
+  UserPromotion                                              UserPromotion[]
   UserSession                                                UserSession[]
 
   @@index([email], map: "idx_user_email")
@@ -605,6 +635,22 @@ model UserConsent {
   User         User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_consent_user")
+}
+
+model UserPromotion {
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  promotion_id Int
+  is_seen      Boolean?  @default(false)
+  is_used      Boolean?  @default(false)
+  used_at      DateTime? @db.Timestamp(6)
+  assigned_at  DateTime? @default(now()) @db.Timestamp(6)
+  Promotion    Promotion @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  User         User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, promotion_id])
+  @@index([promotion_id], map: "idx_user_promotion_promo")
+  @@index([user_id, is_used], map: "idx_user_promotion_user")
 }
 
 model UserSession {

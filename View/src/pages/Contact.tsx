@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { fetchWorkingHours, fetchSiteInfo, type WorkingHour, type SiteInfo } from '../services/public';
+import { usePublicData } from '../contexts/PublicDataContext';
 
 const DAY_ORDER = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
@@ -15,18 +15,7 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
-  const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
-
-  useEffect(() => {
-    fetchSiteInfo().then(setSiteInfo).catch(() => {});
-    fetchWorkingHours()
-      .then(data => {
-        data.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
-        setWorkingHours(data);
-      })
-      .catch(() => {});
-  }, []);
+  const { siteInfo, workingHours } = usePublicData();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

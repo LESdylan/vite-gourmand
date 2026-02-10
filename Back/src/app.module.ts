@@ -42,6 +42,7 @@ import { RoleModule } from './role';
 import { UnsplashModule } from './unsplash';
 import { SeedModule } from './seed';
 import { SiteInfoModule } from './site-info';
+import { PromotionModule } from './promotion';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -80,17 +81,17 @@ import {
               {
                 name: 'short',
                 ttl: 1000, // 1 second
-                limit: 3, // 3 requests per second
+                limit: 20, // 20 requests per second (SPA fires parallel calls on load)
               },
               {
                 name: 'medium',
                 ttl: 10000, // 10 seconds
-                limit: 20, // 20 requests per 10 seconds
+                limit: 100, // 100 requests per 10 seconds
               },
               {
                 name: 'long',
                 ttl: 60000, // 1 minute
-                limit: 100, // 100 requests per minute
+                limit: 300, // 300 requests per minute
               },
             ],
     }),
@@ -139,6 +140,7 @@ import {
     UnsplashModule,
     SeedModule,
     SiteInfoModule,
+    PromotionModule,
   ],
   controllers: [AppController],
   providers: [

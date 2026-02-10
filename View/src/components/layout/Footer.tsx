@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
 import { ChefHat, Clock } from 'lucide-react';
-import { fetchWorkingHours, fetchSiteInfo, type WorkingHour, type SiteInfo } from '../../services/public';
+import { usePublicData } from '../../contexts/PublicDataContext';
 
 type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
 
@@ -8,9 +7,7 @@ type FooterProps = {
   setCurrentPage: (page: Page) => void;
 };
 
-const DAY_ORDER = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-
-const FALLBACK_HOURS: WorkingHour[] = [
+const FALLBACK_HOURS = [
   { id: 1, day: 'Lundi', opening: '09:00', closing: '19:00' },
   { id: 2, day: 'Mardi', opening: '09:00', closing: '19:00' },
   { id: 3, day: 'Mercredi', opening: '09:00', closing: '19:00' },
@@ -21,22 +18,8 @@ const FALLBACK_HOURS: WorkingHour[] = [
 ];
 
 export default function Footer({ setCurrentPage }: FooterProps) {
-  const [hours, setHours] = useState<WorkingHour[]>(FALLBACK_HOURS);
-  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
-
-  useEffect(() => {
-    fetchWorkingHours()
-      .then(data => {
-        if (data.length > 0) {
-          data.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
-          setHours(data);
-        }
-      })
-      .catch(() => {});
-    fetchSiteInfo()
-      .then(setSiteInfo)
-      .catch(() => {});
-  }, []);
+  const { siteInfo, workingHours } = usePublicData();
+  const hours = workingHours.length > 0 ? workingHours : FALLBACK_HOURS;
   const handleNavClick = (page: Page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });

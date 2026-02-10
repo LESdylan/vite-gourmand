@@ -113,6 +113,7 @@ run_sql "$SCHEMAS_DIR/orgnanization.sql" "🏢 Company & Organization"
 run_sql "$SCHEMAS_DIR/gpdr.sql"          "🛡️  GDPR"
 run_sql "$SCHEMAS_DIR/menu.sql"          "📋 Menu Management"
 run_sql "$SCHEMAS_DIR/loyalty.sql"       "🎁 Discounts (pre-order)"
+run_sql "$SCHEMAS_DIR/promotions.sql"    "📢 Promotions & Publicity"
 run_sql "$SCHEMAS_DIR/orders.sql"        "📦 Orders"
 run_sql "$SCHEMAS_DIR/loyalty_post_order.sql" "🏆 Loyalty"
 run_sql "$SCHEMAS_DIR/reviews.sql"       "⭐ Reviews"
@@ -159,6 +160,8 @@ run_sql "$SEEDS_DIR/menu_ingredient.sql"    "🌱 Menu Ingredients"
 
 # Orders & loyalty
 run_sql "$SEEDS_DIR/discount.sql"           "🌱 Discounts"
+run_sql "$SEEDS_DIR/promotion.sql"          "🌱 Promotions"
+run_sql "$SEEDS_DIR/user_promotion.sql"     "🌱 User Promotions"
 run_sql "$SEEDS_DIR/order.sql"              "🌱 Orders"
 run_sql "$SEEDS_DIR/order_status_history.sql" "🌱 Order History"
 run_sql "$SEEDS_DIR/loyalty_account.sql"    "🌱 Loyalty Accounts"
@@ -229,6 +232,8 @@ APPROVED_REVIEWS=$(psql "$DIRECT_URL" -t -c "SELECT COUNT(*) FROM \"Publish\" WH
 COMPANY_COUNT=$(psql "$DIRECT_URL" -t -c 'SELECT COUNT(*) FROM "Company";' 2>/dev/null | xargs || echo "0")
 EVENT_COUNT=$(psql "$DIRECT_URL" -t -c 'SELECT COUNT(*) FROM "Event";' 2>/dev/null | xargs || echo "0")
 WORKING_HOURS_COUNT=$(psql "$DIRECT_URL" -t -c 'SELECT COUNT(*) FROM "WorkingHours";' | xargs)
+PROMOTION_COUNT=$(psql "$DIRECT_URL" -t -c 'SELECT COUNT(*) FROM "Promotion";' 2>/dev/null | xargs || echo "0")
+ACTIVE_PROMOS=$(psql "$DIRECT_URL" -t -c "SELECT COUNT(*) FROM \"Promotion\" WHERE is_active = TRUE AND start_date <= NOW() AND (end_date IS NULL OR end_date >= NOW());" 2>/dev/null | xargs || echo "0")
 
 # Calculate elapsed time
 END_TIME=$(date +%s)
@@ -255,6 +260,8 @@ echo -e "${CYAN}├────────────────────�
 printf "${CYAN}│${NC}  %-30s %25s ${CYAN}│${NC}\n" "Companies:" "$COMPANY_COUNT"
 printf "${CYAN}│${NC}  %-30s %25s ${CYAN}│${NC}\n" "Events:" "$EVENT_COUNT"
 printf "${CYAN}│${NC}  %-30s %25s ${CYAN}│${NC}\n" "Working Hours:" "$WORKING_HOURS_COUNT"
+printf "${CYAN}│${NC}  %-30s %25s ${CYAN}│${NC}\n" "Promotions (total):" "$PROMOTION_COUNT"
+printf "${CYAN}│${NC}  %-30s %25s ${CYAN}│${NC}\n" "Promotions (active now):" "$ACTIVE_PROMOS"
 echo -e "${CYAN}└─────────────────────────────────────────────────────────────┘${NC}"
 echo ""
 echo -e "${CYAN}┌─────────────────────────────────────────────────────────────┐${NC}"

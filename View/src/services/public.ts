@@ -105,3 +105,37 @@ export async function fetchSiteInfo(): Promise<SiteInfo> {
   const wrapper = await apiRequest<ApiWrapper<SiteInfo>>('/api/site-info');
   return wrapper.data;
 }
+
+// ── Promotions ──
+
+export interface PromotionDiscount {
+  code: string;
+  type: string;
+  value: number;
+}
+
+export interface ActivePromotion {
+  id: number;
+  title: string;
+  description: string | null;
+  short_text: string | null;
+  type: string;
+  image_url: string | null;
+  link_url: string | null;
+  link_label: string | null;
+  badge_text: string | null;
+  bg_color: string;
+  text_color: string;
+  priority: number;
+  start_date: string;
+  end_date: string | null;
+  Discount: PromotionDiscount | null;
+}
+
+/** Fetch currently active public promotions (banners, offers, etc.) */
+export async function fetchActivePromotions(): Promise<ActivePromotion[]> {
+  const wrapper = await apiRequest<ApiWrapper<ActivePromotion[]>>(
+    '/api/promotions/active',
+  );
+  return wrapper.data;
+}

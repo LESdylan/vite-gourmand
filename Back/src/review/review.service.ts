@@ -15,22 +15,24 @@ export class ReviewService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Public review statistics: average rating, total approved count,
-   * satisfaction percentage (reviews with note >= 4).
+   * Public review statistics: average rating, approved count,
+   * satisfaction percentage (ALL reviews with note >= 4, including
+   * pending and rejected — for an honest, transparent metric).
    */
   async getPublicStats() {
-    const [aggregation, satisfiedCount, totalApproved] = await Promise.all([
+    const [aggregation, satisfiedCountAll, totalCountAll] = await Promise.all([
+      // Average and count of approved reviews only (public-facing)
       this.prisma.publish.aggregate({
         where: { status: 'approved' },
         _avg: { note: true },
         _count: { id: true },
       }),
+      // Satisfaction uses ALL reviews (approved + pending + rejected)
+      // to provide a transparent, honest metric
       this.prisma.publish.count({
-        where: { status: 'approved', note: { gte: 4 } },
+        where: { note: { gte: 4 } },
       }),
-      this.prisma.publish.count({
-        where: { status: 'approved' },
-      }),
+      this.prisma.publish.count(),
     ]);
 
     const averageRating = aggregation._avg.note
@@ -38,7 +40,9 @@ export class ReviewService {
       : 0;
     const reviewCount = aggregation._count.id;
     const satisfactionPercent =
-      totalApproved > 0 ? Math.round((satisfiedCount / totalApproved) * 100) : 0;
+      totalCountAll > 0
+        ? Math.round((satisfiedCountAll / totalCountAll) * 100)
+        : 0;
 
     return { averageRating, reviewCount, satisfactionPercent };
   }
