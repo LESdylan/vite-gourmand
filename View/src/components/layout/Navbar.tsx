@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { User as UserIcon, LogOut, ChefHat, X, Menu } from 'lucide-react';
+import { User as UserIcon, LogOut, ChefHat, X, Menu, Bell } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 export type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
 
@@ -34,6 +35,7 @@ export default function Navbar({
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const { unreadCount, toggle: toggleNotifications } = useNotifications();
 
   // On non-home pages, always show solid navbar
   const isHome = currentPage === 'home';
@@ -138,6 +140,22 @@ export default function Navbar({
                       Dashboard
                     </button>
                   )}
+                  {/* Notification bell */}
+                  <button
+                    data-notification-bell
+                    onClick={toggleNotifications}
+                    className={`relative w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                      solid ? 'text-[#1A1A1A]/60 hover:bg-[#722F37]/10 hover:text-[#722F37]' : 'text-white/70 hover:bg-white/20 hover:text-white'
+                    }`}
+                    aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
+                  >
+                    <Bell className="h-4 w-4" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 bg-[#722F37] text-white text-[9px] font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 ring-2 ring-white">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
                   <button
                     onClick={() => handleNavClick('user-profile')}
                     className={`w-7 h-7 rounded-full flex items-center justify-center ${
@@ -207,6 +225,23 @@ export default function Navbar({
                 {item.label}
               </button>
             ))}
+            {user && (
+              <button
+                data-notification-bell
+                onClick={() => { setMobileMenuOpen(false); toggleNotifications(); }}
+                className="w-full text-left px-4 py-3 rounded-lg font-medium text-[#1A1A1A] hover:bg-[#FFF8F0] flex items-center justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <Bell className="h-4 w-4" />
+                  Notifications
+                </span>
+                {unreadCount > 0 && (
+                  <span className="bg-[#722F37] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-[#FFF8F0]">

@@ -14,7 +14,9 @@ import LegalPage from './LegalPage';
 import Navbar, { type Page, type UserType } from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import PromoBanner from '../components/layout/PromoBanner';
+import NotificationPanel from '../components/layout/NotificationPanel';
 import { PublicDataProvider } from '../contexts/PublicDataContext';
+import { NotificationProvider } from '../contexts/NotificationContext';
 import {
   fetchActivePromotions,
   type ActivePromotion,
@@ -115,6 +117,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   const navHeight = 56; // matches h-14, sm uses 64 but 56 is safe minimum
 
   return (
+    <NotificationProvider>
     <PublicDataProvider>
       <div className="min-h-screen bg-[#FFF8F0]">
         {/* Promotional banner — fixed at very top */}
@@ -128,6 +131,9 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
           onLogout={onLogout}
           topOffset={bannerHeight}
         />
+
+        {/* Floating notification panel — below navbar */}
+        <NotificationPanel topOffset={bannerHeight + navHeight} />
         
         {/* Main content with smooth transition */}
         <main 
@@ -141,5 +147,6 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
         </main>
       </div>
     </PublicDataProvider>
+    </NotificationProvider>
   );
 }
