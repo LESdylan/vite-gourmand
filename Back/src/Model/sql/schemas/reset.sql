@@ -10,6 +10,12 @@ DROP VIEW IF EXISTS "v_pending_reviews" CASCADE;
 DROP FUNCTION IF EXISTS fn_update_timestamp() CASCADE;
 DROP FUNCTION IF EXISTS fn_order_status_history() CASCADE;
 
+-- New organization tables (must drop before Company/User)
+DROP TABLE IF EXISTS "Event" CASCADE;
+DROP TABLE IF EXISTS "CompanyWorkingHours" CASCADE;
+DROP TABLE IF EXISTS "CompanyOwner" CASCADE;
+DROP TABLE IF EXISTS "Company" CASCADE;
+
 DROP TABLE IF EXISTS "OrderOrderTag" CASCADE;
 DROP TABLE IF EXISTS "OrderTag" CASCADE;
 DROP TABLE IF EXISTS "KanbanColumn" CASCADE;

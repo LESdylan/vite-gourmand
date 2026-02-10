@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { fetchWorkingHours, fetchSiteInfo, type WorkingHour, type SiteInfo } from '../services/public';
+
+const DAY_ORDER = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -12,6 +15,18 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
+  const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
+
+  useEffect(() => {
+    fetchSiteInfo().then(setSiteInfo).catch(() => {});
+    fetchWorkingHours()
+      .then(data => {
+        data.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
+        setWorkingHours(data);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,28 +158,28 @@ export default function ContactPage() {
             <div className="bg-white rounded-2xl shadow-lg shadow-[#1A1A1A]/5 border border-[#1A1A1A]/5 p-5 space-y-4">
               <h2 className="font-bold text-[#1A1A1A] text-sm uppercase tracking-wide">Coordonnées</h2>
 
-              <a href="tel:+33556000000" className="flex items-start gap-3 group">
+              <a href={`tel:${siteInfo?.phone || '+33556000000'}`} className="flex items-start gap-3 group">
                 <div className="w-9 h-9 rounded-lg bg-[#722F37]/10 flex items-center justify-center shrink-0">
                   <Phone className="h-4 w-4 text-[#722F37]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors">05 56 00 00 00</p>
+                  <p className="font-semibold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors">{siteInfo?.phone || '05 56 00 00 00'}</p>
                   <p className="text-[#1A1A1A]/50 text-xs">Lun – Ven, 9 h – 18 h</p>
                 </div>
               </a>
 
-              <a href="mailto:contact@vite-gourmand.fr" className="flex items-start gap-3 group">
+              <a href={`mailto:${siteInfo?.email || 'contact@vite-gourmand.fr'}`} className="flex items-start gap-3 group">
                 <div className="w-9 h-9 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center shrink-0">
                   <Mail className="h-4 w-4 text-[#D4AF37]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors">contact@vite-gourmand.fr</p>
+                  <p className="font-semibold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors">{siteInfo?.email || 'contact@vite-gourmand.fr'}</p>
                   <p className="text-[#1A1A1A]/50 text-xs">Réponse sous 24 – 48 h</p>
                 </div>
               </a>
 
               <a
-                href="https://maps.google.com/?q=15+Rue+Sainte-Catherine+33000+Bordeaux"
+                href={`https://maps.google.com/?q=${encodeURIComponent(siteInfo?.address || '15 Rue Sainte-Catherine 33000 Bordeaux')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-3 group"
@@ -173,8 +188,7 @@ export default function ContactPage() {
                   <MapPin className="h-4 w-4 text-[#556B2F]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors">15 Rue Sainte-Catherine</p>
-                  <p className="text-[#1A1A1A]/50 text-xs">33000 Bordeaux</p>
+                  <p className="font-semibold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors">{siteInfo?.address || '15 Rue Sainte-Catherine, 33000 Bordeaux'}</p>
                 </div>
               </a>
             </div>
@@ -185,18 +199,29 @@ export default function ContactPage() {
                 <Clock className="h-4 w-4 text-[#D4AF37]" /> Horaires
               </h2>
               <div className="space-y-2 text-sm">
-                {[
-                  { day: 'Lundi – Vendredi', time: '9 h – 18 h', open: true },
-                  { day: 'Samedi', time: '10 h – 16 h', open: true },
-                  { day: 'Dimanche', time: 'Fermé', open: false },
-                ].map((row) => (
-                  <div key={row.day} className="flex justify-between items-center py-1.5 border-b border-[#1A1A1A]/5 last:border-0">
-                    <span className="text-[#1A1A1A]/70">{row.day}</span>
-                    <span className={`font-semibold ${row.open ? 'text-[#1A1A1A]' : 'text-red-600'}`}>
-                      {row.time}
-                    </span>
-                  </div>
-                ))}
+                {workingHours.length > 0 ? (
+                  workingHours.map((row) => (
+                    <div key={row.day} className="flex justify-between items-center py-1.5 border-b border-[#1A1A1A]/5 last:border-0">
+                      <span className="text-[#1A1A1A]/70">{row.day}</span>
+                      <span className="font-semibold text-[#1A1A1A]">
+                        {row.opening} – {row.closing}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  [
+                    { day: 'Lundi – Vendredi', time: '9 h – 18 h', open: true },
+                    { day: 'Samedi', time: '10 h – 16 h', open: true },
+                    { day: 'Dimanche', time: 'Fermé', open: false },
+                  ].map((row) => (
+                    <div key={row.day} className="flex justify-between items-center py-1.5 border-b border-[#1A1A1A]/5 last:border-0">
+                      <span className="text-[#1A1A1A]/70">{row.day}</span>
+                      <span className={`font-semibold ${row.open ? 'text-[#1A1A1A]' : 'text-red-600'}`}>
+                        {row.time}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 

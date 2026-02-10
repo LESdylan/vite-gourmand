@@ -7,6 +7,14 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import HeroSection from '../components/layout/HeroSection';
 import Footer from '../components/layout/Footer';
+import {
+  fetchApprovedReviews,
+  fetchReviewStats,
+  fetchSiteInfo,
+  type PublicReview,
+  type ReviewStats,
+  type SiteInfo,
+} from '../services/public';
 
 // Page types for internal navigation
 export type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
@@ -21,7 +29,6 @@ type Review = {
   rating: number;
   text: string;
   createdAt: string;
-  eventType?: string;
 };
 
 /**
@@ -38,7 +45,7 @@ type Review = {
 // ========================================
 // FEATURES SECTION
 // ========================================
-function FeaturesSection() {
+function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -63,7 +70,7 @@ function FeaturesSection() {
     {
       icon: ChefHat,
       title: 'Expertise culinaire',
-      description: '25 années d\'expérience au service de votre palais. Une cuisine raffinée et authentique.',
+      description: `${yearsOfExperience} années d'expérience au service de votre palais. Une cuisine raffinée et authentique.`,
       color: '#722F37'
     },
     {
@@ -142,7 +149,11 @@ function FeaturesSection() {
 // ========================================
 // ABOUT SECTION
 // ========================================
-function AboutSection({ setCurrentPage }: { setCurrentPage: (page: Page) => void }) {
+function AboutSection({ setCurrentPage, siteInfo }: { setCurrentPage: (page: Page) => void; siteInfo: SiteInfo | null }) {
+  const ownerNames = siteInfo?.owners
+    ?.map(o => o.firstName)
+    .join(' et ') || 'Julie et José';
+  const years = siteInfo?.yearsOfExperience ?? 25;
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -185,7 +196,7 @@ function AboutSection({ setCurrentPage }: { setCurrentPage: (page: Page) => void
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#D4AF37]/20 rounded-lg sm:rounded-xl flex items-center justify-center">
                     <Award className="w-4 h-4 sm:w-5 sm:h-5 text-[#D4AF37]" />
                   </div>
-                  <span className="text-2xl sm:text-3xl font-bold text-[#722F37]">25</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-[#722F37]">{years}</span>
                 </div>
                 <p className="text-xs sm:text-sm text-[#1A1A1A]/60">Années d'expérience</p>
               </div>
@@ -217,7 +228,7 @@ function AboutSection({ setCurrentPage }: { setCurrentPage: (page: Page) => void
             
             <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-[#1A1A1A]/70 leading-relaxed">
               <p>
-                Fondée il y a 25 ans à Bordeaux par <strong className="text-[#1A1A1A]">Julie et José</strong>, 
+                Fondée il y a {years} ans à Bordeaux par <strong className="text-[#1A1A1A]">{ownerNames}</strong>, 
                 Vite & Gourmand est née d'une passion commune pour la gastronomie.
               </p>
               <p>
@@ -362,7 +373,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
 // ========================================
 // TESTIMONIALS — COMPACT MARQUEE
 // ========================================
-function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading: boolean }) {
+function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; loading: boolean; stats: ReviewStats | null }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -401,11 +412,11 @@ function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading:
           <div className="flex items-center gap-2 pb-1">
             <div className="flex items-center gap-0.5">
               {[1,2,3,4,5].map(i => (
-                <Star key={i} className="w-3.5 h-3.5 text-[#D4AF37] fill-[#D4AF37]" />
+                <Star key={i} className={`w-3.5 h-3.5 ${i <= Math.round(stats?.averageRating ?? 5) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-[#1A1A1A]/10'}`} />
               ))}
             </div>
-            <span className="text-sm font-bold text-[#1A1A1A]">4.9</span>
-            <span className="text-xs text-[#1A1A1A]/40">· 500+ avis</span>
+            <span className="text-sm font-bold text-[#1A1A1A]">{stats?.averageRating?.toFixed(1) ?? '–'}</span>
+            <span className="text-xs text-[#1A1A1A]/40">· {stats?.reviewCount ?? 0} avis</span>
           </div>
         </div>
       </div>
@@ -444,7 +455,7 @@ function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading:
                 className="w-[250px] sm:w-[280px] flex-shrink-0"
               >
                 <div className="bg-white rounded-2xl p-4 sm:p-5 h-full border border-[#1A1A1A]/[0.04] shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-lg hover:border-[#722F37]/15 transition-all duration-300 hover:-translate-y-0.5">
-                  {/* Rating + event */}
+                  {/* Rating */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-0.5">
                       {[...Array(5)].map((_, i) => (
@@ -458,11 +469,6 @@ function TestimonialsSection({ reviews, loading }: { reviews: Review[], loading:
                         />
                       ))}
                     </div>
-                    {review.eventType && (
-                      <span className="text-[10px] font-medium text-[#722F37]/70 bg-[#722F37]/5 rounded-full px-2 py-0.5">
-                        {review.eventType}
-                      </span>
-                    )}
                   </div>
 
                   {/* Quote */}
@@ -616,54 +622,37 @@ function ValuesSection() {
 // ========================================
 export default function HomePage({ setCurrentPage }: HomePageProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
+  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchReviews();
+    loadPublicData();
   }, []);
 
-  const fetchReviews = async () => {
+  const loadPublicData = async () => {
     try {
-      // Mock reviews - replace with actual API call
-      const mockReviews: Review[] = [
-        {
-          id: '1',
-          userName: 'Marie Dupont',
-          rating: 5,
-          text: 'Un service exceptionnel du début à la fin ! Julie et José ont sublimé notre mariage avec des plats raffinés. Nos invités en parlent encore.',
-          createdAt: '2025-12-15',
-          eventType: 'Mariage'
-        },
-        {
-          id: '2',
-          userName: 'Pierre Martin',
-          rating: 5,
-          text: 'Traiteur de grande qualité pour notre séminaire. Ponctualité, présentation soignée et saveurs au rendez-vous. Une valeur sûre.',
-          createdAt: '2025-11-20',
-          eventType: 'Séminaire entreprise'
-        },
-        {
-          id: '3',
-          userName: 'Sophie Bernard',
-          rating: 5,
-          text: 'Les 60 ans de ma mère resteront gravés dans nos mémoires. Menu personnalisé, produits frais et une équipe aux petits soins.',
-          createdAt: '2025-10-08',
-          eventType: 'Anniversaire'
-        },
-        {
-          id: '4',
-          userName: 'Laurent Dubois',
-          rating: 5,
-          text: 'Deuxième fois que nous faisons appel à eux et toujours la même excellence. Le rapport qualité-prix est imbattable.',
-          createdAt: '2025-09-22',
-          eventType: 'Réception privée'
-        }
-      ];
-      
-      await new Promise(resolve => setTimeout(resolve, 300));
-      setReviews(mockReviews);
+      const [rawReviews, stats, info] = await Promise.all([
+        fetchApprovedReviews(1, 20),
+        fetchReviewStats(),
+        fetchSiteInfo(),
+      ]);
+
+      // Map DB reviews to the component format
+      setReviews(
+        rawReviews.map((r) => ({
+          id: String(r.id),
+          userName:
+            r.User_Publish_user_idToUser?.first_name ?? 'Client',
+          rating: r.note,
+          text: r.description,
+          createdAt: r.created_at,
+        })),
+      );
+      setReviewStats(stats);
+      setSiteInfo(info);
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      console.error('Error fetching public data:', error);
     } finally {
       setLoading(false);
     }
@@ -674,11 +663,13 @@ export default function HomePage({ setCurrentPage }: HomePageProps) {
       <HeroSection
         onExploreMenus={() => setCurrentPage('menu')}
         onContact={() => setCurrentPage('contact')}
+        siteInfo={siteInfo}
+        reviewStats={reviewStats}
       />
-      <FeaturesSection />
-      <AboutSection setCurrentPage={setCurrentPage} />
+      <FeaturesSection yearsOfExperience={siteInfo?.yearsOfExperience ?? 25} />
+      <AboutSection setCurrentPage={setCurrentPage} siteInfo={siteInfo} />
       <ServicesSection setCurrentPage={setCurrentPage} />
-      <TestimonialsSection reviews={reviews} loading={loading} />
+      <TestimonialsSection reviews={reviews} loading={loading} stats={reviewStats} />
       <ValuesSection />
       <Footer setCurrentPage={setCurrentPage} />
     </div>

@@ -41,6 +41,7 @@ import { ImageModule } from './image';
 import { RoleModule } from './role';
 import { UnsplashModule } from './unsplash';
 import { SeedModule } from './seed';
+import { SiteInfoModule } from './site-info';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -137,6 +138,7 @@ import {
     RoleModule,
     UnsplashModule,
     SeedModule,
+    SiteInfoModule,
   ],
   controllers: [AppController],
   providers: [

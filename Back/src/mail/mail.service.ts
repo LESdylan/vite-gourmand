@@ -78,11 +78,18 @@ export class MailService implements OnModuleInit {
     const plainText = options.text || this.htmlToText(options.html);
     try {
       const info = await this.transporter.sendMail({
-        from: this.fromEmail,
+        from: `"Vite et Gourmand" <${this.fromEmail}>`,
         to: options.to,
         subject: options.subject,
         text: plainText,
         html: options.html,
+        headers: {
+          'X-Mailer': 'ViteGourmand/1.0',
+          'X-Priority': '3',
+          'Precedence': 'bulk',
+          'List-Unsubscribe': `<mailto:${this.fromEmail}?subject=unsubscribe>`,
+          'MIME-Version': '1.0',
+        },
       });
       this.logger.log(
         `Email sent to ${options.to} — id=${info.messageId} response="${info.response}" accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)}`,

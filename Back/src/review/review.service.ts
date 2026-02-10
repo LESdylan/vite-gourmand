@@ -14,6 +14,35 @@ import { PaginationDto, buildPaginationMeta } from '../common';
 export class ReviewService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Public review statistics: average rating, total approved count,
+   * satisfaction percentage (reviews with note >= 4).
+   */
+  async getPublicStats() {
+    const [aggregation, satisfiedCount, totalApproved] = await Promise.all([
+      this.prisma.publish.aggregate({
+        where: { status: 'approved' },
+        _avg: { note: true },
+        _count: { id: true },
+      }),
+      this.prisma.publish.count({
+        where: { status: 'approved', note: { gte: 4 } },
+      }),
+      this.prisma.publish.count({
+        where: { status: 'approved' },
+      }),
+    ]);
+
+    const averageRating = aggregation._avg.note
+      ? Math.round(aggregation._avg.note * 10) / 10
+      : 0;
+    const reviewCount = aggregation._count.id;
+    const satisfactionPercent =
+      totalApproved > 0 ? Math.round((satisfiedCount / totalApproved) * 100) : 0;
+
+    return { averageRating, reviewCount, satisfactionPercent };
+  }
+
   async findApproved(pagination: PaginationDto) {
     const { page = 1, limit = 20 } = pagination;
     const where = { status: 'approved' };

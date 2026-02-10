@@ -113,7 +113,7 @@ export async function verifyResetToken(token: string): Promise<{ valid: boolean;
 export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
   const wrapper = await apiRequest<ApiWrapper<{ message: string }>>('/api/auth/reset-password', {
     method: 'POST',
-    body: { token, password },
+    body: { token, newPassword: password },
   });
   return wrapper.data;
 }

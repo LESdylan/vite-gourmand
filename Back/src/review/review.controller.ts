@@ -19,12 +19,31 @@ import { CreateReviewDto, ModerateReviewDto } from './dto/review.dto';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
+  // ─── Static routes MUST come before :id param route ───
+
+  @Public()
+  @Get('stats')
+  @ApiOperation({ summary: 'Get public review statistics (avg rating, count, satisfaction %)' })
+  async getStats() {
+    return this.reviewService.getPublicStats();
+  }
+
+  @Get('pending')
+  @Roles('admin', 'manager')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List pending reviews for moderation' })
+  async findPending(@Query() pagination: PaginationDto) {
+    return this.reviewService.findPending(pagination);
+  }
+
   @Public()
   @Get()
   @ApiOperation({ summary: 'List approved reviews' })
   async findAll(@Query() pagination: PaginationDto) {
     return this.reviewService.findApproved(pagination);
   }
+
+  // ─── Dynamic :id route MUST come last ───
 
   @Public()
   @Get(':id')
@@ -38,14 +57,6 @@ export class ReviewController {
   @ApiOperation({ summary: 'Create new review' })
   async create(@CurrentUser() user: JwtPayload, @Body() dto: CreateReviewDto) {
     return this.reviewService.create(user.sub, dto);
-  }
-
-  @Get('pending')
-  @Roles('admin', 'manager')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'List pending reviews for moderation' })
-  async findPending(@Query() pagination: PaginationDto) {
-    return this.reviewService.findPending(pagination);
   }
 
   @Put(':id/moderate')

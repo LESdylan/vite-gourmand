@@ -125,9 +125,13 @@ export function PortalLoginForm() {
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError('');
+    if (!forgotEmail.trim()) {
+      setLocalError('Veuillez entrer votre adresse email.');
+      return;
+    }
     try {
-      const msg = await forgotPassword(forgotEmail);
-      setSuccessMsg(msg || 'Un email de réinitialisation a été envoyé.');
+      await forgotPassword(forgotEmail);
+      setSuccessMsg(`Un lien de réinitialisation a été envoyé avec succès à ${forgotEmail}`);
     } catch {
       setLocalError('Impossible d\'envoyer l\'email. Vérifiez votre adresse.');
     }

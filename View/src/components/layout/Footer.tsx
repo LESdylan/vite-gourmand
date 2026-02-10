@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { ChefHat, Clock } from 'lucide-react';
+import { fetchWorkingHours, fetchSiteInfo, type WorkingHour, type SiteInfo } from '../../services/public';
 
 type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
 
@@ -6,17 +8,35 @@ type FooterProps = {
   setCurrentPage: (page: Page) => void;
 };
 
-const HOURS = [
-  { day: 'Lundi', time: '09:00 – 19:00' },
-  { day: 'Mardi', time: '09:00 – 19:00' },
-  { day: 'Mercredi', time: '09:00 – 19:00' },
-  { day: 'Jeudi', time: '09:00 – 19:00' },
-  { day: 'Vendredi', time: '09:00 – 20:00' },
-  { day: 'Samedi', time: '10:00 – 20:00' },
-  { day: 'Dimanche', time: '10:00 – 14:00' },
+const DAY_ORDER = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+
+const FALLBACK_HOURS: WorkingHour[] = [
+  { id: 1, day: 'Lundi', opening: '09:00', closing: '19:00' },
+  { id: 2, day: 'Mardi', opening: '09:00', closing: '19:00' },
+  { id: 3, day: 'Mercredi', opening: '09:00', closing: '19:00' },
+  { id: 4, day: 'Jeudi', opening: '09:00', closing: '19:00' },
+  { id: 5, day: 'Vendredi', opening: '09:00', closing: '20:00' },
+  { id: 6, day: 'Samedi', opening: '10:00', closing: '20:00' },
+  { id: 7, day: 'Dimanche', opening: '10:00', closing: '14:00' },
 ];
 
 export default function Footer({ setCurrentPage }: FooterProps) {
+  const [hours, setHours] = useState<WorkingHour[]>(FALLBACK_HOURS);
+  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
+
+  useEffect(() => {
+    fetchWorkingHours()
+      .then(data => {
+        if (data.length > 0) {
+          data.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
+          setHours(data);
+        }
+      })
+      .catch(() => {});
+    fetchSiteInfo()
+      .then(setSiteInfo)
+      .catch(() => {});
+  }, []);
   const handleNavClick = (page: Page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -46,11 +66,11 @@ export default function Footer({ setCurrentPage }: FooterProps) {
               Bordeaux &amp; alentours.
             </p>
             <div className="flex flex-col gap-1">
-              <a href="tel:+33556000000" style={linkStyle} className="hover:!text-white transition-colors">
-                📞 05 56 00 00 00
+              <a href={`tel:${siteInfo?.phone || '+33556000000'}`} style={linkStyle} className="hover:!text-white transition-colors">
+                📞 {siteInfo?.phone || '05 56 00 00 00'}
               </a>
-              <a href="mailto:contact@vite-gourmand.fr" style={linkStyle} className="hover:!text-white transition-colors">
-                ✉️ contact@vite-gourmand.fr
+              <a href={`mailto:${siteInfo?.email || 'contact@vite-gourmand.fr'}`} style={linkStyle} className="hover:!text-white transition-colors">
+                ✉️ {siteInfo?.email || 'contact@vite-gourmand.fr'}
               </a>
             </div>
           </div>
@@ -62,10 +82,10 @@ export default function Footer({ setCurrentPage }: FooterProps) {
               <span style={{ color: '#ffffff' }} className="font-semibold text-[13px]">Horaires</span>
             </div>
             <ul className="space-y-0.5">
-              {HOURS.map(({ day, time }) => (
+              {hours.map(({ day, opening, closing }) => (
                 <li key={day} className="flex justify-between gap-4">
                   <span style={linkStyle}>{day}</span>
-                  <span style={mutedStyle}>{time}</span>
+                  <span style={mutedStyle}>{opening} – {closing}</span>
                 </li>
               ))}
             </ul>

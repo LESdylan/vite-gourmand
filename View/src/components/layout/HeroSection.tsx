@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, Phone, Star, Award, Users, Calendar, Sparkles } from 'lucide-react';
 import { Button } from '../ui/button';
+import type { ReviewStats, SiteInfo } from '../../services/public';
 
 interface HeroSectionProps {
   onExploreMenus: () => void;
   onContact: () => void;
+  siteInfo?: SiteInfo | null;
+  reviewStats?: ReviewStats | null;
 }
 
 /**
@@ -17,12 +20,19 @@ interface HeroSectionProps {
  * - Vert olive (#556B2F) - Success/natural
  * - Noir charbon (#1A1A1A) - Text
  */
-export default function HeroSection({ onExploreMenus, onContact }: HeroSectionProps) {
+export default function HeroSection({ onExploreMenus, onContact, siteInfo, reviewStats }: HeroSectionProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const years = siteInfo?.yearsOfExperience ?? 25;
+  const eventCount = siteInfo?.eventCount ?? 0;
+  const avgRating = reviewStats?.averageRating ?? 0;
+  const reviewCount = reviewStats?.reviewCount ?? 0;
+  const satisfaction = reviewStats?.satisfactionPercent ?? 0;
+  const ownerNames = siteInfo?.owners?.map(o => o.firstName).join(' et ') || 'Julie et José';
 
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden bg-[#1A1A1A]">
@@ -96,7 +106,7 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
               }`}
               style={{ transitionDelay: '300ms' }}
             >
-              Julie et José mettent leur <span className="text-[#D4AF37] font-medium">25 années d'expertise</span> au service de vos événements. 
+              {ownerNames} mettent leur <span className="text-[#D4AF37] font-medium">{years} années d'expertise</span> au service de vos événements. 
               Une cuisine raffinée, des moments inoubliables.
             </p>
 
@@ -147,11 +157,11 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
                 <div>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#D4AF37] fill-[#D4AF37]" />
+                      <Star key={i} className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`} />
                     ))}
-                    <span className="text-white/80 text-sm ml-1.5">4.9/5</span>
+                    <span className="text-white/80 text-sm ml-1.5">{avgRating > 0 ? `${avgRating.toFixed(1)}/5` : '–'}</span>
                   </div>
-                  <p className="text-white/50 text-xs sm:text-sm">+500 avis clients vérifiés</p>
+                  <p className="text-white/50 text-xs sm:text-sm">{reviewCount > 0 ? `${reviewCount} avis clients vérifiés` : 'Avis clients vérifiés'}</p>
                 </div>
               </div>
             </div>
@@ -177,7 +187,7 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
                   <div className="w-11 h-11 bg-[#D4AF37]/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
                     <Award className="w-5 h-5 text-[#D4AF37]" />
                   </div>
-                  <div className="text-3xl font-bold text-white mb-0.5">25+</div>
+                  <div className="text-3xl font-bold text-white mb-0.5">{years}+</div>
                   <p className="text-white/50 text-sm">Années d'expérience</p>
                 </div>
 
@@ -186,7 +196,7 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
                   <div className="w-11 h-11 bg-[#722F37]/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
                     <Calendar className="w-5 h-5 text-[#FFF8F0]" />
                   </div>
-                  <div className="text-3xl font-bold text-white mb-0.5">2000+</div>
+                  <div className="text-3xl font-bold text-white mb-0.5">{eventCount > 0 ? `${eventCount}+` : '–'}</div>
                   <p className="text-white/50 text-sm">Événements réalisés</p>
                 </div>
 
@@ -195,7 +205,7 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
                   <div className="w-11 h-11 bg-[#556B2F]/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
                     <Users className="w-5 h-5 text-[#8fad6a]" />
                   </div>
-                  <div className="text-3xl font-bold text-white mb-0.5">98%</div>
+                  <div className="text-3xl font-bold text-white mb-0.5">{satisfaction > 0 ? `${satisfaction}%` : '–'}</div>
                   <p className="text-white/50 text-sm">Clients satisfaits</p>
                 </div>
 
@@ -203,17 +213,17 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
                 <div className="group bg-gradient-to-br from-[#722F37] to-[#5a252c] rounded-2xl p-5 mt-8 shadow-xl shadow-[#722F37]/25 hover:shadow-[#722F37]/40 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
                   <div className="flex items-center gap-1 mb-2">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-3 h-3 text-[#D4AF37] fill-[#D4AF37]" />
+                      <Star key={i} className={`w-3 h-3 ${i <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`} />
                     ))}
                   </div>
                   <p className="text-white/90 text-sm mb-3 leading-relaxed line-clamp-3">
-                    "Un service exceptionnel du début à la fin. Merci pour ce mariage de rêve !"
+                    "{reviewCount > 0 ? 'Découvrez les avis de nos clients satisfaits !' : 'Soyez le premier à laisser un avis !'}"
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-[#D4AF37]/30 flex items-center justify-center text-white text-xs font-medium">
-                      MD
+                      <Star className="w-3 h-3 fill-current" />
                     </div>
-                    <span className="text-white/60 text-xs">Marie D. - Mariage 2025</span>
+                    <span className="text-white/60 text-xs">{reviewCount} avis vérifiés</span>
                   </div>
                 </div>
               </div>
@@ -229,9 +239,9 @@ export default function HeroSection({ onExploreMenus, onContact }: HeroSectionPr
           style={{ transitionDelay: '700ms' }}
         >
           {[
-            { value: '25+', label: 'Années', icon: Award },
-            { value: '2000+', label: 'Événements', icon: Calendar },
-            { value: '98%', label: 'Satisfaits', icon: Users },
+            { value: `${years}+`, label: 'Années', icon: Award },
+            { value: eventCount > 0 ? `${eventCount}+` : '–', label: 'Événements', icon: Calendar },
+            { value: satisfaction > 0 ? `${satisfaction}%` : '–', label: 'Satisfaits', icon: Users },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
