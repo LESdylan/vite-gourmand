@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePortalAuth } from '../../portal_dashboard';
 import { apiRequest } from '../../services/api';
+import { AiAssistantWidget } from '../ui/AiAssistantWidget';
 import './ClientWidgets.css';
 
 /* ──────────────────────────────────────────────
@@ -560,6 +561,9 @@ export function ClientProfile() {
           </div>
         </div>
       )}
+
+      {/* Floating AI Assistant for profile page */}
+      <AiAssistantWidget pageContext="profile" />
     </div>
   );
 }

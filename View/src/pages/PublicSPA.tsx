@@ -16,6 +16,7 @@ import Navbar, { type Page, type UserType } from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import PromoBanner from '../components/layout/PromoBanner';
 import NotificationPanel from '../components/layout/NotificationPanel';
+import { AiAssistantWidget } from '../components/ui/AiAssistantWidget';
 import { PublicDataProvider } from '../contexts/PublicDataContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { fetchActivePromotions, type ActivePromotion } from '../services/public';
@@ -174,6 +175,14 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
           >
             {renderPage()}
           </main>
+
+          {/* Floating AI Assistant — show on all pages except contact (which has its own AI chat) */}
+          {currentPage !== 'contact' && (
+            <AiAssistantWidget
+              pageContext={currentPage === 'menu' ? 'menu' : currentPage === 'order' ? 'order' : 'home'}
+              onNavigateToContact={() => handlePageChange('contact')}
+            />
+          )}
         </div>
       </PublicDataProvider>
     </NotificationProvider>

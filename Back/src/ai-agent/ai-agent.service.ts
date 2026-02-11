@@ -205,18 +205,71 @@ ${dbContext}`;
   }
 
   /* ═══════════════════════════════════════════════════════════
+     System prompt for Public Assistant mode
+     ═══════════════════════════════════════════════════════════ */
+
+  private buildPublicAssistantPrompt(dbContext: string): string {
+    return `Tu es l'assistant virtuel de "Vite & Gourmand", un service de traiteur gastronomique.
+Tu apparais comme un petit robot sympathique dans le coin de l'écran des pages publiques et du profil utilisateur.
+
+TON RÔLE :
+Tu es un assistant d'accueil et de renseignements. Tu aides les visiteurs à :
+1. 🏪 Découvrir le concept de Vite & Gourmand (traiteur événementiel haut de gamme, menus personnalisés, chef passionné)
+2. 📋 Comprendre les menus et plats disponibles
+3. 🎉 Connaître les promotions actuelles
+4. ✉️ Préparer leur demande de contact (devis, renseignements)
+5. 🧭 Les orienter vers la bonne page (contact, menus, commande)
+
+STYLE DE COMMUNICATION :
+- Sois chaleureux, accueillant et professionnel
+- Réponds en français
+- Sois concis (2-4 phrases max par réponse sauf demande détaillée)
+- Utilise des emojis avec modération pour rendre les échanges vivants
+- Ne sois pas trop formel, reste accessible
+
+INFORMATIONS À CONNAÎTRE SUR VITE & GOURMAND :
+- Traiteur gastronomique spécialisé dans les événements (mariages, anniversaires, séminaires, baptêmes)
+- Cuisine française raffinée avec des produits frais et de saison
+- Menus personnalisables selon les besoins (régimes alimentaires, allergies, budget)
+- Services complémentaires disponibles (décoration, animation, boissons, location matériel)
+- Équipe passionnée dirigée par un chef expérimenté
+- Devis gratuit sous 24h après demande
+
+QUAND AIDER À RÉDIGER UN MESSAGE :
+Si le visiteur veut contacter l'équipe, propose-lui de l'aider à structurer sa demande en lui posant des questions :
+- Type d'événement
+- Nombre de convives
+- Date souhaitée
+- Budget approximatif
+- Contraintes particulières (allergies, régime)
+Puis génère un brouillon de message professionnel qu'il pourra copier dans le formulaire.
+
+REDIRECTION :
+- Pour commander : invite à aller sur la page "Commander"
+- Pour un devis : invite à aller sur la page "Contact"
+- Pour voir les menus : invite à aller sur la page "Nos Menus"
+
+${dbContext}`;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      Chat
      ═══════════════════════════════════════════════════════════ */
 
   async chat(userId: number, dto: ChatMessageDto) {
     const convId = dto.conversationId || this.generateConversationId();
+    const isPublicAssistant = dto.context?.mode === 'public_assistant';
 
     // Get or create conversation
     let conversation = this.conversations.get(convId);
     if (!conversation) {
       const dbContext = await this.gatherDatabaseContext(dto);
+      const systemPrompt = isPublicAssistant 
+        ? this.buildPublicAssistantPrompt(dbContext)
+        : this.buildSystemPrompt(dbContext);
+      
       conversation = {
-        messages: [{ role: 'system', content: this.buildSystemPrompt(dbContext) }],
+        messages: [{ role: 'system', content: systemPrompt }],
         context: {
           guestCount: dto.guestCount,
           budgetPerPerson: dto.budgetPerPerson,
@@ -286,7 +339,15 @@ ${dbContext}`;
   private getDemoResponse(messages: ConversationEntry[]): string {
     const userMessages = messages.filter(m => m.role === 'user');
     const lastMsg = userMessages.at(-1)?.content.toLowerCase() || '';
+    const systemPrompt = messages.find(m => m.role === 'system')?.content || '';
+    const isPublicAssistant = systemPrompt.includes('assistant virtuel');
 
+    // Public assistant mode — general questions
+    if (isPublicAssistant) {
+      return this.getPublicAssistantDemoResponse(userMessages, lastMsg);
+    }
+
+    // Menu builder mode — existing logic
     if (userMessages.length === 1) {
       return `Bonjour ! 👋 Je suis l'assistant IA de Vite & Gourmand.
 
@@ -340,6 +401,99 @@ Mais voici ce que l'assistant complet peut faire pour vous :
 En attendant, n'hésitez pas à remplir le **formulaire de contact** à gauche avec vos besoins — notre équipe vous répondra avec une proposition personnalisée sous 24h ! 📧
 
 > ℹ️ Mode démo actif.`;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Public Assistant Demo Response
+     ═══════════════════════════════════════════════════════════ */
+
+  private getPublicAssistantDemoResponse(userMessages: ConversationEntry[], lastMsg: string): string {
+    // First message — welcome
+    if (userMessages.length === 1) {
+      // Detect intent from first message
+      if (lastMsg.includes('concept') || lastMsg.includes('qui êtes') || lastMsg.includes('c\'est quoi')) {
+        return `🍽️ **Vite & Gourmand**, c'est votre traiteur gastronomique pour tous vos événements !
+
+Notre équipe passionnée crée des menus sur mesure avec des produits frais et de saison. Que ce soit pour un mariage, un anniversaire ou un séminaire d'entreprise, nous nous adaptons à vos envies et contraintes.
+
+Vous souhaitez en savoir plus sur nos menus ou nos services ? 😊`;
+      }
+
+      if (lastMsg.includes('menu') || lastMsg.includes('plat') || lastMsg.includes('carte')) {
+        return `📋 Nous proposons une variété de menus pour tous les goûts !
+
+- 🥗 **Entrées** : Foie gras, carpaccio, velouté de saison…
+- 🍖 **Plats** : Filet de bœuf, suprême de volaille, poisson de saison…
+- 🍰 **Desserts** : Panna cotta, tarte tatin, crème brûlée…
+
+Chaque menu est personnalisable selon vos besoins (végétarien, sans gluten, halal…). Rendez-vous sur la page **Nos Menus** pour découvrir toutes nos créations ! 🎨`;
+      }
+
+      if (lastMsg.includes('promo') || lastMsg.includes('offre') || lastMsg.includes('réduction')) {
+        return `🎉 Bonne nouvelle ! Nous avons régulièrement des offres spéciales.
+
+Actuellement, profitez de :
+- 🎁 **-10%** pour toute première commande
+- 👥 **-5%** à partir de 50 convives
+- 🍾 **Champagne offert** pour les mariages de plus de 80 personnes
+
+Contactez-nous pour un devis personnalisé et découvrir les offres du moment ! ✨`;
+      }
+
+      if (lastMsg.includes('contact') || lastMsg.includes('message') || lastMsg.includes('écrire') || lastMsg.includes('rédiger')) {
+        return `✉️ Je peux vous aider à préparer votre message !
+
+Pour que l'équipe puisse vous répondre au mieux, indiquez-moi :
+1. 🎉 Le type d'événement (mariage, anniversaire…)
+2. 👥 Le nombre de convives
+3. 📅 La date souhaitée
+4. 💰 Votre budget approximatif
+
+Je vous aiderai à formuler une demande claire et complète ! 😊`;
+      }
+
+      // Default welcome
+      return `Bonjour ! 👋 Je suis l'assistant virtuel de Vite & Gourmand.
+
+Je peux vous renseigner sur :
+- 🏪 Notre concept et nos valeurs
+- 📋 Nos menus et plats disponibles  
+- 🎉 Nos promotions actuelles
+- ✉️ Vous aider à préparer votre demande de devis
+
+Comment puis-je vous aider aujourd'hui ? 😊`;
+    }
+
+    // Follow-up messages
+    if (lastMsg.includes('contact') || lastMsg.includes('devis') || lastMsg.includes('commander')) {
+      return `Parfait ! 📝
+
+Pour faire une demande de devis, rendez-vous sur notre page **Contact**. Vous y trouverez un formulaire simple où vous pourrez détailler vos besoins.
+
+Notre équipe vous répondra sous 24h avec une proposition personnalisée ! 🚀
+
+> 💡 Cliquez sur le bouton "Aller au formulaire de contact" ci-dessous pour y accéder directement.`;
+    }
+
+    if (lastMsg.includes('merci') || lastMsg.includes('super') || lastMsg.includes('parfait')) {
+      return `Avec plaisir ! 😊
+
+N'hésitez pas si vous avez d'autres questions. Je suis là pour vous aider !
+
+Bonne visite sur Vite & Gourmand 🍽️✨`;
+    }
+
+    // Default fallback
+    return `Je suis là pour vous aider ! 😊
+
+Vous pouvez me poser des questions sur :
+- Notre concept et nos services
+- Nos menus et tarifs
+- Comment nous contacter
+
+Ou rendez-vous directement sur la page **Contact** pour une demande de devis personnalisé.
+
+> ℹ️ Mode démo — En production, je peux répondre à toutes vos questions en détail !`;
   }
 
   /* ═══════════════════════════════════════════════════════════
