@@ -144,7 +144,7 @@ export default function Navbar({
                   <button
                     data-notification-bell
                     onClick={toggleNotifications}
-                    className={`relative w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                    className={`relative w-9 h-9 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-colors ${
                       solid ? 'text-[#1A1A1A]/60 hover:bg-[#722F37]/10 hover:text-[#722F37]' : 'text-white/70 hover:bg-white/20 hover:text-white'
                     }`}
                     aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
@@ -158,7 +158,7 @@ export default function Navbar({
                   </button>
                   <button
                     onClick={() => handleNavClick('user-profile')}
-                    className={`w-7 h-7 rounded-full flex items-center justify-center ${
+                    className={`w-9 h-9 sm:w-7 sm:h-7 rounded-full flex items-center justify-center ${
                       solid ? 'bg-[#FFF8F0] text-[#722F37]' : 'bg-white/20 text-white'
                     }`}
                   >
@@ -167,7 +167,7 @@ export default function Navbar({
                   {onLogout && (
                     <button
                       onClick={onLogout}
-                      className={`p-1.5 rounded ${solid ? 'text-[#1A1A1A]/40 hover:text-red-600' : 'text-white/60 hover:text-white'}`}
+                      className={`p-2.5 sm:p-1.5 rounded ${solid ? 'text-[#1A1A1A]/40 hover:text-red-600' : 'text-white/60 hover:text-white'}`}
                     >
                       <LogOut className="h-4 w-4" />
                     </button>
@@ -198,8 +198,8 @@ export default function Navbar({
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden fixed inset-0 z-50 bg-white">
-          <div className="flex items-center justify-between px-4 h-14 border-b">
+        <div className="sm:hidden fixed inset-0 z-50 bg-white flex flex-col">
+          <div className="flex items-center justify-between px-4 h-14 border-b flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center">
                 <ChefHat className="h-4 w-4 text-white" />
@@ -211,7 +211,7 @@ export default function Navbar({
             </button>
           </div>
           
-          <div className="p-4 space-y-2">
+          <div className="p-4 space-y-2 flex-1 overflow-y-auto">
             {navItems.map((item) => (
               <button
                 key={item.page}
@@ -244,7 +244,7 @@ export default function Navbar({
             )}
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-[#FFF8F0]">
+          <div className="p-4 border-t bg-[#FFF8F0] flex-shrink-0">
             {user ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-3 p-3 bg-white rounded-lg">

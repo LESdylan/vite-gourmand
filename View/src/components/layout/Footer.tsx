@@ -77,25 +77,25 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           {/* Col 3 — Navigation + Legal */}
           <div>
             <span style={{ color: '#ffffff' }} className="font-semibold text-[13px] block mb-3">Navigation</span>
-            <ul className="space-y-1.5">
+            <ul className="space-y-0 sm:space-y-1.5">
               {[
                 { label: 'Accueil', page: 'home' as Page },
                 { label: 'Nos Menus', page: 'menu' as Page },
                 { label: 'Contact', page: 'contact' as Page },
               ].map(({ label, page }) => (
                 <li key={page}>
-                  <button onClick={() => handleNavClick(page)} style={linkStyle} className="hover:!text-white transition-colors">
+                  <button onClick={() => handleNavClick(page)} style={linkStyle} className="hover:!text-white transition-colors py-2 sm:py-0">
                     {label}
                   </button>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-4 pt-3 border-t border-white/10 space-y-1.5">
-              <button onClick={() => handleNavClick('legal-mentions')} style={linkStyle} className="hover:!text-white transition-colors block">
+            <div className="mt-4 pt-3 border-t border-white/10 space-y-0 sm:space-y-1.5">
+              <button onClick={() => handleNavClick('legal-mentions')} style={linkStyle} className="hover:!text-white transition-colors block py-2 sm:py-0">
                 Mentions légales
               </button>
-              <button onClick={() => handleNavClick('legal-cgv')} style={linkStyle} className="hover:!text-white transition-colors block">
+              <button onClick={() => handleNavClick('legal-cgv')} style={linkStyle} className="hover:!text-white transition-colors block py-2 sm:py-0">
                 Conditions générales de vente
               </button>
             </div>

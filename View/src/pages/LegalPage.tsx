@@ -32,16 +32,16 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour à l'accueil
           </Button>
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#722F37] to-[#5a252c] rounded-2xl flex items-center justify-center shadow-lg shadow-[#722F37]/30">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#722F37] to-[#5a252c] rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-[#722F37]/30 flex-shrink-0">
               {section === 'mentions' ? (
-                <Scale className="h-8 w-8 text-white" />
+                <Scale className="h-5 w-5 sm:h-8 sm:w-8 text-white" />
               ) : (
-                <FileText className="h-8 w-8 text-white" />
+                <FileText className="h-5 w-5 sm:h-8 sm:w-8 text-white" />
               )}
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
                 {section === 'mentions' ? 'Mentions légales' : 'Conditions Générales de Vente'}
               </h1>
               <p className="text-white/60 mt-1">
@@ -55,13 +55,13 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
       <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-12 -mt-8">
         {section === 'mentions' ? (
           <Card className="bg-white border-0 shadow-xl rounded-3xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-[#FFF8F0] to-white border-b border-[#722F37]/10 py-6 px-8">
+            <CardHeader className="bg-gradient-to-r from-[#FFF8F0] to-white border-b border-[#722F37]/10 py-6 px-5 sm:px-8">
               <CardTitle className="text-xl text-[#1A1A1A] flex items-center gap-3">
                 <Shield className="h-6 w-6 text-[#722F37]" />
                 Informations légales
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8 sm:p-10 space-y-10">
+            <CardContent className="p-5 sm:p-8 lg:p-10 space-y-10">
               {/* Section 1 */}
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
@@ -172,13 +172,13 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
           </Card>
         ) : (
           <Card className="bg-white border-0 shadow-xl rounded-3xl overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-[#FFF8F0] to-white border-b border-[#722F37]/10 py-6 px-8">
+            <CardHeader className="bg-gradient-to-r from-[#FFF8F0] to-white border-b border-[#722F37]/10 py-6 px-5 sm:px-8">
               <CardTitle className="text-xl text-[#1A1A1A] flex items-center gap-3">
                 <FileText className="h-6 w-6 text-[#722F37]" />
                 Conditions Générales de Vente
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-8 sm:p-10 space-y-10">
+            <CardContent className="p-5 sm:p-8 lg:p-10 space-y-10">
               {/* CGV Sections */}
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">

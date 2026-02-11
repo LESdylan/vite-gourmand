@@ -84,7 +84,7 @@ function InlineGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
               <button
                 key={i}
                 onClick={(e) => { e.stopPropagation(); setIdx(i); }}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${i === idx ? 'bg-white w-3' : 'bg-white/50'}`}
+                className={`w-2 h-2 sm:w-1.5 sm:h-1.5 rounded-full transition-all ${i === idx ? 'bg-white w-4 sm:w-3' : 'bg-white/50'}`}
                 aria-label={`Image ${i + 1}`}
               />
             ))}
@@ -92,14 +92,14 @@ function InlineGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
           {/* prev/next */}
           <button
             onClick={(e) => { e.stopPropagation(); setIdx(i => (i - 1 + count) % count); }}
-            className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 opacity-0 group-hover/gallery:opacity-100 transition-opacity"
+            className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 sm:p-1 opacity-70 sm:opacity-0 group-hover/gallery:opacity-100 transition-opacity"
             aria-label="Image précédente"
           >
             <ChevronLeft className="h-4 w-4 text-[#1A1A1A]" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); setIdx(i => (i + 1) % count); }}
-            className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1 opacity-0 group-hover/gallery:opacity-100 transition-opacity"
+            className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 sm:p-1 opacity-70 sm:opacity-0 group-hover/gallery:opacity-100 transition-opacity"
             aria-label="Image suivante"
           >
             <ChevronRight className="h-4 w-4 text-[#1A1A1A]" />
@@ -131,14 +131,14 @@ function FullGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
         <>
           <button
             onClick={() => setIdx(i => (i - 1 + count) % count)}
-            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 shadow"
+            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2.5 sm:p-1.5 shadow"
             aria-label="Image précédente"
           >
             <ChevronLeft className="h-5 w-5 text-[#1A1A1A]" />
           </button>
           <button
             onClick={() => setIdx(i => (i + 1) % count)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-1.5 shadow"
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2.5 sm:p-1.5 shadow"
             aria-label="Image suivante"
           >
             <ChevronRight className="h-5 w-5 text-[#1A1A1A]" />

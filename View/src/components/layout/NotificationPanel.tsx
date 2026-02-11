@@ -187,10 +187,10 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
                   {/* Dismiss button */}
                   <button
                     onClick={e => { e.stopPropagation(); dismiss(notif.id); }}
-                    className="absolute top-2 right-2 p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#1A1A1A]/5"
+                    className="absolute top-2 right-2 p-1.5 sm:p-0.5 rounded opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#1A1A1A]/5"
                     aria-label="Masquer cette notification"
                   >
-                    <X className="w-3 h-3 text-[#1A1A1A]/30" />
+                    <X className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-[#1A1A1A]/30" />
                   </button>
                 </div>
               );

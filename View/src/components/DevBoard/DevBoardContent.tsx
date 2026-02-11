@@ -5,7 +5,7 @@
 
 import { MetricsDashboard } from '../features/qa/metrics';
 import { TestCardGrid } from '../features/qa/test-cards';
-import { AutoTestList, RunAllButton } from '../features/qa/automatic-tests';
+import { SuiteList, RunAllButton } from '../features/qa/automatic-tests';
 import { Overview } from '../features/qa/overview';
 import { Activity } from '../features/qa/activity';
 import { LogViewer, useMockLogs } from '../features/logs';
@@ -70,7 +70,7 @@ function getLabels(roleView: RoleView): Record<TestCategory, string> {
 
 export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }: DevBoardContentProps) {
   const { tests } = useMockData(activeCategory);
-  const { autoTests, metrics, isRunning, runAll, rawOutput, error } = testRunner;
+  const { autoTests, suites, metrics, isRunning, runAll, runSuite, runType, rawOutput, error } = testRunner;
   const { logs, connected, clear } = useMockLogs();
 
   const labels = getLabels(roleView);
@@ -141,7 +141,7 @@ export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }
         </header>
 
         <div className="devboard-cards-container">
-          {renderContent(roleView, activeCategory, tests, autoTests, logs, connected, clear, metrics, isRunning)}
+          {renderContent(roleView, activeCategory, tests, autoTests, suites, logs, connected, clear, metrics, isRunning, runSuite, runType)}
         </div>
 
         {showCliOutput && (
@@ -157,11 +157,14 @@ function renderContent(
   category: TestCategory,
   tests: ReturnType<typeof useMockData>['tests'],
   autoTests: ReturnType<typeof useTestRunner>['autoTests'],
+  suites: ReturnType<typeof useTestRunner>['suites'],
   logs: ReturnType<typeof useMockLogs>['logs'],
   connected: boolean,
   clear: () => void,
   metrics: ReturnType<typeof useTestRunner>['metrics'],
-  isRunning: boolean
+  isRunning: boolean,
+  runSuite: ReturnType<typeof useTestRunner>['runSuite'],
+  runType: ReturnType<typeof useTestRunner>['runType']
 ) {
   // Route to role-specific content
   switch (roleView) {
@@ -170,7 +173,7 @@ function renderContent(
     case 'employee':
       return renderEmployeeContent(category);
     default:
-      return renderDevContent(category, tests, autoTests, logs, connected, clear, metrics, isRunning);
+      return renderDevContent(category, tests, autoTests, suites, logs, connected, clear, metrics, isRunning, runSuite, runType);
   }
 }
 
@@ -178,11 +181,14 @@ function renderDevContent(
   category: TestCategory,
   tests: ReturnType<typeof useMockData>['tests'],
   autoTests: ReturnType<typeof useTestRunner>['autoTests'],
+  suites: ReturnType<typeof useTestRunner>['suites'],
   logs: ReturnType<typeof useMockLogs>['logs'],
   connected: boolean,
   clear: () => void,
   metrics: ReturnType<typeof useTestRunner>['metrics'],
-  isRunning: boolean
+  isRunning: boolean,
+  runSuite: ReturnType<typeof useTestRunner>['runSuite'],
+  runType: ReturnType<typeof useTestRunner>['runType']
 ) {
   switch (category) {
     case 'overview':
@@ -196,7 +202,7 @@ function renderDevContent(
     case 'activity':
       return <Activity />;
     default:
-      return <AutoTestList tests={autoTests} />;
+      return <SuiteList suites={suites} onRunSuite={runSuite} onRunType={runType} isRunning={isRunning} />;
   }
 }
 

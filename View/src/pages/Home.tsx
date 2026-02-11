@@ -178,14 +178,14 @@ function AboutSection({ setCurrentPage, siteInfo }: { setCurrentPage: (page: Pag
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
             }`}
           >
-            <div className="relative z-10">
+            <div className="relative z-10 overflow-hidden sm:overflow-visible">
               <img
                 src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800"
                 alt="Julie et José - Notre équipe"
                 className="rounded-2xl sm:rounded-3xl shadow-2xl w-full h-[280px] sm:h-[350px] lg:h-[450px] object-cover"
               />
               {/* Floating card */}
-              <div className="absolute -bottom-4 -right-4 sm:bottom-6 sm:right-6 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-5 max-w-[160px] sm:max-w-[180px]">
+              <div className="absolute bottom-2 right-2 sm:bottom-6 sm:right-6 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-5 max-w-[160px] sm:max-w-[180px]">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#D4AF37]/20 rounded-lg sm:rounded-xl flex items-center justify-center">
                     <Award className="w-4 h-4 sm:w-5 sm:h-5 text-[#D4AF37]" />
@@ -323,7 +323,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
         </div>
 
         {/* Services grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-[2vw]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-[2vw]">
           {services.map((service, index) => (
             <div 
               key={index}
@@ -670,7 +670,7 @@ function ValuesSection() {
               className="rounded-2xl sm:rounded-3xl shadow-xl w-full h-[280px] sm:h-[350px] lg:h-[400px] object-cover"
               loading="lazy"
             />
-            <div className="absolute -bottom-4 -left-4 sm:-bottom-5 sm:-left-5 bg-[#556B2F] text-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-xl">
+            <div className="absolute bottom-2 left-2 sm:-bottom-5 sm:-left-5 bg-[#556B2F] text-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-xl">
               <div className="text-2xl sm:text-3xl font-bold mb-0.5">100%</div>
               <p className="text-white/80 text-xs sm:text-sm">Produits frais<br />et de saison</p>
             </div>

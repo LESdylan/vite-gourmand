@@ -66,6 +66,10 @@ export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}):
   });
 
   if (!response.ok) {
+    // 401 = token expired or invalid → clear stale credentials
+    if (response.status === 401) {
+      clearTokens();
+    }
     const error = await response.json().catch(() => ({ message: response.statusText }));
     throw new ApiError(response.status, error.message || 'Request failed');
   }

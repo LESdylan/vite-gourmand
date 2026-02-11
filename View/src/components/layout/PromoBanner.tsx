@@ -114,7 +114,7 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
           {discountCode && (
             <button
               onClick={() => copyCode(discountCode)}
-              className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md transition-all duration-200 hover:scale-105 flex-shrink-0"
+              className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md transition-all duration-200 hover:scale-105 flex-shrink-0"
               style={{
                 backgroundColor: `${promo.text_color}15`,
                 border: `1px dashed ${promo.text_color}40`,
@@ -174,11 +174,11 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
                 onDismiss?.();
               }, 300);
             }}
-            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all duration-200 hover:scale-110"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-1 rounded-full transition-all duration-200 hover:scale-110"
             style={{ backgroundColor: `${promo.text_color}15` }}
             aria-label="Fermer la bannière promotionnelle"
           >
-            <X className="w-3 h-3" />
+            <X className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
           </button>
         </div>
       </div>

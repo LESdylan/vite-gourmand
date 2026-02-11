@@ -431,7 +431,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
                         Ville *
@@ -462,7 +462,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <Label htmlFor="date" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
                         <Calendar className="h-3.5 w-3.5 inline mr-1" /> Date de livraison *
@@ -542,7 +542,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         type="button"
                         onClick={() => setPersonCount(c => Math.max(selectedMenu.minPersons, c - 1))}
                         disabled={personCount <= selectedMenu.minPersons}
-                        className="w-10 h-10 rounded-full bg-white border border-[#1A1A1A]/10 text-[#1A1A1A] font-bold text-lg disabled:opacity-30 hover:bg-[#722F37] hover:text-white hover:border-[#722F37] transition-all"
+                        className="w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-white border border-[#1A1A1A]/10 text-[#1A1A1A] font-bold text-lg disabled:opacity-30 hover:bg-[#722F37] hover:text-white hover:border-[#722F37] transition-all"
                       >
                         −
                       </button>
@@ -553,7 +553,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       <button
                         type="button"
                         onClick={() => setPersonCount(c => c + 1)}
-                        className="w-10 h-10 rounded-full bg-white border border-[#1A1A1A]/10 text-[#1A1A1A] font-bold text-lg hover:bg-[#722F37] hover:text-white hover:border-[#722F37] transition-all"
+                        className="w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-white border border-[#1A1A1A]/10 text-[#1A1A1A] font-bold text-lg hover:bg-[#722F37] hover:text-white hover:border-[#722F37] transition-all"
                       >
                         +
                       </button>

@@ -12,7 +12,7 @@ import {
   type TestConfigId,
   type RunTestsResponse,
 } from '../../services/testRunner';
-import type { AutoTest } from '../features/qa/automatic-tests';
+import type { AutoTest, TestSuite as UISuite } from '../features/qa/automatic-tests';
 
 interface UseTestRunnerReturn {
   // State
@@ -24,6 +24,7 @@ interface UseTestRunnerReturn {
   
   // Derived data
   autoTests: AutoTest[];
+  suites: UISuite[];
   metrics: {
     total: number;
     passed: number;
@@ -31,10 +32,13 @@ interface UseTestRunnerReturn {
     passRate: number;
     duration: number;
     lastRun: Date | null;
+    suiteCount: number;
   };
   
   // Actions
   runTest: (testId: TestConfigId) => Promise<void>;
+  runSuite: (suiteName: string) => Promise<void>;
+  runType: (type: 'unit' | 'e2e') => Promise<void>;
   runAll: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -59,20 +63,45 @@ function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
 }
 
 /**
+ * Convert API suites to UI format
+ */
+function toUISuites(results: RunTestsResponse | null): UISuite[] {
+  if (!results?.suites?.length) return [];
+  
+  return results.suites.map(suite => ({
+    name: suite.name,
+    type: suite.type,
+    tests: (suite.tests || []).map(test => ({
+      id: test.id,
+      name: test.name,
+      suite: suite.name,
+      status: test.status,
+      duration: test.duration,
+      output: test.output,
+      error: test.error,
+    })),
+    totalPassed: suite.totalPassed,
+    totalFailed: suite.totalFailed,
+    totalDuration: suite.totalDuration,
+  }));
+}
+
+/**
  * Calculate metrics from results
  */
 function calculateMetrics(results: RunTestsResponse | null) {
   if (!results?.summary) {
     // No data yet — return -1 passRate to distinguish from actual 0% failure
-    return { total: 0, passed: 0, failed: 0, passRate: -1, duration: 0, lastRun: null };
+    return { total: 0, passed: 0, failed: 0, passRate: -1, duration: 0, lastRun: null, suiteCount: 0 };
   }
   
   const { total = 0, passed = 0, failed = 0, duration = 0 } = results.summary;
+  const suiteCount = results.suites?.length ?? 0;
   // -1 signals 'no data / pending' to the UI so it doesn't show 'critical'
   const passRate = total > 0 ? Math.round((passed / total) * 100) : -1;
   const lastRun = results.timestamp ? new Date(results.timestamp) : null;
   
-  return { total, passed, failed, passRate, duration, lastRun };
+  return { total, passed, failed, passRate, duration, lastRun, suiteCount };
 }
 export function useTestRunner(): UseTestRunnerReturn {
   const [isRunning, setIsRunning] = useState(false);
@@ -81,7 +110,7 @@ export function useTestRunner(): UseTestRunnerReturn {
   const [error, setError] = useState<string | null>(null);
   const [rawOutput, setRawOutput] = useState<string | null>(null);
 
-  // Load cached results from backend on mount — auto-run if cache is empty
+  // Load cached results from backend on mount — DO NOT auto-run
   useEffect(() => {
     let isMounted = true;
     
@@ -94,30 +123,10 @@ export function useTestRunner(): UseTestRunnerReturn {
           // Cache has data — use it
           setResults(cached);
           if (cached.rawOutput) setRawOutput(cached.rawOutput);
-        } else {
-          // Cache is empty (server restarted) — auto-run all tests
-          console.log('No cached test results — auto-running all tests…');
-          setIsRunning(true);
-          setCurrentTest('All Tests (auto)');
-          try {
-            const response = await runAllTests({ verbose: true });
-            if (isMounted) {
-              setResults(response);
-              if (response.rawOutput) setRawOutput(response.rawOutput);
-            }
-          } catch (err) {
-            if (isMounted) {
-              setError(err instanceof Error ? err.message : 'Auto-run failed');
-            }
-          } finally {
-            if (isMounted) {
-              setIsRunning(false);
-              setCurrentTest(null);
-            }
-          }
         }
+        // If no cache, just leave it empty — user will click "Run All" when ready
       } catch {
-        // Backend not available
+        // Backend not available — silently fail
         if (isMounted) {
           console.log('Test results API not available - backend may not be running');
         }
@@ -137,6 +146,45 @@ export function useTestRunner(): UseTestRunnerReturn {
     try {
       // Always request verbose output to show CLI results
       const response = await runTests(testId, { verbose: true });
+      setResults(response);
+      if (response.rawOutput) setRawOutput(response.rawOutput);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Test run failed');
+    } finally {
+      setIsRunning(false);
+      setCurrentTest(null);
+    }
+  }, []);
+
+  const runSuite = useCallback(async (suiteName: string) => {
+    // Determine if it's unit or e2e based on filename pattern
+    const isE2E = suiteName.includes('.e2e-spec') || suiteName.includes('/e2e/');
+    const testType = isE2E ? 'e2e' : 'unit';
+    
+    setIsRunning(true);
+    setCurrentTest(suiteName);
+    setError(null);
+    
+    try {
+      // Run the appropriate test type
+      const response = await runTests(testType as TestConfigId, { verbose: true });
+      setResults(response);
+      if (response.rawOutput) setRawOutput(response.rawOutput);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Test run failed');
+    } finally {
+      setIsRunning(false);
+      setCurrentTest(null);
+    }
+  }, []);
+
+  const runType = useCallback(async (type: 'unit' | 'e2e') => {
+    setIsRunning(true);
+    setCurrentTest(type === 'unit' ? 'Unit Tests' : 'E2E Tests');
+    setError(null);
+    
+    try {
+      const response = await runTests(type as TestConfigId, { verbose: true });
       setResults(response);
       if (response.rawOutput) setRawOutput(response.rawOutput);
     } catch (err) {
@@ -184,8 +232,11 @@ export function useTestRunner(): UseTestRunnerReturn {
     error,
     rawOutput,
     autoTests: toAutoTests(results),
+    suites: toUISuites(results),
     metrics: calculateMetrics(results),
     runTest,
+    runSuite,
+    runType,
     runAll,
     refresh,
   };

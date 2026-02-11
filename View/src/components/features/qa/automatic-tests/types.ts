@@ -2,7 +2,7 @@
  * Automatic test types
  */
 
-export type AutoTestStatus = 'idle' | 'running' | 'passed' | 'failed';
+export type AutoTestStatus = 'idle' | 'running' | 'passed' | 'failed' | 'skipped';
 
 export interface AutoTest {
   id: string;
@@ -12,4 +12,13 @@ export interface AutoTest {
   duration?: number;
   output?: string;
   error?: string;
+}
+
+export interface TestSuite {
+  name: string;
+  type: 'jest' | 'e2e' | 'postman';
+  tests: AutoTest[];
+  totalPassed: number;
+  totalFailed: number;
+  totalDuration: number;
 }

@@ -90,10 +90,21 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [dismissedIds, setDismissedIds] = useState<Set<number>>(new Set());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  /** Set to true after a 401 — prevents any further network calls */
+  const stoppedRef = useRef(false);
+
+  /** Kill the polling interval immediately */
+  const stopPolling = useCallback(() => {
+    stoppedRef.current = true;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
 
   // ── Fetch from backend ──
   const refresh = useCallback(async () => {
-    if (!isAuthenticated()) return;
+    if (stoppedRef.current || !isAuthenticated()) return;
     try {
       const [notifs, count] = await Promise.all([
         getNotifications(30),
@@ -101,14 +112,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       ]);
       setNotifications(notifs);
       setUnreadCount(count);
-    } catch {
-      // Silently fail — user may have logged out
+    } catch (err: unknown) {
+      // On 401 → token is invalid, stop polling permanently
+      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
+        stopPolling();
+      }
+      // Other errors: silently ignore (network blip, server down, etc.)
     }
-  }, []);
+  }, [stopPolling]);
 
   // ── Polling ──
   useEffect(() => {
     if (!isAuthenticated()) return;
+    stoppedRef.current = false;
 
     // Initial fetch
     refresh();

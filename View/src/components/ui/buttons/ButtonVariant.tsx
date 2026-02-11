@@ -24,8 +24,8 @@ const buttonVariants = cva(
         destructive: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500 shadow-lg shadow-red-500/20",
         // Outline - Bordeaux border
         outline: "border-2 border-[#722F37] bg-transparent text-[#722F37] hover:bg-[#722F37] hover:text-white focus-visible:ring-[#722F37]",
-        // Outline light - for dark backgrounds
-        outlineLight: "border-2 border-white/80 bg-transparent text-white hover:bg-white hover:text-[#1A1A1A] focus-visible:ring-white",
+        // Outline light - for dark backgrounds — gradient fill on hover
+        outlineLight: "border-2 border-white/80 text-white focus-visible:ring-white relative overflow-hidden bg-transparent z-[1] before:absolute before:inset-0 before:z-[-1] before:bg-gradient-to-r before:from-[#D4AF37] before:to-[#f0d78c] before:origin-left before:scale-x-0 before:transition-transform before:duration-500 before:ease-out hover:before:scale-x-100 hover:text-[#1A1A1A] hover:border-[#D4AF37]",
         // Secondary - Light cream
         secondary: "bg-[#FFF8F0] text-[#722F37] hover:bg-[#f5ede3] focus-visible:ring-[#722F37] border border-[#722F37]/10",
         // Ghost

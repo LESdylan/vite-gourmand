@@ -46,8 +46,8 @@ export async function searchUsers(query: string): Promise<SearchResult[]> {
     }));
   } catch (error) {
     console.error('Search API error:', error);
-    // Return mock data for development
-    return getMockUsers(query);
+    // Do NOT fall back to mock data — only return real DB users
+    return [];
   }
 }
 

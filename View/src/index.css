@@ -35,6 +35,8 @@
     color: var(--color-text-primary);
     line-height: 1.5;
     overflow-x: hidden;
+    /* Prevent Chrome scroll-anchoring jitter with fixed navbar */
+    overflow-anchor: none;
   }
 
   #root {
