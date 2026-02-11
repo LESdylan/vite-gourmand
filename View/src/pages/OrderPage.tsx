@@ -1,19 +1,22 @@
 /**
- * OrderPage — Multi-step order flow
+ * OrderPage — Multi-step order flow (No payment)
  * 
  * Steps:
- * 1. Menu selection (pre-filled if coming from menu detail)
- * 2. Delivery info (address, date, time) — Bordeaux pricing: 5€ base + 0.59€/km outside
- * 3. Person count (10% discount if ≥ min_person + 5) + special instructions
- * 4. Recap / price breakdown → Confirm
+ * 1. Menu selection (pre-filled if coming from menu detail) — OR custom request
+ * 2. Delivery info (address, date, time)
+ * 3. Person count + special instructions / custom message
+ * 4. Recap → If not logged in, prompt to create account to retain order.
+ *    Otherwise, send request message directly.
  * 
- * All data from real backend API, zero mocks.
+ * No payment required — the user sends a request message with the
+ * desired menu (or a custom one). The restaurant contacts them back.
  */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ArrowLeft, ArrowRight, Check, ChefHat, Users, Euro,
-  MapPin, Calendar, Clock, ShoppingCart, AlertTriangle,
-  Loader2, Utensils, Truck, Percent, FileText, CheckCircle2,
+  MapPin, Calendar, Clock, AlertTriangle,
+  Loader2, Utensils, Truck, FileText, CheckCircle2,
+  MessageSquare, UserPlus, LogIn, Send, Sparkles,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -28,16 +31,11 @@ import LazyImage from '../components/ui/LazyImage';
 import type { Page } from './Home';
 
 /* ── Constants ── */
-const DELIVERY_BASE = 5; // 5€ base delivery price
-const DELIVERY_PER_KM = 0.59; // 0.59€ per km outside Bordeaux
-const DISCOUNT_THRESHOLD_OVER_MIN = 5; // +5 above min for 10% discount
-const DISCOUNT_PERCENT = 10; // 10% discount
-
 const STEPS = [
   { label: 'Menu', icon: Utensils },
   { label: 'Livraison', icon: Truck },
   { label: 'Détails', icon: Users },
-  { label: 'Confirmation', icon: Check },
+  { label: 'Récapitulatif', icon: Check },
 ] as const;
 
 /* ── Props ── */
@@ -156,9 +154,9 @@ function MiniMenuCard({
 export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPageProps) {
   const { addToast } = useToast();
 
-  /* ── Auth & profile ── */
+  /* ── Auth & profile (optional — user can browse without being logged in) ── */
   const [profile, setProfile] = useState<AuthUserMapped | null>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   /* ── Step state ── */
   const [step, setStep] = useState(0);
@@ -167,43 +165,41 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
   const [allMenus, setAllMenus] = useState<Menu[]>([]);
   const [menusLoading, setMenusLoading] = useState(true);
   const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
+  const [isCustomRequest, setIsCustomRequest] = useState(false);
+  const [customMenuDescription, setCustomMenuDescription] = useState('');
 
   /* ── Step 2: Delivery ── */
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryCity, setDeliveryCity] = useState('Bordeaux');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [deliveryHour, setDeliveryHour] = useState('12:00');
-  const [distanceKm, setDistanceKm] = useState(0);
 
   /* ── Step 3: Details ── */
   const [personCount, setPersonCount] = useState(1);
   const [specialInstructions, setSpecialInstructions] = useState('');
 
+  /* ── Auth prompt state (step 4) ── */
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
   /* ── Submission ── */
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<string | null>(null);
 
-  /* ── Auth check ── */
+  /* ── Check auth & load profile silently (no redirect) ── */
   useEffect(() => {
-    if (!isAuthenticated()) {
-      addToast('Veuillez vous connecter pour passer commande.', 'warning', 6000);
-      window.location.href = '/portal';
-      return;
+    if (isAuthenticated()) {
+      setLoggedIn(true);
+      getProfile()
+        .then(setProfile)
+        .catch(() => {});
     }
-    getProfile()
-      .then(setProfile)
-      .catch(() => {
-        addToast('Impossible de récupérer votre profil.', 'error');
-      })
-      .finally(() => setProfileLoading(false));
-  }, [addToast]);
+  }, []);
 
   /* ── Load menus ── */
   useEffect(() => {
     getMenus({ limit: 100, status: 'published' })
       .then(({ menus }) => {
         setAllMenus(menus);
-        // Pre-select if coming from Menus page
         if (preSelectedMenuId) {
           const found = menus.find(m => m.numericId === preSelectedMenuId);
           if (found) {
@@ -216,60 +212,76 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
       .finally(() => setMenusLoading(false));
   }, [preSelectedMenuId, addToast]);
 
-  /* ── When menu changes, reset person count to min ── */
+  /* ── When menu changes, reset person count ── */
   const handleMenuSelect = useCallback((menu: Menu) => {
     setSelectedMenu(menu);
+    setIsCustomRequest(false);
     setPersonCount(menu.minPersons);
   }, []);
 
-  /* ── Price calculations ── */
-  const pricing = useMemo(() => {
-    if (!selectedMenu) return { menuTotal: 0, delivery: DELIVERY_BASE, discount: 0, total: 0, hasDiscount: false };
-
-    const menuTotal = selectedMenu.pricePerPerson * personCount;
-    const delivery = DELIVERY_BASE + (distanceKm > 0 ? distanceKm * DELIVERY_PER_KM : 0);
-    const overMin = personCount - selectedMenu.minPersons;
-    const hasDiscount = overMin >= DISCOUNT_THRESHOLD_OVER_MIN;
-    const discountPercent = hasDiscount ? DISCOUNT_PERCENT : 0;
-    const discount = menuTotal * (discountPercent / 100);
-    const total = menuTotal + delivery - discount;
-
-    return { menuTotal, delivery, discount, total, hasDiscount, discountPercent };
-  }, [selectedMenu, personCount, distanceKm]);
+  /* ── Price info (informational only — no payment) ── */
+  const priceInfo = useMemo(() => {
+    if (!selectedMenu) return { perPerson: 0, total: 0 };
+    return {
+      perPerson: selectedMenu.pricePerPerson,
+      total: selectedMenu.pricePerPerson * personCount,
+    };
+  }, [selectedMenu, personCount]);
 
   /* ── Validation per step ── */
   const canProceed = useMemo(() => {
     switch (step) {
-      case 0: return !!selectedMenu;
+      case 0: return !!selectedMenu || (isCustomRequest && customMenuDescription.trim().length >= 10);
       case 1: return deliveryAddress.trim().length >= 5 && deliveryDate !== '' && /^([01]\d|2[0-3]):[0-5]\d$/.test(deliveryHour);
-      case 2: return selectedMenu ? personCount >= selectedMenu.minPersons : false;
+      case 2: return isCustomRequest ? personCount >= 1 : (selectedMenu ? personCount >= selectedMenu.minPersons : false);
       case 3: return true;
       default: return false;
     }
-  }, [step, selectedMenu, deliveryAddress, deliveryDate, deliveryHour, personCount]);
+  }, [step, selectedMenu, isCustomRequest, customMenuDescription, deliveryAddress, deliveryDate, deliveryHour, personCount]);
 
-  /* ── Submit order ── */
-  const handleSubmit = async () => {
-    if (!selectedMenu || isSubmitting) return;
+  /* ── Handle "Send Request" — requires account ── */
+  const handleSendRequest = async () => {
+    // If not logged in, show auth prompt instead of submitting
+    if (!loggedIn) {
+      setShowAuthPrompt(true);
+      return;
+    }
 
+    if (isSubmitting) return;
     setIsSubmitting(true);
+
     try {
-      const data: CreateOrderData = {
-        menuId: selectedMenu.numericId,
-        deliveryDate,
-        deliveryHour,
-        deliveryAddress: `${deliveryAddress}, ${deliveryCity}`,
-        personNumber: personCount,
-        menuPrice: selectedMenu.pricePerPerson,
-        totalPrice: Math.round(pricing.total * 100) / 100,
-        specialInstructions: specialInstructions.trim() || undefined,
-      };
-      const order = await createOrder(data);
-      setOrderSuccess(order.order_number);
-      addToast('Commande passée avec succès ! 🎉', 'success', 8000);
+      if (isCustomRequest) {
+        // For custom requests, create an order with special instructions
+        const data: CreateOrderData = {
+          deliveryDate,
+          deliveryHour,
+          deliveryAddress: `${deliveryAddress}, ${deliveryCity}`,
+          personNumber: personCount,
+          menuPrice: 0,
+          totalPrice: 0,
+          specialInstructions: `[DEMANDE PERSONNALISÉE]\n${customMenuDescription}\n\n${specialInstructions.trim() ? `Instructions: ${specialInstructions}` : ''}`.trim(),
+        };
+        const order = await createOrder(data);
+        setOrderSuccess(order.order_number);
+      } else if (selectedMenu) {
+        const data: CreateOrderData = {
+          menuId: selectedMenu.numericId,
+          deliveryDate,
+          deliveryHour,
+          deliveryAddress: `${deliveryAddress}, ${deliveryCity}`,
+          personNumber: personCount,
+          menuPrice: selectedMenu.pricePerPerson,
+          totalPrice: Math.round(priceInfo.total * 100) / 100,
+          specialInstructions: specialInstructions.trim() || undefined,
+        };
+        const order = await createOrder(data);
+        setOrderSuccess(order.order_number);
+      }
+      addToast('Demande envoyée avec succès ! Nous vous contacterons bientôt. 🎉', 'success', 8000);
     } catch (err) {
       addToast(
-        err instanceof Error ? err.message : 'Erreur lors de la création de la commande.',
+        err instanceof Error ? err.message : 'Erreur lors de l\'envoi de la demande.',
         'error',
         6000,
       );
@@ -278,38 +290,45 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
     }
   };
 
-  /* ── Loading / redirect states ── */
-  if (profileLoading) {
-    return (
-      <div className="min-h-screen bg-[#FFF8F0] flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-10 w-10 text-[#722F37] animate-spin mx-auto mb-3" />
-          <p className="text-[#1A1A1A]/60">Chargement de votre profil...</p>
-        </div>
-      </div>
-    );
-  }
-
   /* ── Order success state ── */
   if (orderSuccess) {
     return (
       <div className="min-h-screen bg-[#FFF8F0] flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 sm:p-10 max-w-md w-full text-center">
-          <div className="w-16 h-16 mx-auto mb-5 bg-[#556B2F]/10 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="h-8 w-8 text-[#556B2F]" />
+        <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-12 max-w-md w-full text-center border border-[#D4AF37]/10">
+          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-[#556B2F]/10 to-[#556B2F]/20 rounded-full flex items-center justify-center">
+            <CheckCircle2 className="h-10 w-10 text-[#556B2F]" />
           </div>
-          <h2 className="text-2xl font-bold text-[#1A1A1A] mb-2">Commande confirmée !</h2>
-          <p className="text-[#1A1A1A]/60 mb-4">
-            Votre commande <span className="font-mono font-bold text-[#722F37]">{orderSuccess}</span> a été enregistrée.
+          <h2 className="text-2xl font-black text-[#1A1A1A] mb-2">Demande envoyée !</h2>
+          <p className="text-[#1A1A1A]/60 mb-2">
+            Référence : <span className="font-mono font-bold text-[#722F37] bg-[#722F37]/5 px-2 py-0.5 rounded">{orderSuccess}</span>
           </p>
-          <p className="text-sm text-[#1A1A1A]/50 mb-6">
-            Vous recevrez un email de confirmation. Vous pouvez suivre l'état de votre commande depuis votre espace client.
-          </p>
+          <div className="bg-[#FFF8F0] rounded-2xl p-5 mb-6 text-left border border-[#D4AF37]/10">
+            <div className="flex items-start gap-3">
+              <MessageSquare className="h-5 w-5 text-[#722F37] shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Et maintenant ?</p>
+                <ul className="text-xs text-[#1A1A1A]/60 space-y-1.5">
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                    Notre équipe reçoit votre demande et l'examine.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                    Nous vous contactons pour confirmer les détails.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                    Aucun paiement en ligne — tout se règle à la livraison.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={() => setCurrentPage('menu')} variant="outline" className="flex-1">
+            <Button onClick={() => setCurrentPage('menu')} variant="outline" className="flex-1 h-11">
               <ArrowLeft className="h-4 w-4 mr-1" /> Retour aux menus
             </Button>
-            <Button onClick={() => setCurrentPage('home')} className="flex-1">
+            <Button onClick={() => setCurrentPage('home')} className="flex-1 h-11">
               Accueil
             </Button>
           </div>
@@ -321,25 +340,27 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
   return (
     <div className="min-h-screen bg-[#FFF8F0]">
       {/* Header */}
-      <header className="bg-[#1A1A1A] pt-6 pb-10 sm:pt-8 sm:pb-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+      <header className="relative bg-[#1A1A1A] pt-6 pb-10 sm:pt-8 sm:pb-12 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-1/4 w-64 h-64 bg-[#722F37]/10 rounded-full blur-3xl -translate-y-1/2" />
+          <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-[#D4AF37]/5 rounded-full blur-3xl translate-y-1/2" />
+        </div>
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6">
           <button
             onClick={() => setCurrentPage('menu')}
-            className="flex items-center gap-2 text-white/50 hover:text-white text-sm mb-4 transition-colors"
+            className="flex items-center gap-2 text-white/40 hover:text-white text-sm mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" /> Retour aux menus
           </button>
           <div className="flex items-center gap-3 mb-4">
-            <div className="bg-[#722F37] rounded-full p-2">
-              <ShoppingCart className="h-5 w-5 text-[#D4AF37]" />
+            <div className="bg-gradient-to-br from-[#722F37] to-[#8B3A42] rounded-full p-2.5 shadow-lg shadow-[#722F37]/20">
+              <MessageSquare className="h-5 w-5 text-[#D4AF37]" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">Passer commande</h1>
-              {profile && (
-                <p className="text-white/40 text-sm mt-0.5">
-                  Bonjour {profile.name} · {profile.email}
-                </p>
-              )}
+              <h1 className="text-2xl sm:text-3xl font-black text-white">Votre demande</h1>
+              <p className="text-white/30 text-xs sm:text-sm mt-0.5">
+                {profile ? `${profile.name} · ${profile.email}` : 'Pas de paiement en ligne — nous vous recontactons'}
+              </p>
             </div>
           </div>
           <StepIndicator currentStep={step} />
@@ -351,57 +372,110 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
         <div className="bg-white rounded-2xl shadow-lg border border-[#1A1A1A]/5 overflow-hidden">
           <div className="p-5 sm:p-8 min-h-[400px]">
 
-            {/* ═══ Step 0: Menu Selection ═══ */}
+            {/* ═══ Step 0: Menu Selection — with custom request option ═══ */}
             {step === 0 && (
               <div>
                 <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 flex items-center gap-2">
                   <Utensils className="h-5 w-5 text-[#722F37]" /> Choisissez votre menu
                 </h2>
                 <p className="text-sm text-[#1A1A1A]/50 mb-5">
-                  Sélectionnez le menu de votre choix pour votre événement.
+                  Sélectionnez un menu existant ou décrivez votre demande personnalisée.
                 </p>
 
-                {menusLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 text-[#722F37] animate-spin" />
-                  </div>
-                ) : allMenus.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ChefHat className="h-10 w-10 text-[#1A1A1A]/20 mx-auto mb-3" />
-                    <p className="text-[#1A1A1A]/50">Aucun menu disponible pour le moment.</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {allMenus
-                      .filter(m => m.stockQuantity > 0)
-                      .map(menu => (
-                        <MiniMenuCard
-                          key={menu.id}
-                          menu={menu}
-                          selected={selectedMenu?.id === menu.id}
-                          onSelect={handleMenuSelect}
-                        />
-                      ))}
-                  </div>
-                )}
+                {/* Toggle: Existing menu / Custom request */}
+                <div className="flex gap-2 mb-5 p-1 bg-[#1A1A1A]/5 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => { setIsCustomRequest(false); setSelectedMenu(null); }}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all
+                      ${!isCustomRequest
+                        ? 'bg-white text-[#722F37] shadow-sm'
+                        : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/60'
+                      }`}
+                  >
+                    <Utensils className="h-4 w-4 inline mr-1.5" />
+                    Menu existant
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsCustomRequest(true); setSelectedMenu(null); }}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all
+                      ${isCustomRequest
+                        ? 'bg-white text-[#722F37] shadow-sm'
+                        : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/60'
+                      }`}
+                  >
+                    <Sparkles className="h-4 w-4 inline mr-1.5" />
+                    Menu personnalisé
+                  </button>
+                </div>
 
-                {selectedMenu && (
-                  <div className="mt-5 bg-[#FFF8F0] rounded-xl p-4 border border-[#D4AF37]/20">
-                    <h3 className="font-bold text-[#1A1A1A] text-sm mb-1">{selectedMenu.name}</h3>
-                    <p className="text-xs text-[#1A1A1A]/50 line-clamp-2">{selectedMenu.description}</p>
-                    <div className="flex flex-wrap gap-4 mt-3 text-xs text-[#1A1A1A]/60">
-                      <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#722F37]" /> Min. {selectedMenu.minPersons} pers.</span>
-                      <span className="flex items-center gap-1"><Euro className="h-3.5 w-3.5 text-[#556B2F]" /> {selectedMenu.pricePerPerson.toFixed(2)} €/pers.</span>
-                      {selectedMenu.allergens.length > 0 && (
-                        <span className="flex items-center gap-1 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> {selectedMenu.allergens.join(', ')}</span>
-                      )}
-                    </div>
-                    {selectedMenu.deliveryNotes && (
-                      <div className="mt-3 bg-[#722F37] text-white text-xs rounded-lg p-3 ring-1 ring-[#D4AF37]">
-                        <AlertTriangle className="h-3.5 w-3.5 inline mr-1 text-[#D4AF37]" />
-                        {selectedMenu.deliveryNotes}
+                {!isCustomRequest ? (
+                  <>
+                    {menusLoading ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 text-[#722F37] animate-spin" />
+                      </div>
+                    ) : allMenus.length === 0 ? (
+                      <div className="text-center py-12">
+                        <ChefHat className="h-10 w-10 text-[#1A1A1A]/20 mx-auto mb-3" />
+                        <p className="text-[#1A1A1A]/50">Aucun menu disponible pour le moment.</p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {allMenus
+                          .filter(m => m.stockQuantity > 0)
+                          .map(menu => (
+                            <MiniMenuCard
+                              key={menu.id}
+                              menu={menu}
+                              selected={selectedMenu?.id === menu.id}
+                              onSelect={handleMenuSelect}
+                            />
+                          ))}
                       </div>
                     )}
+
+                    {selectedMenu && (
+                      <div className="mt-5 bg-[#FFF8F0] rounded-xl p-4 border border-[#D4AF37]/20">
+                        <h3 className="font-bold text-[#1A1A1A] text-sm mb-1">{selectedMenu.name}</h3>
+                        <p className="text-xs text-[#1A1A1A]/50 line-clamp-2">{selectedMenu.description}</p>
+                        <div className="flex flex-wrap gap-4 mt-3 text-xs text-[#1A1A1A]/60">
+                          <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#722F37]" /> Min. {selectedMenu.minPersons} pers.</span>
+                          <span className="flex items-center gap-1"><Euro className="h-3.5 w-3.5 text-[#556B2F]" /> {selectedMenu.pricePerPerson.toFixed(2)} €/pers.</span>
+                          {selectedMenu.allergens.length > 0 && (
+                            <span className="flex items-center gap-1 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> {selectedMenu.allergens.join(', ')}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* Custom request form */
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-br from-[#FFF8F0] to-[#D4AF37]/5 rounded-2xl p-5 border border-[#D4AF37]/20">
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center shrink-0">
+                          <Sparkles className="h-5 w-5 text-[#D4AF37]" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-[#1A1A1A] text-sm">Menu sur mesure</h3>
+                          <p className="text-xs text-[#1A1A1A]/50 mt-0.5">
+                            Décrivez le type de menu souhaité : thème, régime, plats, budget... Notre chef vous proposera une création adaptée.
+                          </p>
+                        </div>
+                      </div>
+                      <textarea
+                        value={customMenuDescription}
+                        onChange={e => setCustomMenuDescription(e.target.value)}
+                        rows={5}
+                        placeholder="Ex: Je souhaite un menu végétarien pour 20 personnes, ambiance champêtre, budget autour de 35€/personne. Entrée, plat, fromage, dessert. Pas de noix..."
+                        className="w-full rounded-xl border border-[#D4AF37]/20 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#722F37] resize-none bg-white placeholder:text-[#1A1A1A]/30"
+                      />
+                      <p className="text-[10px] text-[#1A1A1A]/30 mt-2 text-right">
+                        {customMenuDescription.length} / 10 caractères minimum
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -414,7 +488,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                   <MapPin className="h-5 w-5 text-[#722F37]" /> Informations de livraison
                 </h2>
                 <p className="text-sm text-[#1A1A1A]/50 mb-5">
-                  Indiquez l'adresse et la date de livraison souhaitée.
+                  Indiquez où et quand vous souhaitez être livré.
                 </p>
 
                 <div className="space-y-4">
@@ -431,35 +505,17 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
-                        Ville *
-                      </Label>
-                      <Input
-                        id="city"
-                        value={deliveryCity}
-                        onChange={e => setDeliveryCity(e.target.value)}
-                        placeholder="Bordeaux"
-                        className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="distance" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
-                        Distance (km)
-                      </Label>
-                      <Input
-                        id="distance"
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={distanceKm || ''}
-                        onChange={e => setDistanceKm(parseFloat(e.target.value) || 0)}
-                        placeholder="0 (Bordeaux)"
-                        className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
-                      />
-                      <p className="text-[10px] text-[#1A1A1A]/40 mt-1">0 km = centre Bordeaux</p>
-                    </div>
+                  <div>
+                    <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
+                      Ville *
+                    </Label>
+                    <Input
+                      id="city"
+                      value={deliveryCity}
+                      onChange={e => setDeliveryCity(e.target.value)}
+                      placeholder="Bordeaux"
+                      className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -494,41 +550,21 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       <p className="text-[10px] text-[#1A1A1A]/40 mt-1">Entre 08h00 et 22h00</p>
                     </div>
                   </div>
-
-                  {/* Delivery pricing info */}
-                  <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#D4AF37]/20">
-                    <h3 className="text-sm font-bold text-[#1A1A1A] mb-2 flex items-center gap-2">
-                      <Truck className="h-4 w-4 text-[#722F37]" /> Tarification livraison
-                    </h3>
-                    <div className="space-y-1 text-xs text-[#1A1A1A]/60">
-                      <div className="flex justify-between">
-                        <span>Base (Bordeaux)</span>
-                        <span className="font-medium text-[#1A1A1A]">{DELIVERY_BASE.toFixed(2)} €</span>
-                      </div>
-                      {distanceKm > 0 && (
-                        <div className="flex justify-between">
-                          <span>Supplément ({distanceKm} km × {DELIVERY_PER_KM.toFixed(2)} €)</span>
-                          <span className="font-medium text-[#1A1A1A]">+ {(distanceKm * DELIVERY_PER_KM).toFixed(2)} €</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between pt-1 border-t border-[#1A1A1A]/10 font-bold text-[#1A1A1A]">
-                        <span>Total livraison</span>
-                        <span>{pricing.delivery.toFixed(2)} €</span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             )}
 
             {/* ═══ Step 2: Person Count & Instructions ═══ */}
-            {step === 2 && selectedMenu && (
+            {step === 2 && (
               <div>
                 <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 flex items-center gap-2">
                   <Users className="h-5 w-5 text-[#722F37]" /> Nombre de convives
                 </h2>
                 <p className="text-sm text-[#1A1A1A]/50 mb-5">
-                  Le menu <strong>{selectedMenu.name}</strong> requiert un minimum de {selectedMenu.minPersons} personnes.
+                  {selectedMenu
+                    ? <>Le menu <strong>{selectedMenu.name}</strong> requiert un minimum de {selectedMenu.minPersons} personnes.</>
+                    : 'Indiquez le nombre de personnes attendues.'
+                  }
                 </p>
 
                 <div className="space-y-5">
@@ -540,8 +576,8 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                     <div className="flex items-center gap-4">
                       <button
                         type="button"
-                        onClick={() => setPersonCount(c => Math.max(selectedMenu.minPersons, c - 1))}
-                        disabled={personCount <= selectedMenu.minPersons}
+                        onClick={() => setPersonCount(c => Math.max(selectedMenu?.minPersons ?? 1, c - 1))}
+                        disabled={personCount <= (selectedMenu?.minPersons ?? 1)}
                         className="w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-white border border-[#1A1A1A]/10 text-[#1A1A1A] font-bold text-lg disabled:opacity-30 hover:bg-[#722F37] hover:text-white hover:border-[#722F37] transition-all"
                       >
                         −
@@ -558,56 +594,33 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         +
                       </button>
                     </div>
+                  </div>
 
-                    {/* Discount info */}
-                    {pricing.hasDiscount ? (
-                      <div className="mt-3 bg-[#556B2F]/10 rounded-lg p-3 text-sm text-[#556B2F] flex items-center gap-2">
-                        <Percent className="h-4 w-4 shrink-0" />
-                        <span>
-                          Réduction de <strong>{DISCOUNT_PERCENT}%</strong> appliquée ! 
-                          ({personCount - selectedMenu.minPersons} personnes au-dessus du minimum)
-                        </span>
+                  {/* Price indication (informational) */}
+                  {selectedMenu && (
+                    <div className="bg-white rounded-xl border border-[#1A1A1A]/10 p-4">
+                      <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">Estimation indicative</h3>
+                      <div className="flex justify-between text-sm text-[#1A1A1A]/60 mb-1">
+                        <span>{selectedMenu.pricePerPerson.toFixed(2)} € × {personCount} pers.</span>
+                        <span className="font-medium text-[#1A1A1A]">{priceInfo.total.toFixed(2)} €</span>
                       </div>
-                    ) : (
-                      <p className="mt-3 text-xs text-[#1A1A1A]/40">
-                        💡 Ajoutez {selectedMenu.minPersons + DISCOUNT_THRESHOLD_OVER_MIN - personCount} personne{selectedMenu.minPersons + DISCOUNT_THRESHOLD_OVER_MIN - personCount > 1 ? 's' : ''} de plus pour bénéficier d'une réduction de {DISCOUNT_PERCENT}%.
+                      <p className="text-[10px] text-[#1A1A1A]/30 mt-2 italic">
+                        * Prix indicatif. Le montant final sera confirmé par notre équipe. Aucun paiement en ligne.
                       </p>
-                    )}
-                  </div>
-
-                  {/* Live price preview */}
-                  <div className="bg-white rounded-xl border border-[#1A1A1A]/10 p-4">
-                    <div className="flex justify-between text-sm text-[#1A1A1A]/60 mb-1">
-                      <span>{selectedMenu.pricePerPerson.toFixed(2)} € × {personCount} pers.</span>
-                      <span className="font-medium text-[#1A1A1A]">{pricing.menuTotal.toFixed(2)} €</span>
                     </div>
-                    {pricing.hasDiscount && (
-                      <div className="flex justify-between text-sm text-[#556B2F] mb-1">
-                        <span>Réduction {DISCOUNT_PERCENT}%</span>
-                        <span>- {pricing.discount.toFixed(2)} €</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-sm text-[#1A1A1A]/60 mb-1">
-                      <span>Livraison</span>
-                      <span className="font-medium text-[#1A1A1A]">{pricing.delivery.toFixed(2)} €</span>
-                    </div>
-                    <div className="flex justify-between text-base font-bold text-[#722F37] pt-2 mt-2 border-t border-[#1A1A1A]/10">
-                      <span>Total estimé</span>
-                      <span>{pricing.total.toFixed(2)} €</span>
-                    </div>
-                  </div>
+                  )}
 
                   {/* Special instructions */}
                   <div>
                     <Label htmlFor="instructions" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
-                      <FileText className="h-3.5 w-3.5 inline mr-1" /> Instructions spéciales (optionnel)
+                      <FileText className="h-3.5 w-3.5 inline mr-1" /> Message complémentaire (optionnel)
                     </Label>
                     <textarea
                       id="instructions"
                       value={specialInstructions}
                       onChange={e => setSpecialInstructions(e.target.value)}
                       rows={3}
-                      placeholder="Allergies, préférences, accès au lieu de livraison..."
+                      placeholder="Allergies, préférences, accès au lieu de livraison, questions..."
                       className="w-full rounded-lg border border-[#1A1A1A]/10 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#722F37] resize-none bg-white"
                     />
                   </div>
@@ -615,30 +628,41 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
               </div>
             )}
 
-            {/* ═══ Step 3: Recap & Confirmation ═══ */}
-            {step === 3 && selectedMenu && (
+            {/* ═══ Step 3: Recap ═══ */}
+            {step === 3 && (
               <div>
                 <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-[#556B2F]" /> Récapitulatif de commande
+                  <CheckCircle2 className="h-5 w-5 text-[#556B2F]" /> Récapitulatif de votre demande
                 </h2>
                 <p className="text-sm text-[#1A1A1A]/50 mb-5">
-                  Vérifiez les détails avant de confirmer votre commande.
+                  Vérifiez les détails avant d'envoyer votre demande.
                 </p>
 
                 <div className="space-y-4">
                   {/* Menu recap */}
                   <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#1A1A1A]/5">
-                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">Menu sélectionné</h3>
-                    <div className="flex gap-3">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-[#1A1A1A]/5">
-                        <LazyImage src={selectedMenu.image} alt={selectedMenu.name} className="w-full h-full" />
+                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">
+                      {isCustomRequest ? 'Menu personnalisé' : 'Menu sélectionné'}
+                    </h3>
+                    {isCustomRequest ? (
+                      <div className="bg-white rounded-lg p-3 border border-[#D4AF37]/10">
+                        <div className="flex items-start gap-2">
+                          <Sparkles className="h-4 w-4 text-[#D4AF37] shrink-0 mt-0.5" />
+                          <p className="text-sm text-[#1A1A1A]">{customMenuDescription}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-[#1A1A1A]">{selectedMenu.name}</h4>
-                        <p className="text-xs text-[#1A1A1A]/50">{selectedMenu.theme} · {selectedMenu.dietary.join(', ')}</p>
-                        <p className="text-sm font-bold text-[#722F37] mt-1">{selectedMenu.pricePerPerson.toFixed(2)} € / personne</p>
+                    ) : selectedMenu && (
+                      <div className="flex gap-3">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-[#1A1A1A]/5">
+                          <LazyImage src={selectedMenu.image} alt={selectedMenu.name} className="w-full h-full" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-[#1A1A1A]">{selectedMenu.name}</h4>
+                          <p className="text-xs text-[#1A1A1A]/50">{selectedMenu.theme} · {selectedMenu.dietary.join(', ')}</p>
+                          <p className="text-sm font-bold text-[#722F37] mt-1">{selectedMenu.pricePerPerson.toFixed(2)} € / personne</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Delivery recap */}
@@ -667,49 +691,108 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         <p className="text-[#1A1A1A]/50 text-xs">Nombre de personnes</p>
                         <p className="font-medium text-[#1A1A1A]">{personCount}</p>
                       </div>
+                      {selectedMenu && (
+                        <div>
+                          <p className="text-[#1A1A1A]/50 text-xs">Estimation</p>
+                          <p className="font-medium text-[#722F37]">≈ {priceInfo.total.toFixed(2)} €</p>
+                        </div>
+                      )}
                       {specialInstructions && (
                         <div className="col-span-2">
-                          <p className="text-[#1A1A1A]/50 text-xs">Instructions</p>
+                          <p className="text-[#1A1A1A]/50 text-xs">Message</p>
                           <p className="font-medium text-[#1A1A1A] text-xs">{specialInstructions}</p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Price breakdown */}
-                  <div className="bg-white rounded-xl border-2 border-[#722F37]/20 p-5">
-                    <h3 className="text-xs font-bold text-[#722F37] uppercase tracking-wide mb-3">Détail du prix</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between text-[#1A1A1A]/60">
-                        <span>Menu ({selectedMenu.pricePerPerson.toFixed(2)} € × {personCount} pers.)</span>
-                        <span className="font-medium text-[#1A1A1A]">{pricing.menuTotal.toFixed(2)} €</span>
+                  {/* Info: no payment */}
+                  <div className="bg-gradient-to-r from-[#556B2F]/5 to-[#556B2F]/10 rounded-xl p-4 border border-[#556B2F]/20">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#556B2F]/10 flex items-center justify-center shrink-0">
+                        <MessageSquare className="h-4 w-4 text-[#556B2F]" />
                       </div>
-                      <div className="flex justify-between text-[#1A1A1A]/60">
-                        <span>Livraison {distanceKm > 0 ? `(${distanceKm} km)` : '(Bordeaux)'}</span>
-                        <span className="font-medium text-[#1A1A1A]">{pricing.delivery.toFixed(2)} €</span>
-                      </div>
-                      {pricing.hasDiscount && (
-                        <div className="flex justify-between text-[#556B2F]">
-                          <span className="flex items-center gap-1">
-                            <Percent className="h-3.5 w-3.5" /> Réduction {DISCOUNT_PERCENT}%
-                          </span>
-                          <span className="font-medium">- {pricing.discount.toFixed(2)} €</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between text-lg font-bold text-[#722F37] pt-3 mt-3 border-t-2 border-[#722F37]/10">
-                        <span>Total</span>
-                        <span>{pricing.total.toFixed(2)} €</span>
+                      <div>
+                        <h3 className="text-sm font-bold text-[#556B2F] mb-1">Aucun paiement requis</h3>
+                        <p className="text-xs text-[#1A1A1A]/50 leading-relaxed">
+                          En envoyant cette demande, vous ne payez rien. Notre équipe vous contactera pour confirmer
+                          les détails, le prix final et les modalités de livraison. Le règlement se fait à la livraison.
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Conditions reminder */}
-                  {selectedMenu.deliveryNotes && (
+                  {selectedMenu?.deliveryNotes && (
                     <div className="bg-[#722F37] rounded-xl p-4 text-white ring-2 ring-[#D4AF37] ring-offset-2">
                       <h3 className="font-bold text-sm flex items-center gap-2 mb-1">
                         <AlertTriangle className="h-4 w-4 text-[#D4AF37]" /> Conditions
                       </h3>
                       <p className="text-white/90 text-sm">{selectedMenu.deliveryNotes}</p>
+                    </div>
+                  )}
+
+                  {/* ── Auth prompt overlay ── */}
+                  {showAuthPrompt && !loggedIn && (
+                    <div className="bg-white rounded-2xl border-2 border-[#722F37]/20 p-6 shadow-lg">
+                      <div className="text-center mb-5">
+                        <div className="w-14 h-14 mx-auto mb-3 bg-[#722F37]/10 rounded-full flex items-center justify-center">
+                          <UserPlus className="h-7 w-7 text-[#722F37]" />
+                        </div>
+                        <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Créez un compte pour envoyer</h3>
+                        <p className="text-sm text-[#1A1A1A]/50 max-w-sm mx-auto">
+                          Pour conserver votre demande et que nous puissions vous recontacter,
+                          connectez-vous ou créez un compte gratuit.
+                        </p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Button
+                          onClick={() => {
+                            // Store order data in sessionStorage before redirecting
+                            sessionStorage.setItem('vg_pending_order', JSON.stringify({
+                              selectedMenuId: selectedMenu?.numericId,
+                              isCustomRequest,
+                              customMenuDescription,
+                              deliveryAddress,
+                              deliveryCity,
+                              deliveryDate,
+                              deliveryHour,
+                              personCount,
+                              specialInstructions,
+                            }));
+                            window.location.href = '/portal';
+                          }}
+                          className="flex-1 h-11"
+                        >
+                          <LogIn className="h-4 w-4 mr-2" /> Se connecter
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            sessionStorage.setItem('vg_pending_order', JSON.stringify({
+                              selectedMenuId: selectedMenu?.numericId,
+                              isCustomRequest,
+                              customMenuDescription,
+                              deliveryAddress,
+                              deliveryCity,
+                              deliveryDate,
+                              deliveryHour,
+                              personCount,
+                              specialInstructions,
+                            }));
+                            window.location.href = '/portal';
+                          }}
+                          variant="outline"
+                          className="flex-1 h-11 border-[#722F37]/20 text-[#722F37] hover:bg-[#722F37]/5"
+                        >
+                          <UserPlus className="h-4 w-4 mr-2" /> Créer un compte
+                        </Button>
+                      </div>
+                      <button
+                        onClick={() => setShowAuthPrompt(false)}
+                        className="w-full mt-3 text-xs text-[#1A1A1A]/30 hover:text-[#1A1A1A]/50 transition-colors"
+                      >
+                        Annuler
+                      </button>
                     </div>
                   )}
                 </div>
@@ -721,7 +804,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
           {/* Footer navigation */}
           <div className="bg-[#FFF8F0] border-t border-[#1A1A1A]/5 px-5 sm:px-8 py-4 flex items-center justify-between">
             <Button
-              onClick={() => setStep(s => Math.max(0, s - 1))}
+              onClick={() => { setStep(s => Math.max(0, s - 1)); setShowAuthPrompt(false); }}
               variant="ghost"
               disabled={step === 0}
               className="text-[#1A1A1A]/60"
@@ -739,14 +822,14 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
               </Button>
             ) : (
               <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting || !canProceed}
+                onClick={handleSendRequest}
+                disabled={isSubmitting || !canProceed || showAuthPrompt}
                 className="min-w-[180px] bg-[#556B2F] hover:bg-[#475a27] shadow-lg shadow-[#556B2F]/20"
               >
                 {isSubmitting ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Envoi en cours...</>
                 ) : (
-                  <><ShoppingCart className="h-4 w-4 mr-2" /> Confirmer la commande</>
+                  <><Send className="h-4 w-4 mr-2" /> Envoyer la demande</>
                 )}
               </Button>
             )}
@@ -755,8 +838,8 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
         {/* Info note */}
         <p className="text-center text-xs text-[#1A1A1A]/30 mt-6 mb-8">
-          En confirmant, vous acceptez nos conditions générales de vente.
-          Paiement à la livraison ou par virement. Annulation possible jusqu'à 48h avant la livraison.
+          Aucun paiement en ligne. Notre équipe vous recontacte pour confirmer votre commande.
+          Annulation possible jusqu'à 48h avant la livraison.
         </p>
       </div>
     </div>

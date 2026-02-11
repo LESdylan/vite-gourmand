@@ -4,7 +4,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma';
 
-interface FindOptions {
+export interface FindOptions {
   page?: number;
   limit?: number;
   where?: Record<string, unknown>;
@@ -12,7 +12,7 @@ interface FindOptions {
   include?: Record<string, boolean | object>;
 }
 
-interface PaginatedResult<T> {
+export interface PaginatedResult<T> {
   data: T[];
   meta: {
     total: number;
@@ -76,7 +76,7 @@ export class CrudService {
   ): Promise<T | null> {
     const prismaModel = this.getModel(model);
     return prismaModel.findUnique({
-      where: { id },
+      where: { id: parseInt(id, 10) },
       include,
     }) as Promise<T | null>;
   }
@@ -93,14 +93,19 @@ export class CrudService {
   ): Promise<T> {
     const prismaModel = this.getModel(model);
     return prismaModel.update({
-      where: { id },
+      where: { id: parseInt(id, 10) },
       data,
     }) as Promise<T>;
   }
 
   async delete(model: string, id: string): Promise<void> {
     const prismaModel = this.getModel(model);
-    await prismaModel.delete({ where: { id } });
+    await prismaModel.delete({ where: { id: parseInt(id, 10) } });
+  }
+
+  // Alias for delete
+  async remove(model: string, id: string): Promise<void> {
+    return this.delete(model, id);
   }
 
   async exists(

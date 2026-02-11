@@ -7,13 +7,20 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { Request, Response } from 'express';
+import { LogService } from './log.service';
 
 @Injectable()
 export class HttpLogInterceptor implements NestInterceptor {
   private readonly logger = new Logger('HTTP');
+
+  constructor(
+    @Optional() @Inject(LogService) private readonly logService?: LogService,
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();
@@ -44,6 +51,7 @@ export class HttpLogInterceptor implements NestInterceptor {
             startTime,
             clientIp,
             userAgent,
+            error.message,
           ),
       }),
     );
@@ -61,6 +69,11 @@ export class HttpLogInterceptor implements NestInterceptor {
     this.logger.log(
       `${method} ${url} ${statusCode} ${duration}ms - ${ip} "${userAgent}"`,
     );
+    
+    // Store in log service for streaming
+    if (this.logService) {
+      this.logService.logHttp(method, url, statusCode, duration, ip);
+    }
   }
 
   private logError(
@@ -70,10 +83,16 @@ export class HttpLogInterceptor implements NestInterceptor {
     startTime: number,
     ip: string,
     userAgent: string,
+    errorMessage?: string,
   ): void {
     const duration = Date.now() - startTime;
     this.logger.error(
       `${method} ${url} ${statusCode} ${duration}ms - ${ip} "${userAgent}"`,
     );
+    
+    // Store in log service for streaming
+    if (this.logService) {
+      this.logService.logHttp(method, url, statusCode, duration, ip, errorMessage);
+    }
   }
 }
