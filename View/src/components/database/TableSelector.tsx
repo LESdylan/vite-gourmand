@@ -15,13 +15,9 @@ export function TableSelector({ tables, active, onSelect }: Props) {
   return (
     <div className="table-selector">
       <label htmlFor="table-select">Table:</label>
-      <select
-        id="table-select"
-        value={active || ''}
-        onChange={e => onSelect(e.target.value)}
-      >
+      <select id="table-select" value={active || ''} onChange={(e) => onSelect(e.target.value)}>
         <option value="">— Sélectionner —</option>
-        {tables.map(t => (
+        {tables.map((t) => (
           <option key={t.name} value={t.name}>
             {t.name} ({t.rowCount})
           </option>

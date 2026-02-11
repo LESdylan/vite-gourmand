@@ -60,7 +60,7 @@ export class UserService {
     const user = await this.prisma.user.update({
       where: { id },
       data: this.mapDtoToData(dto),
-      include: { Role: true },
+      include: { Role: true, LoyaltyAccount: true },
     });
     return this.sanitize(user);
   }
@@ -98,7 +98,18 @@ export class UserService {
     last_name?: string | null;
     phone_number?: string | null;
     city?: string | null;
+    postal_code?: string | null;
+    country?: string | null;
+    preferred_language?: string | null;
+    is_active?: boolean | null;
+    is_email_verified?: boolean | null;
+    gdpr_consent?: boolean | null;
+    marketing_consent?: boolean | null;
+    created_at?: Date | null;
+    updated_at?: Date | null;
+    last_login_at?: Date | null;
     Role?: { name: string } | null;
+    LoyaltyAccount?: { id: number; user_id: number; total_earned: number | null; total_spent: number | null; balance: number | null; last_activity_at: Date | null } | null;
   }) {
     return {
       id: user.id,
@@ -107,7 +118,25 @@ export class UserService {
       lastName: user.last_name,
       phoneNumber: user.phone_number,
       city: user.city,
+      postalCode: user.postal_code,
+      country: user.country,
+      preferredLanguage: user.preferred_language,
+      isActive: user.is_active,
+      isEmailVerified: user.is_email_verified,
+      gdprConsent: user.gdpr_consent,
+      marketingConsent: user.marketing_consent,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
+      lastLoginAt: user.last_login_at,
       role: user.Role?.name ?? 'client',
+      loyaltyAccount: user.LoyaltyAccount
+        ? {
+            id: user.LoyaltyAccount.id,
+            points: user.LoyaltyAccount.balance ?? 0,
+            totalEarned: user.LoyaltyAccount.total_earned ?? 0,
+            totalSpent: user.LoyaltyAccount.total_spent ?? 0,
+          }
+        : null,
     };
   }
 }

@@ -7,7 +7,16 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { resetPassword, verifyResetToken } from '../services/auth';
 import { useToast } from '../contexts/ToastContext';
-import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, ArrowRight, ChefHat, Loader2 } from 'lucide-react';
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  AlertCircle,
+  ArrowRight,
+  ChefHat,
+  Loader2,
+} from 'lucide-react';
 import './PortalLogin.css';
 
 /* ── Password validation (10 chars, 1 special, 1 upper, 1 lower, 1 digit) ── */
@@ -99,7 +108,10 @@ export function ResetPasswordPage() {
       // Redirect to portal after 3 seconds
       setTimeout(() => navigate('/portal'), 3000);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Échec de la réinitialisation. Le lien a peut-être expiré.';
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Échec de la réinitialisation. Le lien a peut-être expiré.';
       setError(msg);
       addToast(msg, 'error');
     } finally {
@@ -124,7 +136,11 @@ export function ResetPasswordPage() {
           </div>
           <div className="pf-card">
             <div className="pf-body" style={{ textAlign: 'center', padding: '3rem' }}>
-              <Loader2 size={32} className="pf-spinner" style={{ animation: 'spin 1s linear infinite', color: '#8B4557' }} />
+              <Loader2
+                size={32}
+                className="pf-spinner"
+                style={{ animation: 'spin 1s linear infinite', color: '#8B4557' }}
+              />
               <p style={{ marginTop: '1rem', color: '#555' }}>Vérification du lien...</p>
             </div>
           </div>
@@ -156,9 +172,20 @@ export function ResetPasswordPage() {
                 <span>{tokenError}</span>
               </div>
               <p style={{ margin: '1rem 0', color: '#666', fontSize: '0.9rem' }}>
-                Si vous avez besoin de réinitialiser votre mot de passe, veuillez faire une nouvelle demande.
+                Si vous avez besoin de réinitialiser votre mot de passe, veuillez faire une nouvelle
+                demande.
               </p>
-              <Link to="/portal" className="pf-submit" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              <Link
+                to="/portal"
+                className="pf-submit"
+                style={{
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                }}
+              >
                 Retour à la connexion
               </Link>
             </div>
@@ -188,7 +215,11 @@ export function ResetPasswordPage() {
                 <CheckCircle size={16} />
                 <span>Mot de passe modifié avec succès ! Redirection vers la connexion...</span>
               </div>
-              <Link to="/portal" className="pf-submit" style={{ textDecoration: 'none', marginTop: '1rem' }}>
+              <Link
+                to="/portal"
+                className="pf-submit"
+                style={{ textDecoration: 'none', marginTop: '1rem' }}
+              >
                 Se connecter maintenant
               </Link>
             </div>
@@ -240,7 +271,7 @@ export function ResetPasswordPage() {
                     id="new-password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min. 10 caractères"
                     required
                     autoComplete="new-password"
@@ -276,7 +307,7 @@ export function ResetPasswordPage() {
                     id="confirm-password"
                     type="password"
                     value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Retapez votre mot de passe"
                     required
                     autoComplete="new-password"
@@ -289,8 +320,12 @@ export function ResetPasswordPage() {
               </div>
 
               <button type="submit" className="pf-submit" disabled={isLoading}>
-                {isLoading ? 'Mise à jour…' : (
-                  <>Définir le mot de passe <ArrowRight size={16} /></>
+                {isLoading ? (
+                  'Mise à jour…'
+                ) : (
+                  <>
+                    Définir le mot de passe <ArrowRight size={16} />
+                  </>
                 )}
               </button>
 

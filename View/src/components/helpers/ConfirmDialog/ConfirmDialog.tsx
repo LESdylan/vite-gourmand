@@ -27,7 +27,7 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   if (!isOpen) return null;
-  
+
   return (
     <div className="confirm-dialog-overlay" onClick={onCancel}>
       <DialogContent
@@ -55,7 +55,7 @@ interface DialogContentProps {
 
 function DialogContent(props: DialogContentProps) {
   const handleClick = (e: React.MouseEvent) => e.stopPropagation();
-  
+
   return (
     <div className="confirm-dialog" role="dialog" aria-modal="true" onClick={handleClick}>
       <h2 className="confirm-dialog-title">{props.title}</h2>
@@ -67,11 +67,15 @@ function DialogContent(props: DialogContentProps) {
 
 function DialogActions(props: DialogContentProps) {
   const confirmClass = props.variant === 'danger' ? 'confirm-btn-danger' : 'confirm-btn-primary';
-  
+
   return (
     <div className="confirm-dialog-actions">
-      <button className="confirm-btn-cancel" onClick={props.onCancel}>{props.cancelLabel}</button>
-      <button className={`confirm-btn ${confirmClass}`} onClick={props.onConfirm}>{props.confirmLabel}</button>
+      <button className="confirm-btn-cancel" onClick={props.onCancel}>
+        {props.cancelLabel}
+      </button>
+      <button className={`confirm-btn ${confirmClass}`} onClick={props.onConfirm}>
+        {props.confirmLabel}
+      </button>
     </div>
   );
 }

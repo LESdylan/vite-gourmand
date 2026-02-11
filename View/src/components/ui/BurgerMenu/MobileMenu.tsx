@@ -25,7 +25,16 @@ interface NavItem {
 }
 
 export function MobileMenu(props: MobileMenuProps) {
-  const { isOpen, onClose, navItems, categories, activeSection, activeCategory, onNavChange, onCategoryChange } = props;
+  const {
+    isOpen,
+    onClose,
+    navItems,
+    categories,
+    activeSection,
+    activeCategory,
+    onNavChange,
+    onCategoryChange,
+  } = props;
   useMobileMenu(isOpen, onClose);
 
   if (!isOpen) return null;
@@ -35,13 +44,24 @@ export function MobileMenu(props: MobileMenuProps) {
       <nav className="mobile-menu" onClick={(e) => e.stopPropagation()}>
         <NavSection items={navItems} active={activeSection} onSelect={onNavChange} />
         <hr className="mobile-menu-divider" />
-        <CategorySection categories={categories} active={activeCategory} onSelect={(c) => { onCategoryChange(c); onClose(); }} />
+        <CategorySection
+          categories={categories}
+          active={activeCategory}
+          onSelect={(c) => {
+            onCategoryChange(c);
+            onClose();
+          }}
+        />
       </nav>
     </div>
   );
 }
 
-function NavSection<T extends string>({ items, active, onSelect }: {
+function NavSection<T extends string>({
+  items,
+  active,
+  onSelect,
+}: {
   items: { id: T; label: string; icon: React.ReactNode }[];
   active: T;
   onSelect: (id: T) => void;
@@ -50,7 +70,11 @@ function NavSection<T extends string>({ items, active, onSelect }: {
     <div className="mobile-menu-section">
       <h3 className="mobile-menu-title">Navigation</h3>
       {items.map((item) => (
-        <button key={item.id} className={`mobile-menu-item ${active === item.id ? 'mobile-menu-item--active' : ''}`} onClick={() => onSelect(item.id)}>
+        <button
+          key={item.id}
+          className={`mobile-menu-item ${active === item.id ? 'mobile-menu-item--active' : ''}`}
+          onClick={() => onSelect(item.id)}
+        >
           <span className="mobile-menu-icon">{item.icon}</span>
           <span>{item.label}</span>
         </button>
@@ -59,27 +83,46 @@ function NavSection<T extends string>({ items, active, onSelect }: {
   );
 }
 
-function CategorySection({ categories, active, onSelect }: {
+function CategorySection({
+  categories,
+  active,
+  onSelect,
+}: {
   categories: CategoryData[];
   active: TestCategory;
   onSelect: (cat: TestCategory) => void;
 }) {
-  const main = categories.filter(c => c.group === 'main');
-  const utility = categories.filter(c => c.group === 'utility');
-  
+  const main = categories.filter((c) => c.group === 'main');
+  const utility = categories.filter((c) => c.group === 'utility');
+
   return (
     <div className="mobile-menu-section">
       <h3 className="mobile-menu-title">Categories</h3>
-      {main.map((c) => <CatBtn key={c.id} cat={c} active={active} onSelect={onSelect} />)}
+      {main.map((c) => (
+        <CatBtn key={c.id} cat={c} active={active} onSelect={onSelect} />
+      ))}
       {utility.length > 0 && <hr className="mobile-menu-divider" />}
-      {utility.map((c) => <CatBtn key={c.id} cat={c} active={active} onSelect={onSelect} />)}
+      {utility.map((c) => (
+        <CatBtn key={c.id} cat={c} active={active} onSelect={onSelect} />
+      ))}
     </div>
   );
 }
 
-function CatBtn({ cat, active, onSelect }: { cat: CategoryData; active: TestCategory; onSelect: (c: TestCategory) => void }) {
+function CatBtn({
+  cat,
+  active,
+  onSelect,
+}: {
+  cat: CategoryData;
+  active: TestCategory;
+  onSelect: (c: TestCategory) => void;
+}) {
   return (
-    <button className={`mobile-menu-item ${active === cat.id ? 'mobile-menu-item--active' : ''}`} onClick={() => onSelect(cat.id)}>
+    <button
+      className={`mobile-menu-item ${active === cat.id ? 'mobile-menu-item--active' : ''}`}
+      onClick={() => onSelect(cat.id)}
+    >
       <span className="mobile-menu-label">{cat.label}</span>
       {cat.count !== undefined && <span className="mobile-menu-badge">{cat.count}</span>}
     </button>

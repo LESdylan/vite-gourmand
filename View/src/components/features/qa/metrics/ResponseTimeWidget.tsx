@@ -13,7 +13,7 @@ interface ResponseTimeWidgetProps {
 
 export function ResponseTimeWidget({ avgMs, trend, changePercent }: ResponseTimeWidgetProps) {
   return (
-    <MetricWidget 
+    <MetricWidget
       label="Avg Response Time"
       value={avgMs}
       unit="ms"

@@ -29,9 +29,11 @@ export function AuthScenario() {
   return (
     <div className="auth-scenario">
       <GradientBackground />
-      
+
       <header className="auth-header">
-        <a href="/" className="auth-back-link">← Retour</a>
+        <a href="/" className="auth-back-link">
+          ← Retour
+        </a>
         <div className="auth-logo">
           <span className="auth-logo-icon">🍷</span>
           <span className="auth-logo-text">Vite Gourmand</span>

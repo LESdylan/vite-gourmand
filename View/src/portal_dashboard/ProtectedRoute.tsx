@@ -14,7 +14,11 @@ interface ProtectedRouteProps {
   requiredPermission?: string;
 }
 
-export function ProtectedRoute({ children, allowedRoles, requiredPermission }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  children,
+  allowedRoles,
+  requiredPermission,
+}: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = usePortalAuth();
 
   if (isLoading) {

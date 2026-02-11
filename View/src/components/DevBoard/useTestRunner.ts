@@ -21,7 +21,7 @@ interface UseTestRunnerReturn {
   results: RunTestsResponse | null;
   error: string | null;
   rawOutput: string | null;
-  
+
   // Derived data
   autoTests: AutoTest[];
   suites: UISuite[];
@@ -34,7 +34,7 @@ interface UseTestRunnerReturn {
     lastRun: Date | null;
     suiteCount: number;
   };
-  
+
   // Actions
   runTest: (testId: TestConfigId) => Promise<void>;
   runSuite: (suiteName: string) => Promise<void>;
@@ -48,9 +48,9 @@ interface UseTestRunnerReturn {
  */
 function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
   if (!results?.suites?.length) return [];
-  
-  return results.suites.flatMap(suite => 
-    (suite.tests || []).map(test => ({
+
+  return results.suites.flatMap((suite) =>
+    (suite.tests || []).map((test) => ({
       id: test.id,
       name: test.name,
       suite: suite.name,
@@ -58,7 +58,7 @@ function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
       duration: test.duration,
       output: test.output,
       error: test.error,
-    }))
+    })),
   );
 }
 
@@ -67,11 +67,11 @@ function toAutoTests(results: RunTestsResponse | null): AutoTest[] {
  */
 function toUISuites(results: RunTestsResponse | null): UISuite[] {
   if (!results?.suites?.length) return [];
-  
-  return results.suites.map(suite => ({
+
+  return results.suites.map((suite) => ({
     name: suite.name,
     type: suite.type,
-    tests: (suite.tests || []).map(test => ({
+    tests: (suite.tests || []).map((test) => ({
       id: test.id,
       name: test.name,
       suite: suite.name,
@@ -92,15 +92,23 @@ function toUISuites(results: RunTestsResponse | null): UISuite[] {
 function calculateMetrics(results: RunTestsResponse | null) {
   if (!results?.summary) {
     // No data yet — return -1 passRate to distinguish from actual 0% failure
-    return { total: 0, passed: 0, failed: 0, passRate: -1, duration: 0, lastRun: null, suiteCount: 0 };
+    return {
+      total: 0,
+      passed: 0,
+      failed: 0,
+      passRate: -1,
+      duration: 0,
+      lastRun: null,
+      suiteCount: 0,
+    };
   }
-  
+
   const { total = 0, passed = 0, failed = 0, duration = 0 } = results.summary;
   const suiteCount = results.suites?.length ?? 0;
   // -1 signals 'no data / pending' to the UI so it doesn't show 'critical'
   const passRate = total > 0 ? Math.round((passed / total) * 100) : -1;
   const lastRun = results.timestamp ? new Date(results.timestamp) : null;
-  
+
   return { total, passed, failed, passRate, duration, lastRun, suiteCount };
 }
 export function useTestRunner(): UseTestRunnerReturn {
@@ -113,7 +121,7 @@ export function useTestRunner(): UseTestRunnerReturn {
   // Load cached results from backend on mount — DO NOT auto-run
   useEffect(() => {
     let isMounted = true;
-    
+
     const loadCachedResults = async () => {
       try {
         const cached = await getTestResults();
@@ -132,10 +140,12 @@ export function useTestRunner(): UseTestRunnerReturn {
         }
       }
     };
-    
+
     loadCachedResults();
-    
-    return () => { isMounted = false; };
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const runTest = useCallback(async (testId: TestConfigId) => {
@@ -145,7 +155,7 @@ export function useTestRunner(): UseTestRunnerReturn {
     // Reset results to show "running" state with zeroed metrics
     setResults(null);
     setRawOutput(null);
-    
+
     try {
       // Always request verbose output to show CLI results
       const response = await runTests(testId, { verbose: true });
@@ -163,14 +173,14 @@ export function useTestRunner(): UseTestRunnerReturn {
     // Determine if it's unit or e2e based on filename pattern
     const isE2E = suiteName.includes('.e2e-spec') || suiteName.includes('/e2e/');
     const testType = isE2E ? 'e2e' : 'unit';
-    
+
     setIsRunning(true);
     setCurrentTest(suiteName);
     setError(null);
     // Reset results to show "running" state with zeroed metrics
     setResults(null);
     setRawOutput(null);
-    
+
     try {
       // Run the appropriate test type
       const response = await runTests(testType as TestConfigId, { verbose: true });
@@ -197,7 +207,7 @@ export function useTestRunner(): UseTestRunnerReturn {
     // Reset results to show "running" state with zeroed metrics
     setResults(null);
     setRawOutput(null);
-    
+
     try {
       const response = await runTests(type as TestConfigId, { verbose: true });
       setResults(response);
@@ -217,7 +227,7 @@ export function useTestRunner(): UseTestRunnerReturn {
     // Reset results to show "running" state with zeroed metrics
     setResults(null);
     setRawOutput(null);
-    
+
     try {
       // Always request verbose output to show CLI results
       const response = await runAllTests({ verbose: true });

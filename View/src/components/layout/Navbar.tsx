@@ -4,7 +4,14 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { useNotifications } from '../../contexts/NotificationContext';
 
-export type Page = 'home' | 'menu' | 'contact' | 'order' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
+export type Page =
+  | 'home'
+  | 'menu'
+  | 'contact'
+  | 'order'
+  | 'legal-mentions'
+  | 'legal-cgv'
+  | 'user-profile';
 
 export type UserType = {
   id: string;
@@ -25,10 +32,10 @@ type NavbarProps = {
   topOffset?: number;
 };
 
-export default function Navbar({ 
-  currentPage, 
-  setCurrentPage, 
-  user = null, 
+export default function Navbar({
+  currentPage,
+  setCurrentPage,
+  user = null,
   onLogout,
   isDemoMode = false,
   topOffset = 0,
@@ -54,7 +61,9 @@ export default function Navbar({
     } else {
       document.body.style.overflow = '';
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [mobileMenuOpen]);
 
   const navItems = [
@@ -76,17 +85,14 @@ export default function Navbar({
 
   return (
     <>
-      <nav 
+      <nav
         className={`fixed left-0 right-0 z-50 transition-all duration-200 ${
-          solid 
-            ? 'bg-white shadow-sm' 
-            : 'bg-black/20 backdrop-blur-sm'
+          solid ? 'bg-white shadow-sm' : 'bg-black/20 backdrop-blur-sm'
         }`}
         style={{ top: `${topOffset}px` }}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center h-14 sm:h-16">
-            
             {/* Logo */}
             <button
               onClick={() => handleNavClick('home')}
@@ -96,7 +102,9 @@ export default function Navbar({
                 <ChefHat className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div className="hidden sm:block">
-                <span className={`font-bold text-sm sm:text-base ${solid ? 'text-[#1A1A1A]' : 'text-white'}`}>
+                <span
+                  className={`font-bold text-sm sm:text-base ${solid ? 'text-[#1A1A1A]' : 'text-white'}`}
+                >
                   Vite & Gourmand
                 </span>
                 <span className="block text-[10px] text-[#D4AF37] -mt-0.5">Traiteur</span>
@@ -111,11 +119,11 @@ export default function Navbar({
                   onClick={() => handleNavClick(item.page)}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     currentPage === item.page
-                      ? solid 
-                        ? 'bg-[#722F37]/10 text-[#722F37]' 
+                      ? solid
+                        ? 'bg-[#722F37]/10 text-[#722F37]'
                         : 'bg-white/20 text-white'
-                      : solid 
-                        ? 'text-[#1A1A1A]/70 hover:text-[#722F37] hover:bg-[#722F37]/5' 
+                      : solid
+                        ? 'text-[#1A1A1A]/70 hover:text-[#722F37] hover:bg-[#722F37]/5'
                         : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
@@ -134,7 +142,7 @@ export default function Navbar({
                   )}
                   {(user.role === 'admin' || user.role === 'employee') && (
                     <button
-                      onClick={() => window.location.href = '/dashboard'}
+                      onClick={() => (window.location.href = '/dashboard')}
                       className={`text-xs px-2 py-1 rounded ${solid ? 'text-[#722F37] hover:bg-[#722F37]/10' : 'text-white hover:bg-white/10'}`}
                     >
                       Dashboard
@@ -145,7 +153,9 @@ export default function Navbar({
                     data-notification-bell
                     onClick={toggleNotifications}
                     className={`relative w-9 h-9 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-colors ${
-                      solid ? 'text-[#1A1A1A]/60 hover:bg-[#722F37]/10 hover:text-[#722F37]' : 'text-white/70 hover:bg-white/20 hover:text-white'
+                      solid
+                        ? 'text-[#1A1A1A]/60 hover:bg-[#722F37]/10 hover:text-[#722F37]'
+                        : 'text-white/70 hover:bg-white/20 hover:text-white'
                     }`}
                     aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
                   >
@@ -175,7 +185,7 @@ export default function Navbar({
                 </div>
               ) : (
                 <Button
-                  onClick={() => window.location.href = '/portal'}
+                  onClick={() => (window.location.href = '/portal')}
                   size="sm"
                   className="h-8 px-3 text-xs"
                 >
@@ -210,15 +220,15 @@ export default function Navbar({
               <X className="h-5 w-5 text-[#1A1A1A]" />
             </button>
           </div>
-          
+
           <div className="p-4 space-y-2 flex-1 overflow-y-auto">
             {navItems.map((item) => (
               <button
                 key={item.page}
                 onClick={() => handleNavClick(item.page)}
                 className={`w-full text-left px-4 py-3 rounded-lg font-medium ${
-                  currentPage === item.page 
-                    ? 'bg-[#722F37] text-white' 
+                  currentPage === item.page
+                    ? 'bg-[#722F37] text-white'
                     : 'text-[#1A1A1A] hover:bg-[#FFF8F0]'
                 }`}
               >
@@ -228,7 +238,10 @@ export default function Navbar({
             {user && (
               <button
                 data-notification-bell
-                onClick={() => { setMobileMenuOpen(false); toggleNotifications(); }}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  toggleNotifications();
+                }}
                 className="w-full text-left px-4 py-3 rounded-lg font-medium text-[#1A1A1A] hover:bg-[#FFF8F0] flex items-center justify-between"
               >
                 <span className="flex items-center gap-2">
@@ -266,7 +279,7 @@ export default function Navbar({
                 )}
               </div>
             ) : (
-              <Button onClick={() => window.location.href = '/portal'} className="w-full">
+              <Button onClick={() => (window.location.href = '/portal')} className="w-full">
                 Connexion
               </Button>
             )}

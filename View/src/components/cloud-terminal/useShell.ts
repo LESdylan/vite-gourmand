@@ -18,7 +18,7 @@ export function useShell() {
     const cmd = input.trim();
     if (!cmd) return;
 
-    setLines(prev => [...prev, `${cwd} $ ${cmd}`]);
+    setLines((prev) => [...prev, `${cwd} $ ${cmd}`]);
     setInput('');
     setLoading(true);
     historyIdx.current = -1;
@@ -32,7 +32,7 @@ export function useShell() {
 
     const result = await executeCommand(cmd);
     const entry: HistoryEntry = { id: Date.now(), command: cmd, ...result };
-    
+
     // Update cwd if it was a cd command
     if (cmd.startsWith('cd ') || cmd === 'cd') {
       const pwdResult = await executeCommand('pwd');
@@ -42,19 +42,23 @@ export function useShell() {
       }
     }
 
-    setLines(prev => [...prev, result.output]);
-    setHistory(prev => [entry, ...prev].slice(0, 100));
+    setLines((prev) => [...prev, result.output]);
+    setHistory((prev) => [entry, ...prev].slice(0, 100));
     setLoading(false);
   }, [input, cwd]);
 
-  const navigateHistory = useCallback((dir: 'up' | 'down') => {
-    if (history.length === 0) return;
-    const newIdx = dir === 'up' 
-      ? Math.min(historyIdx.current + 1, history.length - 1)
-      : Math.max(historyIdx.current - 1, -1);
-    historyIdx.current = newIdx;
-    setInput(newIdx >= 0 ? history[newIdx].command : '');
-  }, [history]);
+  const navigateHistory = useCallback(
+    (dir: 'up' | 'down') => {
+      if (history.length === 0) return;
+      const newIdx =
+        dir === 'up'
+          ? Math.min(historyIdx.current + 1, history.length - 1)
+          : Math.max(historyIdx.current - 1, -1);
+      historyIdx.current = newIdx;
+      setInput(newIdx >= 0 ? history[newIdx].command : '');
+    },
+    [history],
+  );
 
   const clear = useCallback(() => setLines([]), []);
 

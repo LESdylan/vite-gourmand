@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Allergen {
   id           Int            @id @default(autoincrement())
   name         String         @unique @db.VarChar(100)
@@ -15,6 +17,7 @@ model Allergen {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Company {
   id                  Int                   @id @default(autoincrement())
   name                String                @db.VarChar(255)
@@ -41,6 +44,7 @@ model Company {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model CompanyOwner {
   company_id Int
   user_id    Int
@@ -55,6 +59,7 @@ model CompanyOwner {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model CompanyWorkingHours {
   company_id       Int
   working_hours_id Int
@@ -64,6 +69,7 @@ model CompanyWorkingHours {
   @@id([company_id, working_hours_id])
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ContactMessage {
   id          Int       @id @default(autoincrement())
   title       String    @db.VarChar(255)
@@ -75,6 +81,7 @@ model ContactMessage {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model DataDeletionRequest {
   id                                          Int       @id @default(autoincrement())
   user_id                                     Int?
@@ -88,6 +95,7 @@ model DataDeletionRequest {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model DeliveryAssignment {
   id                 Int       @id @default(autoincrement())
   order_id           Int
@@ -104,6 +112,7 @@ model DeliveryAssignment {
   Order              Order     @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Diet {
   id          Int     @id @default(autoincrement())
   name        String  @unique @db.VarChar(100)
@@ -113,6 +122,7 @@ model Diet {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Discount {
   id               Int         @id @default(autoincrement())
   code             String      @unique @db.VarChar(50)
@@ -131,6 +141,7 @@ model Discount {
   Promotion        Promotion[]
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Dish {
   id             Int              @id @default(autoincrement())
   title          String           @db.VarChar(255)
@@ -146,6 +157,7 @@ model Dish {
   @@index([course_type], map: "idx_dish_course")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model DishAllergen {
   dish_id     Int
   allergen_id Int
@@ -156,6 +168,7 @@ model DishAllergen {
   @@index([allergen_id], map: "idx_dish_allergen_allergen")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model DishIngredient {
   dish_id       Int
   ingredient_id Int
@@ -167,6 +180,7 @@ model DishIngredient {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Event {
   id          Int       @id @default(autoincrement())
   company_id  Int
@@ -184,6 +198,7 @@ model Event {
   @@index([event_date(sort: Desc)], map: "idx_event_date")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Ingredient {
   id                Int              @id @default(autoincrement())
   name              String           @unique @db.VarChar(255)
@@ -198,6 +213,7 @@ model Ingredient {
   MenuIngredient    MenuIngredient[]
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model KanbanColumn {
   id            Int       @id @default(autoincrement())
   name          String    @db.VarChar(100)
@@ -211,6 +227,7 @@ model KanbanColumn {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model LoyaltyAccount {
   id                 Int                  @id @default(autoincrement())
   user_id            Int                  @unique
@@ -225,6 +242,7 @@ model LoyaltyAccount {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model LoyaltyTransaction {
   id                 Int            @id @default(autoincrement())
   loyalty_account_id Int
@@ -240,6 +258,7 @@ model LoyaltyTransaction {
   @@index([order_id], map: "idx_loyalty_txn_order")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Menu {
   id               Int              @id @default(autoincrement())
   title            String           @db.VarChar(255)
@@ -270,6 +289,7 @@ model Menu {
   @@index([title], map: "idx_menu_title")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model MenuImage {
   id            Int       @id @default(autoincrement())
   menu_id       Int
@@ -281,6 +301,7 @@ model MenuImage {
   Menu          Menu      @relation(fields: [menu_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model MenuIngredient {
   menu_id             Int
   ingredient_id       Int
@@ -291,6 +312,7 @@ model MenuIngredient {
   @@id([menu_id, ingredient_id])
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Message {
   id                              Int       @id @default(autoincrement())
   sender_id                       Int?
@@ -308,6 +330,7 @@ model Message {
   User_Message_sender_idToUser    User?     @relation("Message_sender_idToUser", fields: [sender_id], references: [id], onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Notification {
   id         Int       @id @default(autoincrement())
   user_id    Int
@@ -321,6 +344,7 @@ model Notification {
   User       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Order {
   id                        Int                  @id @default(autoincrement())
   order_number              String               @unique @db.VarChar(50)
@@ -365,6 +389,7 @@ model Order {
   @@index([user_id, order_date(sort: Desc)], map: "idx_order_user_date")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model OrderMenu {
   order_id Int
   menu_id  Int
@@ -376,6 +401,7 @@ model OrderMenu {
   @@index([menu_id], map: "idx_order_menu_menu")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model OrderOrderTag {
   order_id Int
   tag_id   Int
@@ -385,6 +411,7 @@ model OrderOrderTag {
   @@id([order_id, tag_id])
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model OrderStatusHistory {
   id         Int       @id @default(autoincrement())
   order_id   Int
@@ -397,6 +424,7 @@ model OrderStatusHistory {
   @@index([order_id], map: "idx_osh_order")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model OrderTag {
   id            Int             @id @default(autoincrement())
   label         String          @unique @db.VarChar(50)
@@ -406,6 +434,7 @@ model OrderTag {
   User          User?           @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model PasswordResetToken {
   id         Int       @id @default(autoincrement())
   token      String    @unique @db.VarChar(255)
@@ -418,6 +447,7 @@ model PasswordResetToken {
   @@index([token], map: "idx_prt_token")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Permission {
   id             Int              @id @default(autoincrement())
   name           String           @unique @db.VarChar(100)
@@ -427,6 +457,7 @@ model Permission {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Promotion {
   id            Int             @id @default(autoincrement())
   title         String          @db.VarChar(150)
@@ -451,10 +482,14 @@ model Promotion {
   User          User?           @relation(fields: [created_by], references: [id], onUpdate: NoAction)
   Discount      Discount?       @relation(fields: [discount_id], references: [id], onUpdate: NoAction)
   UserPromotion UserPromotion[]
+
+  @@index([is_active, start_date, end_date], map: "idx_promotion_active_dates", where: raw("(is_active = true)"))
+  @@index([is_public, is_active, priority(sort: Desc)], map: "idx_promotion_public", where: raw("((is_public = true) AND (is_active = true))"))
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Publish {
   id                              Int           @id @default(autoincrement())
   user_id                         Int
@@ -475,6 +510,7 @@ model Publish {
   @@index([user_id], map: "idx_publish_user")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ReviewImage {
   id          Int      @id @default(autoincrement())
   review_id   Int
@@ -483,6 +519,7 @@ model ReviewImage {
   Publish     Publish  @relation(fields: [review_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Role {
   id             Int              @id @default(autoincrement())
   name           String           @unique @db.VarChar(50)
@@ -492,6 +529,7 @@ model Role {
   User           User[]
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model RolePermission {
   role_id       Int
   permission_id Int
@@ -501,6 +539,7 @@ model RolePermission {
   @@id([role_id, permission_id])
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model SupportTicket {
   id                                   Int             @id @default(autoincrement())
   ticket_number                        String          @unique @db.VarChar(50)
@@ -519,6 +558,7 @@ model SupportTicket {
   TicketMessage                        TicketMessage[]
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Theme {
   id          Int     @id @default(autoincrement())
   name        String  @unique @db.VarChar(100)
@@ -527,6 +567,7 @@ model Theme {
   Menu        Menu[]
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model TicketMessage {
   id            Int           @id @default(autoincrement())
   ticket_id     Int
@@ -538,6 +579,7 @@ model TicketMessage {
   User          User?         @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model TimeOffRequest {
   id                                   Int       @id @default(autoincrement())
   user_id                              Int
@@ -553,6 +595,7 @@ model TimeOffRequest {
   User_TimeOffRequest_user_idToUser    User      @relation("TimeOffRequest_user_idToUser", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model User {
   id                                                         Int                   @id @default(autoincrement())
   email                                                      String                @unique @db.VarChar(255)
@@ -607,6 +650,7 @@ model User {
   @@index([role_id], map: "idx_user_role")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model UserAddress {
   id             Int       @id @default(autoincrement())
   user_id        Int
@@ -624,6 +668,7 @@ model UserAddress {
   @@index([user_id], map: "idx_user_address_user")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model UserConsent {
   id           Int       @id @default(autoincrement())
   user_id      Int
@@ -637,6 +682,7 @@ model UserConsent {
   @@index([user_id], map: "idx_consent_user")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model UserPromotion {
   id           Int       @id @default(autoincrement())
   user_id      Int
@@ -653,6 +699,7 @@ model UserPromotion {
   @@index([user_id, is_used], map: "idx_user_promotion_user")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model UserSession {
   id            Int       @id @default(autoincrement())
   user_id       Int
@@ -668,6 +715,7 @@ model UserSession {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model WorkingHours {
   id                  Int                   @id @default(autoincrement())
   day                 String                @unique @db.VarChar(15)

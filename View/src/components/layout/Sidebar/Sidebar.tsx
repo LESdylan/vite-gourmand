@@ -12,12 +12,8 @@ interface SidebarProps {
 
 export function Sidebar({ children, collapsed = false }: SidebarProps) {
   const classes = buildClasses(collapsed);
-  
-  return (
-    <aside className={classes}>
-      {children}
-    </aside>
-  );
+
+  return <aside className={classes}>{children}</aside>;
 }
 
 function buildClasses(collapsed: boolean): string {

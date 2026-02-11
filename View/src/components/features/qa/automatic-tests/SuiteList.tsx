@@ -9,9 +9,12 @@ import './SuiteList.css';
 /** Get status icon for test result */
 function getStatusIcon(status: AutoTestStatus): string {
   switch (status) {
-    case 'passed': return '✓';
-    case 'failed': return '✕';
-    default: return '○';
+    case 'passed':
+      return '✓';
+    case 'failed':
+      return '✕';
+    default:
+      return '○';
   }
 }
 
@@ -43,7 +46,7 @@ function groupSuitesByType(suites: TestSuite[]): GroupedSuites {
       }
       return acc;
     },
-    { unit: [], e2e: [], custom: [], postman: [] }
+    { unit: [], e2e: [], custom: [], postman: [] },
   );
 }
 
@@ -64,16 +67,23 @@ function calculateGroupStats(suites: TestSuite[]): GroupStats {
       failed: acc.failed + suite.totalFailed,
       duration: acc.duration + suite.totalDuration,
     }),
-    { suites: 0, tests: 0, passed: 0, failed: 0, duration: 0 }
+    { suites: 0, tests: 0, passed: 0, failed: 0, duration: 0 },
   );
 }
 
-export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunning }: Readonly<SuiteListProps>) {
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['unit', 'e2e', 'custom', 'postman']));
+export function SuiteList({
+  suites,
+  onRunSuite: _onRunSuite,
+  onRunType,
+  isRunning,
+}: Readonly<SuiteListProps>) {
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    new Set(['unit', 'e2e', 'custom', 'postman']),
+  );
   const [expandedSuites, setExpandedSuites] = useState<Set<string>>(new Set());
 
   const toggleGroup = (groupName: string) => {
-    setExpandedGroups(prev => {
+    setExpandedGroups((prev) => {
       const next = new Set(prev);
       if (next.has(groupName)) {
         next.delete(groupName);
@@ -85,7 +95,7 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
   };
 
   const toggleSuite = (name: string) => {
-    setExpandedSuites(prev => {
+    setExpandedSuites((prev) => {
       const next = new Set(prev);
       if (next.has(name)) {
         next.delete(name);
@@ -136,7 +146,7 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
                 strokeDasharray="85 255"
                 className="suite-list__loader-ring"
               />
-              
+
               {/* Central test tube / beaker shape */}
               <g className="suite-list__loader-beaker">
                 <path
@@ -148,19 +158,50 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
                   strokeLinejoin="round"
                 />
                 {/* Liquid bubbles */}
-                <circle cx="55" cy="72" r="4" fill="var(--color-success, #059669)" className="suite-list__bubble suite-list__bubble--1" />
-                <circle cx="62" cy="68" r="3" fill="var(--color-warning, #d97706)" className="suite-list__bubble suite-list__bubble--2" />
-                <circle cx="66" cy="75" r="3.5" fill="var(--color-primary, #722F37)" className="suite-list__bubble suite-list__bubble--3" />
+                <circle
+                  cx="55"
+                  cy="72"
+                  r="4"
+                  fill="var(--color-success, #059669)"
+                  className="suite-list__bubble suite-list__bubble--1"
+                />
+                <circle
+                  cx="62"
+                  cy="68"
+                  r="3"
+                  fill="var(--color-warning, #d97706)"
+                  className="suite-list__bubble suite-list__bubble--2"
+                />
+                <circle
+                  cx="66"
+                  cy="75"
+                  r="3.5"
+                  fill="var(--color-primary, #722F37)"
+                  className="suite-list__bubble suite-list__bubble--3"
+                />
               </g>
-              
+
               {/* Orbiting checkmark and X */}
               <g className="suite-list__loader-orbit">
                 <circle cx="60" cy="8" r="8" fill="var(--color-success, #059669)" />
-                <path d="M56 8 L59 11 L65 5" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M56 8 L59 11 L65 5"
+                  stroke="white"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </g>
               <g className="suite-list__loader-orbit suite-list__loader-orbit--reverse">
                 <circle cx="60" cy="8" r="7" fill="var(--color-error, #dc2626)" />
-                <path d="M57 5 L63 11 M63 5 L57 11" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
+                <path
+                  d="M57 5 L63 11 M63 5 L57 11"
+                  stroke="white"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                />
               </g>
             </svg>
           </div>
@@ -194,7 +235,7 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
     type: 'unit' | 'e2e' | 'custom' | 'postman',
     label: string,
     groupSuites: TestSuite[],
-    stats: GroupStats
+    stats: GroupStats,
   ) => {
     const isExpanded = expandedGroups.has(type);
     const allPassed = stats.failed === 0;
@@ -202,29 +243,33 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
     return (
       <div key={type} className="suite-list__group">
         {/* Group Header */}
-        <div 
+        <div
           className={`suite-list__group-header ${allPassed ? 'suite-list__group-header--passed' : 'suite-list__group-header--failed'}`}
         >
-          <button 
+          <button
             className="suite-list__group-toggle"
             onClick={() => toggleGroup(type)}
             aria-label={isExpanded ? 'Collapse group' : 'Expand group'}
           >
             {isExpanded ? '▼' : '▶'}
           </button>
-          
+
           <span className="suite-list__group-title">{label}</span>
-          
+
           <span className="suite-list__group-stats">
             <span className="suite-list__group-stat">{stats.suites} suites</span>
             <span className="suite-list__group-divider">•</span>
             <span className="suite-list__group-stat">{stats.tests} tests</span>
             <span className="suite-list__group-divider">•</span>
-            <span className="suite-list__group-stat suite-list__group-stat--passed">✓ {stats.passed}</span>
+            <span className="suite-list__group-stat suite-list__group-stat--passed">
+              ✓ {stats.passed}
+            </span>
             <span className="suite-list__group-divider">•</span>
-            <span className="suite-list__group-stat suite-list__group-stat--failed">✕ {stats.failed}</span>
+            <span className="suite-list__group-stat suite-list__group-stat--failed">
+              ✕ {stats.failed}
+            </span>
           </span>
-          
+
           <button
             className="suite-list__group-run-btn"
             onClick={() => onRunType?.(type)}
@@ -253,13 +298,15 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
                   const isSuiteExpanded = expandedSuites.has(suite.name);
                   const suiteAllPassed = suite.totalFailed === 0;
                   const fileName = suite.name.split('/').pop() || suite.name;
-                  
+
                   return (
                     <React.Fragment key={suite.name}>
-                      <tr className={`suite-list__row ${index % 2 === 1 ? 'suite-list__row--even' : ''}`}>
+                      <tr
+                        className={`suite-list__row ${index % 2 === 1 ? 'suite-list__row--even' : ''}`}
+                      >
                         <td className="suite-list__td suite-list__td--expand">
                           {suite.tests.length > 0 && (
-                            <button 
+                            <button
                               className="suite-list__expand-btn"
                               onClick={() => toggleSuite(suite.name)}
                               aria-label={isSuiteExpanded ? 'Collapse' : 'Expand'}
@@ -272,12 +319,12 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
                           <span className="suite-list__filename">{fileName}</span>
                         </td>
                         <td className="suite-list__td suite-list__td--tests">
-                          <span className="suite-list__test-count">
-                            {suite.tests.length}
-                          </span>
+                          <span className="suite-list__test-count">{suite.tests.length}</span>
                         </td>
                         <td className="suite-list__td suite-list__td--status">
-                          <span className={`suite-list__status ${suiteAllPassed ? 'suite-list__status--passed' : 'suite-list__status--failed'}`}>
+                          <span
+                            className={`suite-list__status ${suiteAllPassed ? 'suite-list__status--passed' : 'suite-list__status--failed'}`}
+                          >
                             {suiteAllPassed ? '✓ PASS' : `✕ ${suite.totalFailed} FAIL`}
                           </span>
                         </td>
@@ -285,30 +332,32 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
                           {suite.totalDuration}ms
                         </td>
                       </tr>
-                      
+
                       {/* Expanded tests */}
-                      {isSuiteExpanded && suite.tests.map(test => (
-                        <tr 
-                          key={test.id} 
-                          className="suite-list__row suite-list__row--test"
-                        >
-                          <td className="suite-list__td"></td>
-                          <td className="suite-list__td suite-list__td--test-name" colSpan={2}>
-                            <span className={`suite-list__test-icon suite-list__test-icon--${test.status}`}>
-                              {getStatusIcon(test.status)}
-                            </span>
-                            <span className="suite-list__test-title">{test.name}</span>
-                          </td>
-                          <td className="suite-list__td suite-list__td--test-status">
-                            <span className={`suite-list__test-badge suite-list__test-badge--${test.status}`}>
-                              {test.status}
-                            </span>
-                          </td>
-                          <td className="suite-list__td suite-list__td--test-duration">
-                            {test.duration ?? 0}ms
-                          </td>
-                        </tr>
-                      ))}
+                      {isSuiteExpanded &&
+                        suite.tests.map((test) => (
+                          <tr key={test.id} className="suite-list__row suite-list__row--test">
+                            <td className="suite-list__td"></td>
+                            <td className="suite-list__td suite-list__td--test-name" colSpan={2}>
+                              <span
+                                className={`suite-list__test-icon suite-list__test-icon--${test.status}`}
+                              >
+                                {getStatusIcon(test.status)}
+                              </span>
+                              <span className="suite-list__test-title">{test.name}</span>
+                            </td>
+                            <td className="suite-list__td suite-list__td--test-status">
+                              <span
+                                className={`suite-list__test-badge suite-list__test-badge--${test.status}`}
+                              >
+                                {test.status}
+                              </span>
+                            </td>
+                            <td className="suite-list__td suite-list__td--test-duration">
+                              {test.duration ?? 0}ms
+                            </td>
+                          </tr>
+                        ))}
                     </React.Fragment>
                   );
                 })}
@@ -345,8 +394,10 @@ export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunnin
       <div className="suite-list__groups">
         {grouped.unit.length > 0 && renderGroup('unit', 'Unit Tests', grouped.unit, unitStats)}
         {grouped.e2e.length > 0 && renderGroup('e2e', 'E2E Tests', grouped.e2e, e2eStats)}
-        {grouped.custom.length > 0 && renderGroup('custom', 'Custom Tests', grouped.custom, customStats)}
-        {grouped.postman.length > 0 && renderGroup('postman', 'Postman Tests', grouped.postman, postmanStats)}
+        {grouped.custom.length > 0 &&
+          renderGroup('custom', 'Custom Tests', grouped.custom, customStats)}
+        {grouped.postman.length > 0 &&
+          renderGroup('postman', 'Postman Tests', grouped.postman, postmanStats)}
       </div>
     </div>
   );

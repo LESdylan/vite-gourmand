@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {Slot} from "@radix-ui/react-slot";
-import {cva, type VariantProps} from "class-variance-authority";
-import { cn } from "../utils";
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../utils';
 
 /**
  * Button variants following the graphical chart:
@@ -17,56 +17,67 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Primary - Deep Bordeaux
-        default: "bg-[#722F37] text-white hover:bg-[#5a252c] focus-visible:ring-[#722F37] shadow-lg shadow-[#722F37]/20 hover:shadow-[#722F37]/30",
+        default:
+          'bg-[#722F37] text-white hover:bg-[#5a252c] focus-visible:ring-[#722F37] shadow-lg shadow-[#722F37]/20 hover:shadow-[#722F37]/30',
         // Champagne accent
-        champagne: "bg-[#D4AF37] text-[#1A1A1A] hover:bg-[#c9a431] focus-visible:ring-[#D4AF37] shadow-lg shadow-[#D4AF37]/20",
+        champagne:
+          'bg-[#D4AF37] text-[#1A1A1A] hover:bg-[#c9a431] focus-visible:ring-[#D4AF37] shadow-lg shadow-[#D4AF37]/20',
         // Destructive
-        destructive: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500 shadow-lg shadow-red-500/20",
+        destructive:
+          'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500 shadow-lg shadow-red-500/20',
         // Outline - Bordeaux border
-        outline: "border-2 border-[#722F37] bg-transparent text-[#722F37] hover:bg-[#722F37] hover:text-white focus-visible:ring-[#722F37]",
+        outline:
+          'border-2 border-[#722F37] bg-transparent text-[#722F37] hover:bg-[#722F37] hover:text-white focus-visible:ring-[#722F37]',
         // Outline light - for dark backgrounds — gradient fill on hover
-        outlineLight: "border-2 border-white/80 text-white focus-visible:ring-white relative overflow-hidden bg-transparent z-[1] before:absolute before:inset-0 before:z-[-1] before:bg-gradient-to-r before:from-[#D4AF37] before:to-[#f0d78c] before:origin-left before:scale-x-0 before:transition-transform before:duration-500 before:ease-out hover:before:scale-x-100 hover:text-[#1A1A1A] hover:border-[#D4AF37]",
+        outlineLight:
+          'border-2 border-white/80 text-white focus-visible:ring-white relative overflow-hidden bg-transparent z-[1] before:absolute before:inset-0 before:z-[-1] before:bg-gradient-to-r before:from-[#D4AF37] before:to-[#f0d78c] before:origin-left before:scale-x-0 before:transition-transform before:duration-500 before:ease-out hover:before:scale-x-100 hover:text-[#1A1A1A] hover:border-[#D4AF37]',
         // Secondary - Light cream
-        secondary: "bg-[#FFF8F0] text-[#722F37] hover:bg-[#f5ede3] focus-visible:ring-[#722F37] border border-[#722F37]/10",
+        secondary:
+          'bg-[#FFF8F0] text-[#722F37] hover:bg-[#f5ede3] focus-visible:ring-[#722F37] border border-[#722F37]/10',
         // Ghost
-        ghost: "text-[#1A1A1A] hover:bg-[#FFF8F0] hover:text-[#722F37] focus-visible:ring-[#722F37]",
+        ghost:
+          'text-[#1A1A1A] hover:bg-[#FFF8F0] hover:text-[#722F37] focus-visible:ring-[#722F37]',
         // Link
-        link: "text-[#722F37] underline-offset-4 hover:underline focus-visible:ring-[#722F37]",
+        link: 'text-[#722F37] underline-offset-4 hover:underline focus-visible:ring-[#722F37]',
         // Olive/Success
-        success: "bg-[#556B2F] text-white hover:bg-[#475a27] focus-visible:ring-[#556B2F] shadow-lg shadow-[#556B2F]/20",
+        success:
+          'bg-[#556B2F] text-white hover:bg-[#475a27] focus-visible:ring-[#556B2F] shadow-lg shadow-[#556B2F]/20',
       },
       size: {
-        default: "h-11 px-6 py-2 text-sm rounded-lg",
-        sm: "h-9 px-4 py-2 text-sm rounded-lg",
-        lg: "h-12 px-8 py-3 text-base rounded-xl",
-        xl: "h-14 px-10 py-4 text-lg rounded-xl",
-        icon: "size-10 rounded-lg",
+        default: 'h-11 px-6 py-2 text-sm rounded-lg',
+        sm: 'h-9 px-4 py-2 text-sm rounded-lg',
+        lg: 'h-12 px-8 py-3 text-base rounded-xl',
+        xl: 'h-14 px-10 py-4 text-lg rounded-xl',
+        icon: 'size-10 rounded-lg',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
   },
 );
 
 function Button({
-	className,
-	variant,
-	size,
-	asChild = false,
-	...props
-}: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants> & {
-	asChild?: boolean;
-}) {
-	const Comp = asChild ? Slot : "button";
+  className,
+  variant,
+  size,
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  }) {
+  const Comp = asChild ? Slot : 'button';
 
-	return (
-		<Comp data-slot="button"
-		className={cn(buttonVariants({variant, size, className}))}
-		{...props}
-		/>
-	);
+  return (
+    <Comp
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants };

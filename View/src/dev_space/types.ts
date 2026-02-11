@@ -3,12 +3,7 @@
  * Developer dashboard uses DevBoard categories
  */
 
-export type DevCategory = 
-  | 'overview'
-  | 'tests'
-  | 'api'
-  | 'database'
-  | 'activity';
+export type DevCategory = 'overview' | 'tests' | 'api' | 'database' | 'activity';
 
 export interface DevCategoryItem {
   id: DevCategory;

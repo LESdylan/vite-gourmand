@@ -72,7 +72,7 @@ export function KanbanColumn({
               placeholder="Nom de la colonne"
             />
             <div className="column-edit-colors">
-              {['#6b8e23', '#c9a227', '#3b82f6', '#722f37', '#8b5cf6', '#f97316'].map(color => (
+              {['#6b8e23', '#c9a227', '#3b82f6', '#722f37', '#8b5cf6', '#f97316'].map((color) => (
                 <button
                   key={color}
                   className={`color-option ${editColor === color ? 'selected' : ''}`}
@@ -83,8 +83,12 @@ export function KanbanColumn({
               ))}
             </div>
             <div className="column-edit-actions">
-              <button className="btn-save" onClick={handleSave}>✓</button>
-              <button className="btn-cancel" onClick={onEditCancel}>✕</button>
+              <button className="btn-save" onClick={handleSave}>
+                ✓
+              </button>
+              <button className="btn-cancel" onClick={onEditCancel}>
+                ✕
+              </button>
             </div>
           </div>
         ) : (
@@ -101,7 +105,11 @@ export function KanbanColumn({
               <button className="column-action-btn" onClick={onEditStart} aria-label="Modifier">
                 ✏️
               </button>
-              <button className="column-action-btn delete" onClick={onDelete} aria-label="Supprimer">
+              <button
+                className="column-action-btn delete"
+                onClick={onDelete}
+                aria-label="Supprimer"
+              >
                 🗑️
               </button>
             </div>
@@ -111,7 +119,7 @@ export function KanbanColumn({
 
       {/* Tasks */}
       <div className="column-tasks">
-        {column.tasks.map(task => (
+        {column.tasks.map((task) => (
           <TaskCard
             key={task.id}
             task={task}
@@ -122,11 +130,7 @@ export function KanbanColumn({
         ))}
 
         {/* Empty state */}
-        {column.tasks.length === 0 && (
-          <div className="column-empty">
-            Déposez une commande ici
-          </div>
-        )}
+        {column.tasks.length === 0 && <div className="column-empty">Déposez une commande ici</div>}
       </div>
 
       {/* Add Card Placeholder */}

@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ContactService } from './contact.service';
 import { PrismaService } from '../prisma';
+import { MailService } from '../mail/mail.service';
 
 describe('ContactService', () => {
   let service: ContactService;
@@ -24,12 +26,27 @@ describe('ContactService', () => {
         create: jest.fn(),
         delete: jest.fn(),
       },
+      supportTicket: {
+        create: jest.fn().mockResolvedValue({ id: 1, ticket_number: 'TK202602-ABC123' }),
+      },
+    };
+
+    const mockMailService = {
+      send: jest.fn().mockResolvedValue(undefined),
+      sendContactConfirmation: jest.fn().mockResolvedValue(undefined),
+      sendOwnerNotification: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const mockConfigService = {
+      get: jest.fn().mockReturnValue('test@example.com'),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ContactService,
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: MailService, useValue: mockMailService },
+        { provide: ConfigService, useValue: mockConfigService },
       ],
     }).compile();
 
@@ -87,6 +104,7 @@ describe('ContactService', () => {
   describe('create', () => {
     it('should create a contact message', async () => {
       const createDto = {
+        name: 'New User',
         title: 'New Subject',
         description: 'New message',
         email: 'new@example.com',

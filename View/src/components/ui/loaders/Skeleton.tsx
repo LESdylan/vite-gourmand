@@ -12,18 +12,13 @@ interface SkeletonProps {
   lines?: number;
 }
 
-export function Skeleton({
-  variant = 'text',
-  width,
-  height,
-  lines = 1,
-}: SkeletonProps) {
+export function Skeleton({ variant = 'text', width, height, lines = 1 }: SkeletonProps) {
   const style = buildStyle(width, height);
-  
+
   if (variant === 'text' && lines > 1) {
     return <SkeletonLines count={lines} />;
   }
-  
+
   return <div className={`skeleton skeleton-${variant}`} style={style} />;
 }
 
@@ -38,7 +33,11 @@ function SkeletonLines({ count }: { count: number }) {
   return (
     <div className="skeleton-lines">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="skeleton skeleton-text" style={{ width: i === count - 1 ? '60%' : '100%' }} />
+        <div
+          key={i}
+          className="skeleton skeleton-text"
+          style={{ width: i === count - 1 ? '60%' : '100%' }}
+        />
       ))}
     </div>
   );

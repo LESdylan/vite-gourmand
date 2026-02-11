@@ -20,7 +20,7 @@ export function ProgressBar({
 }: ProgressBarProps) {
   const percentage = calculatePercentage(value, max);
   const classes = buildClasses(variant);
-  
+
   return (
     <div className="progress-bar-container">
       <div

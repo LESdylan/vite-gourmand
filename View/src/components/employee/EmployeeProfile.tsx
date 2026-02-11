@@ -85,7 +85,9 @@ export function EmployeeProfile() {
 function ProfileField({ label, value }: { label: string; value: string }) {
   return (
     <div className="task-item">
-      <span className="task-label" style={{ minWidth: '120px', color: 'var(--color-text-muted)' }}>{label}</span>
+      <span className="task-label" style={{ minWidth: '120px', color: 'var(--color-text-muted)' }}>
+        {label}
+      </span>
       <span style={{ flex: 1, textAlign: 'right' }}>{value}</span>
     </div>
   );

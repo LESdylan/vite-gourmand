@@ -47,12 +47,18 @@ export function ClientSupport() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [form, setForm] = useState<NewTicketForm>({ subject: '', description: '', category: 'order' });
+  const [form, setForm] = useState<NewTicketForm>({
+    subject: '',
+    description: '',
+    category: 'order',
+  });
   const [submitting, setSubmitting] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
 
-  useEffect(() => { fetchTickets(); }, []);
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
   async function fetchTickets() {
     setLoading(true);
@@ -83,7 +89,9 @@ export function ClientSupport() {
       setForm({ subject: '', description: '', category: 'order' });
       setShowForm(false);
       await fetchTickets();
-    } catch { /* silent */ } finally {
+    } catch {
+      /* silent */
+    } finally {
       setSubmitting(false);
     }
   }
@@ -98,9 +106,13 @@ export function ClientSupport() {
       });
       setReplyText('');
       // Refresh ticket detail
-      const res = await apiRequest<{ data: Ticket }>(`/api/support/ticket/${selectedTicket?.ticket_number}`);
+      const res = await apiRequest<{ data: Ticket }>(
+        `/api/support/ticket/${selectedTicket?.ticket_number}`,
+      );
       setSelectedTicket(res.data);
-    } catch { /* silent */ } finally {
+    } catch {
+      /* silent */
+    } finally {
       setSending(false);
     }
   }
@@ -135,21 +147,31 @@ export function ClientSupport() {
           <span className="support-category">{getCategoryLabel(selectedTicket.category)}</span>
           <span className="client-order-date">
             {new Date(selectedTicket.created_at).toLocaleDateString('fr-FR', {
-              day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
             })}
           </span>
         </div>
 
         <div className="support-messages">
-          {selectedTicket.messages?.map(msg => (
-            <div key={msg.id} className={`support-message ${msg.sender_type === 'customer' ? 'support-message--mine' : 'support-message--agent'}`}>
+          {selectedTicket.messages?.map((msg) => (
+            <div
+              key={msg.id}
+              className={`support-message ${msg.sender_type === 'customer' ? 'support-message--mine' : 'support-message--agent'}`}
+            >
               <div className="support-message-header">
                 <span className="support-message-sender">
                   {msg.sender_type === 'customer' ? '👤 Vous' : '🎧 Support'}
                 </span>
                 <span className="support-message-date">
                   {new Date(msg.created_at).toLocaleString('fr-FR', {
-                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
                   })}
                 </span>
               </div>
@@ -162,7 +184,7 @@ export function ClientSupport() {
           <div className="support-reply-box">
             <textarea
               value={replyText}
-              onChange={e => setReplyText(e.target.value)}
+              onChange={(e) => setReplyText(e.target.value)}
               placeholder="Écrire un message…"
               className="client-textarea"
               rows={3}
@@ -196,51 +218,61 @@ export function ClientSupport() {
       {showForm && (
         <form className="support-form" onSubmit={handleSubmit}>
           <div className="client-form-group">
-            <label className="client-label" htmlFor="support-category">Catégorie</label>
+            <label className="client-label" htmlFor="support-category">
+              Catégorie
+            </label>
             <select
               id="support-category"
               className="client-select"
               value={form.category}
-              onChange={e => setForm({ ...form, category: e.target.value })}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
             >
-              {CATEGORIES.map(c => (
-                <option key={c.value} value={c.value}>{c.label}</option>
+              {CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
               ))}
             </select>
           </div>
 
           <div className="client-form-group">
-            <label className="client-label" htmlFor="support-subject">Sujet</label>
+            <label className="client-label" htmlFor="support-subject">
+              Sujet
+            </label>
             <input
               id="support-subject"
               className="client-input"
               type="text"
               value={form.subject}
-              onChange={e => setForm({ ...form, subject: e.target.value })}
+              onChange={(e) => setForm({ ...form, subject: e.target.value })}
               placeholder="Décrivez brièvement votre problème"
               required
             />
           </div>
 
           <div className="client-form-group">
-            <label className="client-label" htmlFor="support-order-id">N° de commande (optionnel)</label>
+            <label className="client-label" htmlFor="support-order-id">
+              N° de commande (optionnel)
+            </label>
             <input
               id="support-order-id"
               className="client-input"
               type="text"
               value={form.orderId || ''}
-              onChange={e => setForm({ ...form, orderId: e.target.value })}
+              onChange={(e) => setForm({ ...form, orderId: e.target.value })}
               placeholder="ex: 1234"
             />
           </div>
 
           <div className="client-form-group">
-            <label className="client-label" htmlFor="support-description">Description</label>
+            <label className="client-label" htmlFor="support-description">
+              Description
+            </label>
             <textarea
               id="support-description"
               className="client-textarea"
               value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Détaillez votre demande…"
               rows={5}
               required
@@ -269,14 +301,21 @@ export function ClientSupport() {
       )}
       {!loading && tickets.length > 0 && (
         <div className="support-tickets-list">
-          {tickets.map(ticket => (
-            <button type="button" key={ticket.id} className="support-ticket-card" onClick={() => viewTicket(ticket)}>
+          {tickets.map((ticket) => (
+            <button
+              type="button"
+              key={ticket.id}
+              className="support-ticket-card"
+              onClick={() => viewTicket(ticket)}
+            >
               <div className="support-ticket-left">
                 <span className="support-ticket-number">#{ticket.ticket_number}</span>
                 <h4 className="support-ticket-subject">{ticket.subject}</h4>
                 <span className="support-ticket-date">
                   {new Date(ticket.created_at).toLocaleDateString('fr-FR', {
-                    day: 'numeric', month: 'short', year: 'numeric'
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
                   })}
                 </span>
               </div>
@@ -306,6 +345,6 @@ function getStatusLabel(status: string): string {
 }
 
 function getCategoryLabel(category: string): string {
-  const found = CATEGORIES.find(c => c.value === category);
+  const found = CATEGORIES.find((c) => c.value === category);
   return found?.label || category;
 }

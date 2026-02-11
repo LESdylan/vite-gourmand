@@ -54,42 +54,45 @@ export function AdminAiAgent() {
   // Fetch agent status on mount
   useEffect(() => {
     apiRequest<{ data: AgentStatus } | AgentStatus>('/api/ai-agent/status')
-      .then(res => setStatus('data' in res ? res.data : res))
+      .then((res) => setStatus('data' in res ? res.data : res))
       .catch(() => setStatus(null));
   }, []);
 
-  const sendMessage = useCallback(async (text?: string) => {
-    const msg = text || input.trim();
-    if (!msg || loading) return;
+  const sendMessage = useCallback(
+    async (text?: string) => {
+      const msg = text || input.trim();
+      if (!msg || loading) return;
 
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: msg }]);
-    setLoading(true);
+      setInput('');
+      setMessages((prev) => [...prev, { role: 'user', content: msg }]);
+      setLoading(true);
 
-    try {
-      const body: Record<string, unknown> = {
-        message: msg,
-      };
-      if (conversationId) body.conversationId = conversationId;
-      if (guestCount && !conversationId) body.guestCount = Number(guestCount);
-      if (budget && !conversationId) body.budgetPerPerson = Number(budget);
+      try {
+        const body: Record<string, unknown> = {
+          message: msg,
+        };
+        if (conversationId) body.conversationId = conversationId;
+        if (guestCount && !conversationId) body.guestCount = Number(guestCount);
+        if (budget && !conversationId) body.budgetPerPerson = Number(budget);
 
-      const raw = await apiRequest<{ data: ChatResponse } | ChatResponse>('/api/ai-agent/chat', {
-        method: 'POST',
-        body,
-      });
-      const res: ChatResponse = 'data' in raw ? raw.data : raw;
+        const raw = await apiRequest<{ data: ChatResponse } | ChatResponse>('/api/ai-agent/chat', {
+          method: 'POST',
+          body,
+        });
+        const res: ChatResponse = 'data' in raw ? raw.data : raw;
 
-      setConversationId(res.conversationId);
-      setMessages(prev => [...prev, { role: 'assistant', content: res.message }]);
-    } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : 'Erreur de communication';
-      setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ Erreur: ${errMsg}` }]);
-    } finally {
-      setLoading(false);
-      inputRef.current?.focus();
-    }
-  }, [input, loading, conversationId, guestCount, budget]);
+        setConversationId(res.conversationId);
+        setMessages((prev) => [...prev, { role: 'assistant', content: res.message }]);
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : 'Erreur de communication';
+        setMessages((prev) => [...prev, { role: 'assistant', content: `⚠️ Erreur: ${errMsg}` }]);
+      } finally {
+        setLoading(false);
+        inputRef.current?.focus();
+      }
+    },
+    [input, loading, conversationId, guestCount, budget],
+  );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -108,14 +111,38 @@ export function AdminAiAgent() {
   const hasStarted = messages.length > 0;
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#faf8f6', borderRadius: 16, overflow: 'hidden' }}>
+    <div
+      style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#faf8f6',
+        borderRadius: 16,
+        overflow: 'hidden',
+      }}
+    >
       {/* ── Header ─────────────────────────────────────────── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #722F37 0%, #8a3a44 60%, #D4AF37 100%)',
-        padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #722F37 0%, #8a3a44 60%, #D4AF37 100%)',
+          padding: '18px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
         <div>
-          <h2 style={{ margin: 0, color: 'white', fontSize: 17, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h2
+            style={{
+              margin: 0,
+              color: 'white',
+              fontSize: 17,
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
             🤖 Assistant Menu Personnalisé
           </h2>
           <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,.7)', fontSize: 12 }}>
@@ -124,11 +151,16 @@ export function AdminAiAgent() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {status && (
-            <span style={{
-              fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 20,
-              background: status.aiEnabled ? 'rgba(85,107,47,.25)' : 'rgba(255,255,255,.15)',
-              color: status.aiEnabled ? '#90EE90' : 'rgba(255,255,255,.6)',
-            }}>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                padding: '4px 10px',
+                borderRadius: 20,
+                background: status.aiEnabled ? 'rgba(85,107,47,.25)' : 'rgba(255,255,255,.15)',
+                color: status.aiEnabled ? '#90EE90' : 'rgba(255,255,255,.6)',
+              }}
+            >
               {status.aiEnabled ? `✅ ${status.model}` : '⚠️ Mode démo'}
             </span>
           )}
@@ -137,8 +169,14 @@ export function AdminAiAgent() {
               type="button"
               onClick={newConversation}
               style={{
-                background: 'rgba(255,255,255,.15)', border: 'none', color: 'white',
-                borderRadius: 8, padding: '6px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                background: 'rgba(255,255,255,.15)',
+                border: 'none',
+                color: 'white',
+                borderRadius: 8,
+                padding: '6px 14px',
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 600,
               }}
             >
               + Nouvelle discussion
@@ -149,20 +187,44 @@ export function AdminAiAgent() {
 
       {/* ── Welcome / Quick Setup ──────────────────────────── */}
       {!hasStarted && (
-        <div style={{ padding: 30, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div
+          style={{
+            padding: 30,
+            textAlign: 'center',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+        >
           <div style={{ fontSize: 50, marginBottom: 12 }}>🍽️</div>
           <h3 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 700, color: '#722F37' }}>
             Créer un menu personnalisé
           </h3>
-          <p style={{ margin: '0 0 24px', fontSize: 14, color: '#777', maxWidth: 500, marginInline: 'auto', lineHeight: 1.6 }}>
-            Décrivez les besoins de votre client et l'IA proposera un menu adapté
-            à partir de notre carte, en respectant le budget et les contraintes alimentaires.
+          <p
+            style={{
+              margin: '0 0 24px',
+              fontSize: 14,
+              color: '#777',
+              maxWidth: 500,
+              marginInline: 'auto',
+              lineHeight: 1.6,
+            }}
+          >
+            Décrivez les besoins de votre client et l'IA proposera un menu adapté à partir de notre
+            carte, en respectant le budget et les contraintes alimentaires.
           </p>
 
           {/* Quick params */}
-          <div style={{
-            display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24,
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 12,
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              marginBottom: 24,
+            }}
+          >
             <QuickParam
               icon="👥"
               label="Convives"
@@ -183,18 +245,31 @@ export function AdminAiAgent() {
 
           {/* Quick starters */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {QUICK_STARTERS.map(q => (
+            {QUICK_STARTERS.map((q) => (
               <button
                 type="button"
                 key={q.label}
                 onClick={() => sendMessage(q.prompt)}
                 style={{
-                  padding: '10px 18px', borderRadius: 12, border: '1px solid #e8e4e0',
-                  background: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 500,
-                  color: '#555', transition: 'all .15s', boxShadow: '0 1px 3px rgba(0,0,0,.04)',
+                  padding: '10px 18px',
+                  borderRadius: 12,
+                  border: '1px solid #e8e4e0',
+                  background: 'white',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: '#555',
+                  transition: 'all .15s',
+                  boxShadow: '0 1px 3px rgba(0,0,0,.04)',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#D4AF37'; e.currentTarget.style.color = '#722F37'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#e8e4e0'; e.currentTarget.style.color = '#555'; }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#D4AF37';
+                  e.currentTarget.style.color = '#722F37';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#e8e4e0';
+                  e.currentTarget.style.color = '#555';
+                }}
               >
                 {q.icon} {q.label}
               </button>
@@ -205,18 +280,32 @@ export function AdminAiAgent() {
 
       {/* ── Chat Messages ──────────────────────────────────── */}
       {hasStarted && (
-        <div ref={scrollRef} style={{
-          flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14,
-        }}>
+        <div
+          ref={scrollRef}
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '20px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+          }}
+        >
           {messages.map((msg, i) => (
             <ChatBubble key={`${msg.role}-${i}`} message={msg} />
           ))}
 
           {loading && (
-            <div style={{
-              alignSelf: 'flex-start', background: 'white', borderRadius: '16px 16px 16px 4px',
-              padding: '14px 20px', boxShadow: '0 1px 3px rgba(0,0,0,.06)', maxWidth: '80%',
-            }}>
+            <div
+              style={{
+                alignSelf: 'flex-start',
+                background: 'white',
+                borderRadius: '16px 16px 16px 4px',
+                padding: '14px 20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,.06)',
+                maxWidth: '80%',
+              }}
+            >
               <TypingDots />
             </div>
           )}
@@ -224,35 +313,63 @@ export function AdminAiAgent() {
       )}
 
       {/* ── Input Bar ──────────────────────────────────────── */}
-      <div style={{
-        padding: '14px 20px', background: 'white', borderTop: '1px solid #eee',
-        display: 'flex', gap: 10, alignItems: 'flex-end',
-      }}>
+      <div
+        style={{
+          padding: '14px 20px',
+          background: 'white',
+          borderTop: '1px solid #eee',
+          display: 'flex',
+          gap: 10,
+          alignItems: 'flex-end',
+        }}
+      >
         <textarea
           ref={inputRef}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Décrivez les besoins du client… (Entrée pour envoyer)"
           rows={1}
           style={{
-            flex: 1, resize: 'none', border: '1px solid #e0dcd8', borderRadius: 12,
-            padding: '12px 16px', fontSize: 14, fontFamily: 'inherit', lineHeight: 1.5,
-            outline: 'none', transition: 'border-color .15s', minHeight: 44, maxHeight: 120,
+            flex: 1,
+            resize: 'none',
+            border: '1px solid #e0dcd8',
+            borderRadius: 12,
+            padding: '12px 16px',
+            fontSize: 14,
+            fontFamily: 'inherit',
+            lineHeight: 1.5,
+            outline: 'none',
+            transition: 'border-color .15s',
+            minHeight: 44,
+            maxHeight: 120,
             overflow: 'auto',
           }}
-          onFocus={e => { e.currentTarget.style.borderColor = '#D4AF37'; }}
-          onBlur={e => { e.currentTarget.style.borderColor = '#e0dcd8'; }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = '#D4AF37';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = '#e0dcd8';
+          }}
         />
         <button
           type="button"
           onClick={() => sendMessage()}
           disabled={!input.trim() || loading}
           style={{
-            width: 44, height: 44, borderRadius: 12, border: 'none', cursor: 'pointer',
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            border: 'none',
+            cursor: 'pointer',
             background: input.trim() && !loading ? '#722F37' : '#ddd',
-            color: 'white', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'background .15s', flexShrink: 0,
+            color: 'white',
+            fontSize: 18,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background .15s',
+            flexShrink: 0,
           }}
           aria-label="Envoyer"
         >
@@ -270,23 +387,25 @@ export function AdminAiAgent() {
 function ChatBubble({ message }: Readonly<{ message: Message }>) {
   const isUser = message.role === 'user';
   return (
-    <div style={{
-      alignSelf: isUser ? 'flex-end' : 'flex-start',
-      maxWidth: '80%',
-    }}>
-      <div style={{
-        background: isUser
-          ? 'linear-gradient(135deg, #722F37, #8a3a44)'
-          : 'white',
-        color: isUser ? 'white' : '#333',
-        borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-        padding: '14px 18px',
-        fontSize: 14,
-        lineHeight: 1.7,
-        boxShadow: '0 1px 3px rgba(0,0,0,.06)',
-        whiteSpace: 'pre-wrap',
-        wordBreak: 'break-word',
-      }}>
+    <div
+      style={{
+        alignSelf: isUser ? 'flex-end' : 'flex-start',
+        maxWidth: '80%',
+      }}
+    >
+      <div
+        style={{
+          background: isUser ? 'linear-gradient(135deg, #722F37, #8a3a44)' : 'white',
+          color: isUser ? 'white' : '#333',
+          borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+          padding: '14px 18px',
+          fontSize: 14,
+          lineHeight: 1.7,
+          boxShadow: '0 1px 3px rgba(0,0,0,.06)',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+        }}
+      >
         <FormattedContent content={message.content} isUser={isUser} />
       </div>
     </div>
@@ -308,7 +427,12 @@ function FormattedContent({ content, isUser }: Readonly<{ content: string; isUse
 
         // Headers / decorative lines
         if (line.startsWith('═') || line.startsWith('───')) {
-          return <hr key={key} style={{ border: 'none', borderTop: '1px solid #e8e4e0', margin: '8px 0' }} />;
+          return (
+            <hr
+              key={key}
+              style={{ border: 'none', borderTop: '1px solid #e8e4e0', margin: '8px 0' }}
+            />
+          );
         }
 
         // Empty line
@@ -319,10 +443,17 @@ function FormattedContent({ content, isUser }: Readonly<{ content: string; isUse
         // Blockquote (> text)
         if (line.startsWith('> ')) {
           return (
-            <div key={key} style={{
-              borderLeft: '3px solid #D4AF37', paddingLeft: 12, margin: '6px 0',
-              fontSize: 12, color: '#888', fontStyle: 'italic',
-            }}>
+            <div
+              key={key}
+              style={{
+                borderLeft: '3px solid #D4AF37',
+                paddingLeft: 12,
+                margin: '6px 0',
+                fontSize: 12,
+                color: '#888',
+                fontStyle: 'italic',
+              }}
+            >
               <span dangerouslySetInnerHTML={{ __html: formatted.substring(2) }} />
             </div>
           );
@@ -338,7 +469,10 @@ function FormattedContent({ content, isUser }: Readonly<{ content: string; isUse
         }
 
         // Bullet with emoji or dash
-        if (/^[-•]\s/.test(line) || /^(?:[\u{1F300}-\u{1FAFF}]|\u2705|\u2728|\u26A0\uFE0F)/u.test(line)) {
+        if (
+          /^[-•]\s/.test(line) ||
+          /^(?:[\u{1F300}-\u{1FAFF}]|\u2705|\u2728|\u26A0\uFE0F)/u.test(line)
+        ) {
           return (
             <div key={key} style={{ paddingLeft: 4, margin: '3px 0' }}>
               <span dangerouslySetInnerHTML={{ __html: formatted }} />
@@ -356,7 +490,14 @@ function FormattedContent({ content, isUser }: Readonly<{ content: string; isUse
   );
 }
 
-function QuickParam({ icon, label, value, onChange, placeholder, type }: Readonly<{
+function QuickParam({
+  icon,
+  label,
+  value,
+  onChange,
+  placeholder,
+  type,
+}: Readonly<{
   icon: string;
   label: string;
   value: string;
@@ -365,23 +506,45 @@ function QuickParam({ icon, label, value, onChange, placeholder, type }: Readonl
   type: string;
 }>) {
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 8, background: 'white', borderRadius: 12,
-      border: '1px solid #e8e4e0', padding: '8px 14px', minWidth: 160,
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        background: 'white',
+        borderRadius: 12,
+        border: '1px solid #e8e4e0',
+        padding: '8px 14px',
+        minWidth: 160,
+      }}
+    >
       <span style={{ fontSize: 18 }}>{icon}</span>
       <div style={{ flex: 1 }}>
-        <label style={{ fontSize: 10, color: '#999', fontWeight: 600, textTransform: 'uppercase', letterSpacing: .5, display: 'block' }}>
+        <label
+          style={{
+            fontSize: 10,
+            color: '#999',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: 0.5,
+            display: 'block',
+          }}
+        >
           {label}
         </label>
         <input
           type={type}
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           style={{
-            border: 'none', outline: 'none', fontSize: 14, fontWeight: 600, width: '100%',
-            color: '#333', background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            fontSize: 14,
+            fontWeight: 600,
+            width: '100%',
+            color: '#333',
+            background: 'transparent',
           }}
         />
       </div>
@@ -392,11 +555,14 @@ function QuickParam({ icon, label, value, onChange, placeholder, type }: Readonl
 function TypingDots() {
   return (
     <div style={{ display: 'flex', gap: 5, alignItems: 'center', height: 20 }}>
-      {[0, 1, 2].map(i => (
+      {[0, 1, 2].map((i) => (
         <div
           key={i}
           style={{
-            width: 8, height: 8, borderRadius: '50%', background: '#bbb',
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: '#bbb',
             animation: `typing-bounce 1.2s ease-in-out ${i * 0.15}s infinite`,
           }}
         />
@@ -414,9 +580,31 @@ function TypingDots() {
 /* ── constants ────────────────────────────────────────────── */
 
 const QUICK_STARTERS = [
-  { icon: '🎉', label: 'Anniversaire', prompt: 'Je cherche un menu pour un anniversaire. Qu\'est-ce que vous proposez ?' },
-  { icon: '💍', label: 'Mariage', prompt: 'Je dois préparer un menu de mariage. Quelles sont les options disponibles ?' },
-  { icon: '🏢', label: 'Séminaire', prompt: 'Je cherche un menu pour un séminaire d\'entreprise, quelque chose de professionnel mais convivial.' },
-  { icon: '🥗', label: 'Végétarien', prompt: 'Mon client a besoin d\'un menu entièrement végétarien. Que pouvez-vous proposer ?' },
-  { icon: '💰', label: 'Petit budget', prompt: 'J\'ai un client avec un budget serré, environ 20€ par personne. Quelles options avons-nous ?' },
+  {
+    icon: '🎉',
+    label: 'Anniversaire',
+    prompt: "Je cherche un menu pour un anniversaire. Qu'est-ce que vous proposez ?",
+  },
+  {
+    icon: '💍',
+    label: 'Mariage',
+    prompt: 'Je dois préparer un menu de mariage. Quelles sont les options disponibles ?',
+  },
+  {
+    icon: '🏢',
+    label: 'Séminaire',
+    prompt:
+      "Je cherche un menu pour un séminaire d'entreprise, quelque chose de professionnel mais convivial.",
+  },
+  {
+    icon: '🥗',
+    label: 'Végétarien',
+    prompt: "Mon client a besoin d'un menu entièrement végétarien. Que pouvez-vous proposer ?",
+  },
+  {
+    icon: '💰',
+    label: 'Petit budget',
+    prompt:
+      "J'ai un client avec un budget serré, environ 20€ par personne. Quelles options avons-nous ?",
+  },
 ];

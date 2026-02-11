@@ -24,31 +24,25 @@ export function AdminMenu() {
       </div>
 
       <div className="menu-grid">
-        <MenuItem 
-          name="Pizza Margherita" 
-          category="Plats" 
-          price="12.50€" 
+        <MenuItem
+          name="Pizza Margherita"
+          category="Plats"
+          price="12.50€"
           available={true}
           emoji="🍕"
         />
-        <MenuItem 
-          name="Salade César" 
-          category="Entrées" 
-          price="8.90€" 
+        <MenuItem
+          name="Salade César"
+          category="Entrées"
+          price="8.90€"
           available={true}
           emoji="🥗"
         />
-        <MenuItem 
-          name="Tiramisu" 
-          category="Desserts" 
-          price="6.50€" 
-          available={false}
-          emoji="🍰"
-        />
-        <MenuItem 
-          name="Burger Gourmet" 
-          category="Plats" 
-          price="15.90€" 
+        <MenuItem name="Tiramisu" category="Desserts" price="6.50€" available={false} emoji="🍰" />
+        <MenuItem
+          name="Burger Gourmet"
+          category="Plats"
+          price="15.90€"
           available={true}
           emoji="🍔"
         />
@@ -79,8 +73,12 @@ function MenuItem({ name, category, price, available, emoji }: MenuItemProps) {
           <input type="checkbox" checked={available} readOnly />
           <span className="toggle-slider"></span>
         </label>
-        <button className="btn-icon" title="Modifier">✏️</button>
-        <button className="btn-icon" title="Supprimer">🗑️</button>
+        <button className="btn-icon" title="Modifier">
+          ✏️
+        </button>
+        <button className="btn-icon" title="Supprimer">
+          🗑️
+        </button>
       </div>
     </div>
   );

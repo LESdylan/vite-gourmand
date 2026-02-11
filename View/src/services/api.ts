@@ -15,7 +15,7 @@ interface ApiOptions {
 
 class ApiError extends Error {
   status: number;
-  
+
   constructor(status: number, message: string) {
     super(message);
     this.name = 'ApiError';
@@ -48,13 +48,13 @@ export function isAuthenticated(): boolean {
 /** Make API request with auth handling */
 export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const { method = 'GET', body, headers = {} } = options;
-  
+
   const token = getToken();
   const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     ...headers,
   };
-  
+
   if (token) {
     requestHeaders['Authorization'] = `Bearer ${token}`;
   }

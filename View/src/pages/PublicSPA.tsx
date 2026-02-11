@@ -1,6 +1,6 @@
 /**
  * PublicSPA - Single Page Application for public-facing website
- * 
+ *
  * This component handles all public pages (Home, Menus, Contact, Legal)
  * using internal state navigation to maintain SPA efficiency.
  * Smooth transitions between pages give the impression of content changing
@@ -18,14 +18,19 @@ import PromoBanner from '../components/layout/PromoBanner';
 import NotificationPanel from '../components/layout/NotificationPanel';
 import { PublicDataProvider } from '../contexts/PublicDataContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
-import {
-  fetchActivePromotions,
-  type ActivePromotion,
-} from '../services/public';
+import { fetchActivePromotions, type ActivePromotion } from '../services/public';
 
 interface PublicSPAProps {
   user?: UserType | null;
   onLogout?: () => void;
+}
+
+/** Redirect component to avoid side-effects during render */
+function RedirectToDashboard() {
+  useEffect(() => {
+    window.location.href = '/dashboard';
+  }, []);
+  return null;
 }
 
 export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
@@ -69,17 +74,20 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   }, []);
 
   // Handler for ordering from menus page
-  const handleOrderMenu = useCallback((menuId: number) => {
-    setOrderMenuId(menuId);
-    handlePageChange('order');
-  }, [handlePageChange]);
+  const handleOrderMenu = useCallback(
+    (menuId: number) => {
+      setOrderMenuId(menuId);
+      handlePageChange('order');
+    },
+    [handlePageChange],
+  );
 
   // Render the current page content based on internal navigation state
   const renderPage = () => {
     switch (displayedPage) {
       case 'home':
         return <HomePage setCurrentPage={handlePageChange} />;
-      
+
       case 'menu':
         return (
           <>
@@ -87,7 +95,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
             <Footer setCurrentPage={handlePageChange} />
           </>
         );
-      
+
       case 'order':
         return (
           <>
@@ -95,7 +103,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
             <Footer setCurrentPage={handlePageChange} />
           </>
         );
-      
+
       case 'contact':
         return (
           <>
@@ -103,7 +111,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
             <Footer setCurrentPage={handlePageChange} />
           </>
         );
-      
+
       case 'legal-mentions':
         return (
           <>
@@ -111,7 +119,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
             <Footer setCurrentPage={handlePageChange} />
           </>
         );
-      
+
       case 'legal-cgv':
         return (
           <>
@@ -119,11 +127,10 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
             <Footer setCurrentPage={handlePageChange} />
           </>
         );
-      
+
       case 'user-profile':
-        window.location.href = '/dashboard';
-        return null;
-      
+        return <RedirectToDashboard />;
+
       default:
         return <HomePage setCurrentPage={handlePageChange} />;
     }
@@ -134,35 +141,41 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
 
   return (
     <NotificationProvider>
-    <PublicDataProvider>
-      <div className="min-h-screen bg-[#FFF8F0]">
-        {/* Promotional banner — fixed at very top */}
-        <PromoBanner promotions={promotions} onDismiss={handleBannerDismiss} onHeightChange={handleBannerHeightChange} />
+      <PublicDataProvider>
+        <div className="min-h-screen bg-[#FFF8F0]">
+          {/* Promotional banner — fixed at very top */}
+          <PromoBanner
+            promotions={promotions}
+            onDismiss={handleBannerDismiss}
+            onHeightChange={handleBannerHeightChange}
+          />
 
-        {/* Navigation — fixed, sits right below the banner */}
-        <Navbar
-          currentPage={currentPage}
-          setCurrentPage={handlePageChange}
-          user={user}
-          onLogout={onLogout}
-          topOffset={bannerHeight}
-        />
+          {/* Navigation — fixed, sits right below the banner */}
+          <Navbar
+            currentPage={currentPage}
+            setCurrentPage={handlePageChange}
+            user={user}
+            onLogout={onLogout}
+            topOffset={bannerHeight}
+          />
 
-        {/* Floating notification panel — below navbar */}
-        <NotificationPanel topOffset={bannerHeight + navHeight} />
-        
-        {/* Main content with smooth transition */}
-        <main 
-          ref={mainRef}
-          className={`transition-opacity duration-150 ease-in-out ${
-            isTransitioning ? 'opacity-0' : 'opacity-100'
-          }`}
-          style={currentPage !== 'home' ? { paddingTop: `${bannerHeight + navHeight}px` } : undefined}
-        >
-          {renderPage()}
-        </main>
-      </div>
-    </PublicDataProvider>
+          {/* Floating notification panel — below navbar */}
+          <NotificationPanel topOffset={bannerHeight + navHeight} />
+
+          {/* Main content with smooth transition */}
+          <main
+            ref={mainRef}
+            className={`transition-opacity duration-150 ease-in-out ${
+              isTransitioning ? 'opacity-0' : 'opacity-100'
+            }`}
+            style={
+              currentPage !== 'home' ? { paddingTop: `${bannerHeight + navHeight}px` } : undefined
+            }
+          >
+            {renderPage()}
+          </main>
+        </div>
+      </PublicDataProvider>
     </NotificationProvider>
   );
 }

@@ -31,10 +31,9 @@ export function TaskDetailModal({
   const [editDescription, setEditDescription] = useState(task.description || '');
   const [showTagPicker, setShowTagPicker] = useState(false);
 
-  const completedCount = task.subtasks.filter(st => st.completed).length;
-  const progress = task.subtasks.length > 0 
-    ? Math.round((completedCount / task.subtasks.length) * 100) 
-    : 0;
+  const completedCount = task.subtasks.filter((st) => st.completed).length;
+  const progress =
+    task.subtasks.length > 0 ? Math.round((completedCount / task.subtasks.length) * 100) : 0;
 
   const handleAddSubtask = () => {
     if (newSubtask.trim()) {
@@ -51,10 +50,8 @@ export function TaskDetailModal({
   };
 
   const handleToggleTag = (tag: KanbanTag) => {
-    const hasTag = task.tags.some(t => t.id === tag.id);
-    const newTags = hasTag
-      ? task.tags.filter(t => t.id !== tag.id)
-      : [...task.tags, tag];
+    const hasTag = task.tags.some((t) => t.id === tag.id);
+    const newTags = hasTag ? task.tags.filter((t) => t.id !== tag.id) : [...task.tags, tag];
     onUpdate({ tags: newTags });
   };
 
@@ -84,18 +81,15 @@ export function TaskDetailModal({
                 autoFocus
               />
             ) : (
-              <h2 
-                className="task-modal-title"
-                onClick={() => setIsEditingTitle(true)}
-              >
+              <h2 className="task-modal-title" onClick={() => setIsEditingTitle(true)}>
                 {task.title}
               </h2>
             )}
-            <span className={`task-priority-badge priority-${task.priority}`}>
-              {task.priority}
-            </span>
+            <span className={`task-priority-badge priority-${task.priority}`}>{task.priority}</span>
           </div>
-          <button className="task-modal-close" onClick={onClose}>×</button>
+          <button className="task-modal-close" onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <div className="task-modal-body">
@@ -120,7 +114,7 @@ export function TaskDetailModal({
                 ✅ Checklist
                 <span className="progress-badge">{progress}%</span>
               </h3>
-              
+
               {/* Progress bar */}
               <div className="subtask-progress">
                 <div className="subtask-progress-fill" style={{ width: `${progress}%` }} />
@@ -128,7 +122,7 @@ export function TaskDetailModal({
 
               {/* Subtask list */}
               <div className="subtask-list">
-                {task.subtasks.map(subtask => (
+                {task.subtasks.map((subtask) => (
                   <label key={subtask.id} className="subtask-item">
                     <input
                       type="checkbox"
@@ -153,7 +147,9 @@ export function TaskDetailModal({
                   placeholder="Ajouter une sous-tâche..."
                   className="add-subtask-input"
                 />
-                <button onClick={handleAddSubtask} className="add-subtask-btn">+</button>
+                <button onClick={handleAddSubtask} className="add-subtask-btn">
+                  +
+                </button>
               </div>
             </div>
 
@@ -162,14 +158,14 @@ export function TaskDetailModal({
               <div className="task-section">
                 <h3 className="section-title">💬 Messages ({task.messages.length})</h3>
                 <div className="message-list">
-                  {task.messages.map(msg => (
+                  {task.messages.map((msg) => (
                     <div key={msg.id} className={`message-item ${msg.senderRole}`}>
                       <div className="message-header">
                         <span className="message-sender">{msg.senderName}</span>
                         <span className="message-time">
-                          {new Date(msg.timestamp).toLocaleTimeString('fr-FR', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
+                          {new Date(msg.timestamp).toLocaleTimeString('fr-FR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
                           })}
                         </span>
                       </div>
@@ -187,7 +183,7 @@ export function TaskDetailModal({
             <div className="sidebar-section">
               <h4 className="sidebar-title">Priorité</h4>
               <div className="priority-options">
-                {(['urgent', 'high', 'medium', 'low'] as const).map(p => (
+                {(['urgent', 'high', 'medium', 'low'] as const).map((p) => (
                   <button
                     key={p}
                     className={`priority-option ${task.priority === p ? 'active' : ''} priority-${p}`}
@@ -204,36 +200,30 @@ export function TaskDetailModal({
             <div className="sidebar-section">
               <h4 className="sidebar-title">
                 Tags
-                <button 
-                  className="add-tag-btn"
-                  onClick={() => setShowTagPicker(!showTagPicker)}
-                >
+                <button className="add-tag-btn" onClick={() => setShowTagPicker(!showTagPicker)}>
                   +
                 </button>
               </h4>
               <div className="current-tags">
-                {task.tags.map(tag => (
+                {task.tags.map((tag) => (
                   <span
                     key={tag.id}
                     className="tag-chip"
                     style={{ backgroundColor: `${tag.color}30`, color: tag.color }}
                   >
                     {tag.name}
-                    <button 
-                      className="tag-remove"
-                      onClick={() => handleToggleTag(tag)}
-                    >
+                    <button className="tag-remove" onClick={() => handleToggleTag(tag)}>
                       ×
                     </button>
                   </span>
                 ))}
               </div>
-              
+
               {showTagPicker && (
                 <div className="tag-picker">
                   {availableTags
-                    .filter(tag => !task.tags.some(t => t.id === tag.id))
-                    .map(tag => (
+                    .filter((tag) => !task.tags.some((t) => t.id === tag.id))
+                    .map((tag) => (
                       <button
                         key={tag.id}
                         className="tag-option"

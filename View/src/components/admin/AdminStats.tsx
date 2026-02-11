@@ -22,7 +22,13 @@ export function AdminStats() {
       </div>
 
       <div className="stats-grid">
-        <StatCard label="Chiffre d'affaires" value="8,450€" change="+15%" icon="💰" variant="success" />
+        <StatCard
+          label="Chiffre d'affaires"
+          value="8,450€"
+          change="+15%"
+          icon="💰"
+          variant="success"
+        />
         <StatCard label="Commandes" value="187" change="+8%" icon="📦" />
         <StatCard label="Panier moyen" value="45.20€" change="+3%" icon="🛒" />
         <StatCard label="Nouveaux clients" value="23" change="+12%" icon="👤" variant="warning" />
@@ -66,7 +72,17 @@ function StatCard({ label, value, change, icon, variant }: StatCardProps) {
   );
 }
 
-function RankingItem({ rank, name, count, maxCount }: { rank: number; name: string; count: number; maxCount: number }) {
+function RankingItem({
+  rank,
+  name,
+  count,
+  maxCount,
+}: {
+  rank: number;
+  name: string;
+  count: number;
+  maxCount: number;
+}) {
   const percentage = (count / maxCount) * 100;
   return (
     <div className="ranking-item">

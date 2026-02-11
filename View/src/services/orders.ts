@@ -8,9 +8,9 @@ import { apiRequest } from './api';
 // Re-export icon helper from components
 export { getStatusIcon } from '../components/icons/OrderStatusIcons';
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'
-  | 'confirmed' 
+  | 'confirmed'
   | 'preparing'
   | 'cooking'
   | 'assembling'
@@ -44,14 +44,14 @@ export interface Order {
 
 /** Matches backend CreateOrderDto */
 export interface CreateOrderData {
-  deliveryDate: string;       // ISO date string e.g. "2024-06-15"
-  deliveryHour: string;       // HH:MM format e.g. "12:00"
+  deliveryDate: string; // ISO date string e.g. "2024-06-15"
+  deliveryHour: string; // HH:MM format e.g. "12:00"
   deliveryAddress: string;
   personNumber: number;
   menuPrice: number;
   totalPrice: number;
   specialInstructions?: string;
-  menuId?: number;            // will be added to backend
+  menuId?: number; // will be added to backend
 }
 
 export interface OrderQuery {
@@ -81,9 +81,11 @@ export async function getOrders(query?: OrderQuery): Promise<PaginatedOrders> {
   if (query?.limit) params.set('limit', String(query.limit));
   if (query?.fromDate) params.set('fromDate', query.fromDate);
   if (query?.toDate) params.set('toDate', query.toDate);
-  
+
   const queryString = params.toString();
-  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(`/api/orders${queryString ? `?${queryString}` : ''}`);
+  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(
+    `/api/orders${queryString ? `?${queryString}` : ''}`,
+  );
   return resp.data;
 }
 
@@ -93,7 +95,9 @@ export async function getMyOrders(query?: OrderQuery): Promise<PaginatedOrders> 
   if (query?.page) params.set('page', String(query.page));
   if (query?.limit) params.set('limit', String(query.limit));
   const queryString = params.toString();
-  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(`/api/orders/my${queryString ? `?${queryString}` : ''}`);
+  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(
+    `/api/orders/my${queryString ? `?${queryString}` : ''}`,
+  );
   return resp.data;
 }
 
@@ -110,8 +114,14 @@ export async function createOrder(data: CreateOrderData): Promise<Order> {
 }
 
 /** Update order */
-export async function updateOrder(id: number, data: Partial<Pick<CreateOrderData, 'deliveryAddress' | 'deliveryHour' | 'specialInstructions'>>): Promise<Order> {
-  const resp = await apiRequest<ApiWrapper<Order>>(`/api/orders/${id}`, { method: 'PATCH', body: data });
+export async function updateOrder(
+  id: number,
+  data: Partial<Pick<CreateOrderData, 'deliveryAddress' | 'deliveryHour' | 'specialInstructions'>>,
+): Promise<Order> {
+  const resp = await apiRequest<ApiWrapper<Order>>(`/api/orders/${id}`, {
+    method: 'PATCH',
+    body: data,
+  });
   return resp.data;
 }
 

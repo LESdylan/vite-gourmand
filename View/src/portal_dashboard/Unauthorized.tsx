@@ -28,13 +28,13 @@ export function Unauthorized() {
         <span className="unauthorized-icon">🚫</span>
         <h1>Access Denied</h1>
         <p>You don't have permission to access this page.</p>
-        
+
         {user && (
           <p className="unauthorized-role">
             Your role: <strong>{user.role}</strong>
           </p>
         )}
-        
+
         <div className="unauthorized-actions">
           <button onClick={handleGoBack} className="btn-secondary">
             Go Back

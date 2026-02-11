@@ -29,7 +29,9 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     error: null,
   });
 
-  const [rememberMeData, setRememberMeData] = useState<{ email: string; name: string } | null>(null);
+  const [rememberMeData, setRememberMeData] = useState<{ email: string; name: string } | null>(
+    null,
+  );
 
   // Load remember me data and check existing session
   useEffect(() => {
@@ -42,63 +44,84 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
         try {
           const profile = await authService.getProfile();
           const role = mapRole(profile.role);
-          setState({ user: { ...profile, role }, isAuthenticated: true, isLoading: false, error: null });
+          setState({
+            user: { ...profile, role },
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
         } catch {
-          setState(s => ({ ...s, isLoading: false }));
+          setState((s) => ({ ...s, isLoading: false }));
         }
       } else {
-        setState(s => ({ ...s, isLoading: false }));
+        setState((s) => ({ ...s, isLoading: false }));
       }
     };
     init();
   }, []);
 
   const login = useCallback(async (email: string, password: string, remember = false) => {
-    setState(s => ({ ...s, isLoading: true, error: null }));
+    setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
       const { user } = await authService.login({ email, password });
       const role = mapRole(user.role);
-      
+
       if (remember) saveRememberMe({ email: user.email, name: user.name });
       setState({ user: { ...user, role }, isAuthenticated: true, isLoading: false, error: null });
     } catch (e) {
-      setState(s => ({ ...s, isLoading: false, error: e instanceof Error ? e.message : 'Login failed' }));
+      setState((s) => ({
+        ...s,
+        isLoading: false,
+        error: e instanceof Error ? e.message : 'Login failed',
+      }));
       throw e;
     }
   }, []);
 
   const loginWithGoogle = useCallback(async (credential: string) => {
-    setState(s => ({ ...s, isLoading: true, error: null }));
+    setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
       const { user } = await authService.googleLogin(credential);
       const role = mapRole(user.role);
       setState({ user: { ...user, role }, isAuthenticated: true, isLoading: false, error: null });
     } catch (e) {
-      setState(s => ({ ...s, isLoading: false, error: e instanceof Error ? e.message : 'Google login failed' }));
+      setState((s) => ({
+        ...s,
+        isLoading: false,
+        error: e instanceof Error ? e.message : 'Google login failed',
+      }));
       throw e;
     }
   }, []);
 
   const registerUser = useCallback(async (data: RegisterData) => {
-    setState(s => ({ ...s, isLoading: true, error: null }));
+    setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
       const { user } = await authService.register(data);
       const role = mapRole(user.role);
       setState({ user: { ...user, role }, isAuthenticated: true, isLoading: false, error: null });
     } catch (e) {
-      setState(s => ({ ...s, isLoading: false, error: e instanceof Error ? e.message : 'Échec de l\'inscription' }));
+      setState((s) => ({
+        ...s,
+        isLoading: false,
+        error: e instanceof Error ? e.message : "Échec de l'inscription",
+      }));
       throw e;
     }
   }, []);
 
   const forgotPassword = useCallback(async (email: string): Promise<string> => {
-    setState(s => ({ ...s, isLoading: true, error: null }));
+    setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
       const result = await authService.forgotPassword(email);
-      setState(s => ({ ...s, isLoading: false }));
+      setState((s) => ({ ...s, isLoading: false }));
       return result.message;
     } catch (e) {
-      setState(s => ({ ...s, isLoading: false, error: e instanceof Error ? e.message : 'Échec de l\'envoi' }));
+      setState((s) => ({
+        ...s,
+        isLoading: false,
+        error: e instanceof Error ? e.message : "Échec de l'envoi",
+      }));
       throw e;
     }
   }, []);
@@ -110,12 +133,23 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <PortalAuthContext.Provider value={{ ...state, login, register: registerUser, forgotPassword, loginWithGoogle, logout, rememberMeData }}>
+    <PortalAuthContext.Provider
+      value={{
+        ...state,
+        login,
+        register: registerUser,
+        forgotPassword,
+        loginWithGoogle,
+        logout,
+        rememberMeData,
+      }}
+    >
       {children}
     </PortalAuthContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePortalAuth() {
   const ctx = useContext(PortalAuthContext);
   if (!ctx) throw new Error('usePortalAuth must be used within PortalAuthProvider');

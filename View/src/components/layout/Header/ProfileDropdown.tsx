@@ -41,7 +41,7 @@ export function ProfileDropdown() {
 
   return (
     <div className="profile-dropdown" ref={dropdownRef}>
-      <button 
+      <button
         className={`header-nav-item ${isOpen ? 'header-nav-item--active' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Account menu"
@@ -57,9 +57,7 @@ export function ProfileDropdown() {
           {isAuthenticated && user ? (
             <>
               <div className="profile-dropdown-header">
-                <div className="profile-avatar">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
+                <div className="profile-avatar">{user.name.charAt(0).toUpperCase()}</div>
                 <div className="profile-info">
                   <span className="profile-name">{user.name}</span>
                   <span className="profile-email">{user.email}</span>

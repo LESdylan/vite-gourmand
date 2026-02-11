@@ -32,7 +32,6 @@ export default function Footer({ setCurrentPage }: FooterProps) {
     <footer className="bg-[#1A1A1A]">
       <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-[12px]">
-
           {/* Col 1 — Brand + Contact */}
           <div className="space-y-3">
             <button
@@ -40,19 +39,31 @@ export default function Footer({ setCurrentPage }: FooterProps) {
               className="flex items-center gap-2 group"
             >
               <ChefHat className="h-5 w-5 text-[#D4AF37]" />
-              <span style={{ color: '#ffffff' }} className="font-bold text-sm group-hover:text-[#D4AF37] transition-colors">
+              <span
+                style={{ color: '#ffffff' }}
+                className="font-bold text-sm group-hover:text-[#D4AF37] transition-colors"
+              >
                 Vite&nbsp;&&nbsp;Gourmand
               </span>
             </button>
             <p style={mutedStyle} className="text-[11px] leading-relaxed">
-              Traiteur d'exception pour tous vos événements.<br />
+              Traiteur d'exception pour tous vos événements.
+              <br />
               Bordeaux &amp; alentours.
             </p>
             <div className="flex flex-col gap-1">
-              <a href={`tel:${siteInfo?.phone || '+33556000000'}`} style={linkStyle} className="hover:!text-white transition-colors">
+              <a
+                href={`tel:${siteInfo?.phone || '+33556000000'}`}
+                style={linkStyle}
+                className="hover:!text-white transition-colors"
+              >
                 📞 {siteInfo?.phone || '05 56 00 00 00'}
               </a>
-              <a href={`mailto:${siteInfo?.email || 'contact@vite-gourmand.fr'}`} style={linkStyle} className="hover:!text-white transition-colors">
+              <a
+                href={`mailto:${siteInfo?.email || 'contact@vite-gourmand.fr'}`}
+                style={linkStyle}
+                className="hover:!text-white transition-colors"
+              >
                 ✉️ {siteInfo?.email || 'contact@vite-gourmand.fr'}
               </a>
             </div>
@@ -62,13 +73,17 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Clock className="h-4 w-4 text-[#D4AF37]" />
-              <span style={{ color: '#ffffff' }} className="font-semibold text-[13px]">Horaires</span>
+              <span style={{ color: '#ffffff' }} className="font-semibold text-[13px]">
+                Horaires
+              </span>
             </div>
             <ul className="space-y-0.5">
               {hours.map(({ day, opening, closing }) => (
                 <li key={day} className="flex justify-between gap-4">
                   <span style={linkStyle}>{day}</span>
-                  <span style={mutedStyle}>{opening} – {closing}</span>
+                  <span style={mutedStyle}>
+                    {opening} – {closing}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -76,7 +91,9 @@ export default function Footer({ setCurrentPage }: FooterProps) {
 
           {/* Col 3 — Navigation + Legal */}
           <div>
-            <span style={{ color: '#ffffff' }} className="font-semibold text-[13px] block mb-3">Navigation</span>
+            <span style={{ color: '#ffffff' }} className="font-semibold text-[13px] block mb-3">
+              Navigation
+            </span>
             <ul className="space-y-0 sm:space-y-1.5">
               {[
                 { label: 'Accueil', page: 'home' as Page },
@@ -84,7 +101,11 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                 { label: 'Contact', page: 'contact' as Page },
               ].map(({ label, page }) => (
                 <li key={page}>
-                  <button onClick={() => handleNavClick(page)} style={linkStyle} className="hover:!text-white transition-colors py-2 sm:py-0">
+                  <button
+                    onClick={() => handleNavClick(page)}
+                    style={linkStyle}
+                    className="hover:!text-white transition-colors py-2 sm:py-0"
+                  >
                     {label}
                   </button>
                 </li>
@@ -92,10 +113,18 @@ export default function Footer({ setCurrentPage }: FooterProps) {
             </ul>
 
             <div className="mt-4 pt-3 border-t border-white/10 space-y-0 sm:space-y-1.5">
-              <button onClick={() => handleNavClick('legal-mentions')} style={linkStyle} className="hover:!text-white transition-colors block py-2 sm:py-0">
+              <button
+                onClick={() => handleNavClick('legal-mentions')}
+                style={linkStyle}
+                className="hover:!text-white transition-colors block py-2 sm:py-0"
+              >
                 Mentions légales
               </button>
-              <button onClick={() => handleNavClick('legal-cgv')} style={linkStyle} className="hover:!text-white transition-colors block py-2 sm:py-0">
+              <button
+                onClick={() => handleNavClick('legal-cgv')}
+                style={linkStyle}
+                className="hover:!text-white transition-colors block py-2 sm:py-0"
+              >
                 Conditions générales de vente
               </button>
             </div>

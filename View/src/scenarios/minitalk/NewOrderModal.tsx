@@ -12,15 +12,15 @@ interface NewOrderModalProps {
 }
 
 const MENU_ITEMS: { name: string; price: number }[] = [
-  { name: 'Burger Classic', price: 12.50 },
-  { name: 'Burger Végétarien', price: 11.90 },
-  { name: 'Pizza Margherita', price: 14.00 },
-  { name: 'Pizza 4 Fromages', price: 16.50 },
-  { name: 'Salade César', price: 10.50 },
-  { name: 'Pâtes Carbonara', price: 13.00 },
-  { name: 'Tiramisu', price: 6.50 },
-  { name: 'Coca-Cola', price: 3.50 },
-  { name: 'Eau minérale', price: 2.50 },
+  { name: 'Burger Classic', price: 12.5 },
+  { name: 'Burger Végétarien', price: 11.9 },
+  { name: 'Pizza Margherita', price: 14.0 },
+  { name: 'Pizza 4 Fromages', price: 16.5 },
+  { name: 'Salade César', price: 10.5 },
+  { name: 'Pâtes Carbonara', price: 13.0 },
+  { name: 'Tiramisu', price: 6.5 },
+  { name: 'Coca-Cola', price: 3.5 },
+  { name: 'Eau minérale', price: 2.5 },
 ];
 
 export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps) {
@@ -30,24 +30,22 @@ export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps)
   const [notes, setNotes] = useState('');
 
   const handleAddItem = (menuItem: { name: string; price: number }) => {
-    const existing = items.find(i => i.name === menuItem.name);
+    const existing = items.find((i) => i.name === menuItem.name);
     if (existing) {
-      setItems(items.map(i => 
-        i.name === menuItem.name ? { ...i, quantity: i.quantity + 1 } : i
-      ));
+      setItems(
+        items.map((i) => (i.name === menuItem.name ? { ...i, quantity: i.quantity + 1 } : i)),
+      );
     } else {
       setItems([...items, { name: menuItem.name, quantity: 1, price: menuItem.price }]);
     }
   };
 
   const handleRemoveItem = (name: string) => {
-    const existing = items.find(i => i.name === name);
+    const existing = items.find((i) => i.name === name);
     if (existing && existing.quantity > 1) {
-      setItems(items.map(i => 
-        i.name === name ? { ...i, quantity: i.quantity - 1 } : i
-      ));
+      setItems(items.map((i) => (i.name === name ? { ...i, quantity: i.quantity - 1 } : i)));
     } else {
-      setItems(items.filter(i => i.name !== name));
+      setItems(items.filter((i) => i.name !== name));
     }
   };
 
@@ -56,9 +54,9 @@ export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim() || items.length === 0) return;
-    
+
     onSubmit({ customerName: customerName.trim(), type, items, notes: notes.trim() || undefined });
-    
+
     // Reset form
     setCustomerName('');
     setType('dine_in');
@@ -76,13 +74,23 @@ export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps)
         <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
             Nouvelle Commande
           </h2>
           <button onClick={onClose} className="text-white/80 hover:text-white transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -114,7 +122,7 @@ export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps)
                   { value: 'dine_in', label: 'Sur place', icon: '🍽️' },
                   { value: 'takeaway', label: 'À emporter', icon: '📦' },
                   { value: 'delivery', label: 'Livraison', icon: '🚗' },
-                ].map(option => (
+                ].map((option) => (
                   <button
                     key={option.value}
                     type="button"
@@ -134,11 +142,9 @@ export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps)
 
             {/* Menu Items */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Articles *
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Articles *</label>
               <div className="grid grid-cols-3 gap-2 mb-3">
-                {MENU_ITEMS.map(item => (
+                {MENU_ITEMS.map((item) => (
                   <button
                     key={item.name}
                     type="button"
@@ -154,7 +160,7 @@ export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps)
               {/* Selected Items */}
               {items.length > 0 && (
                 <div className="bg-gray-50 rounded-lg p-3 space-y-2">
-                  {items.map(item => (
+                  {items.map((item) => (
                     <div key={item.name} className="flex items-center justify-between text-sm">
                       <span className="text-gray-700">
                         <span className="font-medium">{item.quantity}x</span> {item.name}
@@ -168,8 +174,18 @@ export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps)
                           onClick={() => handleRemoveItem(item.name)}
                           className="text-red-500 hover:text-red-700 transition-colors"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M20 12H4"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -210,8 +226,8 @@ export function NewOrderModal({ isOpen, onClose, onSubmit }: NewOrderModalProps)
                 {!customerName.trim() && items.length === 0
                   ? '⚠️ Entrez votre nom et sélectionnez au moins un article'
                   : !customerName.trim()
-                  ? '⚠️ Entrez votre nom'
-                  : '⚠️ Sélectionnez au moins un article'}
+                    ? '⚠️ Entrez votre nom'
+                    : '⚠️ Sélectionnez au moins un article'}
               </p>
             )}
             <div className="flex gap-3">

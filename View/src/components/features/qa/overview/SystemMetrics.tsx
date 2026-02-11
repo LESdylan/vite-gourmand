@@ -16,10 +16,10 @@ interface SystemMetricsProps {
 export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: SystemMetricsProps) {
   const formatTime = (date: Date | null) => {
     if (!date) return 'Never';
-    return date.toLocaleTimeString('fr-FR', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
     });
   };
 
@@ -35,7 +35,8 @@ export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: Sys
       label: 'Reliability',
       value: `${passRate < 0 ? '--' : passRate}`,
       unit: '%',
-      status: passRate < 0 ? 'good' : passRate >= 95 ? 'good' : passRate >= 80 ? 'warning' : 'critical',
+      status:
+        passRate < 0 ? 'good' : passRate >= 95 ? 'good' : passRate >= 80 ? 'warning' : 'critical',
       Icon: TargetIcon,
     },
     {
@@ -57,11 +58,11 @@ export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: Sys
   return (
     <div className="system-metrics">
       <h4 className="system-metrics-title">System Metrics</h4>
-      
+
       <div className="system-metrics-grid">
-        {metrics.map(metric => (
-          <div 
-            key={metric.label} 
+        {metrics.map((metric) => (
+          <div
+            key={metric.label}
             className={`system-metric-card system-metric-card--${metric.status}`}
           >
             <span className="system-metric-icon">

@@ -26,12 +26,11 @@ export function RoleViewProvider({ children, defaultView = 'dev' }: RoleViewProv
   }, []);
 
   return (
-    <RoleViewContext.Provider value={{ currentView, setView }}>
-      {children}
-    </RoleViewContext.Provider>
+    <RoleViewContext.Provider value={{ currentView, setView }}>{children}</RoleViewContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRoleView() {
   const context = useContext(RoleViewContext);
   if (!context) {

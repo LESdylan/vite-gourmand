@@ -24,26 +24,26 @@ export function AdminOrders() {
       </div>
 
       <div className="orders-grid">
-        <OrderCard 
-          id="#1234" 
-          table="Table 5" 
-          status="en-cours" 
+        <OrderCard
+          id="#1234"
+          table="Table 5"
+          status="en-cours"
           items={['Pizza Margherita', 'Salade César', 'Tiramisu']}
           total="45.50€"
           time="12:34"
         />
-        <OrderCard 
-          id="#1233" 
-          table="Table 2" 
-          status="prêt" 
+        <OrderCard
+          id="#1233"
+          table="Table 2"
+          status="prêt"
           items={['Burger Classic', 'Frites']}
           total="22.00€"
           time="12:28"
         />
-        <OrderCard 
-          id="#1232" 
-          table="Livraison" 
-          status="en-attente" 
+        <OrderCard
+          id="#1232"
+          table="Livraison"
+          status="en-attente"
           items={['Pâtes Carbonara x2', 'Bruschetta']}
           total="38.00€"
           time="12:25"
@@ -66,11 +66,11 @@ function OrderCard({ id, table, status, items, total, time }: OrderCardProps) {
   const statusConfig: Record<string, { label: string; className: string }> = {
     'en-attente': { label: 'En attente', className: 'order-card-badge--pending' },
     'en-cours': { label: 'En préparation', className: 'order-card-badge--progress' },
-    'prêt': { label: 'Prêt', className: 'order-card-badge--ready' },
+    prêt: { label: 'Prêt', className: 'order-card-badge--ready' },
   };
-  
+
   const config = statusConfig[status] || statusConfig['en-attente'];
-  
+
   return (
     <div className="order-card">
       <div className="order-card-header">

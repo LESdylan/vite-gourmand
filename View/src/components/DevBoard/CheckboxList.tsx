@@ -1,15 +1,15 @@
 /**
  * CheckboxList - Reusable, customizable checkbox list component
- * 
+ *
  * Usage examples:
- * 
+ *
  * Basic:
  * <CheckboxList
  *   items={[{ id: '1', label: 'Option 1' }, { id: '2', label: 'Option 2' }]}
  *   selected={selectedIds}
  *   onChange={setSelectedIds}
  * />
- * 
+ *
  * With groups:
  * <CheckboxList
  *   items={items}
@@ -17,7 +17,7 @@
  *   onChange={setSelected}
  *   groupBy={(item) => item.category}
  * />
- * 
+ *
  * Custom render:
  * <CheckboxList
  *   items={items}
@@ -270,7 +270,13 @@ const SearchIcon = () => (
 
 // Loading Spinner
 const Spinner = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    style={{ animation: 'spin 1s linear infinite' }}
+  >
     <circle cx="12" cy="12" r="10" stroke="#e5e7eb" strokeWidth="3" />
     <path d="M12 2a10 10 0 0 1 10 10" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" />
     <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -305,20 +311,22 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
     const lower = searchTerm.toLowerCase();
     return items.filter(
       (item) =>
-        item.label.toLowerCase().includes(lower) ||
-        item.description?.toLowerCase().includes(lower)
+        item.label.toLowerCase().includes(lower) || item.description?.toLowerCase().includes(lower),
     );
   }, [items, searchTerm]);
 
   // Group items if groupBy is provided
   const groupedItems = useMemo(() => {
     if (!groupBy) return { '': filteredItems };
-    return filteredItems.reduce((acc, item) => {
-      const group = groupBy(item);
-      if (!acc[group]) acc[group] = [];
-      acc[group].push(item);
-      return acc;
-    }, {} as Record<string, T[]>);
+    return filteredItems.reduce(
+      (acc, item) => {
+        const group = groupBy(item);
+        if (!acc[group]) acc[group] = [];
+        acc[group].push(item);
+        return acc;
+      },
+      {} as Record<string, T[]>,
+    );
   }, [filteredItems, groupBy]);
 
   // Toggle single item
@@ -328,14 +336,10 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
       if (singleSelect) {
         onChange([id]);
       } else {
-        onChange(
-          selected.includes(id)
-            ? selected.filter((s) => s !== id)
-            : [...selected, id]
-        );
+        onChange(selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id]);
       }
     },
-    [disabled, singleSelect, onChange, selected]
+    [disabled, singleSelect, onChange, selected],
   );
 
   // Select all / deselect all
@@ -367,10 +371,11 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
 
     const itemStyle = {
       ...styles.item[variant],
-      ...(checked && variant !== 'minimal' && {
-        backgroundColor: accentColor + '10',
-        borderColor: accentColor + '40',
-      }),
+      ...(checked &&
+        variant !== 'minimal' && {
+          backgroundColor: accentColor + '10',
+          borderColor: accentColor + '40',
+        }),
       ...(isDisabled && { opacity: 0.5, cursor: 'not-allowed' }),
     };
 
@@ -394,7 +399,7 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
         onKeyDown={(e) => {
           if (e.key === ' ' || e.key === 'Enter') {
             e.preventDefault();
-            !isDisabled && toggleItem(item.id);
+            if (!isDisabled) toggleItem(item.id);
           }
         }}
       >
@@ -410,14 +415,10 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
 
         <div style={styles.itemContent}>
           <span style={styles.itemLabel}>{item.label}</span>
-          {item.description && (
-            <span style={styles.itemDescription}>{item.description}</span>
-          )}
+          {item.description && <span style={styles.itemDescription}>{item.description}</span>}
         </div>
 
-        {item.badge !== undefined && (
-          <span style={styles.badge}>{item.badge}</span>
-        )}
+        {item.badge !== undefined && <span style={styles.badge}>{item.badge}</span>}
       </div>
     );
   };
@@ -454,20 +455,32 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
       {(showSelectAll || showCount) && !singleSelect && (
         <div style={styles.header}>
           {showSelectAll && (
-            <label style={{ ...styles.selectAll, ...(disabled && { cursor: 'not-allowed', opacity: 0.5 }) }}>
+            <label
+              style={{
+                ...styles.selectAll,
+                ...(disabled && { cursor: 'not-allowed', opacity: 0.5 }),
+              }}
+            >
               <div
                 style={{
                   ...styles.checkbox,
                   width: '16px',
                   height: '16px',
                   ...(allSelected && { backgroundColor: accentColor, borderColor: accentColor }),
-                  ...(someSelected && { backgroundColor: accentColor + '60', borderColor: accentColor }),
+                  ...(someSelected && {
+                    backgroundColor: accentColor + '60',
+                    borderColor: accentColor,
+                  }),
                 }}
                 onClick={toggleAll}
               >
                 {(allSelected || someSelected) && (
                   <div style={{ ...styles.checkmark, width: '8px', height: '8px' }}>
-                    {allSelected ? <CheckIcon /> : <span style={{ color: 'white', fontSize: '10px' }}>−</span>}
+                    {allSelected ? (
+                      <CheckIcon />
+                    ) : (
+                      <span style={{ color: 'white', fontSize: '10px' }}>−</span>
+                    )}
                   </div>
                 )}
               </div>
@@ -505,13 +518,12 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
 }
 
 // Export a hook for managing checkbox state
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCheckboxList(initialSelected: string[] = []) {
   const [selected, setSelected] = React.useState<string[]>(initialSelected);
 
   const toggle = useCallback((id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
+    setSelected((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
   }, []);
 
   const selectAll = useCallback((ids: string[]) => {

@@ -15,13 +15,9 @@ export function BaseCard({
 }: CardBaseProps) {
   const cardClasses = buildCardClasses(variant, padding, onClick, className);
   const Tag = onClick ? 'button' : 'div';
-  
+
   return (
-    <Tag
-      className={cardClasses}
-      onClick={onClick}
-      type={onClick ? 'button' : undefined}
-    >
+    <Tag className={cardClasses} onClick={onClick} type={onClick ? 'button' : undefined}>
       {children}
     </Tag>
   );
@@ -31,13 +27,9 @@ function buildCardClasses(
   variant: string,
   padding: string,
   onClick: (() => void) | undefined,
-  className: string
+  className: string,
 ): string {
-  const classes = [
-    'base-card',
-    `base-card-${variant}`,
-    `base-card-padding-${padding}`,
-  ];
+  const classes = ['base-card', `base-card-${variant}`, `base-card-padding-${padding}`];
   if (onClick) classes.push('base-card-clickable');
   if (className) classes.push(className);
   return classes.join(' ');

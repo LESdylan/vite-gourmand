@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { UserProfile } from '../ui/UserProfile';
 import { searchUsers, canViewUser } from '../ui/Search';
 import type { SearchResult } from '../ui/Search';
+import type { UserVisibility } from '../ui/Search/types';
 import { usePortalAuth } from '../../portal_dashboard/PortalAuthContext';
 import './AdminWidgets.css';
 
@@ -30,13 +31,13 @@ export function StaffList() {
       try {
         // In real app, this would call a dedicated staff endpoint
         const results = await searchUsers('');
-        
+
         // Filter based on visibility rules
         const viewerRole = currentUser?.role;
         const visibleStaff = results.filter((user) =>
-          canViewUser(viewerRole as any, user.role as any)
+          canViewUser(viewerRole as UserVisibility, user.role as UserVisibility),
         );
-        
+
         setStaff(visibleStaff as StaffMember[]);
       } catch (error) {
         console.error('Failed to load staff:', error);
@@ -54,7 +55,12 @@ export function StaffList() {
   });
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getRoleLabel = (role: string) => {
@@ -68,10 +74,14 @@ export function StaffList() {
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'active': return 'inline-status--success';
-      case 'away': return 'inline-status--warning';
-      case 'inactive': return 'inline-status--neutral';
-      default: return 'inline-status--info';
+      case 'active':
+        return 'inline-status--success';
+      case 'away':
+        return 'inline-status--warning';
+      case 'inactive':
+        return 'inline-status--neutral';
+      default:
+        return 'inline-status--info';
     }
   };
 
@@ -86,23 +96,23 @@ export function StaffList() {
 
       {/* Filter Tabs */}
       <div className="filter-tabs">
-        <button 
+        <button
           className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
           onClick={() => setFilter('all')}
         >
           Tous ({staff.length})
         </button>
-        <button 
+        <button
           className={`filter-tab ${filter === 'admin' ? 'active' : ''}`}
           onClick={() => setFilter('admin')}
         >
-          Admins ({staff.filter(s => s.role === 'admin').length})
+          Admins ({staff.filter((s) => s.role === 'admin').length})
         </button>
-        <button 
+        <button
           className={`filter-tab ${filter === 'employee' ? 'active' : ''}`}
           onClick={() => setFilter('employee')}
         >
-          Employés ({staff.filter(s => s.role === 'employee').length})
+          Employés ({staff.filter((s) => s.role === 'employee').length})
         </button>
       </div>
 
@@ -130,7 +140,10 @@ export function StaffList() {
         ) : (
           <>
             {/* Table Header */}
-            <div className="fly-table-header" style={{ gridTemplateColumns: '48px minmax(200px, 2fr) repeat(3, 1fr) 80px' }}>
+            <div
+              className="fly-table-header"
+              style={{ gridTemplateColumns: '48px minmax(200px, 2fr) repeat(3, 1fr) 80px' }}
+            >
               <span></span>
               <span>Nom</span>
               <span>Rôle</span>
@@ -142,7 +155,7 @@ export function StaffList() {
             {/* Table Body */}
             <div className="fly-table-body">
               {filteredStaff.map((member) => (
-                <div 
+                <div
                   key={member.id}
                   className="user-list-row"
                   onClick={() => setSelectedUserId(member.id)}
@@ -154,32 +167,35 @@ export function StaffList() {
                       getInitials(member.name)
                     )}
                   </div>
-                  
+
                   <div className="user-list-info">
                     <span className="user-list-name">{member.name}</span>
                     <span className="user-list-email">{member.email}</span>
                   </div>
-                  
+
                   <div>
                     <span className={`user-list-role user-list-role--${member.role}`}>
                       {getRoleLabel(member.role)}
                     </span>
                   </div>
-                  
+
                   <div data-label="Département">
                     <span>{member.department || '—'}</span>
                   </div>
-                  
+
                   <div>
                     <span className={`inline-status ${getStatusColor(member.status)}`}>
                       <span className="inline-status-dot"></span>
-                      {member.status === 'active' ? 'Actif' : 
-                       member.status === 'away' ? 'Absent' : 'Inactif'}
+                      {member.status === 'active'
+                        ? 'Actif'
+                        : member.status === 'away'
+                          ? 'Absent'
+                          : 'Inactif'}
                     </span>
                   </div>
-                  
+
                   <div className="user-list-actions">
-                    <button 
+                    <button
                       className="user-list-action-btn"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -199,11 +215,7 @@ export function StaffList() {
 
       {/* Profile Modal */}
       {selectedUserId && (
-        <UserProfile 
-          userId={selectedUserId}
-          isModal
-          onClose={() => setSelectedUserId(null)}
-        />
+        <UserProfile userId={selectedUserId} isModal onClose={() => setSelectedUserId(null)} />
       )}
     </div>
   );

@@ -18,31 +18,37 @@ export function AutoTestList({ tests }: AutoTestListProps) {
       <div className="atl">
         <div style={{ padding: '32px', textAlign: 'center' }}>
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🧪</div>
-          <h3 style={{ 
-            fontSize: '1.125rem', 
-            fontWeight: 600, 
-            marginBottom: '8px',
-            color: '#1f2937'
-          }}>
+          <h3
+            style={{
+              fontSize: '1.125rem',
+              fontWeight: 600,
+              marginBottom: '8px',
+              color: '#1f2937',
+            }}
+          >
             No Test Results Yet
           </h3>
-          <p style={{ 
-            color: '#6b7280', 
-            marginBottom: '16px',
-            maxWidth: '500px',
-            margin: '0 auto'
-          }}>
-            Click the <strong>"Run All Tests"</strong> button above to execute your test suites. 
+          <p
+            style={{
+              color: '#6b7280',
+              marginBottom: '16px',
+              maxWidth: '500px',
+              margin: '0 auto',
+            }}
+          >
+            Click the <strong>"Run All Tests"</strong> button above to execute your test suites.
             Results will appear here showing pass/fail status for each test.
           </p>
-          <div style={{
-            marginTop: '24px',
-            padding: '16px',
-            background: '#f9fafb',
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            color: '#6b7280'
-          }}>
+          <div
+            style={{
+              marginTop: '24px',
+              padding: '16px',
+              background: '#f9fafb',
+              borderRadius: '8px',
+              fontSize: '0.875rem',
+              color: '#6b7280',
+            }}
+          >
             💡 Tests are executed on the backend and results are cached for quick viewing
           </div>
         </div>
@@ -64,11 +70,7 @@ export function AutoTestList({ tests }: AutoTestListProps) {
           </thead>
           <tbody>
             {tests.map((test, index) => (
-              <AutoTestRow
-                key={test.id}
-                test={test}
-                isEven={index % 2 === 1}
-              />
+              <AutoTestRow key={test.id} test={test} isEven={index % 2 === 1} />
             ))}
           </tbody>
         </table>

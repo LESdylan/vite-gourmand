@@ -16,7 +16,7 @@ interface RunAllButtonProps {
 export function RunAllButton({ count, isRunning, onRun }: RunAllButtonProps) {
   // Show count only if we have results, otherwise just "Run All"
   const label = count && count > 0 ? `▶ Run All (${count})` : '▶ Run All Tests';
-  
+
   return (
     <div className="run-all-button">
       <PrimaryButton onClick={onRun} disabled={isRunning}>

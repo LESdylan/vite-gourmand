@@ -13,16 +13,16 @@ interface ProfileHeaderProps {
 
 const ROLE_CONFIG: Record<string, { label: string; emoji: string; color: string }> = {
   superadmin: { label: 'Super Admin', emoji: '👑', color: 'var(--up-role-superadmin)' },
-  admin:      { label: 'Administrateur', emoji: '🛡️', color: 'var(--up-role-admin)' },
-  employee:   { label: 'Employé', emoji: '👷', color: 'var(--up-role-employee)' },
-  customer:   { label: 'Client', emoji: '👤', color: 'var(--up-role-customer)' },
+  admin: { label: 'Administrateur', emoji: '🛡️', color: 'var(--up-role-admin)' },
+  employee: { label: 'Employé', emoji: '👷', color: 'var(--up-role-employee)' },
+  customer: { label: 'Client', emoji: '👤', color: 'var(--up-role-customer)' },
 };
 
 export function ProfileHeader({ profile, isSelf, onClose }: ProfileHeaderProps) {
   const roleConf = ROLE_CONFIG[profile.role] ?? ROLE_CONFIG.customer;
   const initials = profile.name
     .split(' ')
-    .map(w => w[0])
+    .map((w) => w[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -34,7 +34,14 @@ export function ProfileHeader({ profile, isSelf, onClose }: ProfileHeaderProps) 
         <div className="up-banner-pattern" />
         {onClose && (
           <button className="up-close" onClick={onClose} aria-label="Fermer le profil">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -51,7 +58,9 @@ export function ProfileHeader({ profile, isSelf, onClose }: ProfileHeaderProps) 
           )}
         </div>
         {isSelf && (
-          <span className="up-avatar-badge" title="C'est vous !">✦</span>
+          <span className="up-avatar-badge" title="C'est vous !">
+            ✦
+          </span>
         )}
       </div>
 
@@ -59,7 +68,10 @@ export function ProfileHeader({ profile, isSelf, onClose }: ProfileHeaderProps) 
       <div className="up-identity">
         <h2 className="up-name">{profile.name}</h2>
         <p className="up-username">@{profile.username}</p>
-        <span className="up-role-badge" style={{ '--role-color': roleConf.color } as React.CSSProperties}>
+        <span
+          className="up-role-badge"
+          style={{ '--role-color': roleConf.color } as React.CSSProperties}
+        >
           {roleConf.emoji} {roleConf.label}
         </span>
       </div>
@@ -73,10 +85,7 @@ export function ProfileHeader({ profile, isSelf, onClose }: ProfileHeaderProps) 
           <span className="up-level-pct">{profile.levelProgress}%</span>
         </div>
         <div className="up-level-track">
-          <div
-            className="up-level-fill"
-            style={{ width: `${profile.levelProgress}%` }}
-          />
+          <div className="up-level-fill" style={{ width: `${profile.levelProgress}%` }} />
         </div>
       </div>
 
@@ -91,7 +100,15 @@ export function ProfileHeader({ profile, isSelf, onClose }: ProfileHeaderProps) 
   );
 }
 
-function QuickStat({ value, label, icon }: { value: string | number; label: string; icon: string }) {
+function QuickStat({
+  value,
+  label,
+  icon,
+}: {
+  value: string | number;
+  label: string;
+  icon: string;
+}) {
   return (
     <div className="up-qstat">
       <span className="up-qstat-icon">{icon}</span>

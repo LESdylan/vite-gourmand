@@ -11,7 +11,8 @@ import { ChefHat, UtensilsCrossed, Clock, Sparkles, Star } from 'lucide-react';
 import './Portal.css';
 
 // Restaurant ambiance image - warm, inviting
-const RESTAURANT_PREVIEW = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&auto=format&q=80';
+const RESTAURANT_PREVIEW =
+  'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&auto=format&q=80';
 
 export function Portal() {
   const { isAuthenticated, isLoading, user } = usePortalAuth();
@@ -43,14 +44,15 @@ export function Portal() {
               <span>Expérience culinaire</span>
             </div>
             <h2 className="portal-preview-title">
-              La gastronomie<br />
+              La gastronomie
+              <br />
               <span className="portal-preview-title-accent">à portée de clic</span>
             </h2>
             <p className="portal-preview-desc">
-              Connectez-vous pour commander vos plats préférés, 
-              gérer vos réservations et découvrir nos nouvelles créations du chef.
+              Connectez-vous pour commander vos plats préférés, gérer vos réservations et découvrir
+              nos nouvelles créations du chef.
             </p>
-            
+
             {/* Feature highlights */}
             <div className="portal-preview-features">
               <div className="portal-preview-feature">
@@ -84,9 +86,9 @@ export function Portal() {
 
             {/* Restaurant image mockup */}
             <div className="portal-preview-mockup">
-              <img 
-                src={RESTAURANT_PREVIEW} 
-                alt="Ambiance restaurant Vite & Gourmand" 
+              <img
+                src={RESTAURANT_PREVIEW}
+                alt="Ambiance restaurant Vite & Gourmand"
                 className="portal-preview-image"
               />
               <div className="portal-preview-image-overlay" />

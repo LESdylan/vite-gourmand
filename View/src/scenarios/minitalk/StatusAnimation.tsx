@@ -10,7 +10,10 @@ interface StatusAnimationProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-const statusConfig: Record<string, { color: string; bgColor: string; label: string; emoji: string }> = {
+const statusConfig: Record<
+  string,
+  { color: string; bgColor: string; label: string; emoji: string }
+> = {
   pending: { color: '#f59e0b', bgColor: '#fef3c7', label: 'En attente', emoji: '⏳' },
   confirmed: { color: '#3b82f6', bgColor: '#dbeafe', label: 'Confirmé', emoji: '✓' },
   preparing: { color: '#3b82f6', bgColor: '#dbeafe', label: 'Préparation', emoji: '👨‍🍳' },
@@ -28,7 +31,11 @@ const sizeConfig = {
   lg: { box: 96, font: '2.5rem', labelSize: '0.875rem' },
 };
 
-export function StatusAnimation({ status, isAnimating = false, size = 'md' }: StatusAnimationProps) {
+export function StatusAnimation({
+  status,
+  isAnimating = false,
+  size = 'md',
+}: StatusAnimationProps) {
   const config = statusConfig[status] || statusConfig.pending;
   const sizes = sizeConfig[size];
 
@@ -66,13 +73,14 @@ export function StatusAnimation({ status, isAnimating = false, size = 'md' }: St
 
   return (
     <div style={containerStyle}>
-      <div style={circleStyle}>
-        {config.emoji}
-      </div>
-      <span style={labelStyle}>
-        {config.label}
-      </span>
-      <style dangerouslySetInnerHTML={{ __html: '@keyframes statusPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }' }} />
+      <div style={circleStyle}>{config.emoji}</div>
+      <span style={labelStyle}>{config.label}</span>
+      <style
+        dangerouslySetInnerHTML={{
+          __html:
+            '@keyframes statusPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }',
+        }}
+      />
     </div>
   );
 }

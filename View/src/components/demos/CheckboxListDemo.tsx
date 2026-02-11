@@ -18,11 +18,7 @@ export function BasicCheckboxDemo() {
   return (
     <div style={{ maxWidth: 400, padding: 20 }}>
       <h3>Basic Checkbox List</h3>
-      <CheckboxList
-        items={basicItems}
-        selected={selected}
-        onChange={setSelected}
-      />
+      <CheckboxList items={basicItems} selected={selected} onChange={setSelected} />
       <p>Selected: {selected.join(', ') || 'None'}</p>
     </div>
   );
@@ -62,9 +58,27 @@ interface TaskItem extends CheckboxItem {
 }
 
 const taskItems: TaskItem[] = [
-  { id: '1', label: 'Fix login bug', description: 'Users cannot log in', badge: 'Urgent', priority: 'high' },
-  { id: '2', label: 'Update documentation', description: 'Add API examples', badge: '2h', priority: 'low' },
-  { id: '3', label: 'Review PR #123', description: 'New feature implementation', badge: 'Review', priority: 'medium' },
+  {
+    id: '1',
+    label: 'Fix login bug',
+    description: 'Users cannot log in',
+    badge: 'Urgent',
+    priority: 'high',
+  },
+  {
+    id: '2',
+    label: 'Update documentation',
+    description: 'Add API examples',
+    badge: '2h',
+    priority: 'low',
+  },
+  {
+    id: '3',
+    label: 'Review PR #123',
+    description: 'New feature implementation',
+    badge: 'Review',
+    priority: 'medium',
+  },
 ];
 
 export function CardsVariantDemo() {
@@ -188,7 +202,14 @@ export function SingleSelectDemo() {
 // All demos combined
 export function CheckboxListDemoPage() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 24, padding: 24 }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+        gap: 24,
+        padding: 24,
+      }}
+    >
       <BasicCheckboxDemo />
       <SearchableCheckboxDemo />
       <CardsVariantDemo />

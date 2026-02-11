@@ -26,7 +26,7 @@ export function IconButton({
   disabled = false,
 }: IconButtonProps) {
   const classes = buildClasses(variant, size);
-  
+
   return (
     <button
       type="button"

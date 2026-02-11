@@ -22,7 +22,7 @@ const FILTER_OPTIONS: { type: ActivityType; label: string; icon: string }[] = [
 export function ActivityFilter({ activeFilters, onFilterChange }: ActivityFilterProps) {
   const handleToggle = (type: ActivityType) => {
     const newFilters = activeFilters.includes(type)
-      ? activeFilters.filter(t => t !== type)
+      ? activeFilters.filter((t) => t !== type)
       : [...activeFilters, type];
     onFilterChange(newFilters);
   };

@@ -25,7 +25,18 @@ describe('UserService', () => {
     lastName: 'Doe',
     phoneNumber: '0612345678',
     city: 'Paris',
+    postalCode: undefined,
+    country: undefined,
+    preferredLanguage: undefined,
+    isActive: undefined,
+    isEmailVerified: undefined,
+    gdprConsent: undefined,
+    marketingConsent: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    lastLoginAt: undefined,
     role: 'client',
+    loyaltyAccount: null,
   };
 
   beforeEach(async () => {

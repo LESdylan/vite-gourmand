@@ -35,11 +35,15 @@ export function ClientOverview() {
       try {
         const [loyaltyRes, ordersRes] = await Promise.all([
           apiRequest<{ data: LoyaltyData }>('/api/loyalty/me').catch(() => null),
-          apiRequest<{ data: { items: OrderSummary[] } }>('/api/orders/my?limit=5&sort=created_at:desc').catch(() => null),
+          apiRequest<{ data: { items: OrderSummary[] } }>(
+            '/api/orders/my?limit=5&sort=created_at:desc',
+          ).catch(() => null),
         ]);
         if (loyaltyRes?.data) setLoyalty(loyaltyRes.data);
         if (ordersRes?.data?.items) setRecentOrders(ordersRes.data.items);
-      } catch { /* silent */ } finally {
+      } catch {
+        /* silent */
+      } finally {
         setLoading(false);
       }
     }
@@ -53,7 +57,9 @@ export function ClientOverview() {
     <div className="client-widget">
       <header className="widget-header">
         <div className="widget-header-content">
-          <h2>{greeting} {firstName} 👋</h2>
+          <h2>
+            {greeting} {firstName} 👋
+          </h2>
           <p className="widget-subtitle">Bienvenue dans votre espace personnel</p>
         </div>
       </header>
@@ -90,7 +96,11 @@ export function ClientOverview() {
               <div className="client-stat-icon">🚀</div>
               <div className="client-stat-content">
                 <span className="client-stat-value">
-                  {recentOrders.filter(o => o.status && !['delivered', 'cancelled'].includes(o.status)).length}
+                  {
+                    recentOrders.filter(
+                      (o) => o.status && !['delivered', 'cancelled'].includes(o.status),
+                    ).length
+                  }
                 </span>
                 <span className="client-stat-label">En cours</span>
               </div>
@@ -101,13 +111,15 @@ export function ClientOverview() {
                 <div className="client-stat-icon">⭐</div>
                 <div className="client-stat-content">
                   <span className="client-stat-value">{loyalty.pointsToNextTier}</span>
-                  <span className="client-stat-label">Points avant {getTierLabel(loyalty.nextTier)}</span>
+                  <span className="client-stat-label">
+                    Points avant {getTierLabel(loyalty.nextTier)}
+                  </span>
                 </div>
                 <div className="client-progress-bar">
                   <div
                     className="client-progress-fill"
                     style={{
-                      width: `${Math.min(100, ((loyalty.points) / (loyalty.points + (loyalty.pointsToNextTier ?? 0))) * 100)}%`
+                      width: `${Math.min(100, (loyalty.points / (loyalty.points + (loyalty.pointsToNextTier ?? 0))) * 100)}%`,
                     }}
                   />
                 </div>
@@ -122,18 +134,22 @@ export function ClientOverview() {
                 <h3>📋 Dernières commandes</h3>
               </div>
               <div className="client-orders-list">
-                {recentOrders.slice(0, 3).map(order => (
+                {recentOrders.slice(0, 3).map((order) => (
                   <div key={order.id} className="client-order-card">
                     <div className="client-order-info">
                       <span className="client-order-number">#{order.order_number}</span>
                       <span className="client-order-date">
                         {new Date(order.created_at).toLocaleDateString('fr-FR', {
-                          day: 'numeric', month: 'short', year: 'numeric'
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
                         })}
                       </span>
                     </div>
                     <div className="client-order-details">
-                      <span className={`client-order-status client-order-status--${order.status || 'pending'}`}>
+                      <span
+                        className={`client-order-status client-order-status--${order.status || 'pending'}`}
+                      >
                         {getStatusLabel(order.status)}
                       </span>
                       <span className="client-order-price">{order.total_price.toFixed(2)} €</span>
@@ -162,7 +178,15 @@ export function ClientOverview() {
   );
 }
 
-function QuickAction({ icon, label, description }: { icon: string; label: string; description: string }) {
+function QuickAction({
+  icon,
+  label,
+  description,
+}: {
+  icon: string;
+  label: string;
+  description: string;
+}) {
   return (
     <div className="client-action-card">
       <span className="client-action-icon">{icon}</span>

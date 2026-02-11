@@ -40,10 +40,10 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
     if (newFilters) {
       filtersRef.current = newFilters;
     }
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await menuService.getMenus(filtersRef.current);
       setMenus(result.menus);
@@ -81,8 +81,14 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
       // Fetch all in parallel, but ensure isLoading reflects menu fetch state
       const [menuResult] = await Promise.all([
         menuService.getMenus(filtersRef.current),
-        menuService.getThemes().then(setThemes).catch(e => console.error('Error fetching themes:', e)),
-        menuService.getDiets().then(setDiets).catch(e => console.error('Error fetching diets:', e)),
+        menuService
+          .getThemes()
+          .then(setThemes)
+          .catch((e) => console.error('Error fetching themes:', e)),
+        menuService
+          .getDiets()
+          .then(setDiets)
+          .catch((e) => console.error('Error fetching diets:', e)),
       ]);
       setMenus(menuResult.menus);
       setMeta(menuResult.meta);

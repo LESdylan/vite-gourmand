@@ -14,7 +14,13 @@ interface MetricsDashboardProps {
   isLoading?: boolean;
 }
 
-export function MetricsDashboard({ totalTests, passedTests, failedTests, passRate, isLoading = false }: Readonly<MetricsDashboardProps>) {
+export function MetricsDashboard({
+  totalTests,
+  passedTests,
+  failedTests,
+  passRate,
+  isLoading = false,
+}: Readonly<MetricsDashboardProps>) {
   if (isLoading) {
     return (
       <section className="metrics-dashboard metrics-dashboard--loading">
@@ -41,7 +47,7 @@ export function MetricsDashboard({ totalTests, passedTests, failedTests, passRat
                 strokeDasharray="70 200"
                 className="metrics-loading__ring"
               />
-              
+
               {/* Inner geometric shapes */}
               <g className="metrics-loading__shapes">
                 {/* Triangle */}
@@ -68,7 +74,7 @@ export function MetricsDashboard({ totalTests, passedTests, failedTests, passRat
                   className="metrics-loading__dot"
                 />
               </g>
-              
+
               {/* Orbiting dots */}
               <g className="metrics-loading__orbit">
                 <circle cx="50" cy="12" r="4" fill="var(--color-primary, #722F37)" />
@@ -80,11 +86,13 @@ export function MetricsDashboard({ totalTests, passedTests, failedTests, passRat
           </div>
           <div className="metrics-loading__text">
             <span className="metrics-loading__title">Running Tests...</span>
-            <span className="metrics-loading__subtitle">Please wait while tests are being executed</span>
+            <span className="metrics-loading__subtitle">
+              Please wait while tests are being executed
+            </span>
           </div>
         </div>
         <div className="metrics-dashboard__skeleton">
-          {[1, 2, 3, 4].map(i => (
+          {[1, 2, 3, 4].map((i) => (
             <div key={i} className="metric-widget metric-widget--skeleton">
               <div className="metric-widget__skeleton-label" />
               <div className="metric-widget__skeleton-value" />
@@ -97,24 +105,16 @@ export function MetricsDashboard({ totalTests, passedTests, failedTests, passRat
 
   return (
     <section className="metrics-dashboard">
-      <MetricWidget 
-        label="Total Tests" 
-        value={totalTests} 
-        trend="stable"
-      />
-      <MetricWidget 
-        label="Passed" 
-        value={passedTests} 
+      <MetricWidget label="Total Tests" value={totalTests} trend="stable" />
+      <MetricWidget
+        label="Passed"
+        value={passedTests}
         trend={passedTests > 0 ? 'down' : 'stable'}
       />
-      <MetricWidget 
-        label="Failed" 
-        value={failedTests} 
-        trend={failedTests > 0 ? 'up' : 'stable'}
-      />
-      <MetricWidget 
-        label="Pass Rate" 
-        value={passRate} 
+      <MetricWidget label="Failed" value={failedTests} trend={failedTests > 0 ? 'up' : 'stable'} />
+      <MetricWidget
+        label="Pass Rate"
+        value={passRate}
         unit="%"
         trend={passRate >= 90 ? 'down' : passRate >= 70 ? 'stable' : 'up'}
       />

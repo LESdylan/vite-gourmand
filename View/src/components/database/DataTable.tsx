@@ -14,11 +14,7 @@ interface Props {
 
 export function DataTable({ columns, records, onEdit, onDelete }: Props) {
   if (records.length === 0) {
-    return (
-      <div className="data-table-empty">
-        Aucun enregistrement trouvé
-      </div>
-    );
+    return <div className="data-table-empty">Aucun enregistrement trouvé</div>;
   }
 
   return (
@@ -26,7 +22,7 @@ export function DataTable({ columns, records, onEdit, onDelete }: Props) {
       <table className="data-table">
         <thead>
           <tr>
-            {columns.map(c => (
+            {columns.map((c) => (
               <th key={c.name}>
                 {c.name}
                 {c.isPrimary && <span className="pk-badge">PK</span>}
@@ -36,9 +32,9 @@ export function DataTable({ columns, records, onEdit, onDelete }: Props) {
           </tr>
         </thead>
         <tbody>
-          {records.map(r => (
+          {records.map((r) => (
             <tr key={r.id}>
-              {columns.map(c => {
+              {columns.map((c) => {
                 const cellClass = getCellClass(c, r[c.name]);
                 return (
                   <td key={c.name} className={cellClass} title={String(r[c.name] ?? '')}>
@@ -47,8 +43,12 @@ export function DataTable({ columns, records, onEdit, onDelete }: Props) {
                 );
               })}
               <td className="data-table-actions">
-                <button onClick={() => onEdit(r)} title="Modifier">✏️</button>
-                <button className="btn-delete" onClick={() => onDelete(r.id)} title="Supprimer">🗑️</button>
+                <button onClick={() => onEdit(r)} title="Modifier">
+                  ✏️
+                </button>
+                <button className="btn-delete" onClick={() => onDelete(r.id)} title="Supprimer">
+                  🗑️
+                </button>
               </td>
             </tr>
           ))}
@@ -70,10 +70,10 @@ function getCellClass(col: TableColumn, value: unknown): string {
 
 function formatCell(value: unknown, col: TableColumn): string {
   if (value === null || value === undefined) return '—';
-  
+
   // Boolean values - handled via CSS
   if (typeof value === 'boolean' || col.type === 'boolean') return '';
-  
+
   // Date values
   if (col.name.toLowerCase().includes('date') || col.name.toLowerCase().includes('at')) {
     try {
@@ -87,14 +87,16 @@ function formatCell(value: unknown, col: TableColumn): string {
           minute: '2-digit',
         });
       }
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
   }
-  
+
   // Objects/Arrays - JSON preview
   if (typeof value === 'object') {
     return JSON.stringify(value).slice(0, 40) + '…';
   }
-  
+
   // Default - truncate long strings
   const str = String(value);
   return str.length > 50 ? str.slice(0, 47) + '…' : str;

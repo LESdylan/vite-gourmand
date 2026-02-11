@@ -35,18 +35,16 @@ export function AddTaskModal({ availableTags, onClose, onAdd }: AddTaskModalProp
   };
 
   const toggleTag = (tag: KanbanTag) => {
-    setSelectedTags(prev =>
-      prev.some(t => t.id === tag.id)
-        ? prev.filter(t => t.id !== tag.id)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.some((t) => t.id === tag.id) ? prev.filter((t) => t.id !== tag.id) : [...prev, tag],
     );
   };
 
   return (
     <div className="add-task-overlay" onClick={onClose}>
-      <div className="add-task-modal" onClick={e => e.stopPropagation()}>
+      <div className="add-task-modal" onClick={(e) => e.stopPropagation()}>
         <h2 className="add-task-title">📦 Nouvelle Commande</h2>
-        
+
         <form onSubmit={handleSubmit} className="add-task-form">
           {/* Title */}
           <div className="form-group">
@@ -54,7 +52,7 @@ export function AddTaskModal({ availableTags, onClose, onAdd }: AddTaskModalProp
             <input
               type="text"
               value={title}
-              onChange={e => setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.target.value)}
               className="form-input"
               placeholder="Ex: Commande #1045 - Menu Bordelais"
               autoFocus
@@ -67,7 +65,7 @@ export function AddTaskModal({ availableTags, onClose, onAdd }: AddTaskModalProp
             <label className="form-label">Description</label>
             <textarea
               value={description}
-              onChange={e => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value)}
               className="form-textarea"
               placeholder="Détails de la commande..."
               rows={3}
@@ -78,7 +76,7 @@ export function AddTaskModal({ availableTags, onClose, onAdd }: AddTaskModalProp
           <div className="form-group">
             <label className="form-label">Priorité</label>
             <div className="priority-selector">
-              {(['urgent', 'high', 'medium', 'low'] as const).map(p => (
+              {(['urgent', 'high', 'medium', 'low'] as const).map((p) => (
                 <button
                   key={p}
                   type="button"
@@ -96,19 +94,19 @@ export function AddTaskModal({ availableTags, onClose, onAdd }: AddTaskModalProp
           <div className="form-group">
             <label className="form-label">Tags</label>
             <div className="tag-selector">
-              {availableTags.map(tag => (
+              {availableTags.map((tag) => (
                 <button
                   key={tag.id}
                   type="button"
-                  className={`tag-btn ${selectedTags.some(t => t.id === tag.id) ? 'active' : ''}`}
-                  style={{ 
-                    backgroundColor: selectedTags.some(t => t.id === tag.id) 
-                      ? `${tag.color}40` 
+                  className={`tag-btn ${selectedTags.some((t) => t.id === tag.id) ? 'active' : ''}`}
+                  style={{
+                    backgroundColor: selectedTags.some((t) => t.id === tag.id)
+                      ? `${tag.color}40`
                       : `${tag.color}15`,
                     color: tag.color,
-                    borderColor: selectedTags.some(t => t.id === tag.id) 
-                      ? tag.color 
-                      : 'transparent'
+                    borderColor: selectedTags.some((t) => t.id === tag.id)
+                      ? tag.color
+                      : 'transparent',
                   }}
                   onClick={() => toggleTag(tag)}
                 >

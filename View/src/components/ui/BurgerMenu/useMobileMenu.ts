@@ -8,7 +8,9 @@ export function useMobileMenu(isOpen: boolean, onClose: () => void) {
   // Lock body scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   // Close on escape key

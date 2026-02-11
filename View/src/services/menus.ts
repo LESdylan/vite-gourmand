@@ -126,14 +126,15 @@ interface ApiWrapperResponse<T> {
 }
 
 // Default fallback image
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
 
 /**
  * Transform API menu to frontend format
  */
 function transformMenu(apiMenu: MenuFromAPI): Menu {
   // Get primary image or first image or fallback
-  const primaryImage = apiMenu.MenuImage?.find(img => img.is_primary);
+  const primaryImage = apiMenu.MenuImage?.find((img) => img.is_primary);
   const firstImage = apiMenu.MenuImage?.[0];
   const imageUrl = primaryImage?.image_url || firstImage?.image_url || FALLBACK_IMAGE;
 
@@ -141,9 +142,9 @@ function transformMenu(apiMenu: MenuFromAPI): Menu {
   const images = [...(apiMenu.MenuImage || [])].sort((a, b) => a.display_order - b.display_order);
 
   // Group dishes by course type
-  const entrees = apiMenu.Dish?.filter(d => d.course_type === 'entrée') || [];
-  const mains = apiMenu.Dish?.filter(d => d.course_type === 'plat') || [];
-  const desserts = apiMenu.Dish?.filter(d => d.course_type === 'dessert') || [];
+  const entrees = apiMenu.Dish?.filter((d) => d.course_type === 'entrée') || [];
+  const mains = apiMenu.Dish?.filter((d) => d.course_type === 'plat') || [];
+  const desserts = apiMenu.Dish?.filter((d) => d.course_type === 'dessert') || [];
 
   // Get dietary info from Diet relation
   const dietary: string[] = [];
@@ -190,7 +191,9 @@ function transformMenu(apiMenu: MenuFromAPI): Menu {
 /**
  * Fetch all published menus from API
  */
-export async function getMenus(filters: MenuFilters = {}): Promise<{ menus: Menu[]; meta: PaginationMeta }> {
+export async function getMenus(
+  filters: MenuFilters = {},
+): Promise<{ menus: Menu[]; meta: PaginationMeta }> {
   const params = new URLSearchParams();
   if (filters.page) params.set('page', filters.page.toString());
   if (filters.limit) params.set('limit', filters.limit.toString());
@@ -200,13 +203,13 @@ export async function getMenus(filters: MenuFilters = {}): Promise<{ menus: Menu
 
   const queryString = params.toString();
   const endpoint = `/api/menus${queryString ? `?${queryString}` : ''}`;
-  
+
   // API returns wrapped response: { success, data: { items, meta } }
   const response = await apiRequest<ApiWrapperResponse<MenuListResponse>>(endpoint);
-  
+
   // Extract data from wrapper
   const data = response.data;
-  
+
   return {
     menus: data.items.map(transformMenu),
     meta: data.meta,
@@ -231,8 +234,13 @@ export async function getThemes(): Promise<Theme[]> {
   } catch {
     // Fallback: extract themes from menus
     const { menus } = await getMenus({ limit: 100 });
-    const themeNames = [...new Set(menus.map(m => m.theme))];
-    return themeNames.map((name, idx) => ({ id: idx + 1, name, description: null, icon_url: null }));
+    const themeNames = [...new Set(menus.map((m) => m.theme))];
+    return themeNames.map((name, idx) => ({
+      id: idx + 1,
+      name,
+      description: null,
+      icon_url: null,
+    }));
   }
 }
 

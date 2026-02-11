@@ -104,8 +104,12 @@ export async function forgotPassword(email: string): Promise<{ message: string }
 }
 
 /** Verify reset token validity */
-export async function verifyResetToken(token: string): Promise<{ valid: boolean; message: string }> {
-  const wrapper = await apiRequest<ApiWrapper<{ valid: boolean; message: string }>>(`/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`);
+export async function verifyResetToken(
+  token: string,
+): Promise<{ valid: boolean; message: string }> {
+  const wrapper = await apiRequest<ApiWrapper<{ valid: boolean; message: string }>>(
+    `/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`,
+  );
   return wrapper.data;
 }
 
@@ -126,7 +130,8 @@ export function logout(): void {
 /** Get Google OAuth client ID from backend */
 export async function getGoogleConfig(): Promise<{ clientId: string | null }> {
   try {
-    const wrapper = await apiRequest<ApiWrapper<{ clientId: string | null }>>('/api/auth/google/config');
+    const wrapper =
+      await apiRequest<ApiWrapper<{ clientId: string | null }>>('/api/auth/google/config');
     return wrapper.data;
   } catch {
     // If endpoint doesn't exist or fails, return null

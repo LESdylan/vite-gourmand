@@ -28,7 +28,7 @@ export function ShellModal({ isOpen, onClose }: Props) {
 
   return (
     <div className="shell-backdrop">
-      <Shell 
+      <Shell
         onClose={onClose}
         style={style}
         onHeaderMouseDown={drag.onMouseDown}

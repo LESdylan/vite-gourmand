@@ -21,9 +21,7 @@ export function WidgetCard({ icon, title, children, className = '', wide }: Widg
         <span className="up-widget-icon">{icon}</span>
         <h3 className="up-widget-title">{title}</h3>
       </div>
-      <div className="up-widget-body">
-        {children}
-      </div>
+      <div className="up-widget-body">{children}</div>
     </div>
   );
 }

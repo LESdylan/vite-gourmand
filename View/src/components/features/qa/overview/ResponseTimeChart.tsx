@@ -13,6 +13,7 @@ interface ResponseTimeChartProps {
 
 export function ResponseTimeChart({ avgTime, totalTime }: ResponseTimeChartProps) {
   // Generate mock time distribution data
+
   const timeData = useMemo(() => {
     const ranges = [
       { label: '0-50ms', min: 0, max: 50 },
@@ -22,13 +23,13 @@ export function ResponseTimeChart({ avgTime, totalTime }: ResponseTimeChartProps
       { label: '500ms+', min: 500, max: 1000 },
     ];
 
-    // Simulate distribution based on average
-    return ranges.map(range => {
+    // Simulate distribution based on average (deterministic)
+    return ranges.map((range, i) => {
       let count;
       if (avgTime < range.min) {
         count = Math.max(0, 3 - Math.floor((range.min - avgTime) / 50));
       } else if (avgTime <= range.max) {
-        count = 4 + Math.floor(Math.random() * 3);
+        count = 4 + (i % 3); // deterministic variation instead of Math.random()
       } else {
         count = Math.max(0, 5 - Math.floor((avgTime - range.max) / 100));
       }
@@ -36,21 +37,21 @@ export function ResponseTimeChart({ avgTime, totalTime }: ResponseTimeChartProps
     });
   }, [avgTime]);
 
-  const maxCount = Math.max(...timeData.map(d => d.count), 1);
+  const maxCount = Math.max(...timeData.map((d) => d.count), 1);
 
   return (
     <div className="response-time-chart">
       <h4 className="response-time-chart-title">Response Time Distribution</h4>
-      
+
       <div className="response-time-chart-container">
         <div className="response-time-bars">
           {timeData.map((item, index) => (
             <div key={item.label} className="response-time-bar-group">
-              <div 
+              <div
                 className="response-time-bar"
-                style={{ 
+                style={{
                   height: `${(item.count / maxCount) * 100}%`,
-                  animationDelay: `${index * 100}ms`
+                  animationDelay: `${index * 100}ms`,
                 }}
               >
                 <span className="response-time-bar-value">{item.count}</span>

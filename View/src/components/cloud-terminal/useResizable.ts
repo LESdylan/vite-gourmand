@@ -4,7 +4,10 @@
 
 import { useState, useCallback, useEffect } from 'react';
 
-interface Size { width: number; height: number }
+interface Size {
+  width: number;
+  height: number;
+}
 
 export function useResizable(initialSize: Size = { width: 700, height: 400 }) {
   const [size, setSize] = useState(initialSize);

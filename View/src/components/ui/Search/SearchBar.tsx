@@ -15,7 +15,10 @@ interface SearchBarProps {
   onSelectUser?: (user: SearchResult) => void;
 }
 
-export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSelectUser }: SearchBarProps) {
+export function SearchBar({
+  placeholder = 'Rechercher un utilisateur...',
+  onSelectUser,
+}: SearchBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,8 +42,8 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
       try {
         const searchResults = await searchUsers(query);
         // Filter results based on visibility rules
-        const visibleResults = searchResults.filter((user: SearchResult) => 
-          canViewUser(currentUser?.role as UserVisibility, user.role as UserVisibility)
+        const visibleResults = searchResults.filter((user: SearchResult) =>
+          canViewUser(currentUser?.role as UserVisibility, user.role as UserVisibility),
         );
         setResults(visibleResults);
         setIsOpen(true);
@@ -56,36 +59,40 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
   }, [query, currentUser?.role]);
 
   // Keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (!isOpen) return;
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isOpen) return;
 
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setFocusedIndex(prev => Math.min(prev + 1, results.length - 1));
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setFocusedIndex(prev => Math.max(prev - 1, 0));
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (focusedIndex >= 0 && results[focusedIndex]) {
-          handleSelectUser(results[focusedIndex]);
-        }
-        break;
-      case 'Escape':
-        setIsOpen(false);
-        setFocusedIndex(-1);
-        break;
-    }
-  }, [isOpen, results, focusedIndex]);
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setFocusedIndex((prev) => Math.min(prev + 1, results.length - 1));
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setFocusedIndex((prev) => Math.max(prev - 1, 0));
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (focusedIndex >= 0 && results[focusedIndex]) {
+            handleSelectUser(results[focusedIndex]);
+          }
+          break;
+        case 'Escape':
+          setIsOpen(false);
+          setFocusedIndex(-1);
+          break;
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isOpen, results, focusedIndex],
+  );
 
   // Close on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
-        dropdownRef.current && 
+        dropdownRef.current &&
         !dropdownRef.current.contains(e.target as Node) &&
         inputRef.current &&
         !inputRef.current.contains(e.target as Node)
@@ -115,7 +122,7 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
     setIsOpen(false);
     setQuery('');
     setFocusedIndex(-1);
-    
+
     if (onSelectUser) {
       onSelectUser(user);
     } else {
@@ -128,18 +135,29 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
     if (!query) return text;
     const regex = new RegExp(`(${query})`, 'gi');
     const parts = text.split(regex);
-    return parts.map((part, i) => 
-      regex.test(part) ? <mark key={i} className="search-result-highlight">{part}</mark> : part
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <mark key={i} className="search-result-highlight">
+          {part}
+        </mark>
+      ) : (
+        part
+      ),
     );
   };
 
   const getRoleEmoji = (role: string) => {
     switch (role) {
-      case 'superadmin': return '👑';
-      case 'admin': return '🛡️';
-      case 'employee': return '👷';
-      case 'customer': return '👤';
-      default: return '👤';
+      case 'superadmin':
+        return '👑';
+      case 'admin':
+        return '🛡️';
+      case 'employee':
+        return '👷';
+      case 'customer':
+        return '👤';
+      default:
+        return '👤';
     }
   };
 
@@ -163,11 +181,14 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
           autoComplete="off"
         />
         <SearchIcon className="search-bar-icon" />
-        
+
         {query ? (
-          <button 
-            className="search-bar-clear" 
-            onClick={() => { setQuery(''); setIsOpen(false); }}
+          <button
+            className="search-bar-clear"
+            onClick={() => {
+              setQuery('');
+              setIsOpen(false);
+            }}
             aria-label="Effacer la recherche"
           >
             ✕
@@ -188,7 +209,9 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
             <>
               <div className="search-dropdown-header">
                 <span className="search-dropdown-title">Utilisateurs</span>
-                <span className="search-dropdown-count">{results.length} résultat{results.length > 1 ? 's' : ''}</span>
+                <span className="search-dropdown-count">
+                  {results.length} résultat{results.length > 1 ? 's' : ''}
+                </span>
               </div>
               <div className="search-results-list">
                 {results.map((user, index) => (
@@ -200,13 +223,9 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
                     role="option"
                     aria-selected={index === focusedIndex}
                   >
-                    <div className="search-result-avatar">
-                      {getRoleEmoji(user.role)}
-                    </div>
+                    <div className="search-result-avatar">{getRoleEmoji(user.role)}</div>
                     <div className="search-result-info">
-                      <div className="search-result-name">
-                        {highlightMatch(user.name, query)}
-                      </div>
+                      <div className="search-result-name">{highlightMatch(user.name, query)}</div>
                       <div className="search-result-meta">
                         <span>@{highlightMatch(user.username, query)}</span>
                         <span className={`search-result-role search-result-role--${user.role}`}>
@@ -222,9 +241,7 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
           ) : (
             <div className="search-empty">
               <div className="search-empty-icon">🔍</div>
-              <p className="search-empty-text">
-                Aucun utilisateur trouvé pour "{query}"
-              </p>
+              <p className="search-empty-text">Aucun utilisateur trouvé pour "{query}"</p>
             </div>
           )}
         </div>
@@ -235,7 +252,13 @@ export function SearchBar({ placeholder = 'Rechercher un utilisateur...', onSele
 
 function SearchIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <circle cx="11" cy="11" r="8" />
       <path d="M21 21l-4.35-4.35" />
     </svg>

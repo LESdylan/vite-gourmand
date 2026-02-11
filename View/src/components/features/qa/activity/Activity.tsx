@@ -19,7 +19,7 @@ export function Activity() {
           🔄 Rafraîchir
         </button>
       </header>
-      
+
       <ActivityFilter activeFilters={activeFilters} onFilterChange={filterByType} />
       <ActivityList activities={activities} loading={loading} error={error} />
     </div>

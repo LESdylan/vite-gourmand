@@ -38,11 +38,7 @@ export function EmployeeTasks() {
           <h3>🔴 Tâches urgentes</h3>
         </div>
         <div className="task-list">
-          <TaskCard 
-            title="Réapprovisionner desserts" 
-            priority="high"
-            dueTime="Avant 14h"
-          />
+          <TaskCard title="Réapprovisionner desserts" priority="high" dueTime="Avant 14h" />
         </div>
       </section>
 
@@ -51,21 +47,9 @@ export function EmployeeTasks() {
           <h3>📋 À faire</h3>
         </div>
         <div className="task-list">
-          <TaskCard 
-            title="Mise en place tables 1-5" 
-            priority="medium"
-            dueTime="Midi"
-          />
-          <TaskCard 
-            title="Vérifier réservations du soir" 
-            priority="medium"
-            dueTime="16h"
-          />
-          <TaskCard 
-            title="Nettoyage fin de service" 
-            priority="low"
-            dueTime="Fermeture"
-          />
+          <TaskCard title="Mise en place tables 1-5" priority="medium" dueTime="Midi" />
+          <TaskCard title="Vérifier réservations du soir" priority="medium" dueTime="16h" />
+          <TaskCard title="Nettoyage fin de service" priority="low" dueTime="Fermeture" />
         </div>
       </section>
 
@@ -74,18 +58,8 @@ export function EmployeeTasks() {
           <h3>✅ Terminées</h3>
         </div>
         <div className="task-list">
-          <TaskCard 
-            title="Ouverture caisse" 
-            priority="low"
-            dueTime="Terminé à 11h30"
-            done
-          />
-          <TaskCard 
-            title="Inventaire boissons" 
-            priority="low"
-            dueTime="Terminé à 11h45"
-            done
-          />
+          <TaskCard title="Ouverture caisse" priority="low" dueTime="Terminé à 11h30" done />
+          <TaskCard title="Inventaire boissons" priority="low" dueTime="Terminé à 11h45" done />
         </div>
       </section>
     </div>

@@ -17,53 +17,61 @@ export function useMinitalk() {
   // Sync selected order with orders list
   useEffect(() => {
     if (selectedOrder) {
-      const updated = orders.find(o => o.id === selectedOrder.id);
+      const updated = orders.find((o) => o.id === selectedOrder.id);
       if (updated && updated.status !== selectedOrder.status) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedOrder(updated);
+
         setStatusChanged(updated.id);
         setTimeout(() => setStatusChanged(null), 3000);
       }
     }
   }, [orders, selectedOrder]);
 
-  const createOrder = useCallback((form: NewOrderForm) => {
-    const total = form.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const newOrder: MinitalkOrder = {
-      id: Date.now(),
-      orderNumber: `#${String(orders.length + 1).padStart(3, '0')}`,
-      customerName: form.customerName,
-      status: 'pending',
-      items: form.items,
-      total,
-      type: form.type,
-      notes: form.notes,
-      createdAt: new Date().toISOString(),
-      messages: [],
-      unreadCount: 0,
-    };
-    setOrders(prev => [...prev, newOrder]);
-    setSelectedOrder(newOrder);
-    return newOrder;
-  }, [orders.length]);
+  const createOrder = useCallback(
+    (form: NewOrderForm) => {
+      const total = form.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const newOrder: MinitalkOrder = {
+        id: Date.now(),
+        orderNumber: `#${String(orders.length + 1).padStart(3, '0')}`,
+        customerName: form.customerName,
+        status: 'pending',
+        items: form.items,
+        total,
+        type: form.type,
+        notes: form.notes,
+        createdAt: new Date().toISOString(),
+        messages: [],
+        unreadCount: 0,
+      };
+      setOrders((prev) => [...prev, newOrder]);
+      setSelectedOrder(newOrder);
+      return newOrder;
+    },
+    [orders.length],
+  );
 
   const updateStatus = useCallback((orderId: number, status: OrderStatus) => {
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status } : o)));
   }, []);
 
-  const sendMessage = useCallback((orderId: number, content: string, role: 'client' | 'professional') => {
-    const message: MinitalkMessage = {
-      id: Date.now().toString(),
-      senderId: role,
-      senderName: role === 'client' ? 'Vous' : 'Restaurant',
-      senderRole: role,
-      content,
-      timestamp: new Date().toISOString(),
-      read: false,
-    };
-    setOrders(prev => prev.map(o => 
-      o.id === orderId ? { ...o, messages: [...o.messages, message] } : o
-    ));
-  }, []);
+  const sendMessage = useCallback(
+    (orderId: number, content: string, role: 'client' | 'professional') => {
+      const message: MinitalkMessage = {
+        id: Date.now().toString(),
+        senderId: role,
+        senderName: role === 'client' ? 'Vous' : 'Restaurant',
+        senderRole: role,
+        content,
+        timestamp: new Date().toISOString(),
+        read: false,
+      };
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, messages: [...o.messages, message] } : o)),
+      );
+    },
+    [],
+  );
 
   return {
     orders,

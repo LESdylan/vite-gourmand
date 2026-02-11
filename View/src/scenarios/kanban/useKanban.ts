@@ -78,7 +78,9 @@ export function useKanban() {
   const [selectedTask, setSelectedTask] = useState<KanbanTask | null>(null);
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
   const [isAddingColumn, setIsAddingColumn] = useState(false);
-  const [draggedTask, setDraggedTask] = useState<{ task: KanbanTask; fromColumn: string } | null>(null);
+  const [draggedTask, setDraggedTask] = useState<{ task: KanbanTask; fromColumn: string } | null>(
+    null,
+  );
 
   // Column operations
   const addColumn = useCallback((title: string, color?: string) => {
@@ -88,19 +90,17 @@ export function useKanban() {
       color: color || '#722f37',
       tasks: [],
     };
-    setColumns(prev => [...prev, newColumn]);
+    setColumns((prev) => [...prev, newColumn]);
     setIsAddingColumn(false);
   }, []);
 
   const updateColumn = useCallback((columnId: string, updates: Partial<KanbanColumn>) => {
-    setColumns(prev => prev.map(col =>
-      col.id === columnId ? { ...col, ...updates } : col
-    ));
+    setColumns((prev) => prev.map((col) => (col.id === columnId ? { ...col, ...updates } : col)));
     setEditingColumnId(null);
   }, []);
 
   const deleteColumn = useCallback((columnId: string) => {
-    setColumns(prev => prev.filter(col => col.id !== columnId));
+    setColumns((prev) => prev.filter((col) => col.id !== columnId));
   }, []);
 
   // Task operations
@@ -110,73 +110,91 @@ export function useKanban() {
       id: `task-${Date.now()}`,
       createdAt: new Date().toISOString(),
     };
-    setColumns(prev => prev.map(col =>
-      col.id === columnId ? { ...col, tasks: [...col.tasks, newTask] } : col
-    ));
+    setColumns((prev) =>
+      prev.map((col) => (col.id === columnId ? { ...col, tasks: [...col.tasks, newTask] } : col)),
+    );
   }, []);
 
-  const updateTask = useCallback((taskId: string, updates: Partial<KanbanTask>) => {
-    setColumns(prev => prev.map(col => ({
-      ...col,
-      tasks: col.tasks.map(task =>
-        task.id === taskId ? { ...task, ...updates } : task
-      ),
-    })));
-    
-    // Update selected task if it's the one being edited
-    if (selectedTask?.id === taskId) {
-      setSelectedTask(prev => prev ? { ...prev, ...updates } : null);
-    }
-  }, [selectedTask]);
+  const updateTask = useCallback(
+    (taskId: string, updates: Partial<KanbanTask>) => {
+      setColumns((prev) =>
+        prev.map((col) => ({
+          ...col,
+          tasks: col.tasks.map((task) => (task.id === taskId ? { ...task, ...updates } : task)),
+        })),
+      );
 
-  const deleteTask = useCallback((taskId: string, columnId: string) => {
-    setColumns(prev => prev.map(col =>
-      col.id === columnId
-        ? { ...col, tasks: col.tasks.filter(t => t.id !== taskId) }
-        : col
-    ));
-    if (selectedTask?.id === taskId) {
-      setSelectedTask(null);
-    }
-  }, [selectedTask]);
+      // Update selected task if it's the one being edited
+      if (selectedTask?.id === taskId) {
+        setSelectedTask((prev) => (prev ? { ...prev, ...updates } : null));
+      }
+    },
+    [selectedTask],
+  );
+
+  const deleteTask = useCallback(
+    (taskId: string, columnId: string) => {
+      setColumns((prev) =>
+        prev.map((col) =>
+          col.id === columnId ? { ...col, tasks: col.tasks.filter((t) => t.id !== taskId) } : col,
+        ),
+      );
+      if (selectedTask?.id === taskId) {
+        setSelectedTask(null);
+      }
+    },
+    [selectedTask],
+  );
 
   // Subtask operations
-  const toggleSubtask = useCallback((taskId: string, subtaskId: string) => {
-    setColumns(prev => prev.map(col => ({
-      ...col,
-      tasks: col.tasks.map(task =>
-        task.id === taskId
-          ? {
-              ...task,
-              subtasks: task.subtasks.map(st =>
-                st.id === subtaskId ? { ...st, completed: !st.completed } : st
-              ),
-            }
-          : task
-      ),
-    })));
-    
-    // Update selected task subtasks
-    if (selectedTask?.id === taskId) {
-      setSelectedTask(prev => prev ? {
-        ...prev,
-        subtasks: prev.subtasks.map(st =>
-          st.id === subtaskId ? { ...st, completed: !st.completed } : st
-        ),
-      } : null);
-    }
-  }, [selectedTask]);
+  const toggleSubtask = useCallback(
+    (taskId: string, subtaskId: string) => {
+      setColumns((prev) =>
+        prev.map((col) => ({
+          ...col,
+          tasks: col.tasks.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  subtasks: task.subtasks.map((st) =>
+                    st.id === subtaskId ? { ...st, completed: !st.completed } : st,
+                  ),
+                }
+              : task,
+          ),
+        })),
+      );
 
-  const addSubtask = useCallback((taskId: string, title: string) => {
-    const newSubtask: KanbanSubtask = {
-      id: `st-${Date.now()}`,
-      title,
-      completed: false,
-    };
-    updateTask(taskId, {
-      subtasks: [...(selectedTask?.subtasks || []), newSubtask],
-    });
-  }, [updateTask, selectedTask]);
+      // Update selected task subtasks
+      if (selectedTask?.id === taskId) {
+        setSelectedTask((prev) =>
+          prev
+            ? {
+                ...prev,
+                subtasks: prev.subtasks.map((st) =>
+                  st.id === subtaskId ? { ...st, completed: !st.completed } : st,
+                ),
+              }
+            : null,
+        );
+      }
+    },
+    [selectedTask],
+  );
+
+  const addSubtask = useCallback(
+    (taskId: string, title: string) => {
+      const newSubtask: KanbanSubtask = {
+        id: `st-${Date.now()}`,
+        title,
+        completed: false,
+      };
+      updateTask(taskId, {
+        subtasks: [...(selectedTask?.subtasks || []), newSubtask],
+      });
+    },
+    [updateTask, selectedTask],
+  );
 
   // Tag operations
   const addTag = useCallback((name: string, color: string) => {
@@ -185,20 +203,22 @@ export function useKanban() {
       name,
       color,
     };
-    setTags(prev => [...prev, newTag]);
+    setTags((prev) => [...prev, newTag]);
     return newTag;
   }, []);
 
   const deleteTag = useCallback((tagId: string) => {
-    setTags(prev => prev.filter(t => t.id !== tagId));
+    setTags((prev) => prev.filter((t) => t.id !== tagId));
     // Remove tag from all tasks
-    setColumns(prev => prev.map(col => ({
-      ...col,
-      tasks: col.tasks.map(task => ({
-        ...task,
-        tags: task.tags.filter(t => t.id !== tagId),
+    setColumns((prev) =>
+      prev.map((col) => ({
+        ...col,
+        tasks: col.tasks.map((task) => ({
+          ...task,
+          tags: task.tags.filter((t) => t.id !== tagId),
+        })),
       })),
-    })));
+    );
   }, []);
 
   // Drag & Drop
@@ -206,36 +226,43 @@ export function useKanban() {
     setDraggedTask({ task, fromColumn: columnId });
   }, []);
 
-  const handleDrop = useCallback((targetColumnId: string) => {
-    if (!draggedTask) return;
+  const handleDrop = useCallback(
+    (targetColumnId: string) => {
+      if (!draggedTask) return;
 
-    setColumns(prev => prev.map(col => {
-      if (col.id === draggedTask.fromColumn) {
-        return { ...col, tasks: col.tasks.filter(t => t.id !== draggedTask.task.id) };
-      }
-      if (col.id === targetColumnId) {
-        return { ...col, tasks: [...col.tasks, draggedTask.task] };
-      }
-      return col;
-    }));
+      setColumns((prev) =>
+        prev.map((col) => {
+          if (col.id === draggedTask.fromColumn) {
+            return { ...col, tasks: col.tasks.filter((t) => t.id !== draggedTask.task.id) };
+          }
+          if (col.id === targetColumnId) {
+            return { ...col, tasks: [...col.tasks, draggedTask.task] };
+          }
+          return col;
+        }),
+      );
 
-    setDraggedTask(null);
-  }, [draggedTask]);
+      setDraggedTask(null);
+    },
+    [draggedTask],
+  );
 
   // Message operations
   const markMessagesAsRead = useCallback((taskId: string) => {
-    setColumns(prev => prev.map(col => ({
-      ...col,
-      tasks: col.tasks.map(task =>
-        task.id === taskId
-          ? {
-              ...task,
-              unreadCount: 0,
-              messages: task.messages?.map(m => ({ ...m, read: true })),
-            }
-          : task
-      ),
-    })));
+    setColumns((prev) =>
+      prev.map((col) => ({
+        ...col,
+        tasks: col.tasks.map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                unreadCount: 0,
+                messages: task.messages?.map((m) => ({ ...m, read: true })),
+              }
+            : task,
+        ),
+      })),
+    );
   }, []);
 
   return {
@@ -246,32 +273,32 @@ export function useKanban() {
     editingColumnId,
     isAddingColumn,
     draggedTask,
-    
+
     // Column operations
     addColumn,
     updateColumn,
     deleteColumn,
     setEditingColumnId,
     setIsAddingColumn,
-    
+
     // Task operations
     addTask,
     updateTask,
     deleteTask,
     setSelectedTask,
-    
+
     // Subtask operations
     toggleSubtask,
     addSubtask,
-    
+
     // Tag operations
     addTag,
     deleteTag,
-    
+
     // Drag & Drop
     handleDragStart,
     handleDrop,
-    
+
     // Messages
     markMessagesAsRead,
   };

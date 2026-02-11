@@ -14,6 +14,23 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma';
 import OpenAI from 'openai';
 import { ChatMessageDto } from './dto/ai-agent.dto';
+import { Prisma, Allergen, Diet, Theme } from '@prisma/client';
+
+type DishWithRelations = Prisma.DishGetPayload<{
+  include: {
+    DishAllergen: { include: { Allergen: true } };
+    DishIngredient: { include: { Ingredient: true } };
+  };
+}>;
+
+type MenuWithRelations = Prisma.MenuGetPayload<{
+  include: {
+    Diet: true;
+    Theme: true;
+    Dish: true;
+    MenuIngredient: { include: { Ingredient: true } };
+  };
+}>;
 
 interface ConversationEntry {
   role: 'system' | 'user' | 'assistant';
@@ -95,20 +112,20 @@ export class AiAgentService implements OnModuleInit {
       this.prisma.allergen.findMany(),
     ]);
 
-    const dishList = dishes.map(d => {
-      const allergenNames = d.DishAllergen.map(da => da.Allergen.name).join(', ');
-      const ingredients = d.DishIngredient.map(di => `${di.Ingredient.name} (${di.quantity}${di.Ingredient.unit})`).join(', ');
+    const dishList = dishes.map((d: DishWithRelations) => {
+      const allergenNames = d.DishAllergen.map((da: { Allergen: { name: string } }) => da.Allergen.name).join(', ');
+      const ingredients = d.DishIngredient.map((di: { Ingredient: { name: string; unit: string | null }; quantity: unknown }) => `${di.Ingredient.name} (${di.quantity}${di.Ingredient.unit})`).join(', ');
       return `  - [ID:${d.id}] "${d.title}" (${d.course_type ?? 'plat'}) — ${d.description || 'Pas de description'}. Allergènes: ${allergenNames || 'aucun'}. Ingrédients: ${ingredients || 'non renseignés'}`;
     }).join('\n');
 
-    const menuList = menus.map(m => {
-      const dishNames = m.Dish.map(d => d.title).join(', ');
+    const menuList = menus.map((m: MenuWithRelations) => {
+      const dishNames = m.Dish.map((d: { title: string }) => d.title).join(', ');
       return `  - [ID:${m.id}] "${m.title}" — ${m.price_per_person}€/pers, min ${m.person_min} pers. Régime: ${m.Diet?.name || 'aucun'}. Thème: ${m.Theme?.name || 'aucun'}. Plats: ${dishNames || 'aucun'}${m.is_seasonal ? ' (saisonnier)' : ''}`;
     }).join('\n');
 
-    const dietList = diets.map(d => `  - [ID:${d.id}] ${d.name}: ${d.description}`).join('\n');
-    const themeList = themes.map(t => `  - [ID:${t.id}] ${t.name}: ${t.description}`).join('\n');
-    const allergenList = allergens.map(a => `  - [ID:${a.id}] ${a.name}`).join('\n');
+    const dietList = diets.map((d: Diet) => `  - [ID:${d.id}] ${d.name}: ${d.description}`).join('\n');
+    const themeList = themes.map((t: Theme) => `  - [ID:${t.id}] ${t.name}: ${t.description}`).join('\n');
+    const allergenList = allergens.map((a: Allergen) => `  - [ID:${a.id}] ${a.name}`).join('\n');
 
     return `
 ═══ BASE DE DONNÉES VITE & GOURMAND ═══

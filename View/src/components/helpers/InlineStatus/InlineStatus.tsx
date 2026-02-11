@@ -23,7 +23,7 @@ const STATUS_ICONS: Record<StatusType, string> = {
 
 export function InlineStatus({ type, text, showIcon = true }: InlineStatusProps) {
   const classes = buildClasses(type);
-  
+
   return (
     <span className={classes}>
       {showIcon && <InlineStatusIcon type={type} />}
@@ -37,5 +37,9 @@ function buildClasses(type: StatusType): string {
 }
 
 function InlineStatusIcon({ type }: { type: StatusType }) {
-  return <span className="inline-status-icon" aria-hidden="true">{STATUS_ICONS[type]}</span>;
+  return (
+    <span className="inline-status-icon" aria-hidden="true">
+      {STATUS_ICONS[type]}
+    </span>
+  );
 }

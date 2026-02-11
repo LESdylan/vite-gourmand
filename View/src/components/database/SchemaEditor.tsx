@@ -79,7 +79,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
       setError('Le nom de la table est requis');
       return;
     }
-    if (columns.some(c => !c.name.trim())) {
+    if (columns.some((c) => !c.name.trim())) {
       setError('Toutes les colonnes doivent avoir un nom');
       return;
     }
@@ -92,7 +92,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
         method: 'POST',
         body: {
           tableName: newTableName.trim(),
-          columns: columns.map(c => ({
+          columns: columns.map((c) => ({
             name: c.name.trim(),
             type: c.type,
             nullable: c.nullable,
@@ -137,13 +137,18 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
       });
       onSuccess();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Échec de l\'ajout');
+      setError(e instanceof Error ? e.message : "Échec de l'ajout");
     } finally {
       setLoading(false);
     }
   };
 
-  const renderColumnForm = (col: ColumnDef, index: number, onChange: (field: keyof ColumnDef, value: unknown) => void, canRemove: boolean) => (
+  const renderColumnForm = (
+    col: ColumnDef,
+    index: number,
+    onChange: (field: keyof ColumnDef, value: unknown) => void,
+    canRemove: boolean,
+  ) => (
     <div key={index} className="column-form">
       <div className="column-form-row">
         <div className="form-field">
@@ -151,15 +156,17 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
           <input
             type="text"
             value={col.name}
-            onChange={e => onChange('name', e.target.value)}
+            onChange={(e) => onChange('name', e.target.value)}
             placeholder="ex: user_id, email, created_at"
           />
         </div>
         <div className="form-field">
           <label>Type *</label>
-          <select value={col.type} onChange={e => onChange('type', e.target.value)}>
-            {COLUMN_TYPES.map(t => (
-              <option key={t.value} value={t.value}>{t.label}</option>
+          <select value={col.type} onChange={(e) => onChange('type', e.target.value)}>
+            {COLUMN_TYPES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
             ))}
           </select>
         </div>
@@ -171,7 +178,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
           <input
             type="text"
             value={col.defaultValue}
-            onChange={e => onChange('defaultValue', e.target.value)}
+            onChange={(e) => onChange('defaultValue', e.target.value)}
             placeholder="ex: '', 0, NOW(), NULL"
           />
         </div>
@@ -180,7 +187,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
             <input
               type="checkbox"
               checked={!col.nullable}
-              onChange={e => onChange('nullable', !e.target.checked)}
+              onChange={(e) => onChange('nullable', !e.target.checked)}
             />
             NOT NULL
           </label>
@@ -188,7 +195,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
             <input
               type="checkbox"
               checked={col.isUnique}
-              onChange={e => onChange('isUnique', e.target.checked)}
+              onChange={(e) => onChange('isUnique', e.target.checked)}
             />
             UNIQUE
           </label>
@@ -197,7 +204,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
               <input
                 type="checkbox"
                 checked={col.isPrimary}
-                onChange={e => onChange('isPrimary', e.target.checked)}
+                onChange={(e) => onChange('isPrimary', e.target.checked)}
               />
               PRIMARY KEY
             </label>
@@ -211,7 +218,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
           <div className="fk-select">
             <select
               value={col.foreignKey?.table || ''}
-              onChange={e => {
+              onChange={(e) => {
                 const table = e.target.value;
                 if (!table) {
                   onChange('foreignKey', null);
@@ -221,18 +228,26 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
               }}
             >
               <option value="">Aucune référence</option>
-              {tables.map(t => (
-                <option key={t.name} value={t.name}>→ {t.name}</option>
+              {tables.map((t) => (
+                <option key={t.name} value={t.name}>
+                  → {t.name}
+                </option>
               ))}
             </select>
             {col.foreignKey && (
               <select
                 value={col.foreignKey.column}
-                onChange={e => onChange('foreignKey', { ...col.foreignKey!, column: e.target.value })}
+                onChange={(e) =>
+                  onChange('foreignKey', { ...col.foreignKey!, column: e.target.value })
+                }
               >
-                {tables.find(t => t.name === col.foreignKey?.table)?.columns.map(c => (
-                  <option key={c.name} value={c.name}>{c.name}</option>
-                ))}
+                {tables
+                  .find((t) => t.name === col.foreignKey?.table)
+                  ?.columns.map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
               </select>
             )}
           </div>
@@ -248,12 +263,16 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
 
   return (
     <div className="schema-editor-overlay" onClick={onClose}>
-      <div className="schema-editor" onClick={e => e.stopPropagation()}>
+      <div className="schema-editor" onClick={(e) => e.stopPropagation()}>
         <header className="schema-editor-header">
           <h3>
-            {mode === 'createTable' ? '🗂️ Créer une nouvelle table' : `➕ Ajouter une colonne à "${tableName}"`}
+            {mode === 'createTable'
+              ? '🗂️ Créer une nouvelle table'
+              : `➕ Ajouter une colonne à "${tableName}"`}
           </h3>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={onClose}>
+            ×
+          </button>
         </header>
 
         <div className="schema-editor-content">
@@ -266,7 +285,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
                 <input
                   type="text"
                   value={newTableName}
-                  onChange={e => setNewTableName(e.target.value)}
+                  onChange={(e) => setNewTableName(e.target.value)}
                   placeholder="ex: products, categories, reviews"
                 />
                 <span className="hint">Utilisez le format snake_case (ex: user_settings)</span>
@@ -279,19 +298,31 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
                     + Ajouter une colonne
                   </button>
                 </div>
-                
+
                 <div className="info-box">
                   💡 Une colonne <code>id SERIAL PRIMARY KEY</code> sera automatiquement ajoutée.
                 </div>
 
-                {columns.map((col, i) => renderColumnForm(col, i, (field, value) => updateColumn(i, field, value), columns.length > 1))}
+                {columns.map((col, i) =>
+                  renderColumnForm(
+                    col,
+                    i,
+                    (field, value) => updateColumn(i, field, value),
+                    columns.length > 1,
+                  ),
+                )}
               </div>
             </>
           )}
 
           {mode === 'addColumn' && (
             <div className="columns-section">
-              {renderColumnForm(singleColumn, 0, (field, value) => setSingleColumn({ ...singleColumn, [field]: value }), false)}
+              {renderColumnForm(
+                singleColumn,
+                0,
+                (field, value) => setSingleColumn({ ...singleColumn, [field]: value }),
+                false,
+              )}
             </div>
           )}
         </div>
@@ -306,7 +337,11 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
             onClick={mode === 'createTable' ? handleCreateTable : handleAddColumn}
             disabled={loading}
           >
-            {loading ? '⏳ En cours...' : mode === 'createTable' ? '✓ Créer la table' : '✓ Ajouter la colonne'}
+            {loading
+              ? '⏳ En cours...'
+              : mode === 'createTable'
+                ? '✓ Créer la table'
+                : '✓ Ajouter la colonne'}
           </button>
         </footer>
       </div>

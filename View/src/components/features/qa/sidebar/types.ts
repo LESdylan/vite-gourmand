@@ -4,7 +4,7 @@
  */
 
 /** Category identifiers - Fly.io style organization */
-export type TestCategory = 
+export type TestCategory =
   | 'overview'
   | 'test-automatics'
   | 'scenarios'

@@ -14,10 +14,15 @@ interface CategoryListProps {
   onSelect: (category: TestCategory) => void;
 }
 
-export function CategoryList({ categories, activeCategory, collapsed, onSelect }: CategoryListProps) {
+export function CategoryList({
+  categories,
+  activeCategory,
+  collapsed,
+  onSelect,
+}: CategoryListProps) {
   // Group categories by their group property
-  const mainCategories = categories.filter(c => c.group === 'main');
-  const utilityCategories = categories.filter(c => c.group === 'utility');
+  const mainCategories = categories.filter((c) => c.group === 'main');
+  const utilityCategories = categories.filter((c) => c.group === 'utility');
 
   return (
     <nav className="category-list" aria-label="Test categories">
@@ -33,12 +38,10 @@ export function CategoryList({ categories, activeCategory, collapsed, onSelect }
           />
         ))}
       </div>
-      
+
       {/* Divider */}
-      {!collapsed && utilityCategories.length > 0 && (
-        <hr className="category-divider" />
-      )}
-      
+      {!collapsed && utilityCategories.length > 0 && <hr className="category-divider" />}
+
       {/* Utility section */}
       <div className="category-section">
         {utilityCategories.map((category) => (

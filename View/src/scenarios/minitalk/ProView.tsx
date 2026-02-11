@@ -31,7 +31,7 @@ export const ProView: React.FC<Props> = ({ orders, selectedId, onSelect, onStatu
     setDragOverColumn(null);
     const orderId = Number.parseInt(e.dataTransfer.getData('orderId'));
     if (!Number.isNaN(orderId)) {
-      const order = orders.find(o => o.id === orderId);
+      const order = orders.find((o) => o.id === orderId);
       if (order && order.status !== targetStatus) {
         onStatusChange(orderId, targetStatus);
         setRecentlyChanged(orderId);
@@ -48,7 +48,7 @@ export const ProView: React.FC<Props> = ({ orders, selectedId, onSelect, onStatu
       </div>
       <div className="pro-columns">
         {COLUMNS.map(({ status, label, icon }) => {
-          const columnOrders = orders.filter(o => o.status === status);
+          const columnOrders = orders.filter((o) => o.status === status);
           const info = getStatusInfo(status);
 
           return (
@@ -56,16 +56,21 @@ export const ProView: React.FC<Props> = ({ orders, selectedId, onSelect, onStatu
               key={status}
               className={`pro-column ${dragOverColumn === status ? 'drag-over' : ''}`}
               style={{ '--column-color': info.color } as React.CSSProperties}
-              onDragOver={e => { e.preventDefault(); setDragOverColumn(status); }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOverColumn(status);
+              }}
               onDragLeave={() => setDragOverColumn(null)}
-              onDrop={e => handleDrop(e, status)}
+              onDrop={(e) => handleDrop(e, status)}
             >
               <header className="pro-column-header">
                 <div className="column-title">
                   <span className="column-icon">{icon}</span>
                   <h3>{label}</h3>
                 </div>
-                <span className="count" style={{ background: info.color }}>{columnOrders.length}</span>
+                <span className="count" style={{ background: info.color }}>
+                  {columnOrders.length}
+                </span>
               </header>
               <div className="pro-column-tasks">
                 {columnOrders.length === 0 ? (
@@ -74,7 +79,7 @@ export const ProView: React.FC<Props> = ({ orders, selectedId, onSelect, onStatu
                     <span>Aucune commande</span>
                   </div>
                 ) : (
-                  columnOrders.map(order => (
+                  columnOrders.map((order) => (
                     <OrderTicket
                       key={order.id}
                       order={order}
@@ -112,21 +117,27 @@ const OrderTicket: React.FC<OrderTicketProps> = ({ order, isSelected, isAnimatin
     <div
       className={`order-ticket ${isSelected ? 'selected' : ''} ${isAnimating ? 'animating' : ''}`}
       draggable
-      onDragStart={e => e.dataTransfer.setData('orderId', order.id.toString())}
+      onDragStart={(e) => e.dataTransfer.setData('orderId', order.id.toString())}
       onClick={onSelect}
     >
       {order.unreadCount > 0 && <span className="unread-badge">{order.unreadCount}</span>}
-      
+
       <div className="ticket-header">
         <span className="ticket-number">{order.orderNumber}</span>
         <span className="ticket-time">
-          {new Date(order.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+          {new Date(order.createdAt).toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
         </span>
       </div>
 
       <div className="ticket-customer">
         <span className="customer-name">{order.customerName}</span>
-        <span className="customer-type" style={{ background: `${info.color}15`, color: info.color }}>
+        <span
+          className="customer-type"
+          style={{ background: `${info.color}15`, color: info.color }}
+        >
           {typeInfo[order.type]?.icon} {typeInfo[order.type]?.label}
         </span>
       </div>
@@ -140,11 +151,7 @@ const OrderTicket: React.FC<OrderTicketProps> = ({ order, isSelected, isAnimatin
         ))}
       </div>
 
-      {order.notes && (
-        <div className="ticket-notes">
-          📝 {order.notes}
-        </div>
-      )}
+      {order.notes && <div className="ticket-notes">📝 {order.notes}</div>}
 
       <div className="ticket-footer">
         <span className="ticket-total">{order.total.toFixed(2)}€</span>

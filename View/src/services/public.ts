@@ -74,10 +74,7 @@ interface PaginatedWrapper<T> {
 // ── API calls ──
 
 /** Fetch approved reviews (public, paginated) */
-export async function fetchApprovedReviews(
-  page = 1,
-  limit = 20,
-): Promise<PublicReview[]> {
+export async function fetchApprovedReviews(page = 1, limit = 20): Promise<PublicReview[]> {
   const wrapper = await apiRequest<PaginatedWrapper<PublicReview>>(
     `/api/reviews?page=${page}&limit=${limit}`,
   );
@@ -86,17 +83,13 @@ export async function fetchApprovedReviews(
 
 /** Fetch aggregate review stats */
 export async function fetchReviewStats(): Promise<ReviewStats> {
-  const wrapper = await apiRequest<ApiWrapper<ReviewStats>>(
-    '/api/reviews/stats',
-  );
+  const wrapper = await apiRequest<ApiWrapper<ReviewStats>>('/api/reviews/stats');
   return wrapper.data;
 }
 
 /** Fetch working hours */
 export async function fetchWorkingHours(): Promise<WorkingHour[]> {
-  const wrapper = await apiRequest<ApiWrapper<WorkingHour[]>>(
-    '/api/working-hours',
-  );
+  const wrapper = await apiRequest<ApiWrapper<WorkingHour[]>>('/api/working-hours');
   return wrapper.data;
 }
 
@@ -134,8 +127,6 @@ export interface ActivePromotion {
 
 /** Fetch currently active public promotions (banners, offers, etc.) */
 export async function fetchActivePromotions(): Promise<ActivePromotion[]> {
-  const wrapper = await apiRequest<ApiWrapper<ActivePromotion[]>>(
-    '/api/promotions/active',
-  );
+  const wrapper = await apiRequest<ApiWrapper<ActivePromotion[]>>('/api/promotions/active');
   return wrapper.data;
 }

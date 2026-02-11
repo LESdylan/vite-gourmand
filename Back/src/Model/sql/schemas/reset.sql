@@ -2,6 +2,10 @@
 -- RESET: Drop ALL objects (reverse FK order)
 -- ============================================
 
+-- Drop materialized view refresh functions (from security_rls.sql)
+DROP FUNCTION IF EXISTS refresh_mv_orders_by_status() CASCADE;
+DROP FUNCTION IF EXISTS refresh_mv_monthly_revenue() CASCADE;
+
 DROP MATERIALIZED VIEW IF EXISTS "mv_orders_by_status" CASCADE;
 DROP MATERIALIZED VIEW IF EXISTS "mv_monthly_revenue" CASCADE;
 DROP VIEW IF EXISTS "v_active_menus" CASCADE;

@@ -40,7 +40,7 @@ export function ShellInput({ value, prompt, loading, onChange, onSubmit, onNavig
         ref={ref}
         type="text"
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKey}
         disabled={loading}
         autoFocus

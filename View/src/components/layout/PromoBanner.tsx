@@ -1,6 +1,6 @@
 /**
  * PromoBanner — Sticky top-bar for active promotions
- * 
+ *
  * Sits above the Navbar with bright attention-grabbing colors.
  * Auto-rotates between active promotions if there are multiple.
  * Dismissible per-session. Includes discount code copy-to-clipboard.
@@ -49,7 +49,7 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
   useEffect(() => {
     if (promotions.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % promotions.length);
+      setCurrentIndex((prev) => (prev + 1) % promotions.length);
     }, 6000);
     return () => clearInterval(interval);
   }, [promotions.length]);
@@ -81,7 +81,8 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
       <div
         className="absolute inset-0 opacity-[0.08] pointer-events-none"
         style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
           backgroundSize: '200% 100%',
           animation: 'promoShimmer 3s ease-in-out infinite',
         }}
@@ -123,11 +124,7 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
             >
               <Tag className="w-3 h-3" />
               <span className="font-mono tracking-wider">{discountCode}</span>
-              {copied ? (
-                <Check className="w-3 h-3" />
-              ) : (
-                <Copy className="w-3 h-3 opacity-50" />
-              )}
+              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3 opacity-50" />}
             </button>
           )}
 

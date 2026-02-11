@@ -22,7 +22,7 @@ export function getRememberMe(): RememberMeData | null {
   try {
     const data: RememberMeData = JSON.parse(stored);
     const maxAge = MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-    
+
     if (Date.now() - data.timestamp > maxAge) {
       clearRememberMe();
       return null;

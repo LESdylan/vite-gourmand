@@ -38,20 +38,12 @@ export function TestCardItem({ test, onRun, onView }: TestCardItemProps) {
         </div>
       </header>
 
-      {test.description && (
-        <p className="test-card-item-description">{test.description}</p>
-      )}
+      {test.description && <p className="test-card-item-description">{test.description}</p>}
 
       <footer className="test-card-item-footer">
-        <span className="test-card-item-meta">
-          {test.duration && `${test.duration}ms`}
-        </span>
+        <span className="test-card-item-meta">{test.duration && `${test.duration}ms`}</span>
         <div className="test-card-item-actions">
-          <button 
-            className="test-card-run-btn" 
-            onClick={handleRunTest} 
-            disabled={isRunning}
-          >
+          <button className="test-card-run-btn" onClick={handleRunTest} disabled={isRunning}>
             {test.testPath ? (
               <>
                 <FlaskIcon size={14} />

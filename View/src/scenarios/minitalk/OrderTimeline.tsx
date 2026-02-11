@@ -11,7 +11,16 @@ interface Props {
   currentStatus: OrderStatus;
 }
 
-const FLOW: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'cooking', 'assembling', 'ready', 'delivery', 'delivered'];
+const FLOW: OrderStatus[] = [
+  'pending',
+  'confirmed',
+  'preparing',
+  'cooking',
+  'assembling',
+  'ready',
+  'delivery',
+  'delivered',
+];
 
 export const OrderTimeline: React.FC<Props> = ({ currentStatus }) => {
   const currentIdx = FLOW.indexOf(currentStatus);
@@ -26,7 +35,10 @@ export const OrderTimeline: React.FC<Props> = ({ currentStatus }) => {
         const isCurrent = idx === currentIdx && !isCancelled;
 
         return (
-          <div key={status} className={`timeline-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}`}>
+          <div
+            key={status}
+            className={`timeline-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}`}
+          >
             <div className="timeline-icon" style={{ color: isActive ? info.color : undefined }}>
               <Icon />
             </div>

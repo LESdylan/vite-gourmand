@@ -66,7 +66,11 @@ fi
 log "Introspecting Supabase database..."
 cd "$BACKEND_DIR"
 
-if ! npx prisma db pull --schema=src/Model/prisma/schema.prisma 2>&1; then
+# Use DIRECT_URL for introspection (bypasses pgbouncer which doesn't support DDL/introspection)
+# prisma.config.ts handles routing to DIRECT_URL for Supabase, but we also export it explicitly
+export DATABASE_URL="$DIRECT_URL"
+
+if ! npx prisma db pull 2>&1; then
     error "Prisma introspection failed. Is the database deployed?"
 fi
 
@@ -74,7 +78,7 @@ ok "Prisma schema generated from Supabase!"
 
 # ── Generate client ──────────────────────────────────
 log "Generating Prisma Client..."
-npx prisma generate --schema=src/Model/prisma/schema.prisma 2>&1
+npx prisma generate 2>&1
 
 ok "Prisma Client generated!"
 echo ""

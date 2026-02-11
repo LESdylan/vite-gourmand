@@ -3,13 +3,13 @@
  * Type definitions for activity monitoring
  */
 
-export type ActivityType = 
-  | 'order'      // Orders placed, updated, cancelled
-  | 'user'       // User logins, registrations
-  | 'menu'       // Menu item changes
-  | 'system'     // System events (deploys, restarts)
-  | 'staff'      // Staff actions
-  | 'alert';     // Alerts and warnings
+export type ActivityType =
+  | 'order' // Orders placed, updated, cancelled
+  | 'user' // User logins, registrations
+  | 'menu' // Menu item changes
+  | 'system' // System events (deploys, restarts)
+  | 'staff' // Staff actions
+  | 'alert'; // Alerts and warnings
 
 export type ActivitySeverity = 'info' | 'success' | 'warning' | 'error';
 

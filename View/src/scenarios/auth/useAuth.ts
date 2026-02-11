@@ -19,23 +19,23 @@ export function useAuth() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const updateField = useCallback((field: keyof FormState, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    setErrors(prev => ({ ...prev, [field]: undefined, general: undefined }));
+    setForm((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined, general: undefined }));
   }, []);
 
   const validate = useCallback((): boolean => {
     const newErrors: FormErrors = {};
-    
+
     if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = 'Email invalide';
     }
-    
+
     if (mode !== 'forgot') {
       if (!form.password || form.password.length < 8) {
         newErrors.password = 'Minimum 8 caractères';
       }
     }
-    
+
     if (mode === 'register') {
       if (!form.name || form.name.length < 2) {
         newErrors.name = 'Nom requis (min 2 caractères)';
@@ -51,7 +51,7 @@ export function useAuth() {
 
   const handleSubmit = useCallback(async () => {
     if (!validate()) return;
-    
+
     setLoading(true);
     setErrors({});
     setSuccess(null);
@@ -86,19 +86,23 @@ export function useAuth() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, mode, navigate, validate]);
 
-  const handleGoogleLogin = useCallback(async (credential: string) => {
-    setLoading(true);
-    try {
-      await authService.googleLogin(credential);
-      navigate('/');
-    } catch (err) {
-      setErrors({ general: err instanceof Error ? err.message : 'Échec Google OAuth' });
-    } finally {
-      setLoading(false);
-    }
-  }, [navigate]);
+  const handleGoogleLogin = useCallback(
+    async (credential: string) => {
+      setLoading(true);
+      try {
+        await authService.googleLogin(credential);
+        navigate('/');
+      } catch (err) {
+        setErrors({ general: err instanceof Error ? err.message : 'Échec Google OAuth' });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate],
+  );
 
   const switchMode = useCallback((newMode: AuthMode) => {
     setMode(newMode);

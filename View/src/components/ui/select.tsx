@@ -1,5 +1,5 @@
-import * as React from "react";
-import { cn } from "./utils";
+import * as React from 'react';
+import { cn } from './utils';
 
 // Select context
 const SelectContext = React.createContext<{
@@ -15,7 +15,7 @@ interface SelectProps {
   children: React.ReactNode;
 }
 
-function Select({ value = "", onValueChange = () => {}, children }: SelectProps) {
+function Select({ value = '', onValueChange = () => {}, children }: SelectProps) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -31,21 +31,21 @@ interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 function SelectTrigger({ className, children, ...props }: SelectTriggerProps) {
   const context = React.useContext(SelectContext);
-  if (!context) throw new Error("SelectTrigger must be used within Select");
+  if (!context) throw new Error('SelectTrigger must be used within Select');
 
   return (
     <button
       type="button"
       className={cn(
-        "flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        className
+        'flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+        className,
       )}
       onClick={() => context.setOpen(!context.open)}
       {...props}
     >
       {children}
       <svg
-        className={cn("h-4 w-4 transition-transform", context.open && "rotate-180")}
+        className={cn('h-4 w-4 transition-transform', context.open && 'rotate-180')}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -62,10 +62,10 @@ interface SelectValueProps {
 
 function SelectValue({ placeholder }: SelectValueProps) {
   const context = React.useContext(SelectContext);
-  if (!context) throw new Error("SelectValue must be used within Select");
+  if (!context) throw new Error('SelectValue must be used within Select');
 
   return (
-    <span className={context.value ? "text-gray-900" : "text-gray-500"}>
+    <span className={context.value ? 'text-gray-900' : 'text-gray-500'}>
       {context.value || placeholder}
     </span>
   );
@@ -77,7 +77,7 @@ interface SelectContentProps {
 
 function SelectContent({ children }: SelectContentProps) {
   const context = React.useContext(SelectContext);
-  if (!context) throw new Error("SelectContent must be used within Select");
+  if (!context) throw new Error('SelectContent must be used within Select');
 
   if (!context.open) return null;
 
@@ -95,13 +95,13 @@ interface SelectItemProps {
 
 function SelectItem({ value, children }: SelectItemProps) {
   const context = React.useContext(SelectContext);
-  if (!context) throw new Error("SelectItem must be used within Select");
+  if (!context) throw new Error('SelectItem must be used within Select');
 
   return (
     <div
       className={cn(
-        "cursor-pointer px-3 py-2 text-sm hover:bg-orange-50",
-        context.value === value && "bg-orange-100 text-orange-900"
+        'cursor-pointer px-3 py-2 text-sm hover:bg-orange-50',
+        context.value === value && 'bg-orange-100 text-orange-900',
       )}
       onClick={() => {
         context.onValueChange(value);

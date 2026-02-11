@@ -33,14 +33,19 @@ export function DatabaseCards({ columns, records, onEdit, onDelete }: Props) {
   );
 }
 
-function RecordCard({ record, columns, onEdit, onDelete }: {
+function RecordCard({
+  record,
+  columns,
+  onEdit,
+  onDelete,
+}: {
   record: TableRecord;
   columns: TableColumn[];
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const titleField = findTitleField(columns, record);
-  const displayFields = columns.filter(c => !c.isPrimary).slice(0, 4);
+  const displayFields = columns.filter((c) => !c.isPrimary).slice(0, 4);
 
   return (
     <article className="db-card">
@@ -72,8 +77,12 @@ function FieldDisplay({ column, value }: { column: TableColumn; value: unknown }
 function CardActions({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
   return (
     <footer className="db-card-actions">
-      <button className="db-card-btn db-card-btn--edit" onClick={onEdit}>✏️ Edit</button>
-      <button className="db-card-btn db-card-btn--delete" onClick={onDelete}>🗑️</button>
+      <button className="db-card-btn db-card-btn--edit" onClick={onEdit}>
+        ✏️ Edit
+      </button>
+      <button className="db-card-btn db-card-btn--delete" onClick={onDelete}>
+        🗑️
+      </button>
     </footer>
   );
 }
@@ -90,7 +99,7 @@ function EmptyState() {
 /* === Helpers === */
 function findTitleField(columns: TableColumn[], record: TableRecord): string | null {
   const nameFields = ['name', 'title', 'label', 'email', 'username'];
-  const titleCol = columns.find(c => nameFields.includes(c.name.toLowerCase()));
+  const titleCol = columns.find((c) => nameFields.includes(c.name.toLowerCase()));
   return titleCol ? String(record[titleCol.name] || '') : null;
 }
 

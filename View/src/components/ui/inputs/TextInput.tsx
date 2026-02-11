@@ -26,7 +26,7 @@ export function TextInput({
   size = 'md',
 }: TextInputProps) {
   const inputClasses = buildInputClasses(size, error);
-  
+
   return (
     <div className="input-wrapper">
       {label && <InputLabel htmlFor={id} required={required} label={label} />}
@@ -54,7 +54,15 @@ function buildInputClasses(size: string, error?: string): string {
   return classes.join(' ');
 }
 
-function InputLabel({ htmlFor, required, label }: { htmlFor: string; required: boolean; label: string }) {
+function InputLabel({
+  htmlFor,
+  required,
+  label,
+}: {
+  htmlFor: string;
+  required: boolean;
+  label: string;
+}) {
   return (
     <label htmlFor={htmlFor} className="input-label">
       {label}
@@ -64,5 +72,9 @@ function InputLabel({ htmlFor, required, label }: { htmlFor: string; required: b
 }
 
 function InputError({ id, message }: { id: string; message: string }) {
-  return <span id={id} className="input-error" role="alert">{message}</span>;
+  return (
+    <span id={id} className="input-error" role="alert">
+      {message}
+    </span>
+  );
 }

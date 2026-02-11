@@ -15,8 +15,12 @@ export function EmployeeOrders() {
       </header>
 
       <div className="order-tabs">
-        <button className="order-tab active">À préparer <span className="order-tab-badge">3</span></button>
-        <button className="order-tab">Prêtes <span className="order-tab-badge">2</span></button>
+        <button className="order-tab active">
+          À préparer <span className="order-tab-badge">3</span>
+        </button>
+        <button className="order-tab">
+          Prêtes <span className="order-tab-badge">2</span>
+        </button>
         <button className="order-tab">Mes livraisons</button>
       </div>
 
@@ -46,9 +50,7 @@ export function EmployeeOrders() {
           id="#1236"
           table="Livraison"
           status="ready"
-          items={[
-            { name: 'Pâtes Carbonara', quantity: 3, notes: '' },
-          ]}
+          items={[{ name: 'Pâtes Carbonara', quantity: 3, notes: '' }]}
           time="12:25"
         />
       </div>
@@ -73,18 +75,18 @@ interface EmployeeOrderCardProps {
 function EmployeeOrderCard({ id, table, status, items, time }: EmployeeOrderCardProps) {
   const isReady = status === 'ready';
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
-  
+
   return (
     <div className={`employee-order-card ${isReady ? 'employee-order-card--ready' : ''}`}>
-      <div className="employee-order-status-icon">
-        {isReady ? '✅' : '👨‍🍳'}
-      </div>
+      <div className="employee-order-status-icon">{isReady ? '✅' : '👨‍🍳'}</div>
       <div className="employee-order-info">
         <div className="employee-order-header">
           <span className="employee-order-id">{id}</span>
           <span className="employee-order-table">{table}</span>
         </div>
-        <span className="employee-order-items">{itemCount} articles • {time}</span>
+        <span className="employee-order-items">
+          {itemCount} articles • {time}
+        </span>
       </div>
       <div className="employee-order-actions">
         {isReady ? (

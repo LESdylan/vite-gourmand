@@ -9,45 +9,45 @@ import type { AutoTest } from '../features/qa/automatic-tests';
 
 export function useMockData(category: TestCategory) {
   const tests: TestItem[] = [
-    { 
-      id: '1', 
-      name: 'Authentification', 
-      description: 'Connexion, inscription, réinitialisation mot de passe, OAuth', 
-      status: 'pending', 
+    {
+      id: '1',
+      name: 'Authentification',
+      description: 'Connexion, inscription, réinitialisation mot de passe, OAuth',
+      status: 'pending',
       type: 'scenario',
-      testPath: '/scenario/auth'
+      testPath: '/scenario/auth',
     },
-    { 
-      id: '2', 
-      name: 'Validation Formulaire', 
-      description: 'Test du formulaire de contact - validation, soumission', 
-      status: 'pending', 
+    {
+      id: '2',
+      name: 'Validation Formulaire',
+      description: 'Test du formulaire de contact - validation, soumission',
+      status: 'pending',
       type: 'scenario',
-      testPath: '/scenario/form'
+      testPath: '/scenario/form',
     },
-    { 
-      id: '3', 
-      name: 'Minitalk Client-Pro', 
-      description: 'Communication temps réel entre client et professionnel', 
-      status: 'pending', 
+    {
+      id: '3',
+      name: 'Minitalk Client-Pro',
+      description: 'Communication temps réel entre client et professionnel',
+      status: 'pending',
       type: 'scenario',
-      testPath: '/scenario/minitalk'
+      testPath: '/scenario/minitalk',
     },
-    { 
-      id: '8', 
-      name: 'Kanban Restaurant', 
-      description: 'Gestion des commandes avec Kanban professionnel', 
-      status: 'pending', 
+    {
+      id: '8',
+      name: 'Kanban Restaurant',
+      description: 'Gestion des commandes avec Kanban professionnel',
+      status: 'pending',
       type: 'scenario',
-      testPath: '/scenario/kanban'
+      testPath: '/scenario/kanban',
     },
-    { 
-      id: '5', 
-      name: 'Food Card Gallery', 
-      description: 'Galerie de menus foodcard, mobile-first', 
-      status: 'pending', 
+    {
+      id: '5',
+      name: 'Food Card Gallery',
+      description: 'Galerie de menus foodcard, mobile-first',
+      status: 'pending',
       type: 'scenario',
-      testPath: '/scenario/foodcard'
+      testPath: '/scenario/foodcard',
     },
   ];
 

@@ -17,7 +17,7 @@ import { useIsMobile } from '../hooks';
 import type { TableRecord, TableColumn } from './types';
 import './DatabaseViewer.css';
 
-type ModalType = 
+type ModalType =
   | { type: 'record'; record: TableRecord | null }
   | { type: 'addColumn' }
   | { type: 'createTable' }
@@ -31,7 +31,8 @@ export function DatabaseViewer() {
 
   useEffect(() => {
     if (db.activeTable) {
-      const table = db.tables.find(t => t.name === db.activeTable);
+      const table = db.tables.find((t) => t.name === db.activeTable);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setColumns(table?.columns || []);
     }
   }, [db.activeTable, db.tables]);
@@ -47,7 +48,7 @@ export function DatabaseViewer() {
       setModal(null);
       db.refresh();
     } catch (e) {
-      alert(`Erreur: ${e instanceof Error ? e.message : 'Échec de l\'opération'}`);
+      alert(`Erreur: ${e instanceof Error ? e.message : "Échec de l'opération"}`);
     }
   };
 
@@ -73,8 +74,8 @@ export function DatabaseViewer() {
           <TableSelector tables={db.tables} active={db.activeTable} onSelect={db.selectTable} />
         </div>
         <div className="header-actions">
-          <button 
-            className="btn-schema" 
+          <button
+            className="btn-schema"
             onClick={() => setModal({ type: 'createTable' })}
             title="Créer une nouvelle table"
           >
@@ -82,15 +83,15 @@ export function DatabaseViewer() {
           </button>
           {db.activeTable && (
             <>
-              <button 
-                className="btn-schema" 
+              <button
+                className="btn-schema"
                 onClick={() => setModal({ type: 'addColumn' })}
                 title="Ajouter une colonne"
               >
                 ➕ Colonne
               </button>
-              <button 
-                className="btn-create" 
+              <button
+                className="btn-create"
                 onClick={() => setModal({ type: 'record', record: null })}
               >
                 + Nouvel Enregistrement
@@ -106,8 +107,12 @@ export function DatabaseViewer() {
         <div className="database-placeholder">
           <p>⚠️ Impossible de charger le schéma de la base de données</p>
           {db.error && <p style={{ color: '#f56565', fontSize: '0.875rem' }}>{db.error}</p>}
-          <p className="database-placeholder-hint">Vérifiez que le backend est démarré et accessible</p>
-          <button onClick={db.loadTables} style={{ marginTop: '1rem' }}>Réessayer</button>
+          <p className="database-placeholder-hint">
+            Vérifiez que le backend est démarré et accessible
+          </p>
+          <button onClick={db.loadTables} style={{ marginTop: '1rem' }}>
+            Réessayer
+          </button>
         </div>
       )}
 
@@ -120,8 +125,8 @@ export function DatabaseViewer() {
 
       {db.activeTable && columns.length > 0 && (
         <>
-          <FilterBar 
-            columns={columns} 
+          <FilterBar
+            columns={columns}
             searchTerm={db.searchTerm}
             onSearch={db.handleSearch}
             onClear={db.clearSearch}
@@ -130,33 +135,33 @@ export function DatabaseViewer() {
             <DatabaseCards
               columns={columns}
               records={db.records}
-              onEdit={r => setModal({ type: 'record', record: r })}
+              onEdit={(r) => setModal({ type: 'record', record: r })}
               onDelete={handleDelete}
             />
           ) : (
-            <DataTable 
-              columns={columns} 
-              records={db.records} 
-              onEdit={r => setModal({ type: 'record', record: r })} 
-              onDelete={handleDelete} 
+            <DataTable
+              columns={columns}
+              records={db.records}
+              onEdit={(r) => setModal({ type: 'record', record: r })}
+              onDelete={handleDelete}
             />
           )}
-          <Pagination 
-            page={db.pagination.page} 
-            pageSize={db.pagination.pageSize} 
-            total={db.pagination.total} 
-            onPageChange={db.setPage} 
+          <Pagination
+            page={db.pagination.page}
+            pageSize={db.pagination.pageSize}
+            total={db.pagination.total}
+            onPageChange={db.setPage}
           />
         </>
       )}
 
       {/* Record Create/Edit Modal */}
       {modal?.type === 'record' && (
-        <RecordModal 
-          columns={columns} 
-          record={modal.record} 
-          onSave={handleSave} 
-          onClose={() => setModal(null)} 
+        <RecordModal
+          columns={columns}
+          record={modal.record}
+          onSave={handleSave}
+          onClose={() => setModal(null)}
         />
       )}
 

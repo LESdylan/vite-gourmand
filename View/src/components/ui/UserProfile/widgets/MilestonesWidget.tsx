@@ -13,7 +13,7 @@ export function MilestonesWidget({ profile }: ProfileWidgetProps) {
         {profile.milestones.length === 0 && (
           <div className="up-milestone-empty">Aucune étape atteinte pour l'instant.</div>
         )}
-        {profile.milestones.map(m => (
+        {profile.milestones.map((m) => (
           <MilestoneItem key={m.id} milestone={m} />
         ))}
       </div>
@@ -29,9 +29,7 @@ function MilestoneItem({ milestone }: { milestone: Milestone }) {
       <span className="up-milestone-icon">{milestone.icon}</span>
       <span className="up-milestone-label">{milestone.label}</span>
       <span className="up-milestone-desc">{milestone.description}</span>
-      {milestone.date && (
-        <span className="up-milestone-date">{formatDate(milestone.date)}</span>
-      )}
+      {milestone.date && <span className="up-milestone-date">{formatDate(milestone.date)}</span>}
     </div>
   );
 }

@@ -1,21 +1,21 @@
 /**
  * Menu Types and Fallback Data
- * 
+ *
  * This file provides:
  * 1. Type definitions for menus
  * 2. Fallback static data when API is unavailable
- * 
+ *
  * NOTE: Primary data should come from the API via useMenus hook.
  * This static data is only used as a fallback.
  */
 
-export type DietaryType = 
-  | 'classique' 
-  | 'végétarien' 
-  | 'vegan' 
-  | 'sans-gluten' 
-  | 'sans-lactose' 
-  | 'halal' 
+export type DietaryType =
+  | 'classique'
+  | 'végétarien'
+  | 'vegan'
+  | 'sans-gluten'
+  | 'sans-lactose'
+  | 'halal'
   | 'casher'
   | 'bio';
 
@@ -47,7 +47,8 @@ export interface Menu {
 }
 
 // Default fallback image
-export const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
+export const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
 
 /**
  * Empty menus array - data comes from API
@@ -60,7 +61,7 @@ export const menus: Menu[] = [];
  * @deprecated Use menuService.getMenuById() instead
  */
 export function getMenuById(id: string): Menu | undefined {
-  return menus.find(menu => menu.id === id);
+  return menus.find((menu) => menu.id === id);
 }
 
 /**
@@ -75,7 +76,16 @@ export function getAllThemes(): string[] {
  * Get all dietary types
  */
 export function getAllDietaryTypes(): DietaryType[] {
-  return ['classique', 'végétarien', 'vegan', 'sans-gluten', 'sans-lactose', 'halal', 'casher', 'bio'];
+  return [
+    'classique',
+    'végétarien',
+    'vegan',
+    'sans-gluten',
+    'sans-lactose',
+    'halal',
+    'casher',
+    'bio',
+  ];
 }
 
 /**
@@ -83,13 +93,13 @@ export function getAllDietaryTypes(): DietaryType[] {
  * @deprecated Use API filters instead
  */
 export function getMenusByTheme(theme: string): Menu[] {
-  return menus.filter(menu => menu.theme === theme);
+  return menus.filter((menu) => menu.theme === theme);
 }
 
 /**
  * Filter menus by dietary type (fallback)
- * @deprecated Use API filters instead  
+ * @deprecated Use API filters instead
  */
 export function getMenusByDietary(dietary: DietaryType): Menu[] {
-  return menus.filter(menu => menu.dietary.includes(dietary));
+  return menus.filter((menu) => menu.dietary.includes(dietary));
 }

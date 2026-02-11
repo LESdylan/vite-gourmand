@@ -69,14 +69,14 @@ export function useActivityData(): UseActivityDataReturn {
   const fetchActivities = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // TODO: Replace with real API call when backend endpoint exists
       // const response = await fetch('/api/activity');
       // const data = await response.json();
-      
+
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       setActivities(MOCK_ACTIVITIES);
     } catch {
       setError('Failed to load activities');
@@ -93,9 +93,10 @@ export function useActivityData(): UseActivityDataReturn {
     setActiveFilters(types);
   }, []);
 
-  const filteredActivities = activeFilters.length > 0
-    ? activities.filter(a => activeFilters.includes(a.type))
-    : activities;
+  const filteredActivities =
+    activeFilters.length > 0
+      ? activities.filter((a) => activeFilters.includes(a.type))
+      : activities;
 
   return {
     activities: filteredActivities,

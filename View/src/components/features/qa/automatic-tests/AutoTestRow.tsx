@@ -15,7 +15,7 @@ interface AutoTestRowProps {
 
 export function AutoTestRow({ test, isEven }: AutoTestRowProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   const statusMap = {
     idle: 'neutral',
     running: 'info',
@@ -31,7 +31,7 @@ export function AutoTestRow({ test, isEven }: AutoTestRowProps) {
 
   return (
     <>
-      <tr 
+      <tr
         className={`atr ${isEven ? 'atr--alt' : ''} ${hasDetails ? 'atr--clickable' : ''}`}
         onClick={handleRowClick}
       >
@@ -40,7 +40,9 @@ export function AutoTestRow({ test, isEven }: AutoTestRowProps) {
           {hasDetails && (
             <span className={`atr__chevron ${isExpanded ? 'atr__chevron--open' : ''}`}>▶</span>
           )}
-          <span className="atr__name" title={test.name}>{test.name}</span>
+          <span className="atr__name" title={test.name}>
+            {test.name}
+          </span>
         </td>
         <td className="atr__cell atr__cell--suite">
           <span className="atr__badge">{test.suite}</span>

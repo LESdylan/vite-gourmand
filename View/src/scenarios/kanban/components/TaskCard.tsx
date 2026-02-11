@@ -13,7 +13,7 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onDragStart, onClick, onDelete }: TaskCardProps) {
-  const completedSubtasks = task.subtasks.filter(st => st.completed).length;
+  const completedSubtasks = task.subtasks.filter((st) => st.completed).length;
   const totalSubtasks = task.subtasks.length;
   const progress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
@@ -26,15 +26,13 @@ export function TaskCard({ task, onDragStart, onClick, onDelete }: TaskCardProps
     >
       {/* Notification Badge */}
       {task.unreadCount && task.unreadCount > 0 && (
-        <div className="task-notification-badge unread">
-          {task.unreadCount}
-        </div>
+        <div className="task-notification-badge unread">{task.unreadCount}</div>
       )}
 
       {/* Tags */}
       {task.tags.length > 0 && (
         <div className="task-tags">
-          {task.tags.slice(0, 3).map(tag => (
+          {task.tags.slice(0, 3).map((tag) => (
             <span
               key={tag.id}
               className="task-tag"
@@ -43,9 +41,7 @@ export function TaskCard({ task, onDragStart, onClick, onDelete }: TaskCardProps
               {tag.name}
             </span>
           ))}
-          {task.tags.length > 3 && (
-            <span className="task-tag-more">+{task.tags.length - 3}</span>
-          )}
+          {task.tags.length > 3 && <span className="task-tag-more">+{task.tags.length - 3}</span>}
         </div>
       )}
 
@@ -53,9 +49,7 @@ export function TaskCard({ task, onDragStart, onClick, onDelete }: TaskCardProps
       <h4 className="task-title">{task.title}</h4>
 
       {/* Description preview */}
-      {task.description && (
-        <p className="task-description">{task.description}</p>
-      )}
+      {task.description && <p className="task-description">{task.description}</p>}
 
       {/* Progress bar for subtasks */}
       {totalSubtasks > 0 && (
@@ -72,7 +66,13 @@ export function TaskCard({ task, onDragStart, onClick, onDelete }: TaskCardProps
       {/* Footer */}
       <div className="task-footer">
         <span className={`task-priority priority-${task.priority}`}>
-          {task.priority === 'urgent' ? '🔥' : task.priority === 'high' ? '⬆️' : task.priority === 'medium' ? '➡️' : '⬇️'}
+          {task.priority === 'urgent'
+            ? '🔥'
+            : task.priority === 'high'
+              ? '⬆️'
+              : task.priority === 'medium'
+                ? '➡️'
+                : '⬇️'}
           {task.priority}
         </span>
         <button

@@ -1,6 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { ArrowLeft, Scale, FileText, Shield, AlertTriangle, Clock, CreditCard, Truck, Phone, Mail, MapPin } from 'lucide-react';
+import {
+  ArrowLeft,
+  Scale,
+  FileText,
+  Shield,
+  AlertTriangle,
+  Clock,
+  CreditCard,
+  Truck,
+  Phone,
+  Mail,
+  MapPin,
+} from 'lucide-react';
 import type { Page } from './Home';
 
 type LegalPageProps = {
@@ -10,7 +22,7 @@ type LegalPageProps = {
 
 /**
  * LegalPage - Mentions légales et CGV
- * 
+ *
  * Color scheme from graphical chart:
  * - Deep Bordeaux (#722F37) - Primary brand color
  * - Champagne (#D4AF37) - Accent
@@ -45,7 +57,9 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
                 {section === 'mentions' ? 'Mentions légales' : 'Conditions Générales de Vente'}
               </h1>
               <p className="text-white/60 mt-1">
-                {section === 'mentions' ? 'Informations légales et réglementaires' : 'Conditions applicables à toute commande'}
+                {section === 'mentions'
+                  ? 'Informations légales et réglementaires'
+                  : 'Conditions applicables à toute commande'}
               </p>
             </div>
           </div>
@@ -65,7 +79,9 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
               {/* Section 1 */}
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">1</span>
+                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    1
+                  </span>
                   Éditeur du site
                 </h2>
                 <div className="bg-[#FFF8F0] rounded-2xl p-6 space-y-4 border border-[#722F37]/10">
@@ -90,11 +106,18 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
                     </div>
                     <div className="flex items-center gap-3 text-[#1A1A1A]/70">
                       <Mail className="h-5 w-5 text-[#722F37]" />
-                      <a href="mailto:contact@vite-gourmand.fr" className="text-[#722F37] hover:underline">contact@vite-gourmand.fr</a>
+                      <a
+                        href="mailto:contact@vite-gourmand.fr"
+                        className="text-[#722F37] hover:underline"
+                      >
+                        contact@vite-gourmand.fr
+                      </a>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-[#722F37]/10">
-                    <span className="font-semibold text-[#1A1A1A]">Directeurs de la publication</span>
+                    <span className="font-semibold text-[#1A1A1A]">
+                      Directeurs de la publication
+                    </span>
                     <p className="text-[#1A1A1A]/70">Julie et José Martinez</p>
                   </div>
                 </div>
@@ -103,25 +126,30 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
               {/* Section 2 */}
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">2</span>
+                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    2
+                  </span>
                   Hébergement
                 </h2>
                 <p className="text-[#1A1A1A]/70 bg-[#FFF8F0] rounded-2xl p-6 border border-[#722F37]/10">
-                  Le site est hébergé par notre infrastructure cloud sécurisée.
-                  Serveur situé en France, conformément aux réglementations européennes.
+                  Le site est hébergé par notre infrastructure cloud sécurisée. Serveur situé en
+                  France, conformément aux réglementations européennes.
                 </p>
               </section>
 
               {/* Section 3 */}
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">3</span>
+                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    3
+                  </span>
                   Protection des données (RGPD)
                 </h2>
                 <div className="space-y-4">
                   <p className="text-[#1A1A1A]/70 leading-relaxed">
-                    Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, 
-                    de rectification, de suppression et de portabilité de vos données personnelles.
+                    Conformément au Règlement Général sur la Protection des Données (RGPD), vous
+                    disposez d'un droit d'accès, de rectification, de suppression et de portabilité
+                    de vos données personnelles.
                   </p>
                   <div className="bg-[#722F37]/5 rounded-2xl p-6 border border-[#722F37]/10">
                     <p className="font-semibold text-[#722F37] mb-3 flex items-center gap-2">
@@ -129,7 +157,13 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
                       Données collectées
                     </p>
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[#1A1A1A]/70">
-                      {['Nom et prénom', 'Adresse email', 'Numéro de téléphone', 'Adresse postale', 'Informations de commande'].map((item) => (
+                      {[
+                        'Nom et prénom',
+                        'Adresse email',
+                        'Numéro de téléphone',
+                        'Adresse postale',
+                        'Informations de commande',
+                      ].map((item) => (
                         <li key={item} className="flex items-center gap-2">
                           <span className="w-1.5 h-1.5 bg-[#722F37] rounded-full" />
                           {item}
@@ -139,8 +173,13 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
                   </div>
                   <div className="bg-[#556B2F]/10 rounded-2xl p-6 border border-[#556B2F]/20">
                     <p className="text-[#556B2F]">
-                      Pour exercer vos droits, contactez-nous à: 
-                      <a href="mailto:rgpd@vite-gourmand.fr" className="font-semibold ml-1 hover:underline">rgpd@vite-gourmand.fr</a>
+                      Pour exercer vos droits, contactez-nous à:
+                      <a
+                        href="mailto:rgpd@vite-gourmand.fr"
+                        className="font-semibold ml-1 hover:underline"
+                      >
+                        rgpd@vite-gourmand.fr
+                      </a>
                     </p>
                   </div>
                 </div>
@@ -148,14 +187,36 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
 
               {/* Section 4-7 */}
               {[
-                { num: '4', title: 'Cookies', content: 'Ce site utilise des cookies techniques nécessaires au fonctionnement de l\'application. Aucun cookie publicitaire n\'est utilisé.' },
-                { num: '5', title: 'Propriété intellectuelle', content: 'L\'ensemble des contenus présents sur ce site sont la propriété exclusive de Vite & Gourmand. Toute reproduction est strictement interdite sans autorisation.' },
-                { num: '6', title: 'Responsabilité', content: 'Vite & Gourmand s\'efforce d\'assurer l\'exactitude des informations. Les photos sont présentées à titre indicatif.' },
-                { num: '7', title: 'Liens hypertextes', content: 'Le site peut contenir des liens externes. Vite & Gourmand décline toute responsabilité quant au contenu de ces sites.' }
+                {
+                  num: '4',
+                  title: 'Cookies',
+                  content:
+                    "Ce site utilise des cookies techniques nécessaires au fonctionnement de l'application. Aucun cookie publicitaire n'est utilisé.",
+                },
+                {
+                  num: '5',
+                  title: 'Propriété intellectuelle',
+                  content:
+                    "L'ensemble des contenus présents sur ce site sont la propriété exclusive de Vite & Gourmand. Toute reproduction est strictement interdite sans autorisation.",
+                },
+                {
+                  num: '6',
+                  title: 'Responsabilité',
+                  content:
+                    "Vite & Gourmand s'efforce d'assurer l'exactitude des informations. Les photos sont présentées à titre indicatif.",
+                },
+                {
+                  num: '7',
+                  title: 'Liens hypertextes',
+                  content:
+                    'Le site peut contenir des liens externes. Vite & Gourmand décline toute responsabilité quant au contenu de ces sites.',
+                },
               ].map((section) => (
                 <section key={section.num}>
                   <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                    <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">{section.num}</span>
+                    <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                      {section.num}
+                    </span>
                     {section.title}
                   </h2>
                   <p className="text-[#1A1A1A]/70 leading-relaxed">{section.content}</p>
@@ -165,7 +226,8 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
               {/* Footer */}
               <div className="bg-[#1A1A1A] text-white rounded-2xl p-6 mt-8">
                 <p className="text-sm">
-                  <span className="font-semibold text-[#D4AF37]">Dernière mise à jour:</span> Février 2026
+                  <span className="font-semibold text-[#D4AF37]">Dernière mise à jour:</span>{' '}
+                  Février 2026
                 </p>
               </div>
             </CardContent>
@@ -182,26 +244,32 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
               {/* CGV Sections */}
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">1</span>
+                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    1
+                  </span>
                   Objet
                 </h2>
                 <p className="text-[#1A1A1A]/70 leading-relaxed">
-                  Les présentes CGV régissent les relations contractuelles entre Vite & Gourmand et ses clients 
-                  dans le cadre de la vente de prestations traiteur.
+                  Les présentes CGV régissent les relations contractuelles entre Vite & Gourmand et
+                  ses clients dans le cadre de la vente de prestations traiteur.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">2</span>
+                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    2
+                  </span>
                   Commandes
                 </h2>
                 <div className="space-y-4">
                   <p className="text-[#1A1A1A]/70 leading-relaxed">
-                    <strong className="text-[#1A1A1A]">2.1</strong> Les commandes sont effectuées via notre site web ou par téléphone.
+                    <strong className="text-[#1A1A1A]">2.1</strong> Les commandes sont effectuées
+                    via notre site web ou par téléphone.
                   </p>
                   <p className="text-[#1A1A1A]/70 leading-relaxed">
-                    <strong className="text-[#1A1A1A]">2.2</strong> La commande n'est définitive qu'après confirmation et réception de l'acompte.
+                    <strong className="text-[#1A1A1A]">2.2</strong> La commande n'est définitive
+                    qu'après confirmation et réception de l'acompte.
                   </p>
                   <div className="bg-[#D4AF37]/10 rounded-2xl p-6 border border-[#D4AF37]/20">
                     <p className="font-semibold text-[#1A1A1A] mb-3 flex items-center gap-2">
@@ -220,12 +288,15 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
 
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">3</span>
+                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    3
+                  </span>
                   Prix et paiement
                 </h2>
                 <div className="space-y-4">
                   <p className="text-[#1A1A1A]/70 leading-relaxed">
-                    Les prix sont indiqués en euros TTC. Un devis détaillé est fourni avant toute commande.
+                    Les prix sont indiqués en euros TTC. Un devis détaillé est fourni avant toute
+                    commande.
                   </p>
                   <div className="bg-[#556B2F]/10 rounded-2xl p-6 border border-[#556B2F]/20">
                     <p className="font-semibold text-[#556B2F] mb-3 flex items-center gap-2">
@@ -243,7 +314,9 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
 
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">4</span>
+                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    4
+                  </span>
                   Livraison
                 </h2>
                 <div className="bg-[#722F37]/5 rounded-2xl p-6 border border-[#722F37]/10">
@@ -261,7 +334,9 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
 
               <section>
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
-                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">5</span>
+                  <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    5
+                  </span>
                   Annulation
                 </h2>
                 <div className="bg-red-50 rounded-2xl p-6 border border-red-200">
@@ -282,7 +357,8 @@ export default function LegalPage({ section, setCurrentPage }: LegalPageProps) {
               {/* Footer */}
               <div className="bg-[#1A1A1A] text-white rounded-2xl p-6 mt-8">
                 <p className="text-sm">
-                  <span className="font-semibold text-[#D4AF37]">Dernière mise à jour:</span> Février 2026
+                  <span className="font-semibold text-[#D4AF37]">Dernière mise à jour:</span>{' '}
+                  Février 2026
                   <br />
                   <span className="text-white/60">Version applicable au jour de la commande.</span>
                 </p>

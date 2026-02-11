@@ -47,7 +47,9 @@ export function KanbanScenario() {
       <GradientBackground />
       {/* Header */}
       <header className="kanban-header">
-        <a href="/" className="back-link">← Retour au Dashboard</a>
+        <a href="/" className="back-link">
+          ← Retour au Dashboard
+        </a>
         <div className="header-content">
           <h1>🍷 Gestion des Commandes</h1>
           <p className="header-description">
@@ -56,7 +58,9 @@ export function KanbanScenario() {
         </div>
         <div className="header-stats">
           <div className="stat-item">
-            <span className="stat-value">{columns.reduce((acc, col) => acc + col.tasks.length, 0)}</span>
+            <span className="stat-value">
+              {columns.reduce((acc, col) => acc + col.tasks.length, 0)}
+            </span>
             <span className="stat-label">Commandes</span>
           </div>
           <div className="stat-item">
@@ -73,7 +77,7 @@ export function KanbanScenario() {
       {/* Kanban Board */}
       <div className="kanban-board-wrapper">
         <div className="kanban-board">
-          {columns.map(column => (
+          {columns.map((column) => (
             <KanbanColumn
               key={column.id}
               column={column}
@@ -111,7 +115,7 @@ export function KanbanScenario() {
         <div className="legend">
           <h4>Tags disponibles:</h4>
           <div className="legend-items">
-            {tags.map(tag => (
+            {tags.map((tag) => (
               <span
                 key={tag.id}
                 className="legend-tag"

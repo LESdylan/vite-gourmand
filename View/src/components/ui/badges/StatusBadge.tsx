@@ -13,7 +13,10 @@ interface StatusBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const STATUS_CONFIG: Record<BadgeStatus, { label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }> = {
+const STATUS_CONFIG: Record<
+  BadgeStatus,
+  { label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }
+> = {
   idle: { label: 'En attente', Icon: CircleIcon },
   running: { label: 'En cours', Icon: RefreshIcon },
   success: { label: 'Réussi', Icon: CheckIcon },
@@ -26,7 +29,7 @@ export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
   const config = STATUS_CONFIG[status];
   const classes = buildClasses(status, size);
   const iconSize = size === 'sm' ? 10 : 12;
-  
+
   return (
     <span className={classes} role="status">
       <span className="status-badge-icon" aria-hidden="true">

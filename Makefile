@@ -136,7 +136,7 @@ test-full:  ## Run complete test suite with report
 #  🗄️ DATABASE (Prisma)
 # ============================================
 
-.PHONY: db-connect db-status db-seed db-migrate db-reset db-query db-generate db-studio db-push
+.PHONY: db-connect db-status db-seed db-migrate db-reset db-reset-full db-query db-generate db-studio db-push db-security
 
 db-connect:  ## Connect to Supabase PostgreSQL
 	@$(SCRIPTS_PATH)/db/connect.sh
@@ -155,6 +155,12 @@ db-migrate-deploy:  ## Run Prisma migrations (production)
 
 db-reset:  ## Reset database (DESTRUCTIVE!)
 	@$(SCRIPTS_PATH)/db/reset.sh
+
+db-reset-full:  ## Full database reset: drop, schemas, seeds, RLS, introspect (DESTRUCTIVE!)
+	@$(SCRIPTS_PATH)/database/reset_database.sh
+
+db-security:  ## Apply RLS & security policies only (non-destructive)
+	@. $(BACKEND_PATH)/.env && psql "$$DIRECT_URL" -v ON_ERROR_STOP=1 -f $(BACKEND_PATH)/src/Model/sql/schemas/security_rls.sql && echo "✅ RLS & security policies applied!"
 
 db-query:  ## Run SQL query: make db-query SQL="SELECT * FROM users"
 	@SQL="$(SQL)" $(SCRIPTS_PATH)/db/query.sh

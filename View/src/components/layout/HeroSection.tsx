@@ -12,7 +12,7 @@ interface HeroSectionProps {
 
 /**
  * HeroSection - Premium landing section with smooth animations
- * 
+ *
  * Color scheme from graphical chart:
  * - Deep Bordeaux (#722F37) - Primary brand color
  * - Champagne (#D4AF37) - Accent/highlights
@@ -20,10 +20,16 @@ interface HeroSectionProps {
  * - Vert olive (#556B2F) - Success/natural
  * - Noir charbon (#1A1A1A) - Text
  */
-export default function HeroSection({ onExploreMenus, onContact, siteInfo, reviewStats }: HeroSectionProps) {
+export default function HeroSection({
+  onExploreMenus,
+  onContact,
+  siteInfo,
+  reviewStats,
+}: HeroSectionProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -32,15 +38,15 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
   const avgRating = reviewStats?.averageRating ?? 0;
   const reviewCount = reviewStats?.reviewCount ?? 0;
   const satisfaction = reviewStats?.satisfactionPercent ?? 0;
-  const ownerNames = siteInfo?.owners?.map(o => o.firstName).join(' et ') || 'Julie et José';
+  const ownerNames = siteInfo?.owners?.map((o) => o.firstName).join(' et ') || 'Julie et José';
 
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden bg-[#1A1A1A]">
       {/* Background Image with parallax effect */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1555244162-803834f70033?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXRlcmluZyUyMGVsZWdhbnQlMjBmb29kfGVufDF8fHx8MTc3MDExMzI3Nnww&ixlib=rb-4.1.0&q=80&w=1920')`
+          backgroundImage: `url('https://images.unsplash.com/photo-1555244162-803834f70033?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXRlcmluZyUyMGVsZWdhbnQlMjBmb29kfGVufDF8fHx8MTc3MDExMzI3Nnww&ixlib=rb-4.1.0&q=80&w=1920')`,
         }}
       >
         {/* Multi-layer overlay for depth */}
@@ -51,13 +57,13 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
 
       {/* Animated decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div 
+        <div
           className={`absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-[#D4AF37]/8 rounded-full blur-[100px] transition-all duration-1000 ${
             mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
           }`}
           style={{ transitionDelay: '300ms' }}
         />
-        <div 
+        <div
           className={`absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-[#722F37]/15 rounded-full blur-[100px] transition-all duration-1000 ${
             mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
           }`}
@@ -71,7 +77,7 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
           {/* Left column - Text content (7 cols) */}
           <div className="lg:col-span-7 space-y-6 sm:space-y-8">
             {/* Badge */}
-            <div 
+            <div
               className={`inline-flex items-center gap-2 sm:gap-3 bg-[#D4AF37]/15 backdrop-blur-md border border-[#D4AF37]/30 rounded-full px-4 py-2 transition-all duration-700 ${
                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
@@ -83,7 +89,7 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
             </div>
 
             {/* Main title */}
-            <div 
+            <div
               className={`space-y-3 sm:space-y-4 transition-all duration-700 ${
                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
@@ -100,18 +106,19 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
             </div>
 
             {/* Subtitle */}
-            <p 
+            <p
               className={`text-[clamp(0.9rem,1.5vw,1.25rem)] text-white/75 max-w-xl leading-relaxed transition-all duration-700 ${
                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
               style={{ transitionDelay: '300ms' }}
             >
-              {ownerNames} mettent leur <span className="text-[#D4AF37] font-medium">{years} années d'expertise</span> au service de vos événements. 
-              Une cuisine raffinée, des moments inoubliables.
+              {ownerNames} mettent leur{' '}
+              <span className="text-[#D4AF37] font-medium">{years} années d'expertise</span> au
+              service de vos événements. Une cuisine raffinée, des moments inoubliables.
             </p>
 
             {/* CTA Buttons */}
-            <div 
+            <div
               className={`flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 transition-all duration-700 ${
                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
@@ -137,7 +144,7 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
             </div>
 
             {/* Trust indicators */}
-            <div 
+            <div
               className={`flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 pt-4 sm:pt-6 transition-all duration-700 ${
                 mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
@@ -146,8 +153,8 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-2.5">
                   {['JD', 'ML', 'PB', 'AS'].map((initials, i) => (
-                    <div 
-                      key={i} 
+                    <div
+                      key={i}
                       className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#1A1A1A] bg-gradient-to-br from-[#D4AF37]/90 to-[#722F37] flex items-center justify-center text-white text-xs font-medium shadow-lg"
                     >
                       {initials}
@@ -157,18 +164,27 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
                 <div>
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`} />
+                      <Star
+                        key={i}
+                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
+                      />
                     ))}
-                    <span className="text-white/80 text-sm ml-1.5">{avgRating > 0 ? `${avgRating.toFixed(1)}/5` : '–'}</span>
+                    <span className="text-white/80 text-sm ml-1.5">
+                      {avgRating > 0 ? `${avgRating.toFixed(1)}/5` : '–'}
+                    </span>
                   </div>
-                  <p className="text-white/50 text-xs sm:text-sm">{reviewCount > 0 ? `${reviewCount} avis clients vérifiés` : 'Avis clients vérifiés'}</p>
+                  <p className="text-white/50 text-xs sm:text-sm">
+                    {reviewCount > 0
+                      ? `${reviewCount} avis clients vérifiés`
+                      : 'Avis clients vérifiés'}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right column - Stats cards (5 cols) */}
-          <div 
+          <div
             className={`lg:col-span-5 hidden lg:block transition-all duration-1000 ${
               mounted ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
             }`}
@@ -180,7 +196,7 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
                 <div className="w-72 h-72 border border-[#D4AF37]/15 rounded-full animate-[spin_20s_linear_infinite]" />
                 <div className="absolute w-96 h-96 border border-[#D4AF37]/8 rounded-full animate-[spin_30s_linear_infinite_reverse]" />
               </div>
-              
+
               <div className="relative grid grid-cols-2 gap-4">
                 {/* Stat card 1 */}
                 <div className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
@@ -196,7 +212,9 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
                   <div className="w-11 h-11 bg-[#722F37]/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
                     <Calendar className="w-5 h-5 text-[#FFF8F0]" />
                   </div>
-                  <div className="text-3xl font-bold text-white mb-0.5">{eventCount > 0 ? `${eventCount}+` : '–'}</div>
+                  <div className="text-3xl font-bold text-white mb-0.5">
+                    {eventCount > 0 ? `${eventCount}+` : '–'}
+                  </div>
                   <p className="text-white/50 text-sm">Événements réalisés</p>
                 </div>
 
@@ -205,7 +223,9 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
                   <div className="w-11 h-11 bg-[#556B2F]/30 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
                     <Users className="w-5 h-5 text-[#8fad6a]" />
                   </div>
-                  <div className="text-3xl font-bold text-white mb-0.5">{satisfaction > 0 ? `${satisfaction}%` : '–'}</div>
+                  <div className="text-3xl font-bold text-white mb-0.5">
+                    {satisfaction > 0 ? `${satisfaction}%` : '–'}
+                  </div>
                   <p className="text-white/50 text-sm">Clients satisfaits</p>
                 </div>
 
@@ -213,11 +233,18 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
                 <div className="group bg-gradient-to-br from-[#722F37] to-[#5a252c] rounded-2xl p-5 mt-8 shadow-xl shadow-[#722F37]/25 hover:shadow-[#722F37]/40 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
                   <div className="flex items-center gap-1 mb-2">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className={`w-3 h-3 ${i <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`} />
+                      <Star
+                        key={i}
+                        className={`w-3 h-3 ${i <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
+                      />
                     ))}
                   </div>
                   <p className="text-white/90 text-sm mb-3 leading-relaxed line-clamp-3">
-                    "{reviewCount > 0 ? 'Découvrez les avis de nos clients satisfaits !' : 'Soyez le premier à laisser un avis !'}"
+                    "
+                    {reviewCount > 0
+                      ? 'Découvrez les avis de nos clients satisfaits !'
+                      : 'Soyez le premier à laisser un avis !'}
+                    "
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-[#D4AF37]/30 flex items-center justify-center text-white text-xs font-medium">
@@ -232,7 +259,7 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
         </div>
 
         {/* Mobile stats row */}
-        <div 
+        <div
           className={`lg:hidden mt-10 sm:mt-12 grid grid-cols-3 gap-3 transition-all duration-700 ${
             mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
@@ -241,11 +268,15 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
           {[
             { value: `${years}+`, label: 'Années', icon: Award },
             { value: eventCount > 0 ? `${eventCount}+` : '–', label: 'Événements', icon: Calendar },
-            { value: satisfaction > 0 ? `${satisfaction}%` : '–', label: 'Satisfaits', icon: Users },
+            {
+              value: satisfaction > 0 ? `${satisfaction}%` : '–',
+              label: 'Satisfaits',
+              icon: Users,
+            },
           ].map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div 
+              <div
                 key={index}
                 className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10"
               >
@@ -259,7 +290,7 @@ export default function HeroSection({ onExploreMenus, onContact, siteInfo, revie
       </div>
 
       {/* Scroll indicator */}
-      <div 
+      <div
         className={`absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 hidden sm:flex transition-all duration-700 ${
           mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}

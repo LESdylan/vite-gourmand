@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Star, ArrowRight, ChefHat, Award, Heart, Clock, 
-  Quote, Utensils, Users, Leaf
+import {
+  Star,
+  ArrowRight,
+  ChefHat,
+  Award,
+  Heart,
+  Clock,
+  Quote,
+  Utensils,
+  Users,
+  Leaf,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -11,7 +19,14 @@ import { usePublicData } from '../contexts/PublicDataContext';
 import type { ReviewStats, SiteInfo } from '../services/public';
 
 // Page types for internal navigation
-export type Page = 'home' | 'menu' | 'contact' | 'order' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
+export type Page =
+  | 'home'
+  | 'menu'
+  | 'contact'
+  | 'order'
+  | 'legal-mentions'
+  | 'legal-cgv'
+  | 'user-profile';
 
 type HomePageProps = {
   setCurrentPage: (page: Page) => void;
@@ -27,7 +42,7 @@ type Review = {
 
 /**
  * HomePage - Premium landing page with smooth animations
- * 
+ *
  * Color scheme from graphical chart:
  * - Deep Bordeaux (#722F37) - Primary brand color
  * - Champagne (#D4AF37) - Accent/highlights
@@ -50,7 +65,7 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (sectionRef.current) {
@@ -65,33 +80,36 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
       icon: ChefHat,
       title: 'Expertise culinaire',
       description: `${yearsOfExperience} années d'expérience au service de votre palais. Une cuisine raffinée et authentique.`,
-      color: '#722F37'
+      color: '#722F37',
     },
     {
       icon: Award,
       title: 'Excellence',
-      description: 'Des produits frais et de saison, sélectionnés avec soin auprès de producteurs locaux.',
-      color: '#D4AF37'
+      description:
+        'Des produits frais et de saison, sélectionnés avec soin auprès de producteurs locaux.',
+      color: '#D4AF37',
     },
     {
       icon: Heart,
       title: 'Sur mesure',
-      description: 'Chaque menu est personnalisé selon vos envies, votre budget et le thème de votre événement.',
-      color: '#722F37'
+      description:
+        'Chaque menu est personnalisé selon vos envies, votre budget et le thème de votre événement.',
+      color: '#722F37',
     },
     {
       icon: Clock,
       title: 'Réactivité',
-      description: 'Une équipe disponible et à l\'écoute pour répondre à toutes vos demandes rapidement.',
-      color: '#556B2F'
-    }
+      description:
+        "Une équipe disponible et à l'écoute pour répondre à toutes vos demandes rapidement.",
+      color: '#556B2F',
+    },
   ];
 
   return (
     <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-[#FFF8F0]">
       <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12">
         {/* Section header */}
-        <div 
+        <div
           className={`text-center max-w-2xl mx-auto mb-10 sm:mb-12 lg:mb-14 transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
@@ -104,8 +122,8 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
             Pourquoi choisir <span className="text-[#722F37]">Vite & Gourmand</span> ?
           </h2>
           <p className="text-[clamp(0.875rem,1.5vw,1rem)] text-[#1A1A1A]/60 leading-relaxed">
-            Notre passion pour la gastronomie et notre engagement envers l'excellence 
-            font de chaque événement un moment unique.
+            Notre passion pour la gastronomie et notre engagement envers l'excellence font de chaque
+            événement un moment unique.
           </p>
         </div>
 
@@ -114,21 +132,23 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className={`group bg-white border-0 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden rounded-2xl ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
                 <CardContent className="p-6 sm:p-8">
-                  <div 
+                  <div
                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-5 transition-transform duration-300 group-hover:scale-110"
                     style={{ backgroundColor: `${feature.color}12` }}
                   >
                     <Icon className="h-5 w-5 sm:h-6 sm:w-6" style={{ color: feature.color }} />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-2 sm:mb-3">{feature.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-2 sm:mb-3">
+                    {feature.title}
+                  </h3>
                   <p className="text-sm text-[#1A1A1A]/60 leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
@@ -143,10 +163,14 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
 // ========================================
 // ABOUT SECTION
 // ========================================
-function AboutSection({ setCurrentPage, siteInfo }: { setCurrentPage: (page: Page) => void; siteInfo: SiteInfo | null }) {
-  const ownerNames = siteInfo?.owners
-    ?.map(o => o.firstName)
-    .join(' et ') || 'Julie et José';
+function AboutSection({
+  setCurrentPage,
+  siteInfo,
+}: {
+  setCurrentPage: (page: Page) => void;
+  siteInfo: SiteInfo | null;
+}) {
+  const ownerNames = siteInfo?.owners?.map((o) => o.firstName).join(' et ') || 'Julie et José';
   const years = siteInfo?.yearsOfExperience ?? 25;
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -158,7 +182,7 @@ function AboutSection({ setCurrentPage, siteInfo }: { setCurrentPage: (page: Pag
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (sectionRef.current) {
@@ -173,7 +197,7 @@ function AboutSection({ setCurrentPage, siteInfo }: { setCurrentPage: (page: Pag
       <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-[5vw] items-center">
           {/* Image column */}
-          <div 
+          <div
             className={`relative order-2 lg:order-1 transition-all duration-1000 ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
             }`}
@@ -201,7 +225,7 @@ function AboutSection({ setCurrentPage, siteInfo }: { setCurrentPage: (page: Pag
           </div>
 
           {/* Text column */}
-          <div 
+          <div
             className={`order-1 lg:order-2 space-y-5 sm:space-y-6 transition-all duration-1000 ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
             }`}
@@ -211,23 +235,26 @@ function AboutSection({ setCurrentPage, siteInfo }: { setCurrentPage: (page: Pag
               <Heart className="w-4 h-4 text-[#D4AF37]" />
               <span className="text-[#D4AF37] text-xs sm:text-sm font-medium">Notre histoire</span>
             </div>
-            
+
             <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-[#1A1A1A] leading-tight">
-              Une passion<br />
-              <span className="text-[#722F37]">transmise</span> depuis<br />
+              Une passion
+              <br />
+              <span className="text-[#722F37]">transmise</span> depuis
+              <br />
               deux générations
             </h2>
-            
+
             <div className="w-12 sm:w-16 h-1 bg-gradient-to-r from-[#722F37] to-[#D4AF37] rounded-full" />
-            
+
             <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-[#1A1A1A]/70 leading-relaxed">
               <p>
-                Fondée il y a {years} ans à Bordeaux par <strong className="text-[#1A1A1A]">{ownerNames}</strong>, 
-                Vite & Gourmand est née d'une passion commune pour la gastronomie.
+                Fondée il y a {years} ans à Bordeaux par{' '}
+                <strong className="text-[#1A1A1A]">{ownerNames}</strong>, Vite & Gourmand est née
+                d'une passion commune pour la gastronomie.
               </p>
               <p>
-                Notre duo allie créativité culinaire et sens du détail pour offrir 
-                des prestations sur mesure qui subliment vos événements.
+                Notre duo allie créativité culinaire et sens du détail pour offrir des prestations
+                sur mesure qui subliment vos événements.
               </p>
             </div>
 
@@ -270,7 +297,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (sectionRef.current) {
@@ -283,29 +310,29 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
   const services = [
     {
       title: 'Mariages',
-      description: 'De l\'apéritif au dessert, un menu sur mesure pour le plus beau jour.',
+      description: "De l'apéritif au dessert, un menu sur mesure pour le plus beau jour.",
       image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600',
-      persons: '30 - 300 personnes'
+      persons: '30 - 300 personnes',
     },
     {
-      title: 'Événements d\'entreprise',
+      title: "Événements d'entreprise",
       description: 'Séminaires, cocktails, team building... Impressionnez vos collaborateurs.',
       image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600',
-      persons: '10 - 200 personnes'
+      persons: '10 - 200 personnes',
     },
     {
       title: 'Réceptions privées',
       description: 'Anniversaires, baptêmes, communions... Des moments de partage inoubliables.',
       image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600',
-      persons: '10 - 100 personnes'
-    }
+      persons: '10 - 100 personnes',
+    },
   ];
 
   return (
     <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-[#1A1A1A]">
       <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12">
         {/* Section header */}
-        <div 
+        <div
           className={`text-center max-w-2xl mx-auto mb-8 sm:mb-10 lg:mb-12 transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
@@ -325,7 +352,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
         {/* Services grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-[2vw]">
           {services.map((service, index) => (
-            <div 
+            <div
               key={index}
               className={`group relative overflow-hidden rounded-2xl sm:rounded-3xl cursor-pointer transition-all duration-700 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
@@ -341,7 +368,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-[#1A1A1A]/50 to-transparent" />
-                
+
                 {/* Content */}
                 <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
                   <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 mb-3">
@@ -349,7 +376,9 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
                     <span className="text-white/80 text-xs">{service.persons}</span>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{service.title}</h3>
-                  <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 line-clamp-2">{service.description}</p>
+                  <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4 line-clamp-2">
+                    {service.description}
+                  </p>
                   <div className="flex items-center text-[#D4AF37] text-sm font-medium group-hover:gap-3 gap-2 transition-all">
                     <span>Découvrir</span>
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -367,7 +396,15 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
 // ========================================
 // TESTIMONIALS — INFINITE SCROLL CAROUSEL
 // ========================================
-function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; loading: boolean; stats: ReviewStats | null }) {
+function TestimonialsSection({
+  reviews,
+  loading,
+  stats,
+}: {
+  reviews: Review[];
+  loading: boolean;
+  stats: ReviewStats | null;
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const isPausedRef = useRef(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -378,7 +415,7 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
       ([entry]) => {
         if (entry.isIntersecting) setIsVisible(true);
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
@@ -430,7 +467,9 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
           <div className="flex justify-center mb-6">
             <div className="inline-flex items-center gap-2 bg-[#722F37]/8 rounded-full px-4 py-2">
               <Quote className="w-4 h-4 text-[#722F37]" />
-              <span className="text-[#722F37] text-xs sm:text-sm font-medium tracking-wide">Ce que disent nos clients</span>
+              <span className="text-[#722F37] text-xs sm:text-sm font-medium tracking-wide">
+                Ce que disent nos clients
+              </span>
             </div>
           </div>
 
@@ -444,11 +483,13 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
               {/* Rating badge */}
               <div className="flex flex-col items-center">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <span className="text-4xl sm:text-5xl font-black text-[#1A1A1A] tabular-nums">{avgRating > 0 ? avgRating.toFixed(1) : '–'}</span>
+                  <span className="text-4xl sm:text-5xl font-black text-[#1A1A1A] tabular-nums">
+                    {avgRating > 0 ? avgRating.toFixed(1) : '–'}
+                  </span>
                   <span className="text-xl sm:text-2xl text-[#1A1A1A]/30 font-medium">/5</span>
                 </div>
                 <div className="flex items-center gap-0.5 mb-1">
-                  {[1,2,3,4,5].map(i => (
+                  {[1, 2, 3, 4, 5].map((i) => (
                     <Star
                       key={i}
                       className={`w-5 h-5 sm:w-6 sm:h-6 ${
@@ -469,7 +510,9 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
 
               {/* Review count */}
               <div className="flex flex-col items-center">
-                <span className="text-4xl sm:text-5xl font-black text-[#722F37] tabular-nums">{reviewCount}</span>
+                <span className="text-4xl sm:text-5xl font-black text-[#722F37] tabular-nums">
+                  {reviewCount}
+                </span>
                 <span className="text-sm text-[#1A1A1A]/50 mt-1">Avis vérifiés</span>
               </div>
 
@@ -478,7 +521,9 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
 
               {/* Satisfaction */}
               <div className="flex flex-col items-center">
-                <span className="text-4xl sm:text-5xl font-black text-[#556B2F] tabular-nums">{satisfaction}%</span>
+                <span className="text-4xl sm:text-5xl font-black text-[#556B2F] tabular-nums">
+                  {satisfaction}%
+                </span>
                 <span className="text-sm text-[#1A1A1A]/50 mt-1">Clients satisfaits</span>
               </div>
             </div>
@@ -497,8 +542,12 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
             isVisible ? 'opacity-100' : 'opacity-0'
           }`}
           style={{ transitionDelay: '300ms' }}
-          onMouseEnter={() => { isPausedRef.current = true; }}
-          onMouseLeave={() => { isPausedRef.current = false; }}
+          onMouseEnter={() => {
+            isPausedRef.current = true;
+          }}
+          onMouseLeave={() => {
+            isPausedRef.current = false;
+          }}
           role="region"
           aria-label="Avis clients — survolez pour mettre en pause le défilement"
         >
@@ -525,9 +574,7 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
                         <Star
                           key={i}
                           className={`w-4 h-4 transition-colors ${
-                            i < review.rating
-                              ? 'text-[#D4AF37] fill-[#D4AF37]'
-                              : 'text-[#1A1A1A]/8'
+                            i < review.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-[#1A1A1A]/8'
                           }`}
                         />
                       ))}
@@ -550,10 +597,15 @@ function TestimonialsSection({ reviews, loading, stats }: { reviews: Review[]; l
                   {/* Author */}
                   <div className="flex items-center gap-3 pt-3 border-t border-[#1A1A1A]/[0.04]">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#722F37] to-[#D4AF37] flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:shadow-md transition-shadow">
-                      {review.userName.split(' ').map(n => n[0]).join('')}
+                      {review.userName
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
                     </div>
                     <div>
-                      <span className="font-semibold text-[#1A1A1A] text-sm block">{review.userName}</span>
+                      <span className="font-semibold text-[#1A1A1A] text-sm block">
+                        {review.userName}
+                      </span>
                       <span className="text-[11px] text-[#1A1A1A]/40">Client vérifié</span>
                     </div>
                   </div>
@@ -585,7 +637,7 @@ function ValuesSection() {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (sectionRef.current) {
@@ -599,18 +651,19 @@ function ValuesSection() {
     {
       icon: Leaf,
       title: 'Produits locaux',
-      description: 'Nous privilégions les circuits courts et les producteurs de la région bordelaise.'
+      description:
+        'Nous privilégions les circuits courts et les producteurs de la région bordelaise.',
     },
     {
       icon: Heart,
       title: 'Fait maison',
-      description: 'Toutes nos préparations sont réalisées dans notre cuisine, avec passion.'
+      description: 'Toutes nos préparations sont réalisées dans notre cuisine, avec passion.',
     },
     {
       icon: Award,
       title: 'Qualité premium',
-      description: 'Des ingrédients sélectionnés avec soin pour une qualité irréprochable.'
-    }
+      description: 'Des ingrédients sélectionnés avec soin pour une qualité irréprochable.',
+    },
   ];
 
   return (
@@ -618,7 +671,7 @@ function ValuesSection() {
       <div className="max-w-[min(90rem,95vw)] mx-auto px-6 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-[5vw] items-center">
           {/* Values list */}
-          <div 
+          <div
             className={`space-y-5 sm:space-y-6 transition-all duration-1000 ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
             }`}
@@ -627,9 +680,10 @@ function ValuesSection() {
               <Leaf className="w-4 h-4 text-[#556B2F]" />
               <span className="text-[#556B2F] text-xs sm:text-sm font-medium">Nos valeurs</span>
             </div>
-            
+
             <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-[#1A1A1A] leading-tight">
-              L'engagement d'une<br />
+              L'engagement d'une
+              <br />
               <span className="text-[#556B2F]">cuisine responsable</span>
             </h2>
 
@@ -637,8 +691,8 @@ function ValuesSection() {
               {values.map((value, index) => {
                 const Icon = value.icon;
                 return (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`flex gap-4 transition-all duration-700 ${
                       isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
                     }`}
@@ -648,8 +702,12 @@ function ValuesSection() {
                       <Icon className="w-5 h-5 text-[#556B2F]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[#1A1A1A] text-base sm:text-lg mb-1">{value.title}</h3>
-                      <p className="text-sm text-[#1A1A1A]/60 leading-relaxed">{value.description}</p>
+                      <h3 className="font-semibold text-[#1A1A1A] text-base sm:text-lg mb-1">
+                        {value.title}
+                      </h3>
+                      <p className="text-sm text-[#1A1A1A]/60 leading-relaxed">
+                        {value.description}
+                      </p>
                     </div>
                   </div>
                 );
@@ -658,7 +716,7 @@ function ValuesSection() {
           </div>
 
           {/* Image */}
-          <div 
+          <div
             className={`relative transition-all duration-1000 ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
             }`}
@@ -672,7 +730,11 @@ function ValuesSection() {
             />
             <div className="absolute bottom-2 left-2 sm:-bottom-5 sm:-left-5 bg-[#556B2F] text-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-xl">
               <div className="text-2xl sm:text-3xl font-bold mb-0.5">100%</div>
-              <p className="text-white/80 text-xs sm:text-sm">Produits frais<br />et de saison</p>
+              <p className="text-white/80 text-xs sm:text-sm">
+                Produits frais
+                <br />
+                et de saison
+              </p>
             </div>
           </div>
         </div>
@@ -690,8 +752,7 @@ export default function HomePage({ setCurrentPage }: HomePageProps) {
   // Map DB reviews to the component format
   const reviews: Review[] = rawReviews.map((r) => ({
     id: String(r.id),
-    userName:
-      r.User_Publish_user_idToUser?.first_name ?? 'Client',
+    userName: r.User_Publish_user_idToUser?.first_name ?? 'Client',
     rating: r.note,
     text: r.description,
     createdAt: r.created_at,

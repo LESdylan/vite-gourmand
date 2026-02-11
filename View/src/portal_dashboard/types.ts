@@ -34,8 +34,20 @@ export interface PortalAuthState {
 /** Bot users for debugging (superadmin only) */
 export const DEBUG_BOTS: Record<BotId, DashboardUser> = {
   bot_admin: { id: -1, email: 'bot_admin@debug', name: 'Bot Admin', role: 'admin', isBot: true },
-  bot_employee: { id: -2, email: 'bot_employee@debug', name: 'Bot Employee', role: 'employee', isBot: true },
-  bot_user: { id: -3, email: 'bot_user@debug', name: 'Bot Customer', role: 'customer', isBot: true },
+  bot_employee: {
+    id: -2,
+    email: 'bot_employee@debug',
+    name: 'Bot Employee',
+    role: 'employee',
+    isBot: true,
+  },
+  bot_user: {
+    id: -3,
+    email: 'bot_user@debug',
+    name: 'Bot Customer',
+    role: 'customer',
+    isBot: true,
+  },
 };
 
 /** Role-based permissions */
@@ -53,6 +65,6 @@ export function hasPermission(role: UserRole, permission: string): boolean {
 }
 
 /** Check if role can access dashboard */
-export function canAccessDashboard(role: UserRole): boolean {
+export function canAccessDashboard(_role: UserRole): boolean {
   return true; // All authenticated roles can access their dashboard
 }

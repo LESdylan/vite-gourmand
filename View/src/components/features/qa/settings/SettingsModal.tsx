@@ -31,7 +31,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   if (!isOpen) return null;
 
   const handleChange = (key: keyof Settings, value: boolean | number) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
@@ -45,7 +45,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
         <header className="settings-header">
           <h2>⚙️ Paramètres</h2>
-          <button className="settings-close" onClick={onClose}>×</button>
+          <button className="settings-close" onClick={onClose}>
+            ×
+          </button>
         </header>
 
         <div className="settings-content">

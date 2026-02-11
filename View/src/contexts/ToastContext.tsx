@@ -1,17 +1,10 @@
 /**
  * ToastContext - Lightweight toast notification system
- * 
+ *
  * Provides addToast() globally for ephemeral action confirmations
  * (e.g. "Email envoyé", "Inscription réussie", "Commande validée").
  */
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useRef,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from 'react';
 import { X, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 
 /* ── Types ── */
@@ -32,6 +25,7 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 /* ── Hook ── */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast(): ToastContextValue {
   const ctx = useContext(ToastContext);
   if (!ctx) throw new Error('useToast must be used within <ToastProvider>');
@@ -44,13 +38,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const counterRef = useRef(0);
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const addToast = useCallback(
     (message: string, type: ToastType = 'info', duration = 5000) => {
       const id = `toast-${++counterRef.current}`;
-      setToasts(prev => [...prev, { id, message, type, duration }]);
+      setToasts((prev) => [...prev, { id, message, type, duration }]);
 
       if (duration > 0) {
         setTimeout(() => removeToast(id), duration);
@@ -68,7 +62,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         aria-label="Notifications"
         className="fixed bottom-4 right-4 z-[100] flex flex-col-reverse gap-2 pointer-events-none max-w-sm w-full"
       >
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onDismiss={removeToast} />
         ))}
       </div>
@@ -78,10 +72,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 /* ── Single toast item ── */
 const STYLE: Record<ToastType, { bg: string; icon: typeof CheckCircle2; iconColor: string }> = {
-  success: { bg: 'bg-emerald-50 border-emerald-300 text-emerald-900', icon: CheckCircle2, iconColor: 'text-emerald-600' },
-  error:   { bg: 'bg-red-50 border-red-300 text-red-900',             icon: XCircle,     iconColor: 'text-red-600' },
-  warning: { bg: 'bg-amber-50 border-amber-300 text-amber-900',       icon: AlertTriangle, iconColor: 'text-amber-600' },
-  info:    { bg: 'bg-blue-50 border-blue-300 text-blue-900',           icon: Info,         iconColor: 'text-blue-600' },
+  success: {
+    bg: 'bg-emerald-50 border-emerald-300 text-emerald-900',
+    icon: CheckCircle2,
+    iconColor: 'text-emerald-600',
+  },
+  error: { bg: 'bg-red-50 border-red-300 text-red-900', icon: XCircle, iconColor: 'text-red-600' },
+  warning: {
+    bg: 'bg-amber-50 border-amber-300 text-amber-900',
+    icon: AlertTriangle,
+    iconColor: 'text-amber-600',
+  },
+  info: { bg: 'bg-blue-50 border-blue-300 text-blue-900', icon: Info, iconColor: 'text-blue-600' },
 };
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {

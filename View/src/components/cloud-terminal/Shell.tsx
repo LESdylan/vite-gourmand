@@ -31,8 +31,14 @@ export function Shell({ onClose, style, onHeaderMouseDown, onResizeStart }: Prop
         </div>
         <span className="shell-title">cloud-shell — {sh.cwd}</span>
         <div className="shell-actions">
-          <button onClick={sh.clear} title="Clear">⌫</button>
-          {onClose && <button onClick={onClose} title="Close">×</button>}
+          <button onClick={sh.clear} title="Clear">
+            ⌫
+          </button>
+          {onClose && (
+            <button onClick={onClose} title="Close">
+              ×
+            </button>
+          )}
         </div>
       </header>
       <div className="shell-body">
@@ -46,9 +52,7 @@ export function Shell({ onClose, style, onHeaderMouseDown, onResizeStart }: Prop
           onNavigate={sh.navigateHistory}
         />
       </div>
-      {onResizeStart && (
-        <div className="shell-resize-handle" onMouseDown={onResizeStart} />
-      )}
+      {onResizeStart && <div className="shell-resize-handle" onMouseDown={onResizeStart} />}
     </div>
   );
 }

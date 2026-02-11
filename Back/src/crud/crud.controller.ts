@@ -71,9 +71,9 @@ export class CrudController {
     // Get Prisma DMMF (Data Model Meta Format)
     const dmmf = Prisma.dmmf;
     
-    return dmmf.datamodel.models.map(model => ({
+    return dmmf.datamodel.models.map((model: Prisma.DMMF.Model) => ({
       name: model.name,
-      columns: model.fields.map(field => ({
+      columns: model.fields.map((field: Prisma.DMMF.Field) => ({
         name: field.name,
         type: mapPrismaType(field.type),
         isId: field.isId,
@@ -244,20 +244,20 @@ export class CrudController {
    */
   private buildSearchWhere(modelName: string, search: string): Record<string, unknown> {
     const dmmf = Prisma.dmmf;
-    const model = dmmf.datamodel.models.find(m => m.name.toLowerCase() === modelName);
+    const model = dmmf.datamodel.models.find((m: Prisma.DMMF.Model) => m.name.toLowerCase() === modelName);
     
     if (!model) return {};
 
     // Get string fields
     const stringFields = model.fields
-      .filter(f => f.type === 'String' && !f.relationName)
-      .map(f => f.name);
+      .filter((f: Prisma.DMMF.Field) => f.type === 'String' && !f.relationName)
+      .map((f: Prisma.DMMF.Field) => f.name);
 
     if (stringFields.length === 0) return {};
 
     // Build OR clause for search across all string fields
     return {
-      OR: stringFields.map(field => ({
+      OR: stringFields.map((field: string) => ({
         [field]: { contains: search, mode: 'insensitive' },
       })),
     };

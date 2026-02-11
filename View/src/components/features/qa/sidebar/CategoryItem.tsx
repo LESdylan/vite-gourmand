@@ -23,9 +23,14 @@ interface CategoryItemProps {
   onClick: () => void;
 }
 
-export function CategoryItem({ category, isActive, collapsed = false, onClick }: CategoryItemProps) {
+export function CategoryItem({
+  category,
+  isActive,
+  collapsed = false,
+  onClick,
+}: CategoryItemProps) {
   const classes = buildClasses(isActive);
-  
+
   return (
     <button type="button" className={classes} onClick={onClick} title={category.description}>
       <span className="category-icon-wrapper">
@@ -47,7 +52,7 @@ function buildClasses(isActive: boolean): string {
 
 function CategoryIcon({ iconType }: { iconType: string }) {
   const iconProps = { size: 18, className: 'category-svg-icon' };
-  
+
   switch (iconType) {
     case 'settings':
       return <SettingsIcon {...iconProps} />;

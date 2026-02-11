@@ -16,11 +16,26 @@ import { useMockData } from './useMockData';
 import type { useTestRunner } from './useTestRunner';
 import { VerboseOutput } from './VerboseOutput';
 // Admin widgets
-import { AdminOverview, AdminOrders, AdminMenu, AdminStats, AdminSettings, AdminTickets, AdminAiAgent } from '../admin';
+import {
+  AdminOverview,
+  AdminOrders,
+  AdminMenu,
+  AdminStats,
+  AdminSettings,
+  AdminTickets,
+  AdminAiAgent,
+} from '../admin';
 // Employee widgets
 import { EmployeeOverview, EmployeeOrders, EmployeeTasks, EmployeeProfile } from '../employee';
 // Client widgets
-import { ClientOverview, ClientOrders, ClientLoyalty, ClientSupport, ClientReviews, ClientProfile } from '../client';
+import {
+  ClientOverview,
+  ClientOrders,
+  ClientLoyalty,
+  ClientSupport,
+  ClientReviews,
+  ClientProfile,
+} from '../client';
 import './DevBoardContent.css';
 
 interface DevBoardContentProps {
@@ -75,22 +90,32 @@ const clientLabels: Record<TestCategory, string> = {
 
 function getLabels(roleView: RoleView): Record<TestCategory, string> {
   switch (roleView) {
-    case 'admin': return adminLabels;
-    case 'employee': return employeeLabels;
-    case 'client': return clientLabels;
-    default: return devLabels;
+    case 'admin':
+      return adminLabels;
+    case 'employee':
+      return employeeLabels;
+    case 'client':
+      return clientLabels;
+    default:
+      return devLabels;
   }
 }
 
-export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }: DevBoardContentProps) {
+export function DevBoardContent({
+  activeCategory,
+  testRunner,
+  roleView = 'dev',
+}: DevBoardContentProps) {
   const { tests } = useMockData(activeCategory);
-  const { autoTests, suites, metrics, isRunning, runAll, runSuite, runType, rawOutput, error } = testRunner;
+  const { autoTests, suites, metrics, isRunning, runAll, runSuite, runType, rawOutput, error } =
+    testRunner;
   const { logs, connected, clear } = useRealLogs();
 
   const labels = getLabels(roleView);
-  
+
   // Dev view specific features
   const isDev = roleView === 'dev';
+  const isClient = roleView === 'client';
   const showMetricsDashboard = isDev && activeCategory === 'test-automatics';
   const showRunAllButton = isDev && activeCategory === 'test-automatics';
   const showCliOutput = isDev && activeCategory === 'test-automatics';
@@ -99,28 +124,36 @@ export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }
     <main className="devboard-content">
       {/* Error banner for backend connectivity issues (dev view only) */}
       {error && isDev && activeCategory === 'test-automatics' && (
-        <div style={{
-          padding: 'var(--space-4)',
-          marginBottom: 'var(--space-4)',
-          background: 'var(--color-error-bg)',
-          border: '1px solid var(--color-error-border)',
-          borderRadius: 'var(--radius-md)',
-          color: 'var(--color-error-text)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-2)'
-        }}>
+        <div
+          style={{
+            padding: 'var(--space-4)',
+            marginBottom: 'var(--space-4)',
+            background: 'var(--color-error-bg)',
+            border: '1px solid var(--color-error-border)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--color-error-text)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+          }}
+        >
           <span style={{ fontSize: '1.25rem' }}>⚠️</span>
           <div>
-            <strong>Error: </strong>{error}
+            <strong>Error: </strong>
+            {error}
             {error.includes('Backend') && (
               <div style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--space-1)' }}>
-                Run: <code style={{ 
-                  background: 'rgba(0,0,0,0.1)', 
-                  padding: '2px 6px', 
-                  borderRadius: 'var(--radius-sm)',
-                  fontFamily: 'monospace'
-                }}>cd backend && npm run start:dev</code>
+                Run:{' '}
+                <code
+                  style={{
+                    background: 'rgba(0,0,0,0.1)',
+                    padding: '2px 6px',
+                    borderRadius: 'var(--radius-sm)',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  cd backend && npm run start:dev
+                </code>
               </div>
             )}
           </div>
@@ -129,7 +162,7 @@ export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }
 
       {showMetricsDashboard && (
         <section className="devboard-content-metrics">
-          <MetricsDashboard 
+          <MetricsDashboard
             totalTests={metrics.total}
             passedTests={metrics.passed}
             failedTests={metrics.failed}
@@ -140,28 +173,35 @@ export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }
       )}
 
       <section className="devboard-content-main">
-        <header className="devboard-content-header">
-          <h2 className="devboard-content-title">
-            {labels[activeCategory]}
-          </h2>
-          <div className="devboard-content-actions">
-            {showRunAllButton && (
-              <RunAllButton 
-                count={autoTests.length} 
-                onRun={runAll}
-                isRunning={isRunning}
-              />
-            )}
-          </div>
-        </header>
+        {!isClient && (
+          <header className="devboard-content-header">
+            <h2 className="devboard-content-title">{labels[activeCategory]}</h2>
+            <div className="devboard-content-actions">
+              {showRunAllButton && (
+                <RunAllButton count={autoTests.length} onRun={runAll} isRunning={isRunning} />
+              )}
+            </div>
+          </header>
+        )}
 
         <div className="devboard-cards-container">
-          {renderContent(roleView, activeCategory, tests, autoTests, suites, logs, connected, clear, metrics, isRunning, runSuite, runType)}
+          {renderContent(
+            roleView,
+            activeCategory,
+            tests,
+            autoTests,
+            suites,
+            logs,
+            connected,
+            clear,
+            metrics,
+            isRunning,
+            runSuite,
+            runType,
+          )}
         </div>
 
-        {showCliOutput && (
-          <VerboseOutput output={rawOutput} isVisible={true} />
-        )}
+        {showCliOutput && <VerboseOutput output={rawOutput} isVisible={true} />}
       </section>
     </main>
   );
@@ -179,7 +219,7 @@ function renderContent(
   metrics: ReturnType<typeof useTestRunner>['metrics'],
   isRunning: boolean,
   runSuite: ReturnType<typeof useTestRunner>['runSuite'],
-  runType: ReturnType<typeof useTestRunner>['runType']
+  runType: ReturnType<typeof useTestRunner>['runType'],
 ) {
   // Route to role-specific content
   switch (roleView) {
@@ -190,7 +230,19 @@ function renderContent(
     case 'client':
       return renderClientContent(category);
     default:
-      return renderDevContent(category, tests, autoTests, suites, logs, connected, clear, metrics, isRunning, runSuite, runType);
+      return renderDevContent(
+        category,
+        tests,
+        autoTests,
+        suites,
+        logs,
+        connected,
+        clear,
+        metrics,
+        isRunning,
+        runSuite,
+        runType,
+      );
   }
 }
 
@@ -205,7 +257,7 @@ function renderDevContent(
   metrics: ReturnType<typeof useTestRunner>['metrics'],
   isRunning: boolean,
   runSuite: ReturnType<typeof useTestRunner>['runSuite'],
-  runType: ReturnType<typeof useTestRunner>['runType']
+  runType: ReturnType<typeof useTestRunner>['runType'],
 ) {
   switch (category) {
     case 'overview':
@@ -219,7 +271,14 @@ function renderDevContent(
     case 'activity':
       return <Activity />;
     default:
-      return <SuiteList suites={suites} onRunSuite={runSuite} onRunType={runType} isRunning={isRunning} />;
+      return (
+        <SuiteList
+          suites={suites}
+          onRunSuite={runSuite}
+          onRunType={runType}
+          isRunning={isRunning}
+        />
+      );
   }
 }
 

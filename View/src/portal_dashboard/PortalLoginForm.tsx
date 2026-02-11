@@ -8,8 +8,17 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { usePortalAuth } from './PortalAuthContext';
 import { getGoogleConfig } from '../services/auth';
 import {
-  Eye, EyeOff, Mail, Lock, User, Phone, MapPin,
-  ArrowRight, CheckCircle, AlertCircle, ChevronLeft,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  Phone,
+  MapPin,
+  ArrowRight,
+  CheckCircle,
+  AlertCircle,
+  ChevronLeft,
 } from 'lucide-react';
 import './PortalLogin.css';
 
@@ -32,10 +41,8 @@ function isPasswordValid(pw: string): boolean {
 }
 
 export function PortalLoginForm() {
-  const {
-    login, register, forgotPassword, loginWithGoogle,
-    rememberMeData, isLoading, error,
-  } = usePortalAuth();
+  const { login, register, forgotPassword, loginWithGoogle, rememberMeData, isLoading, error } =
+    usePortalAuth();
 
   const [mode, setMode] = useState<Mode>('login');
 
@@ -65,14 +72,18 @@ export function PortalLoginForm() {
   // Pre-fill remember me
   useEffect(() => {
     if (rememberMeData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(rememberMeData.email);
+
       setRemember(true);
     }
   }, [rememberMeData]);
 
   // Clear messages on mode change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSuccessMsg('');
+
     setLocalError('');
   }, [mode]);
 
@@ -114,7 +125,7 @@ export function PortalLoginForm() {
         password: regPassword,
         firstName: `${regPrenom.trim()} ${regNom.trim()}`,
         telephoneNumber: regPhone || undefined,
-        city: regAddress || undefined,  // Backend expects 'city', not 'postalAddress'
+        city: regAddress || undefined, // Backend expects 'city', not 'postalAddress'
       });
       // On success, PortalAuthContext sets user → Portal.tsx will redirect
     } catch {
@@ -133,7 +144,7 @@ export function PortalLoginForm() {
       await forgotPassword(forgotEmail);
       setSuccessMsg(`Un lien de réinitialisation a été envoyé avec succès à ${forgotEmail}`);
     } catch {
-      setLocalError('Impossible d\'envoyer l\'email. Vérifiez votre adresse.');
+      setLocalError("Impossible d'envoyer l'email. Vérifiez votre adresse.");
     }
   };
 
@@ -141,13 +152,16 @@ export function PortalLoginForm() {
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const [googleReady, setGoogleReady] = useState(false);
 
-  const onGoogleCredential = useCallback(async (response: { credential: string }) => {
-    try {
-      await loginWithGoogle(response.credential);
-    } catch {
-      // Error handled by context
-    }
-  }, [loginWithGoogle]);
+  const onGoogleCredential = useCallback(
+    async (response: { credential: string }) => {
+      try {
+        await loginWithGoogle(response.credential);
+      } catch {
+        // Error handled by context
+      }
+    },
+    [loginWithGoogle],
+  );
 
   // Step 1: Load GSI script + initialize google.accounts.id
   useEffect(() => {
@@ -169,6 +183,7 @@ export function PortalLoginForm() {
             if (!cancelled) initGsiClient(clientId);
           };
           document.head.appendChild(script);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } else if ((window as any).google?.accounts) {
           initGsiClient(clientId);
         }
@@ -178,6 +193,7 @@ export function PortalLoginForm() {
     }
 
     function initGsiClient(clientId: string) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const google = (window as any).google;
       if (!google?.accounts) return;
 
@@ -190,12 +206,15 @@ export function PortalLoginForm() {
     }
 
     initGoogle();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [onGoogleCredential]);
 
   // Step 2: Render the Google button once GSI is ready AND the ref div is mounted
   useEffect(() => {
     if (!googleReady || !googleBtnRef.current) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const google = (window as any).google;
     if (!google?.accounts) return;
 
@@ -260,10 +279,15 @@ export function PortalLoginForm() {
             {rememberMeData && email === rememberMeData.email && (
               <div className="pf-remember-banner">
                 <span>👋 Bon retour, {rememberMeData.name} !</span>
-                <button type="button" onClick={() => {
-                  setEmail('');
-                  setRemember(false);
-                }}>Changer de compte</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('');
+                    setRemember(false);
+                  }}
+                >
+                  Changer de compte
+                </button>
               </div>
             )}
 
@@ -277,7 +301,7 @@ export function PortalLoginForm() {
                   id="login-email"
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="jean@exemple.fr"
                   required
                   autoComplete="email"
@@ -296,7 +320,7 @@ export function PortalLoginForm() {
                   id="login-pw"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••"
                   required
                   autoComplete="current-password"
@@ -318,7 +342,7 @@ export function PortalLoginForm() {
                 <input
                   type="checkbox"
                   checked={remember}
-                  onChange={e => setRemember(e.target.checked)}
+                  onChange={(e) => setRemember(e.target.checked)}
                 />
                 <span>Se souvenir de moi</span>
               </label>
@@ -328,13 +352,23 @@ export function PortalLoginForm() {
             </div>
 
             <button type="submit" className="pf-submit" disabled={isLoading}>
-              {isLoading ? 'Connexion…' : (
-                <>Se connecter <ArrowRight size={16} /></>
+              {isLoading ? (
+                'Connexion…'
+              ) : (
+                <>
+                  Se connecter <ArrowRight size={16} />
+                </>
               )}
             </button>
 
-            <div className="pf-divider"><span>ou</span></div>
-            <div ref={googleBtnRef} className="pf-google-wrap" style={googleReady ? undefined : { display: 'none' }} />
+            <div className="pf-divider">
+              <span>ou</span>
+            </div>
+            <div
+              ref={googleBtnRef}
+              className="pf-google-wrap"
+              style={googleReady ? undefined : { display: 'none' }}
+            />
           </form>
         )}
 
@@ -344,55 +378,124 @@ export function PortalLoginForm() {
             {/* Nom + Prénom */}
             <div className="pf-row-2">
               <div className="pf-field">
-                <label htmlFor="reg-prenom" className="pf-label">Prénom *</label>
+                <label htmlFor="reg-prenom" className="pf-label">
+                  Prénom *
+                </label>
                 <div className="pf-input-wrap">
                   <User size={16} className="pf-input-icon" />
-                  <input id="reg-prenom" type="text" value={regPrenom} onChange={e => setRegPrenom(e.target.value)} placeholder="Jean" required className="pf-input" autoComplete="given-name" />
+                  <input
+                    id="reg-prenom"
+                    type="text"
+                    value={regPrenom}
+                    onChange={(e) => setRegPrenom(e.target.value)}
+                    placeholder="Jean"
+                    required
+                    className="pf-input"
+                    autoComplete="given-name"
+                  />
                 </div>
               </div>
               <div className="pf-field">
-                <label htmlFor="reg-nom" className="pf-label">Nom *</label>
+                <label htmlFor="reg-nom" className="pf-label">
+                  Nom *
+                </label>
                 <div className="pf-input-wrap">
                   <User size={16} className="pf-input-icon" />
-                  <input id="reg-nom" type="text" value={regNom} onChange={e => setRegNom(e.target.value)} placeholder="Dupont" required className="pf-input" autoComplete="family-name" />
+                  <input
+                    id="reg-nom"
+                    type="text"
+                    value={regNom}
+                    onChange={(e) => setRegNom(e.target.value)}
+                    placeholder="Dupont"
+                    required
+                    className="pf-input"
+                    autoComplete="family-name"
+                  />
                 </div>
               </div>
             </div>
 
             {/* Email */}
             <div className="pf-field">
-              <label htmlFor="reg-email" className="pf-label">Adresse email *</label>
+              <label htmlFor="reg-email" className="pf-label">
+                Adresse email *
+              </label>
               <div className="pf-input-wrap">
                 <Mail size={16} className="pf-input-icon" />
-                <input id="reg-email" type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} placeholder="jean@exemple.fr" required className="pf-input" autoComplete="email" />
+                <input
+                  id="reg-email"
+                  type="email"
+                  value={regEmail}
+                  onChange={(e) => setRegEmail(e.target.value)}
+                  placeholder="jean@exemple.fr"
+                  required
+                  className="pf-input"
+                  autoComplete="email"
+                />
               </div>
             </div>
 
             {/* GSM */}
             <div className="pf-field">
-              <label htmlFor="reg-phone" className="pf-label">Numéro de GSM</label>
+              <label htmlFor="reg-phone" className="pf-label">
+                Numéro de GSM
+              </label>
               <div className="pf-input-wrap">
                 <Phone size={16} className="pf-input-icon" />
-                <input id="reg-phone" type="tel" value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="06 12 34 56 78" className="pf-input" autoComplete="tel" />
+                <input
+                  id="reg-phone"
+                  type="tel"
+                  value={regPhone}
+                  onChange={(e) => setRegPhone(e.target.value)}
+                  placeholder="06 12 34 56 78"
+                  className="pf-input"
+                  autoComplete="tel"
+                />
               </div>
             </div>
 
             {/* Adresse postale */}
             <div className="pf-field">
-              <label htmlFor="reg-addr" className="pf-label">Adresse postale</label>
+              <label htmlFor="reg-addr" className="pf-label">
+                Adresse postale
+              </label>
               <div className="pf-input-wrap">
                 <MapPin size={16} className="pf-input-icon" />
-                <input id="reg-addr" type="text" value={regAddress} onChange={e => setRegAddress(e.target.value)} placeholder="15 Rue Sainte-Catherine, 33000 Bordeaux" className="pf-input" autoComplete="street-address" />
+                <input
+                  id="reg-addr"
+                  type="text"
+                  value={regAddress}
+                  onChange={(e) => setRegAddress(e.target.value)}
+                  placeholder="15 Rue Sainte-Catherine, 33000 Bordeaux"
+                  className="pf-input"
+                  autoComplete="street-address"
+                />
               </div>
             </div>
 
             {/* Password */}
             <div className="pf-field">
-              <label htmlFor="reg-pw" className="pf-label">Mot de passe *</label>
+              <label htmlFor="reg-pw" className="pf-label">
+                Mot de passe *
+              </label>
               <div className="pf-input-wrap">
                 <Lock size={16} className="pf-input-icon" />
-                <input id="reg-pw" type={showRegPassword ? 'text' : 'password'} value={regPassword} onChange={e => setRegPassword(e.target.value)} placeholder="Min. 10 caractères" required className="pf-input" autoComplete="new-password" />
-                <button type="button" className="pf-input-toggle" onClick={() => setShowRegPassword(!showRegPassword)} aria-label={showRegPassword ? 'Masquer' : 'Afficher'}>
+                <input
+                  id="reg-pw"
+                  type={showRegPassword ? 'text' : 'password'}
+                  value={regPassword}
+                  onChange={(e) => setRegPassword(e.target.value)}
+                  placeholder="Min. 10 caractères"
+                  required
+                  className="pf-input"
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="pf-input-toggle"
+                  onClick={() => setShowRegPassword(!showRegPassword)}
+                  aria-label={showRegPassword ? 'Masquer' : 'Afficher'}
+                >
                   {showRegPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -410,10 +513,21 @@ export function PortalLoginForm() {
 
             {/* Confirm password */}
             <div className="pf-field">
-              <label htmlFor="reg-confirm" className="pf-label">Confirmer le mot de passe *</label>
+              <label htmlFor="reg-confirm" className="pf-label">
+                Confirmer le mot de passe *
+              </label>
               <div className="pf-input-wrap">
                 <Lock size={16} className="pf-input-icon" />
-                <input id="reg-confirm" type="password" value={regConfirm} onChange={e => setRegConfirm(e.target.value)} placeholder="Retapez votre mot de passe" required className="pf-input" autoComplete="new-password" />
+                <input
+                  id="reg-confirm"
+                  type="password"
+                  value={regConfirm}
+                  onChange={(e) => setRegConfirm(e.target.value)}
+                  placeholder="Retapez votre mot de passe"
+                  required
+                  className="pf-input"
+                  autoComplete="new-password"
+                />
               </div>
               {regConfirm.length > 0 && regPassword !== regConfirm && (
                 <p className="pf-field-error">Les mots de passe ne correspondent pas</p>
@@ -421,14 +535,18 @@ export function PortalLoginForm() {
             </div>
 
             <button type="submit" className="pf-submit" disabled={isLoading}>
-              {isLoading ? 'Création…' : (
-                <>Créer mon compte <ArrowRight size={16} /></>
+              {isLoading ? (
+                'Création…'
+              ) : (
+                <>
+                  Créer mon compte <ArrowRight size={16} />
+                </>
               )}
             </button>
 
             <p className="pf-hint">
-              En vous inscrivant, vous recevrez un email de bienvenue.
-              Le rôle « utilisateur » vous sera attribué.
+              En vous inscrivant, vous recevrez un email de bienvenue. Le rôle « utilisateur » vous
+              sera attribué.
             </p>
           </form>
         )}
@@ -442,20 +560,36 @@ export function PortalLoginForm() {
 
             <h2 className="pf-form-title">Mot de passe oublié ?</h2>
             <p className="pf-form-desc">
-              Entrez votre adresse email. Vous recevrez un lien pour réinitialiser votre mot de passe.
+              Entrez votre adresse email. Vous recevrez un lien pour réinitialiser votre mot de
+              passe.
             </p>
 
             <div className="pf-field">
-              <label htmlFor="forgot-email" className="pf-label">Adresse email</label>
+              <label htmlFor="forgot-email" className="pf-label">
+                Adresse email
+              </label>
               <div className="pf-input-wrap">
                 <Mail size={16} className="pf-input-icon" />
-                <input id="forgot-email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="jean@exemple.fr" required className="pf-input" autoComplete="email" />
+                <input
+                  id="forgot-email"
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="jean@exemple.fr"
+                  required
+                  className="pf-input"
+                  autoComplete="email"
+                />
               </div>
             </div>
 
             <button type="submit" className="pf-submit" disabled={isLoading}>
-              {isLoading ? 'Envoi…' : (
-                <>Envoyer le lien <ArrowRight size={16} /></>
+              {isLoading ? (
+                'Envoi…'
+              ) : (
+                <>
+                  Envoyer le lien <ArrowRight size={16} />
+                </>
               )}
             </button>
           </form>
@@ -475,5 +609,3 @@ function PwCheck({ ok, label }: { ok: boolean; label: string }) {
     </li>
   );
 }
-
-

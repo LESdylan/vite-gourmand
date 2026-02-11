@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import styles from "./foodcard.module.css";
-import { API_URL, FALLBACK_IMAGE_URL } from "../../styles/constant";
+import React, { useEffect, useState } from 'react';
+import styles from './foodcard.module.css';
+import { API_URL, FALLBACK_IMAGE_URL } from '../../styles/constant';
 
 export interface FoodCardProps {
   name: string;
@@ -19,20 +19,18 @@ export const FoodCard: React.FC<FoodCardProps> = ({ name, description, price, im
    * if the fectch fails, we fallback to a default image.
    * .then(res => res.json()) is used to parse the response as JSON, and we extract the regular size image URL from the response data.
    * .then
-   * 
+   *
    */
   {
-  	useEffect(() => {
-  	  if (!imageUrl) {
-  	    fetch(
-  	    	API_URL
-  	    )
-  	      .then(res => res.json())
-  	      .then(data => setRandomImage(data.urls?.regular))
-		  // catch is important here to avoid unhandled promise rejection if the API call fails, we fallback to a default image in that case.
-  	      .catch(() => setRandomImage(FALLBACK_IMAGE_URL));
-  	  }
-  	}, [imageUrl]);
+    useEffect(() => {
+      if (!imageUrl) {
+        fetch(API_URL)
+          .then((res) => res.json())
+          .then((data) => setRandomImage(data.urls?.regular))
+          // catch is important here to avoid unhandled promise rejection if the API call fails, we fallback to a default image in that case.
+          .catch(() => setRandomImage(FALLBACK_IMAGE_URL));
+      }
+    }, [imageUrl]);
   }
   return (
     <div className={styles.card}>

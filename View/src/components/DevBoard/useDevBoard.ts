@@ -41,7 +41,7 @@ export function useDevBoard() {
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
     setLastRefresh(new Date());
     setIsRefreshing(false);
   }, []);

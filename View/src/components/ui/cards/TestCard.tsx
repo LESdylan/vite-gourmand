@@ -17,13 +17,7 @@ interface TestCardProps {
   onClick?: () => void;
 }
 
-export function TestCard({
-  name,
-  description,
-  type,
-  status,
-  onClick,
-}: TestCardProps) {
+export function TestCard({ name, description, type, status, onClick }: TestCardProps) {
   return (
     <BaseCard onClick={onClick} className="test-card">
       <TestCardHeader name={name} status={status} />
@@ -56,5 +50,10 @@ function TestCardFooter({ type }: { type: TestType }) {
 }
 
 function StatusIndicator({ status }: { status: TestStatus }) {
-  return <span className={`test-card-status test-card-status-${status}`} aria-label={`Status: ${status}`} />;
+  return (
+    <span
+      className={`test-card-status test-card-status-${status}`}
+      aria-label={`Status: ${status}`}
+    />
+  );
 }

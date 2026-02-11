@@ -22,25 +22,39 @@ export function Pagination({ page, pageSize, total, onPageChange }: Props) {
   return (
     <nav className="db-pagination" aria-label="Pagination">
       <div className="db-pagination-info">
-        Affichage <strong>{startItem}-{endItem}</strong> sur <strong>{total}</strong> enregistrements
+        Affichage{' '}
+        <strong>
+          {startItem}-{endItem}
+        </strong>{' '}
+        sur <strong>{total}</strong> enregistrements
       </div>
       <div className="db-pagination-controls">
-        <button 
-          className="nav-btn" 
-          disabled={page === 1} 
+        <button
+          className="nav-btn"
+          disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
           title="Page précédente"
         >
           ←
         </button>
-        {pages.map((p, i) => (
-          p === '...' 
-            ? <span key={`ellipsis-${i}`} className="db-pagination-ellipsis">…</span>
-            : <button key={p} className={p === page ? 'active' : ''} onClick={() => onPageChange(p as number)}>{p}</button>
-        ))}
-        <button 
-          className="nav-btn" 
-          disabled={page === totalPages || totalPages === 0} 
+        {pages.map((p, i) =>
+          p === '...' ? (
+            <span key={`ellipsis-${i}`} className="db-pagination-ellipsis">
+              …
+            </span>
+          ) : (
+            <button
+              key={p}
+              className={p === page ? 'active' : ''}
+              onClick={() => onPageChange(p as number)}
+            >
+              {p}
+            </button>
+          ),
+        )}
+        <button
+          className="nav-btn"
+          disabled={page === totalPages || totalPages === 0}
           onClick={() => onPageChange(page + 1)}
           title="Page suivante"
         >

@@ -11,7 +11,9 @@ export function SecurityWidget({ profile }: ProfileWidgetProps) {
     <WidgetCard icon="🔒" title="Sécurité & RGPD">
       <div className="up-field-list">
         <Field label="Consentement RGPD" value={profile.gdprConsent ? 'Oui' : 'Non'} />
-        {profile.gdprConsentDate && <Field label="Date consentement" value={formatDate(profile.gdprConsentDate)} />}
+        {profile.gdprConsentDate && (
+          <Field label="Date consentement" value={formatDate(profile.gdprConsentDate)} />
+        )}
         <Field label="Consentement marketing" value={profile.marketingConsent ? 'Oui' : 'Non'} />
         <Field label="Compte créé" value={formatDate(profile.createdAt)} />
         <Field label="Dernière mise à jour" value={formatDate(profile.updatedAt)} />

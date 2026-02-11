@@ -20,7 +20,7 @@ export function FilterBar({ columns, searchTerm, onSearch, onClear }: Props) {
         <input
           type="text"
           value={searchTerm}
-          onChange={e => onSearch(e.target.value)}
+          onChange={(e) => onSearch(e.target.value)}
           placeholder="Rechercher dans les données..."
           className="search-input"
         />
@@ -30,16 +30,10 @@ export function FilterBar({ columns, searchTerm, onSearch, onClear }: Props) {
           </button>
         )}
       </div>
-      
+
       <div className="filter-bar-info">
-        <span className="columns-count">
-          📊 {columns.length} colonnes
-        </span>
-        {searchTerm && (
-          <span className="active-filter">
-            Recherche: "{searchTerm}"
-          </span>
-        )}
+        <span className="columns-count">📊 {columns.length} colonnes</span>
+        {searchTerm && <span className="active-filter">Recherche: "{searchTerm}"</span>}
       </div>
     </div>
   );

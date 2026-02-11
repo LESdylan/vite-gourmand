@@ -17,7 +17,7 @@ export function GhostButton({
   ariaLabel,
 }: ButtonBaseProps) {
   const classNames = buildClassNames(size, fullWidth, loading);
-  
+
   return (
     <button
       type={type}

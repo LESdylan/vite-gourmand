@@ -74,6 +74,7 @@ const defaultState: NotificationState = {
 
 const NotificationCtx = createContext<NotificationState>(defaultState);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useNotifications(): NotificationState {
   return useContext(NotificationCtx);
 }
@@ -106,15 +107,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     if (stoppedRef.current || !isAuthenticated()) return;
     try {
-      const [notifs, count] = await Promise.all([
-        getNotifications(30),
-        getUnreadCount(),
-      ]);
+      const [notifs, count] = await Promise.all([getNotifications(30), getUnreadCount()]);
       setNotifications(notifs);
       setUnreadCount(count);
     } catch (err: unknown) {
       // On 401 → token is invalid, stop polling permanently
-      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
+      if (
+        err &&
+        typeof err === 'object' &&
+        'status' in err &&
+        (err as { status: number }).status === 401
+      ) {
         stopPolling();
       }
       // Other errors: silently ignore (network blip, server down, etc.)
@@ -127,6 +130,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     stoppedRef.current = false;
 
     // Initial fetch
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
 
     intervalRef.current = setInterval(refresh, POLL_INTERVAL);
@@ -136,20 +140,22 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   // ── Actions ──
-  const toggle = useCallback(() => setIsOpen(prev => !prev), []);
+  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
 
   const dismiss = useCallback((id: number) => {
-    setDismissedIds(prev => new Set(prev).add(id));
+    setDismissedIds((prev) => new Set(prev).add(id));
   }, []);
 
   const read = useCallback(async (id: number) => {
     try {
       await markAsRead(id);
-      setNotifications(prev =>
-        prev.map(n => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n)),
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n,
+        ),
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch {
       // ignore
     }
@@ -158,23 +164,28 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const readAll = useCallback(async () => {
     try {
       await markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true, read_at: new Date().toISOString() })));
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, is_read: true, read_at: new Date().toISOString() })),
+      );
       setUnreadCount(0);
     } catch {
       // ignore
     }
   }, []);
 
-  const remove = useCallback(async (id: number) => {
-    try {
-      await deleteNotification(id);
-      setNotifications(prev => prev.filter(n => n.id !== id));
-      setUnreadCount(prev => Math.max(0, prev - 1));
-      dismiss(id);
-    } catch {
-      // ignore
-    }
-  }, [dismiss]);
+  const remove = useCallback(
+    async (id: number) => {
+      try {
+        await deleteNotification(id);
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+        dismiss(id);
+      } catch {
+        // ignore
+      }
+    },
+    [dismiss],
+  );
 
   return (
     <NotificationCtx.Provider

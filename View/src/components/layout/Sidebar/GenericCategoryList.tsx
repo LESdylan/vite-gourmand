@@ -13,11 +13,11 @@ interface GenericCategoryListProps<T extends string> {
   onSelect: (category: T) => void;
 }
 
-export function GenericCategoryList<T extends string>({ 
-  categories, 
-  activeCategory, 
-  collapsed, 
-  onSelect 
+export function GenericCategoryList<T extends string>({
+  categories,
+  activeCategory,
+  collapsed,
+  onSelect,
 }: GenericCategoryListProps<T>) {
   return (
     <nav className="generic-category-list" aria-label="Navigation">
@@ -43,16 +43,14 @@ interface CategoryItemProps {
 
 function CategoryItem({ category, isActive, collapsed, onClick }: CategoryItemProps) {
   const classes = buildClasses(isActive, collapsed);
-  
+
   return (
     <button className={classes} onClick={onClick} title={category.label}>
       <span className="cat-icon">{category.icon}</span>
       {!collapsed && (
         <>
           <span className="cat-label">{category.label}</span>
-          {category.count !== undefined && (
-            <span className="cat-count">{category.count}</span>
-          )}
+          {category.count !== undefined && <span className="cat-count">{category.count}</span>}
         </>
       )}
     </button>

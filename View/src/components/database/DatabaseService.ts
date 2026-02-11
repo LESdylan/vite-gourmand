@@ -43,9 +43,11 @@ export class DatabaseService {
   static async getSchema(): Promise<SchemaModel[]> {
     try {
       console.log('[DatabaseService] Fetching schema from', `${BASE}/schema`);
-      const response = await apiRequest(`${BASE}/schema`) as { data?: SchemaModel[] } | SchemaModel[];
+      const response = (await apiRequest(`${BASE}/schema`)) as
+        | { data?: SchemaModel[] }
+        | SchemaModel[];
       console.log('[DatabaseService] Raw schema response:', response);
-      
+
       // Handle wrapped response { success, data } or direct array
       if (Array.isArray(response)) {
         console.log('[DatabaseService] Response is array with', response.length, 'items');
@@ -64,9 +66,11 @@ export class DatabaseService {
   static async getCounts(): Promise<Record<string, number>> {
     try {
       console.log('[DatabaseService] Fetching counts from', `${BASE}/counts`);
-      const response = await apiRequest(`${BASE}/counts`) as { data?: Record<string, number> } | Record<string, number>;
+      const response = (await apiRequest(`${BASE}/counts`)) as
+        | { data?: Record<string, number> }
+        | Record<string, number>;
       console.log('[DatabaseService] Raw counts response:', response);
-      
+
       // Handle wrapped response { success, data } or direct object
       if (response && typeof response === 'object' && 'data' in response) {
         return (response.data || {}) as Record<string, number>;
@@ -81,20 +85,17 @@ export class DatabaseService {
   /** Convert schema to TableMeta format with real counts */
   static async getTables(): Promise<TableMeta[]> {
     // Fetch schema and counts in parallel
-    const [schema, counts] = await Promise.all([
-      this.getSchema(),
-      this.getCounts(),
-    ]);
+    const [schema, counts] = await Promise.all([this.getSchema(), this.getCounts()]);
     console.log('[DatabaseService] Schema loaded:', schema.length, 'tables');
     console.log('[DatabaseService] Counts loaded:', counts);
-    
+
     const tables = schema
-      .filter(model => MODEL_TO_ENDPOINT[model.name]) // Only include models with endpoints
-      .map(model => ({
+      .filter((model) => MODEL_TO_ENDPOINT[model.name]) // Only include models with endpoints
+      .map((model) => ({
         name: model.name as TableMeta['name'],
         columns: model.columns
-          .filter(col => !col.isRelation && !col.isList) // Exclude relations
-          .map(col => ({
+          .filter((col) => !col.isRelation && !col.isList) // Exclude relations
+          .map((col) => ({
             name: col.name,
             type: col.type.toLowerCase(),
             nullable: !col.isRequired,
@@ -102,8 +103,11 @@ export class DatabaseService {
           })),
         rowCount: counts[model.name] || 0,
       }));
-    
-    console.log('[DatabaseService] Tables with endpoints:', tables.map(t => `${t.name}(${t.rowCount})`));
+
+    console.log(
+      '[DatabaseService] Tables with endpoints:',
+      tables.map((t) => `${t.name}(${t.rowCount})`),
+    );
     return tables;
   }
 
@@ -111,7 +115,7 @@ export class DatabaseService {
   static async getRecords(
     table: string,
     filters: FilterConfig[],
-    pagination: PaginationState
+    pagination: PaginationState,
   ): Promise<{ data: TableRecord[]; total: number }> {
     const endpoint = MODEL_TO_ENDPOINT[table];
     if (!endpoint) {
@@ -123,21 +127,21 @@ export class DatabaseService {
     const url = `${BASE}/${endpoint}${params ? `?${params}` : ''}`;
 
     try {
-      const response = await apiRequest(url) as unknown;
+      const response = (await apiRequest(url)) as unknown;
       console.log(`[DatabaseService] Response for ${table}:`, response);
-      
+
       // Handle various response formats:
       // 1. Wrapped: { success, data: { data: [], total } }
       // 2. Wrapped array: { success, data: [] }
       // 3. Direct paginated: { data: [], total }
       // 4. Direct array: []
-      
+
       if (Array.isArray(response)) {
         return { data: response as TableRecord[], total: response.length };
       }
-      
+
       const res = response as { data?: unknown; total?: number };
-      
+
       // Check if data is the inner paginated object
       if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
         const inner = res.data as { data?: TableRecord[]; total?: number };
@@ -145,12 +149,12 @@ export class DatabaseService {
           return { data: inner.data, total: inner.total || inner.data.length };
         }
       }
-      
+
       // Check if data is an array directly
       if (Array.isArray(res.data)) {
         return { data: res.data as TableRecord[], total: res.total || res.data.length };
       }
-      
+
       return { data: [], total: 0 };
     } catch (error) {
       console.error(`Error fetching ${table}:`, error);
@@ -161,32 +165,44 @@ export class DatabaseService {
   /** Create a new record */
   static async create(table: string, data: Partial<TableRecord>): Promise<TableRecord> {
     const endpoint = MODEL_TO_ENDPOINT[table];
-    return apiRequest(`${BASE}/${endpoint}`, { method: 'POST', body: data }) as Promise<TableRecord>;
+    return apiRequest(`${BASE}/${endpoint}`, {
+      method: 'POST',
+      body: data,
+    }) as Promise<TableRecord>;
   }
 
   /** Update an existing record */
   static async update(table: string, id: number, data: Partial<TableRecord>): Promise<TableRecord> {
     const endpoint = MODEL_TO_ENDPOINT[table];
-    return apiRequest(`${BASE}/${endpoint}/${id}`, { method: 'PUT', body: data }) as Promise<TableRecord>;
+    return apiRequest(`${BASE}/${endpoint}/${id}`, {
+      method: 'PUT',
+      body: data,
+    }) as Promise<TableRecord>;
   }
 
   /** Delete a record */
   static async delete(table: string, id: number): Promise<void> {
-    await apiRequest(`${MODEL_TO_ENDPOINT[table] ? `${BASE}/${MODEL_TO_ENDPOINT[table]}/${id}` : ''}`, { method: 'DELETE' });
+    await apiRequest(
+      `${MODEL_TO_ENDPOINT[table] ? `${BASE}/${MODEL_TO_ENDPOINT[table]}/${id}` : ''}`,
+      { method: 'DELETE' },
+    );
   }
 
   /** Build query string from filters and pagination */
-  private static buildQueryParams(filters: FilterConfig[], { page, pageSize }: PaginationState): string {
+  private static buildQueryParams(
+    filters: FilterConfig[],
+    { page, pageSize }: PaginationState,
+  ): string {
     const params = new URLSearchParams();
     params.set('skip', String((page - 1) * pageSize));
     params.set('take', String(pageSize));
-    
+
     // Build search param from contains filters
-    const searchFilter = filters.find(f => f.operator === 'contains');
+    const searchFilter = filters.find((f) => f.operator === 'contains');
     if (searchFilter) {
       params.set('search', String(searchFilter.value));
     }
-    
+
     return params.toString();
   }
 
@@ -205,14 +221,14 @@ export class DatabaseService {
       isPrimary?: boolean;
       isUnique?: boolean;
       foreignKey?: { table: string; column: string } | null;
-    }>
+    }>,
   ): Promise<{ success: boolean; message: string }> {
     try {
       console.log('[DatabaseService] Creating table:', tableName, columns);
-      const response = await apiRequest(`${BASE}/schema/table`, {
+      const response = (await apiRequest(`${BASE}/schema/table`, {
         method: 'POST',
         body: { tableName, columns },
-      }) as { success: boolean; message: string };
+      })) as { success: boolean; message: string };
       console.log('[DatabaseService] Create table response:', response);
       return response;
     } catch (error) {
@@ -231,14 +247,14 @@ export class DatabaseService {
       defaultValue?: string | null;
       isUnique?: boolean;
       foreignKey?: { table: string; column: string } | null;
-    }
+    },
   ): Promise<{ success: boolean; message: string }> {
     try {
       console.log('[DatabaseService] Adding column to', tableName, ':', column);
-      const response = await apiRequest(`${BASE}/schema/column`, {
+      const response = (await apiRequest(`${BASE}/schema/column`, {
         method: 'POST',
         body: { tableName, column },
-      }) as { success: boolean; message: string };
+      })) as { success: boolean; message: string };
       console.log('[DatabaseService] Add column response:', response);
       return response;
     } catch (error) {
@@ -250,7 +266,7 @@ export class DatabaseService {
   /** Get all tables from PostgreSQL (including dynamically created) */
   static async getAllTables(): Promise<string[]> {
     try {
-      const response = await apiRequest(`${BASE}/schema/tables`) as string[] | { data: string[] };
+      const response = (await apiRequest(`${BASE}/schema/tables`)) as string[] | { data: string[] };
       if (Array.isArray(response)) {
         return response;
       }
@@ -262,16 +278,18 @@ export class DatabaseService {
   }
 
   /** Get full database schema from PostgreSQL */
-  static async getFullSchema(): Promise<Array<{
-    name: string;
-    columns: Array<{
+  static async getFullSchema(): Promise<
+    Array<{
       name: string;
-      type: string;
-      isNullable: boolean;
-      defaultValue: string | null;
-      isPrimaryKey: boolean;
-    }>;
-  }>> {
+      columns: Array<{
+        name: string;
+        type: string;
+        isNullable: boolean;
+        defaultValue: string | null;
+        isPrimaryKey: boolean;
+      }>;
+    }>
+  > {
     type FullSchemaResult = Array<{
       name: string;
       columns: Array<{
@@ -287,7 +305,7 @@ export class DatabaseService {
       if (Array.isArray(response)) {
         return response as FullSchemaResult;
       }
-      return ((response as { data?: FullSchemaResult }).data || []);
+      return (response as { data?: FullSchemaResult }).data || [];
     } catch (error) {
       console.error('[DatabaseService] Failed to get full schema:', error);
       return [];
@@ -295,12 +313,14 @@ export class DatabaseService {
   }
 
   /** Get foreign key relationships */
-  static async getForeignKeys(): Promise<Array<{
-    tableName: string;
-    columnName: string;
-    referencedTable: string;
-    referencedColumn: string;
-  }>> {
+  static async getForeignKeys(): Promise<
+    Array<{
+      tableName: string;
+      columnName: string;
+      referencedTable: string;
+      referencedColumn: string;
+    }>
+  > {
     type ForeignKeyResult = Array<{
       tableName: string;
       columnName: string;
@@ -312,7 +332,7 @@ export class DatabaseService {
       if (Array.isArray(response)) {
         return response as ForeignKeyResult;
       }
-      return ((response as { data?: ForeignKeyResult }).data || []);
+      return (response as { data?: ForeignKeyResult }).data || [];
     } catch (error) {
       console.error('[DatabaseService] Failed to get foreign keys:', error);
       return [];

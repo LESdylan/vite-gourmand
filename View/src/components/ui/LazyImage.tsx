@@ -1,6 +1,6 @@
 /**
  * LazyImage — Image with skeleton placeholder
- * 
+ *
  * Shows a shimmer/skeleton placeholder while the image loads,
  * then fades in the actual image. Falls back to a neutral placeholder
  * if the image fails to load.
@@ -14,9 +14,15 @@ interface LazyImageProps {
   fallback?: string;
 }
 
-const DEFAULT_FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
+const DEFAULT_FALLBACK =
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
 
-export default function LazyImage({ src, alt, className = '', fallback = DEFAULT_FALLBACK }: LazyImageProps) {
+export default function LazyImage({
+  src,
+  alt,
+  className = '',
+  fallback = DEFAULT_FALLBACK,
+}: LazyImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
@@ -34,7 +40,8 @@ export default function LazyImage({ src, alt, className = '', fallback = DEFAULT
           <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
               backgroundSize: '200% 100%',
               animation: 'lazyImageShimmer 1.5s ease-in-out infinite',
             }}

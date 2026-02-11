@@ -13,10 +13,16 @@ export function AdminOverview() {
           <p className="widget-subtitle">Vue d'ensemble du restaurant</p>
         </div>
       </header>
-      
+
       <div className="stats-grid">
         <StatCard icon="🛒" label="Commandes du jour" value="24" trend="+12%" />
-        <StatCard icon="💰" label="Chiffre d'affaires" value="1,245€" trend="+8%" variant="success" />
+        <StatCard
+          icon="💰"
+          label="Chiffre d'affaires"
+          value="1,245€"
+          trend="+8%"
+          variant="success"
+        />
         <StatCard icon="👥" label="Clients servis" value="89" trend="+5%" />
         <StatCard icon="⭐" label="Note moyenne" value="4.7" trend="+0.2" variant="warning" />
       </div>
@@ -68,19 +74,35 @@ function StatCard({ icon, label, value, trend, variant }: StatCardProps) {
   );
 }
 
-function OrderRow({ id, status, table, total }: { id: string; status: string; table: string; total: string }) {
+function OrderRow({
+  id,
+  status,
+  table,
+  total,
+}: {
+  id: string;
+  status: string;
+  table: string;
+  total: string;
+}) {
   const statusConfig: Record<string, { label: string; className: string }> = {
     'en-cours': { label: 'En préparation', className: 'order-card-badge--progress' },
-    'prêt': { label: 'Prêt', className: 'order-card-badge--ready' },
-    'livré': { label: 'Livré', className: 'order-card-badge--pending' },
+    prêt: { label: 'Prêt', className: 'order-card-badge--ready' },
+    livré: { label: 'Livré', className: 'order-card-badge--pending' },
   };
   const config = statusConfig[status] || statusConfig['en-cours'];
   return (
     <tr>
-      <td><strong>{id}</strong></td>
+      <td>
+        <strong>{id}</strong>
+      </td>
       <td>{table}</td>
-      <td><span className={`order-card-badge ${config.className}`}>{config.label}</span></td>
-      <td><strong>{total}</strong></td>
+      <td>
+        <span className={`order-card-badge ${config.className}`}>{config.label}</span>
+      </td>
+      <td>
+        <strong>{total}</strong>
+      </td>
     </tr>
   );
 }

@@ -25,7 +25,7 @@ export function DevBoard() {
   const { user } = usePortalAuth();
   // Set default view based on user role
   const defaultView = user?.role ? getDefaultViewForRole(user.role) : 'employee';
-  
+
   return (
     <RoleViewProvider defaultView={defaultView}>
       <DevBoardInner />
@@ -61,7 +61,7 @@ function DevBoardInner() {
   // Add dynamic test count for dev view
   const categories = useMemo(() => {
     if (currentView !== 'dev') return baseCategories;
-    return baseCategories.map(cat => {
+    return baseCategories.map((cat) => {
       if (cat.id === 'test-automatics') {
         return { ...cat, count: testRunner.metrics.total };
       }
@@ -77,7 +77,7 @@ function DevBoardInner() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === '`' && window.innerWidth > 768 && currentView === 'dev') {
         e.preventDefault();
-        setIsShellOpen(prev => !prev);
+        setIsShellOpen((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -88,7 +88,7 @@ function DevBoardInner() {
     <TestCountProvider value={{ testCount: testRunner.metrics.total }}>
       <div className="devboard">
         <GradientBackground />
-        <DevBoardHeader 
+        <DevBoardHeader
           activeSection={activeSection}
           onSectionChange={setActiveSection}
           categories={categories}
@@ -103,14 +103,14 @@ function DevBoardInner() {
             onSelectCategory={selectCategory}
             onToggleCollapse={toggleSidebar}
           />
-          <DevBoardContent 
-            activeCategory={activeCategory} 
+          <DevBoardContent
+            activeCategory={activeCategory}
             testRunner={testRunner}
             roleView={currentView}
           />
         </section>
         <SettingsModal isOpen={isSettingsOpen} onClose={closeSettings} />
-        
+
         {/* Cloud Shell - Desktop only, dev view only */}
         {currentView === 'dev' && (
           <>

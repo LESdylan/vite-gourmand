@@ -18,7 +18,14 @@ interface TestActionsProps {
   disabled?: boolean;
 }
 
-export function TestActions({ notes = '', onNotesChange, onPass, onFail, onBlock, disabled }: TestActionsProps) {
+export function TestActions({
+  notes = '',
+  onNotesChange,
+  onPass,
+  onFail,
+  onBlock,
+  disabled,
+}: TestActionsProps) {
   return (
     <div className="test-actions">
       <TextArea

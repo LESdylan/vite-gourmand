@@ -1,22 +1,38 @@
 /**
  * OrderPage — Multi-step order flow (No payment)
- * 
+ *
  * Steps:
  * 1. Menu selection (pre-filled if coming from menu detail) — OR custom request
  * 2. Delivery info (address, date, time)
  * 3. Person count + special instructions / custom message
  * 4. Recap → If not logged in, prompt to create account to retain order.
  *    Otherwise, send request message directly.
- * 
+ *
  * No payment required — the user sends a request message with the
  * desired menu (or a custom one). The restaurant contacts them back.
  */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  ArrowLeft, ArrowRight, Check, ChefHat, Users, Euro,
-  MapPin, Calendar, Clock, AlertTriangle,
-  Loader2, Utensils, Truck, FileText, CheckCircle2,
-  MessageSquare, UserPlus, LogIn, Send, Sparkles,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChefHat,
+  Users,
+  Euro,
+  MapPin,
+  Calendar,
+  Clock,
+  AlertTriangle,
+  Loader2,
+  Utensils,
+  Truck,
+  FileText,
+  CheckCircle2,
+  MessageSquare,
+  UserPlus,
+  LogIn,
+  Send,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -78,11 +94,12 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
             <div className="flex flex-col items-center gap-1">
               <div
                 className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all text-sm font-bold
-                  ${isCompleted
-                    ? 'bg-[#556B2F] text-white'
-                    : isActive
-                    ? 'bg-[#722F37] text-white shadow-lg shadow-[#722F37]/30'
-                    : 'bg-[#1A1A1A]/5 text-[#1A1A1A]/30'
+                  ${
+                    isCompleted
+                      ? 'bg-[#556B2F] text-white'
+                      : isActive
+                        ? 'bg-[#722F37] text-white shadow-lg shadow-[#722F37]/30'
+                        : 'bg-[#1A1A1A]/5 text-[#1A1A1A]/30'
                   }`}
               >
                 {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
@@ -112,18 +129,23 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
    Mini Menu Card (for selection in step 1)
    ══════════════════════════════════════════════════════════ */
 function MiniMenuCard({
-  menu, selected, onSelect,
+  menu,
+  selected,
+  onSelect,
 }: {
-  menu: Menu; selected: boolean; onSelect: (m: Menu) => void;
+  menu: Menu;
+  selected: boolean;
+  onSelect: (m: Menu) => void;
 }) {
   return (
     <button
       type="button"
       onClick={() => onSelect(menu)}
       className={`text-left w-full rounded-xl border-2 overflow-hidden transition-all duration-200
-        ${selected
-          ? 'border-[#722F37] ring-2 ring-[#722F37]/20 shadow-lg'
-          : 'border-[#1A1A1A]/10 hover:border-[#722F37]/40 hover:shadow-md'
+        ${
+          selected
+            ? 'border-[#722F37] ring-2 ring-[#722F37]/20 shadow-lg'
+            : 'border-[#1A1A1A]/10 hover:border-[#722F37]/40 hover:shadow-md'
         }`}
     >
       <div className="flex gap-3 p-3">
@@ -136,7 +158,10 @@ function MiniMenuCard({
             {menu.theme} · Min. {menu.minPersons} pers.
           </p>
           <div className="flex items-center justify-between mt-2">
-            <span className="text-lg font-bold text-[#722F37]">{menu.pricePerPerson.toFixed(0)} €<span className="text-xs font-normal text-[#1A1A1A]/50">/pers.</span></span>
+            <span className="text-lg font-bold text-[#722F37]">
+              {menu.pricePerPerson.toFixed(0)} €
+              <span className="text-xs font-normal text-[#1A1A1A]/50">/pers.</span>
+            </span>
             {selected && (
               <Badge className="bg-[#722F37] text-white border-0 text-[10px]">
                 <Check className="h-3 w-3 mr-0.5" /> Sélectionné
@@ -202,7 +227,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
       .then(({ menus }) => {
         setAllMenus(menus);
         if (preSelectedMenuId) {
-          const found = menus.find(m => m.numericId === preSelectedMenuId);
+          const found = menus.find((m) => m.numericId === preSelectedMenuId);
           if (found) {
             setSelectedMenu(found);
             setPersonCount(found.minPersons);
@@ -232,13 +257,35 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
   /* ── Validation per step ── */
   const canProceed = useMemo(() => {
     switch (step) {
-      case 0: return !!selectedMenu || (isCustomRequest && customMenuDescription.trim().length >= 10);
-      case 1: return deliveryAddress.trim().length >= 5 && deliveryDate !== '' && /^([01]\d|2[0-3]):[0-5]\d$/.test(deliveryHour);
-      case 2: return isCustomRequest ? personCount >= 1 : (selectedMenu ? personCount >= selectedMenu.minPersons : false);
-      case 3: return true;
-      default: return false;
+      case 0:
+        return !!selectedMenu || (isCustomRequest && customMenuDescription.trim().length >= 10);
+      case 1:
+        return (
+          deliveryAddress.trim().length >= 5 &&
+          deliveryDate !== '' &&
+          /^([01]\d|2[0-3]):[0-5]\d$/.test(deliveryHour)
+        );
+      case 2:
+        return isCustomRequest
+          ? personCount >= 1
+          : selectedMenu
+            ? personCount >= selectedMenu.minPersons
+            : false;
+      case 3:
+        return true;
+      default:
+        return false;
     }
-  }, [step, selectedMenu, isCustomRequest, customMenuDescription, deliveryAddress, deliveryDate, deliveryHour, personCount]);
+  }, [
+    step,
+    selectedMenu,
+    isCustomRequest,
+    customMenuDescription,
+    deliveryAddress,
+    deliveryDate,
+    deliveryHour,
+    personCount,
+  ]);
 
   /* ── Handle "Send Request" — requires account ── */
   const handleSendRequest = async () => {
@@ -261,7 +308,8 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
           personNumber: personCount,
           menuPrice: 0,
           totalPrice: 0,
-          specialInstructions: `[DEMANDE PERSONNALISÉE]\n${customMenuDescription}\n\n${specialInstructions.trim() ? `Instructions: ${specialInstructions}` : ''}`.trim(),
+          specialInstructions:
+            `[DEMANDE PERSONNALISÉE]\n${customMenuDescription}\n\n${specialInstructions.trim() ? `Instructions: ${specialInstructions}` : ''}`.trim(),
         };
         const order = await createOrder(data);
         setOrderSuccess(order.order_number);
@@ -282,7 +330,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
       addToast('Demande envoyée avec succès ! Nous vous contacterons bientôt. 🎉', 'success', 8000);
     } catch (err) {
       addToast(
-        err instanceof Error ? err.message : 'Erreur lors de l\'envoi de la demande.',
+        err instanceof Error ? err.message : "Erreur lors de l'envoi de la demande.",
         'error',
         6000,
       );
@@ -301,7 +349,10 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
           </div>
           <h2 className="text-2xl font-black text-[#1A1A1A] mb-2">Demande envoyée !</h2>
           <p className="text-[#1A1A1A]/60 mb-2">
-            Référence : <span className="font-mono font-bold text-[#722F37] bg-[#722F37]/5 px-2 py-0.5 rounded">{orderSuccess}</span>
+            Référence :{' '}
+            <span className="font-mono font-bold text-[#722F37] bg-[#722F37]/5 px-2 py-0.5 rounded">
+              {orderSuccess}
+            </span>
           </p>
           <div className="bg-[#FFF8F0] rounded-2xl p-5 mb-6 text-left border border-[#D4AF37]/10">
             <div className="flex items-start gap-3">
@@ -310,15 +361,21 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Et maintenant ?</p>
                 <ul className="text-xs text-[#1A1A1A]/60 space-y-1.5">
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      1
+                    </span>
                     Notre équipe reçoit votre demande et l'examine.
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      2
+                    </span>
                     Nous vous contactons pour confirmer les détails.
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                    <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      3
+                    </span>
                     Aucun paiement en ligne — tout se règle à la livraison.
                   </li>
                 </ul>
@@ -326,7 +383,11 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={() => setCurrentPage('menu')} variant="outline" className="flex-1 h-11">
+            <Button
+              onClick={() => setCurrentPage('menu')}
+              variant="outline"
+              className="flex-1 h-11"
+            >
               <ArrowLeft className="h-4 w-4 mr-1" /> Retour aux menus
             </Button>
             <Button onClick={() => setCurrentPage('home')} className="flex-1 h-11">
@@ -360,7 +421,9 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-white">Votre demande</h1>
               <p className="text-white/30 text-xs sm:text-sm mt-0.5">
-                {profile ? `${profile.name} · ${profile.email}` : 'Pas de paiement en ligne — nous vous recontactons'}
+                {profile
+                  ? `${profile.name} · ${profile.email}`
+                  : 'Pas de paiement en ligne — nous vous recontactons'}
               </p>
             </div>
           </div>
@@ -372,7 +435,6 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
       <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-5">
         <div className="bg-white rounded-2xl shadow-lg border border-[#1A1A1A]/5 overflow-hidden">
           <div className="p-5 sm:p-8 min-h-[400px]">
-
             {/* ═══ Step 0: Menu Selection — with custom request option ═══ */}
             {step === 0 && (
               <div>
@@ -387,11 +449,15 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 <div className="flex gap-2 mb-5 p-1 bg-[#1A1A1A]/5 rounded-xl">
                   <button
                     type="button"
-                    onClick={() => { setIsCustomRequest(false); setSelectedMenu(null); }}
+                    onClick={() => {
+                      setIsCustomRequest(false);
+                      setSelectedMenu(null);
+                    }}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all
-                      ${!isCustomRequest
-                        ? 'bg-white text-[#722F37] shadow-sm'
-                        : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/60'
+                      ${
+                        !isCustomRequest
+                          ? 'bg-white text-[#722F37] shadow-sm'
+                          : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/60'
                       }`}
                   >
                     <Utensils className="h-4 w-4 inline mr-1.5" />
@@ -399,11 +465,15 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setIsCustomRequest(true); setSelectedMenu(null); }}
+                    onClick={() => {
+                      setIsCustomRequest(true);
+                      setSelectedMenu(null);
+                    }}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all
-                      ${isCustomRequest
-                        ? 'bg-white text-[#722F37] shadow-sm'
-                        : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/60'
+                      ${
+                        isCustomRequest
+                          ? 'bg-white text-[#722F37] shadow-sm'
+                          : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/60'
                       }`}
                   >
                     <Sparkles className="h-4 w-4 inline mr-1.5" />
@@ -425,8 +495,8 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                     ) : (
                       <div className="grid gap-3 sm:grid-cols-2">
                         {allMenus
-                          .filter(m => m.stockQuantity > 0)
-                          .map(menu => (
+                          .filter((m) => m.stockQuantity > 0)
+                          .map((menu) => (
                             <MiniMenuCard
                               key={menu.id}
                               menu={menu}
@@ -439,13 +509,26 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
                     {selectedMenu && (
                       <div className="mt-5 bg-[#FFF8F0] rounded-xl p-4 border border-[#D4AF37]/20">
-                        <h3 className="font-bold text-[#1A1A1A] text-sm mb-1">{selectedMenu.name}</h3>
-                        <p className="text-xs text-[#1A1A1A]/50 line-clamp-2">{selectedMenu.description}</p>
+                        <h3 className="font-bold text-[#1A1A1A] text-sm mb-1">
+                          {selectedMenu.name}
+                        </h3>
+                        <p className="text-xs text-[#1A1A1A]/50 line-clamp-2">
+                          {selectedMenu.description}
+                        </p>
                         <div className="flex flex-wrap gap-4 mt-3 text-xs text-[#1A1A1A]/60">
-                          <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#722F37]" /> Min. {selectedMenu.minPersons} pers.</span>
-                          <span className="flex items-center gap-1"><Euro className="h-3.5 w-3.5 text-[#556B2F]" /> {selectedMenu.pricePerPerson.toFixed(2)} €/pers.</span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3.5 w-3.5 text-[#722F37]" /> Min.{' '}
+                            {selectedMenu.minPersons} pers.
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Euro className="h-3.5 w-3.5 text-[#556B2F]" />{' '}
+                            {selectedMenu.pricePerPerson.toFixed(2)} €/pers.
+                          </span>
                           {selectedMenu.allergens.length > 0 && (
-                            <span className="flex items-center gap-1 text-amber-700"><AlertTriangle className="h-3.5 w-3.5" /> {selectedMenu.allergens.join(', ')}</span>
+                            <span className="flex items-center gap-1 text-amber-700">
+                              <AlertTriangle className="h-3.5 w-3.5" />{' '}
+                              {selectedMenu.allergens.join(', ')}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -474,26 +557,32 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="address" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
+                    <Label
+                      htmlFor="address"
+                      className="text-sm font-medium text-[#1A1A1A] mb-1.5 block"
+                    >
                       Adresse de livraison *
                     </Label>
                     <Input
                       id="address"
                       value={deliveryAddress}
-                      onChange={e => setDeliveryAddress(e.target.value)}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
                       placeholder="123 rue de la Paix"
                       className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="city" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
+                    <Label
+                      htmlFor="city"
+                      className="text-sm font-medium text-[#1A1A1A] mb-1.5 block"
+                    >
                       Ville *
                     </Label>
                     <Input
                       id="city"
                       value={deliveryCity}
-                      onChange={e => setDeliveryCity(e.target.value)}
+                      onChange={(e) => setDeliveryCity(e.target.value)}
                       placeholder="Bordeaux"
                       className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
                     />
@@ -501,7 +590,10 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <Label htmlFor="date" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
+                      <Label
+                        htmlFor="date"
+                        className="text-sm font-medium text-[#1A1A1A] mb-1.5 block"
+                      >
                         <Calendar className="h-3.5 w-3.5 inline mr-1" /> Date de livraison *
                       </Label>
                       <Input
@@ -510,13 +602,16 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         min={getMinDate()}
                         max={getMaxDate()}
                         value={deliveryDate}
-                        onChange={e => setDeliveryDate(e.target.value)}
+                        onChange={(e) => setDeliveryDate(e.target.value)}
                         className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
                       />
                       <p className="text-[10px] text-[#1A1A1A]/40 mt-1">Minimum 48h à l'avance</p>
                     </div>
                     <div>
-                      <Label htmlFor="hour" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
+                      <Label
+                        htmlFor="hour"
+                        className="text-sm font-medium text-[#1A1A1A] mb-1.5 block"
+                      >
                         <Clock className="h-3.5 w-3.5 inline mr-1" /> Heure de livraison *
                       </Label>
                       <Input
@@ -525,7 +620,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         min="08:00"
                         max="22:00"
                         value={deliveryHour}
-                        onChange={e => setDeliveryHour(e.target.value)}
+                        onChange={(e) => setDeliveryHour(e.target.value)}
                         className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
                       />
                       <p className="text-[10px] text-[#1A1A1A]/40 mt-1">Entre 08h00 et 22h00</p>
@@ -542,10 +637,14 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                   <Users className="h-5 w-5 text-[#722F37]" /> Nombre de convives
                 </h2>
                 <p className="text-sm text-[#1A1A1A]/50 mb-5">
-                  {selectedMenu
-                    ? <>Le menu <strong>{selectedMenu.name}</strong> requiert un minimum de {selectedMenu.minPersons} personnes.</>
-                    : 'Indiquez le nombre de personnes attendues.'
-                  }
+                  {selectedMenu ? (
+                    <>
+                      Le menu <strong>{selectedMenu.name}</strong> requiert un minimum de{' '}
+                      {selectedMenu.minPersons} personnes.
+                    </>
+                  ) : (
+                    'Indiquez le nombre de personnes attendues.'
+                  )}
                 </p>
 
                 <div className="space-y-5">
@@ -557,7 +656,9 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                     <div className="flex items-center gap-4">
                       <button
                         type="button"
-                        onClick={() => setPersonCount(c => Math.max(selectedMenu?.minPersons ?? 1, c - 1))}
+                        onClick={() =>
+                          setPersonCount((c) => Math.max(selectedMenu?.minPersons ?? 1, c - 1))
+                        }
                         disabled={personCount <= (selectedMenu?.minPersons ?? 1)}
                         className="w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-white border border-[#1A1A1A]/10 text-[#1A1A1A] font-bold text-lg disabled:opacity-30 hover:bg-[#722F37] hover:text-white hover:border-[#722F37] transition-all"
                       >
@@ -565,11 +666,13 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       </button>
                       <div className="text-center">
                         <span className="text-3xl font-bold text-[#722F37]">{personCount}</span>
-                        <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wide">personne{personCount > 1 ? 's' : ''}</p>
+                        <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wide">
+                          personne{personCount > 1 ? 's' : ''}
+                        </p>
                       </div>
                       <button
                         type="button"
-                        onClick={() => setPersonCount(c => c + 1)}
+                        onClick={() => setPersonCount((c) => c + 1)}
                         className="w-11 h-11 sm:w-10 sm:h-10 rounded-full bg-white border border-[#1A1A1A]/10 text-[#1A1A1A] font-bold text-lg hover:bg-[#722F37] hover:text-white hover:border-[#722F37] transition-all"
                       >
                         +
@@ -580,26 +683,37 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                   {/* Price indication (informational) */}
                   {selectedMenu && (
                     <div className="bg-white rounded-xl border border-[#1A1A1A]/10 p-4">
-                      <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">Estimation indicative</h3>
+                      <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">
+                        Estimation indicative
+                      </h3>
                       <div className="flex justify-between text-sm text-[#1A1A1A]/60 mb-1">
-                        <span>{selectedMenu.pricePerPerson.toFixed(2)} € × {personCount} pers.</span>
-                        <span className="font-medium text-[#1A1A1A]">{priceInfo.total.toFixed(2)} €</span>
+                        <span>
+                          {selectedMenu.pricePerPerson.toFixed(2)} € × {personCount} pers.
+                        </span>
+                        <span className="font-medium text-[#1A1A1A]">
+                          {priceInfo.total.toFixed(2)} €
+                        </span>
                       </div>
                       <p className="text-[10px] text-[#1A1A1A]/30 mt-2 italic">
-                        * Prix indicatif. Le montant final sera confirmé par notre équipe. Aucun paiement en ligne.
+                        * Prix indicatif. Le montant final sera confirmé par notre équipe. Aucun
+                        paiement en ligne.
                       </p>
                     </div>
                   )}
 
                   {/* Special instructions */}
                   <div>
-                    <Label htmlFor="instructions" className="text-sm font-medium text-[#1A1A1A] mb-1.5 block">
-                      <FileText className="h-3.5 w-3.5 inline mr-1" /> Message complémentaire (optionnel)
+                    <Label
+                      htmlFor="instructions"
+                      className="text-sm font-medium text-[#1A1A1A] mb-1.5 block"
+                    >
+                      <FileText className="h-3.5 w-3.5 inline mr-1" /> Message complémentaire
+                      (optionnel)
                     </Label>
                     <textarea
                       id="instructions"
                       value={specialInstructions}
-                      onChange={e => setSpecialInstructions(e.target.value)}
+                      onChange={(e) => setSpecialInstructions(e.target.value)}
                       rows={3}
                       placeholder="Allergies, préférences, accès au lieu de livraison, questions..."
                       className="w-full rounded-lg border border-[#1A1A1A]/10 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#722F37] resize-none bg-white"
@@ -632,33 +746,52 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                           <p className="text-sm text-[#1A1A1A]">{customMenuDescription}</p>
                         </div>
                       </div>
-                    ) : selectedMenu && (
-                      <div className="flex gap-3">
-                        <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-[#1A1A1A]/5">
-                          <LazyImage src={selectedMenu.image} alt={selectedMenu.name} className="w-full h-full" />
+                    ) : (
+                      selectedMenu && (
+                        <div className="flex gap-3">
+                          <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-[#1A1A1A]/5">
+                            <LazyImage
+                              src={selectedMenu.image}
+                              alt={selectedMenu.name}
+                              className="w-full h-full"
+                            />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-[#1A1A1A]">{selectedMenu.name}</h4>
+                            <p className="text-xs text-[#1A1A1A]/50">
+                              {selectedMenu.theme} · {selectedMenu.dietary.join(', ')}
+                            </p>
+                            <p className="text-sm font-bold text-[#722F37] mt-1">
+                              {selectedMenu.pricePerPerson.toFixed(2)} € / personne
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold text-[#1A1A1A]">{selectedMenu.name}</h4>
-                          <p className="text-xs text-[#1A1A1A]/50">{selectedMenu.theme} · {selectedMenu.dietary.join(', ')}</p>
-                          <p className="text-sm font-bold text-[#722F37] mt-1">{selectedMenu.pricePerPerson.toFixed(2)} € / personne</p>
-                        </div>
-                      </div>
+                      )
                     )}
                   </div>
 
                   {/* Delivery recap */}
                   <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#1A1A1A]/5">
-                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">Livraison</h3>
+                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">
+                      Livraison
+                    </h3>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <p className="text-[#1A1A1A]/50 text-xs">Adresse</p>
-                        <p className="font-medium text-[#1A1A1A]">{deliveryAddress}, {deliveryCity}</p>
+                        <p className="font-medium text-[#1A1A1A]">
+                          {deliveryAddress}, {deliveryCity}
+                        </p>
                       </div>
                       <div>
                         <p className="text-[#1A1A1A]/50 text-xs">Date & heure</p>
                         <p className="font-medium text-[#1A1A1A]">
-                          {new Date(deliveryDate + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                          {' '}à {deliveryHour}
+                          {new Date(deliveryDate + 'T00:00:00').toLocaleDateString('fr-FR', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })}{' '}
+                          à {deliveryHour}
                         </p>
                       </div>
                     </div>
@@ -666,7 +799,9 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
                   {/* Details recap */}
                   <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#1A1A1A]/5">
-                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">Détails</h3>
+                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">
+                      Détails
+                    </h3>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <p className="text-[#1A1A1A]/50 text-xs">Nombre de personnes</p>
@@ -675,13 +810,17 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       {selectedMenu && (
                         <div>
                           <p className="text-[#1A1A1A]/50 text-xs">Estimation</p>
-                          <p className="font-medium text-[#722F37]">≈ {priceInfo.total.toFixed(2)} €</p>
+                          <p className="font-medium text-[#722F37]">
+                            ≈ {priceInfo.total.toFixed(2)} €
+                          </p>
                         </div>
                       )}
                       {specialInstructions && (
                         <div className="col-span-2">
                           <p className="text-[#1A1A1A]/50 text-xs">Message</p>
-                          <p className="font-medium text-[#1A1A1A] text-xs">{specialInstructions}</p>
+                          <p className="font-medium text-[#1A1A1A] text-xs">
+                            {specialInstructions}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -694,10 +833,13 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         <MessageSquare className="h-4 w-4 text-[#556B2F]" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-[#556B2F] mb-1">Aucun paiement requis</h3>
+                        <h3 className="text-sm font-bold text-[#556B2F] mb-1">
+                          Aucun paiement requis
+                        </h3>
                         <p className="text-xs text-[#1A1A1A]/50 leading-relaxed">
-                          En envoyant cette demande, vous ne payez rien. Notre équipe vous contactera pour confirmer
-                          les détails, le prix final et les modalités de livraison. Le règlement se fait à la livraison.
+                          En envoyant cette demande, vous ne payez rien. Notre équipe vous
+                          contactera pour confirmer les détails, le prix final et les modalités de
+                          livraison. Le règlement se fait à la livraison.
                         </p>
                       </div>
                     </div>
@@ -720,7 +862,9 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         <div className="w-14 h-14 mx-auto mb-3 bg-[#722F37]/10 rounded-full flex items-center justify-center">
                           <UserPlus className="h-7 w-7 text-[#722F37]" />
                         </div>
-                        <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Créez un compte pour envoyer</h3>
+                        <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">
+                          Créez un compte pour envoyer
+                        </h3>
                         <p className="text-sm text-[#1A1A1A]/50 max-w-sm mx-auto">
                           Pour conserver votre demande et que nous puissions vous recontacter,
                           connectez-vous ou créez un compte gratuit.
@@ -730,17 +874,20 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         <Button
                           onClick={() => {
                             // Store order data in sessionStorage before redirecting
-                            sessionStorage.setItem('vg_pending_order', JSON.stringify({
-                              selectedMenuId: selectedMenu?.numericId,
-                              isCustomRequest,
-                              customMenuDescription,
-                              deliveryAddress,
-                              deliveryCity,
-                              deliveryDate,
-                              deliveryHour,
-                              personCount,
-                              specialInstructions,
-                            }));
+                            sessionStorage.setItem(
+                              'vg_pending_order',
+                              JSON.stringify({
+                                selectedMenuId: selectedMenu?.numericId,
+                                isCustomRequest,
+                                customMenuDescription,
+                                deliveryAddress,
+                                deliveryCity,
+                                deliveryDate,
+                                deliveryHour,
+                                personCount,
+                                specialInstructions,
+                              }),
+                            );
                             window.location.href = '/portal';
                           }}
                           className="flex-1 h-11"
@@ -749,17 +896,20 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         </Button>
                         <Button
                           onClick={() => {
-                            sessionStorage.setItem('vg_pending_order', JSON.stringify({
-                              selectedMenuId: selectedMenu?.numericId,
-                              isCustomRequest,
-                              customMenuDescription,
-                              deliveryAddress,
-                              deliveryCity,
-                              deliveryDate,
-                              deliveryHour,
-                              personCount,
-                              specialInstructions,
-                            }));
+                            sessionStorage.setItem(
+                              'vg_pending_order',
+                              JSON.stringify({
+                                selectedMenuId: selectedMenu?.numericId,
+                                isCustomRequest,
+                                customMenuDescription,
+                                deliveryAddress,
+                                deliveryCity,
+                                deliveryDate,
+                                deliveryHour,
+                                personCount,
+                                specialInstructions,
+                              }),
+                            );
                             window.location.href = '/portal';
                           }}
                           variant="outline"
@@ -779,13 +929,15 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 </div>
               </div>
             )}
-
           </div>
 
           {/* Footer navigation */}
           <div className="bg-[#FFF8F0] border-t border-[#1A1A1A]/5 px-5 sm:px-8 py-4 flex items-center justify-between">
             <Button
-              onClick={() => { setStep(s => Math.max(0, s - 1)); setShowAuthPrompt(false); }}
+              onClick={() => {
+                setStep((s) => Math.max(0, s - 1));
+                setShowAuthPrompt(false);
+              }}
               variant="ghost"
               disabled={step === 0}
               className="text-[#1A1A1A]/60"
@@ -795,7 +947,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
             {step < 3 ? (
               <Button
-                onClick={() => setStep(s => s + 1)}
+                onClick={() => setStep((s) => s + 1)}
                 disabled={!canProceed}
                 className="min-w-[140px]"
               >
@@ -808,9 +960,13 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 className="min-w-[180px] bg-[#556B2F] hover:bg-[#475a27] shadow-lg shadow-[#556B2F]/20"
               >
                 {isSubmitting ? (
-                  <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Envoi en cours...</>
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" /> Envoi en cours...
+                  </>
                 ) : (
-                  <><Send className="h-4 w-4 mr-2" /> Envoyer la demande</>
+                  <>
+                    <Send className="h-4 w-4 mr-2" /> Envoyer la demande
+                  </>
                 )}
               </Button>
             )}

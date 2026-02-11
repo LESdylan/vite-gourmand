@@ -4,21 +4,27 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 
-interface Position { x: number; y: number }
+interface Position {
+  x: number;
+  y: number;
+}
 
 export function useDraggable(initialPos: Position = { x: 100, y: 100 }) {
   const [position, setPosition] = useState(initialPos);
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('.shell-actions')) return;
-    setIsDragging(true);
-    dragOffset.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    };
-  }, [position]);
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if ((e.target as HTMLElement).closest('.shell-actions')) return;
+      setIsDragging(true);
+      dragOffset.current = {
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      };
+    },
+    [position],
+  );
 
   useEffect(() => {
     if (!isDragging) return;

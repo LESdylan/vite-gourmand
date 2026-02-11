@@ -16,7 +16,7 @@ interface CountBadgeProps {
 export function CountBadge({ count, variant = 'default', max = 99 }: CountBadgeProps) {
   const displayValue = formatCount(count, max);
   const classes = buildClasses(variant);
-  
+
   return (
     <span className={classes} aria-label={`${count} items`}>
       {displayValue}

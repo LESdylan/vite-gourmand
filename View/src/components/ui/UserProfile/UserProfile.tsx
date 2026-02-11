@@ -27,7 +27,7 @@ export function UserProfile({ userId, onClose, isModal = false }: UserProfilePro
 
       try {
         const data = await getUserProfile(userId);
-        
+
         if (!data) {
           setError('Utilisateur non trouvé');
           return;
@@ -35,7 +35,11 @@ export function UserProfile({ userId, onClose, isModal = false }: UserProfilePro
 
         // Check visibility permissions
         const viewerRole = currentUser?.role as UserProfileData['role'] | undefined;
-        const canView = canViewDetailedProfile(viewerRole, data.role as UserProfileData['role'], isSelf);
+        const canView = canViewDetailedProfile(
+          viewerRole,
+          data.role as UserProfileData['role'],
+          isSelf,
+        );
 
         if (!canView) {
           setAccessDenied(true);
@@ -67,7 +71,12 @@ export function UserProfile({ userId, onClose, isModal = false }: UserProfilePro
   }, [isModal, onClose]);
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const formatDate = (dateString?: string) => {
@@ -210,7 +219,9 @@ export function UserProfile({ userId, onClose, isModal = false }: UserProfilePro
               )}
               {profile.stats.averageRating !== undefined && (
                 <div className="user-profile-stat">
-                  <div className="user-profile-stat-value">{profile.stats.averageRating.toFixed(1)}</div>
+                  <div className="user-profile-stat-value">
+                    {profile.stats.averageRating.toFixed(1)}
+                  </div>
                   <div className="user-profile-stat-label">Note moyenne</div>
                 </div>
               )}
@@ -241,22 +252,20 @@ export function UserProfile({ userId, onClose, isModal = false }: UserProfilePro
 }
 
 // Wrapper for modal or inline display
-function ProfileWrapper({ 
-  children, 
-  isModal, 
-  onClose 
-}: { 
-  children: React.ReactNode; 
-  isModal: boolean; 
+function ProfileWrapper({
+  children,
+  isModal,
+  onClose,
+}: {
+  children: React.ReactNode;
+  isModal: boolean;
   onClose?: () => void;
 }) {
   if (isModal) {
     return (
       <>
         <div className="user-profile-backdrop" onClick={onClose} />
-        <div className="user-profile user-profile--modal">
-          {children}
-        </div>
+        <div className="user-profile user-profile--modal">{children}</div>
       </>
     );
   }
@@ -283,14 +292,26 @@ const CloseIcon = () => (
 );
 
 const ErrorIcon = () => (
-  <svg className="user-profile-error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    className="user-profile-error-icon"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <circle cx="12" cy="12" r="10" />
     <path d="M12 8v4M12 16h.01" />
   </svg>
 );
 
 const LockIcon = () => (
-  <svg className="user-profile-denied-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    className="user-profile-denied-icon"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <rect x="3" y="11" width="18" height="11" rx="2" />
     <path d="M7 11V7a5 5 0 0110 0v4" />
   </svg>

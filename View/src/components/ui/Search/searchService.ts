@@ -33,17 +33,21 @@ interface ApiUser {
  */
 export async function searchUsers(query: string): Promise<SearchResult[]> {
   try {
-    const response = await apiRequest<ApiResponse<ApiUser[]>>(`/api/crud/users?search=${encodeURIComponent(query)}`);
-    
+    const response = await apiRequest<ApiResponse<ApiUser[]>>(
+      `/api/crud/users?search=${encodeURIComponent(query)}`,
+    );
+
     // Transform API response to SearchResult format
     const users = response?.data?.data || [];
-    return users.map((user): SearchResult => ({
-      id: String(user.id),
-      name: user.firstName,
-      username: user.email.split('@')[0],
-      email: user.email,
-      role: user.role,
-    }));
+    return users.map(
+      (user): SearchResult => ({
+        id: String(user.id),
+        name: user.firstName,
+        username: user.email.split('@')[0],
+        email: user.email,
+        role: user.role,
+      }),
+    );
   } catch (error) {
     console.error('Search API error:', error);
     // Do NOT fall back to mock data — only return real DB users
@@ -65,7 +69,7 @@ export async function getUserProfile(userId: string): Promise<SearchResult | nul
     const response = await apiRequest<SingleUserResponse>(`/api/crud/users/${userId}`);
     const user = response?.data;
     if (!user) return null;
-    
+
     return {
       id: String(user.id),
       name: user.firstName,
@@ -86,9 +90,12 @@ export async function getUserProfile(userId: string): Promise<SearchResult | nul
  * - employee: can see only employees (transparency)
  * - customer: can see no one except themselves
  */
-export function canViewUser(viewerRole: UserVisibility | undefined, targetRole: UserVisibility): boolean {
+export function canViewUser(
+  viewerRole: UserVisibility | undefined,
+  targetRole: UserVisibility,
+): boolean {
   if (!viewerRole) return false;
-  
+
   const visibilityMatrix: Record<UserVisibility, UserVisibility[]> = {
     superadmin: ['superadmin', 'admin', 'employee', 'customer'],
     admin: ['admin', 'employee'], // Admins see admins and employees
@@ -102,7 +109,11 @@ export function canViewUser(viewerRole: UserVisibility | undefined, targetRole: 
 /**
  * Check if user can view detailed profile (not just search result)
  */
-export function canViewDetailedProfile(viewerRole: UserVisibility | undefined, targetRole: UserVisibility, isSelf: boolean): boolean {
+export function canViewDetailedProfile(
+  viewerRole: UserVisibility | undefined,
+  targetRole: UserVisibility,
+  isSelf: boolean,
+): boolean {
   if (isSelf) return true; // Can always view own profile
   return canViewUser(viewerRole, targetRole);
 }
@@ -110,22 +121,70 @@ export function canViewDetailedProfile(viewerRole: UserVisibility | undefined, t
 /**
  * Mock data for development/testing
  */
-function getMockUsers(query: string): SearchResult[] {
+function _getMockUsers(_query: string): SearchResult[] {
   const mockUsers: SearchResult[] = [
-    { id: '1', name: 'Jean Dupont', username: 'jdupont', email: 'jean@vitegourmand.fr', role: 'employee' },
-    { id: '2', name: 'Marie Martin', username: 'mmartin', email: 'marie@vitegourmand.fr', role: 'employee' },
-    { id: '3', name: 'Pierre Admin', username: 'padmin', email: 'pierre@vitegourmand.fr', role: 'admin' },
-    { id: '4', name: 'Sophie Chef', username: 'schef', email: 'sophie@vitegourmand.fr', role: 'employee' },
-    { id: '5', name: 'Lucas Manager', username: 'lmanager', email: 'lucas@vitegourmand.fr', role: 'admin' },
-    { id: '6', name: 'Emma Serveur', username: 'eserveur', email: 'emma@vitegourmand.fr', role: 'employee' },
-    { id: '7', name: 'Hugo Client', username: 'hclient', email: 'hugo@example.com', role: 'customer' },
-    { id: '8', name: 'Léa SuperAdmin', username: 'lsuperadmin', email: 'lea@vitegourmand.fr', role: 'superadmin' },
+    {
+      id: '1',
+      name: 'Jean Dupont',
+      username: 'jdupont',
+      email: 'jean@vitegourmand.fr',
+      role: 'employee',
+    },
+    {
+      id: '2',
+      name: 'Marie Martin',
+      username: 'mmartin',
+      email: 'marie@vitegourmand.fr',
+      role: 'employee',
+    },
+    {
+      id: '3',
+      name: 'Pierre Admin',
+      username: 'padmin',
+      email: 'pierre@vitegourmand.fr',
+      role: 'admin',
+    },
+    {
+      id: '4',
+      name: 'Sophie Chef',
+      username: 'schef',
+      email: 'sophie@vitegourmand.fr',
+      role: 'employee',
+    },
+    {
+      id: '5',
+      name: 'Lucas Manager',
+      username: 'lmanager',
+      email: 'lucas@vitegourmand.fr',
+      role: 'admin',
+    },
+    {
+      id: '6',
+      name: 'Emma Serveur',
+      username: 'eserveur',
+      email: 'emma@vitegourmand.fr',
+      role: 'employee',
+    },
+    {
+      id: '7',
+      name: 'Hugo Client',
+      username: 'hclient',
+      email: 'hugo@example.com',
+      role: 'customer',
+    },
+    {
+      id: '8',
+      name: 'Léa SuperAdmin',
+      username: 'lsuperadmin',
+      email: 'lea@vitegourmand.fr',
+      role: 'superadmin',
+    },
   ];
 
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = _query.toLowerCase();
   return mockUsers.filter(
-    user => 
+    (user) =>
       user.name.toLowerCase().includes(lowerQuery) ||
-      user.username.toLowerCase().includes(lowerQuery)
+      user.username.toLowerCase().includes(lowerQuery),
   );
 }

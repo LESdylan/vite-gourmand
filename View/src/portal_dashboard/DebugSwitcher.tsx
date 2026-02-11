@@ -34,7 +34,7 @@ export function DebugSwitcher() {
       <button className="debug-toggle" onClick={() => setIsOpen(!isOpen)} title="Debug Mode">
         🔧
       </button>
-      
+
       {isOpen && (
         <DebugPanel
           activeBot={activeBot}
@@ -63,20 +63,15 @@ function DebugPanel({ activeBot, onSelect, onExit, onClose }: DebugPanelProps) {
         <span>🔧 Debug Mode</span>
         <button onClick={onClose}>✕</button>
       </header>
-      
+
       <div className="debug-panel-body">
         <p className="debug-hint">View as different roles:</p>
-        
+
         {bots.map(([id, bot]) => (
-          <BotButton
-            key={id}
-            bot={bot}
-            isActive={activeBot === id}
-            onClick={() => onSelect(id)}
-          />
+          <BotButton key={id} bot={bot} isActive={activeBot === id} onClick={() => onSelect(id)} />
         ))}
       </div>
-      
+
       {activeBot && (
         <footer className="debug-panel-footer">
           <button className="debug-exit" onClick={onExit}>

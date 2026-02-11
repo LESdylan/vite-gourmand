@@ -17,14 +17,7 @@ interface MetricCardProps {
   icon?: React.ReactNode;
 }
 
-export function MetricCard({
-  label,
-  value,
-  unit,
-  trend,
-  trendValue,
-  icon,
-}: MetricCardProps) {
+export function MetricCard({ label, value, unit, trend, trendValue, icon }: MetricCardProps) {
   return (
     <BaseCard className="metric-card">
       <MetricCardHeader label={label} icon={icon} />

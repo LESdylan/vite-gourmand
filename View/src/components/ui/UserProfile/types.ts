@@ -90,7 +90,7 @@ export interface UserProfileProps {
 
 /* ───────────────── Legacy compat ───────────────── */
 
-export interface UserProfileData extends FullUserProfile {}
+export type UserProfileData = FullUserProfile;
 
 export interface UserStats {
   ordersHandled?: number;

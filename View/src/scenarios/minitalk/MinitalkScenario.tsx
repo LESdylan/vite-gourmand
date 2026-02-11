@@ -36,13 +36,22 @@ export const MinitalkScenario: React.FC = () => {
           <h1>🍽️ Minitalk</h1>
           <p>Suivi de commande en temps réel</p>
           <div className="view-toggle">
-            <button className={viewMode === 'split' ? 'active' : ''} onClick={() => setViewMode('split')}>
+            <button
+              className={viewMode === 'split' ? 'active' : ''}
+              onClick={() => setViewMode('split')}
+            >
               <span>⚡</span> Vue partagée
             </button>
-            <button className={viewMode === 'pro' ? 'active' : ''} onClick={() => setViewMode('pro')}>
+            <button
+              className={viewMode === 'pro' ? 'active' : ''}
+              onClick={() => setViewMode('pro')}
+            >
               <span>👨‍🍳</span> Professionnel
             </button>
-            <button className={viewMode === 'client' ? 'active' : ''} onClick={() => setViewMode('client')}>
+            <button
+              className={viewMode === 'client' ? 'active' : ''}
+              onClick={() => setViewMode('client')}
+            >
               <span>👤</span> Client
             </button>
           </div>

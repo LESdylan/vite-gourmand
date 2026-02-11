@@ -21,25 +21,56 @@ interface RoleOption {
 }
 
 const ROLE_OPTIONS: RoleOption[] = [
-  { id: 'dev', label: 'DevBoard', icon: '🛠️', description: 'QA & Development', allowedRoles: ['superadmin'] },
-  { id: 'admin', label: 'Admin', icon: '👔', description: 'Administration', allowedRoles: ['superadmin', 'admin'] },
-  { id: 'employee', label: 'Employé', icon: '👷', description: 'Espace Employé', allowedRoles: ['superadmin', 'admin', 'employee'] },
-  { id: 'client', label: 'Client', icon: '👤', description: 'Mon Espace', allowedRoles: ['superadmin', 'admin', 'customer'] },
+  {
+    id: 'dev',
+    label: 'DevBoard',
+    icon: '🛠️',
+    description: 'QA & Development',
+    allowedRoles: ['superadmin'],
+  },
+  {
+    id: 'admin',
+    label: 'Admin',
+    icon: '👔',
+    description: 'Administration',
+    allowedRoles: ['superadmin', 'admin'],
+  },
+  {
+    id: 'employee',
+    label: 'Employé',
+    icon: '👷',
+    description: 'Espace Employé',
+    allowedRoles: ['superadmin', 'admin', 'employee'],
+  },
+  {
+    id: 'client',
+    label: 'Client',
+    icon: '👤',
+    description: 'Mon Espace',
+    allowedRoles: ['superadmin', 'admin', 'customer'],
+  },
 ];
 
 /** Get available views for a user role */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getAvailableViews(userRole: string): RoleOption[] {
-  return ROLE_OPTIONS.filter(opt => opt.allowedRoles.includes(userRole));
+  return ROLE_OPTIONS.filter((opt) => opt.allowedRoles.includes(userRole));
 }
 
 /** Get default view for a user role */
+// eslint-disable-next-line react-refresh/only-export-components
 export function getDefaultViewForRole(userRole: string): RoleView {
   switch (userRole) {
-    case 'superadmin': return 'dev';
-    case 'admin': return 'admin';
-    case 'employee': return 'employee';
-    case 'customer': return 'client';
-    default: return 'employee';
+    case 'superadmin':
+      return 'dev';
+    case 'admin':
+      return 'admin';
+    case 'employee':
+      return 'employee';
+    case 'customer':
+      return 'client';
+    default:
+      return 'employee';
   }
 }
 
@@ -53,6 +84,7 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Get available views for current user
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const availableViews = useMemo(() => {
     if (!user?.role) return [];
     return getAvailableViews(user.role);
@@ -61,7 +93,7 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
   // Don't show switcher if user has only one view available
   if (availableViews.length <= 1) return null;
 
-  const currentRole = availableViews.find(r => r.id === currentView) || availableViews[0];
+  const currentRole = availableViews.find((r) => r.id === currentView) || availableViews[0];
 
   const handleSelect = (role: RoleOption) => {
     setView(role.id);
@@ -71,8 +103,8 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
   if (collapsed) {
     return (
       <div className="role-switcher role-switcher--collapsed">
-        <button 
-          className="role-switcher-toggle" 
+        <button
+          className="role-switcher-toggle"
           onClick={() => setIsOpen(!isOpen)}
           title="Switch View"
         >
@@ -80,7 +112,7 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
         </button>
         {isOpen && (
           <div className="role-switcher-dropdown role-switcher-dropdown--right">
-            {availableViews.map(role => (
+            {availableViews.map((role) => (
               <button
                 key={role.id}
                 className={`role-option ${currentRole.id === role.id ? 'active' : ''}`}
@@ -98,8 +130,8 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
 
   return (
     <div className="role-switcher">
-      <button 
-        className="role-switcher-toggle" 
+      <button
+        className="role-switcher-toggle"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
@@ -110,11 +142,11 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
         </span>
         <span className={`role-switcher-arrow ${isOpen ? 'open' : ''}`}>▼</span>
       </button>
-      
+
       {isOpen && (
         <div className="role-switcher-dropdown">
           <div className="role-dropdown-header">Changer de vue</div>
-          {availableViews.map(role => (
+          {availableViews.map((role) => (
             <button
               key={role.id}
               className={`role-option ${currentRole.id === role.id ? 'active' : ''}`}

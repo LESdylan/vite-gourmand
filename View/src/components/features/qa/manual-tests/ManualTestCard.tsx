@@ -29,9 +29,7 @@ export function ManualTestCard({ test, onSelect }: ManualTestCardProps) {
       </header>
       <p className="manual-test-card-description">{test.description}</p>
       <footer className="manual-test-card-footer">
-        <span className="manual-test-card-steps">
-          {test.steps.length} steps
-        </span>
+        <span className="manual-test-card-steps">{test.steps.length} steps</span>
         <GhostButton onClick={onSelect}>Start Test →</GhostButton>
       </footer>
     </article>

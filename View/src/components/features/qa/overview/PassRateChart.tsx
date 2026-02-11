@@ -14,7 +14,7 @@ interface PassRateChartProps {
 export function PassRateChart({ passed, failed, total }: PassRateChartProps) {
   const hasData = total > 0;
   const passPercent = hasData ? Math.round((passed / total) * 100) : 0;
-  
+
   // For donut chart CSS
   const circumference = 2 * Math.PI * 45; // radius = 45
   const passOffset = hasData ? circumference - (circumference * passPercent) / 100 : circumference;
@@ -22,7 +22,7 @@ export function PassRateChart({ passed, failed, total }: PassRateChartProps) {
   return (
     <div className="pass-rate-chart">
       <h4 className="pass-rate-chart-title">Test Results Distribution</h4>
-      
+
       <div className="pass-rate-chart-container">
         <svg className="pass-rate-donut" viewBox="0 0 100 100">
           {/* Background circle */}

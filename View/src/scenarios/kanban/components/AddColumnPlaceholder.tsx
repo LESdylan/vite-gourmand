@@ -42,7 +42,7 @@ export function AddColumnPlaceholder({ onAdd }: AddColumnPlaceholderProps) {
   return (
     <div className="add-column-form">
       <h4 className="add-column-form-title">Nouvelle colonne</h4>
-      
+
       <input
         type="text"
         value={title}
@@ -54,7 +54,7 @@ export function AddColumnPlaceholder({ onAdd }: AddColumnPlaceholderProps) {
       />
 
       <div className="add-column-colors">
-        {colors.map(c => (
+        {colors.map((c) => (
           <button
             key={c}
             className={`color-btn ${color === c ? 'selected' : ''}`}

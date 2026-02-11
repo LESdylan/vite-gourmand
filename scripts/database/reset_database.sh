@@ -123,7 +123,8 @@ run_sql "$SCHEMAS_DIR/messaging.sql"     "💬 Messaging"
 run_sql "$SCHEMAS_DIR/kanban.sql"        "📊 Kanban"
 run_sql "$SCHEMAS_DIR/optimizing.sql"    "⚡ Triggers & Views"
 run_sql "$SCHEMAS_DIR/cache.sql"         "📈 Materialized Views"
-ok "All schemas created"
+run_sql "$SCHEMAS_DIR/security_rls.sql"  "🔒 RLS & Security Policies"
+ok "All schemas created (with RLS enabled)"
 
 # ── 4. Seed data (order matters for FK) ──────────────
 section "4/7 — Seeding Data"

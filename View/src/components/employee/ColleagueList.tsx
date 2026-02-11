@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { UserProfile } from '../ui/UserProfile';
 import { searchUsers, canViewUser } from '../ui/Search';
 import type { SearchResult } from '../ui/Search';
+import type { UserVisibility } from '../ui/Search/types';
 import { usePortalAuth } from '../../portal_dashboard/PortalAuthContext';
 import '../admin/AdminWidgets.css'; // Reuse admin table styles
 import './EmployeeWidgets.css';
@@ -31,13 +32,13 @@ export function ColleagueList() {
       try {
         // In real app, this would call a dedicated colleagues endpoint
         const results = await searchUsers('');
-        
+
         // Filter based on visibility rules (employees can only see employees)
         const viewerRole = currentUser?.role;
         const visibleColleagues = results.filter((user) =>
-          canViewUser(viewerRole as any, user.role as any)
+          canViewUser(viewerRole as UserVisibility, user.role as UserVisibility),
         );
-        
+
         setColleagues(visibleColleagues as Colleague[]);
       } catch (error) {
         console.error('Failed to load colleagues:', error);
@@ -50,24 +51,37 @@ export function ColleagueList() {
   }, [currentUser?.role]);
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'active': return 'inline-status--success';
-      case 'away': return 'inline-status--warning';
-      case 'inactive': return 'inline-status--neutral';
-      default: return 'inline-status--info';
+      case 'active':
+        return 'inline-status--success';
+      case 'away':
+        return 'inline-status--warning';
+      case 'inactive':
+        return 'inline-status--neutral';
+      default:
+        return 'inline-status--info';
     }
   };
 
   const getStatusLabel = (status?: string) => {
     switch (status) {
-      case 'active': return 'En service';
-      case 'away': return 'Absent';
-      case 'inactive': return 'Hors service';
-      default: return 'Disponible';
+      case 'active':
+        return 'En service';
+      case 'away':
+        return 'Absent';
+      case 'inactive':
+        return 'Hors service';
+      default:
+        return 'Disponible';
     }
   };
 
@@ -76,9 +90,7 @@ export function ColleagueList() {
       <header className="widget-header">
         <div className="widget-header-content">
           <h2>👥 Mes collègues</h2>
-          <p className="widget-subtitle">
-            Équipe du restaurant • {colleagues.length} membres
-          </p>
+          <p className="widget-subtitle">Équipe du restaurant • {colleagues.length} membres</p>
         </div>
       </header>
 
@@ -103,7 +115,7 @@ export function ColleagueList() {
         ) : (
           <div className="colleague-grid">
             {colleagues.map((colleague) => (
-              <div 
+              <div
                 key={colleague.id}
                 className="colleague-card"
                 onClick={() => setSelectedUserId(colleague.id)}
@@ -114,16 +126,16 @@ export function ColleagueList() {
                   ) : (
                     getInitials(colleague.name)
                   )}
-                  <span className={`colleague-status-indicator ${
-                    colleague.status === 'active' ? 'colleague-status-indicator--active' : ''
-                  }`}></span>
+                  <span
+                    className={`colleague-status-indicator ${
+                      colleague.status === 'active' ? 'colleague-status-indicator--active' : ''
+                    }`}
+                  ></span>
                 </div>
-                
+
                 <div className="colleague-card-info">
                   <span className="colleague-card-name">{colleague.name}</span>
-                  <span className="colleague-card-position">
-                    {colleague.position || 'Employé'}
-                  </span>
+                  <span className="colleague-card-position">{colleague.position || 'Employé'}</span>
                 </div>
 
                 <div className="colleague-card-meta">
@@ -132,9 +144,7 @@ export function ColleagueList() {
                     {getStatusLabel(colleague.status)}
                   </span>
                   {colleague.shift && (
-                    <span className="colleague-card-shift">
-                      🕐 {colleague.shift}
-                    </span>
+                    <span className="colleague-card-shift">🕐 {colleague.shift}</span>
                   )}
                 </div>
               </div>
@@ -147,18 +157,14 @@ export function ColleagueList() {
       <div className="transparency-note">
         <span className="transparency-note-icon">ℹ️</span>
         <p className="transparency-note-text">
-          Pour favoriser la transparence au sein de l'équipe, vous pouvez consulter 
-          les profils de vos collègues. Les informations sensibles restent confidentielles.
+          Pour favoriser la transparence au sein de l'équipe, vous pouvez consulter les profils de
+          vos collègues. Les informations sensibles restent confidentielles.
         </p>
       </div>
 
       {/* Profile Modal */}
       {selectedUserId && (
-        <UserProfile 
-          userId={selectedUserId}
-          isModal
-          onClose={() => setSelectedUserId(null)}
-        />
+        <UserProfile userId={selectedUserId} isModal onClose={() => setSelectedUserId(null)} />
       )}
     </div>
   );

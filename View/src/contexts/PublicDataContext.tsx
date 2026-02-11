@@ -45,6 +45,7 @@ const defaultValue: PublicData = {
 
 const PublicDataCtx = createContext<PublicData>(defaultValue);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePublicData(): PublicData {
   return useContext(PublicDataCtx);
 }
@@ -85,7 +86,7 @@ export function PublicDataProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         console.error('[PublicDataProvider] Failed to fetch public data:', err);
         if (!cancelled) {
-          setData(prev => ({ ...prev, loading: false }));
+          setData((prev) => ({ ...prev, loading: false }));
         }
       }
     })();

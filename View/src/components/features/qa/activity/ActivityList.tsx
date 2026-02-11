@@ -28,7 +28,7 @@ export function ActivityList({ activities, loading, error }: ActivityListProps) 
 
   return (
     <div className="activity-list">
-      {activities.map(activity => (
+      {activities.map((activity) => (
         <ActivityItem key={activity.id} activity={activity} />
       ))}
     </div>

@@ -7,24 +7,16 @@
  */
 
 import { useEffect, useRef } from 'react';
-import {
-  X,
-  Bell,
-  ShoppingCart,
-  Star,
-  Megaphone,
-  Settings,
-  CheckCheck,
-} from 'lucide-react';
+import { X, Bell, ShoppingCart, Star, Megaphone, Settings, CheckCheck } from 'lucide-react';
 import { useNotifications } from '../../contexts/NotificationContext';
 
 /* ── Type-based styling ── */
 
 const TYPE_CONFIG: Record<string, { icon: typeof Bell; color: string; bg: string }> = {
-  order_update: { icon: ShoppingCart, color: 'text-blue-600',   bg: 'bg-blue-50' },
-  review:       { icon: Star,         color: 'text-amber-600',  bg: 'bg-amber-50' },
-  promo:        { icon: Megaphone,    color: 'text-[#722F37]',  bg: 'bg-[#722F37]/5' },
-  system:       { icon: Settings,     color: 'text-gray-600',   bg: 'bg-gray-50' },
+  order_update: { icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
+  review: { icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
+  promo: { icon: Megaphone, color: 'text-[#722F37]', bg: 'bg-[#722F37]/5' },
+  system: { icon: Settings, color: 'text-gray-600', bg: 'bg-gray-50' },
 };
 
 function getTypeConfig(type: string) {
@@ -35,12 +27,12 @@ function getTypeConfig(type: string) {
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1)  return "À l'instant";
+  if (mins < 1) return "À l'instant";
   if (mins < 60) return `Il y a ${mins} min`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24)  return `Il y a ${hrs}h`;
+  if (hrs < 24) return `Il y a ${hrs}h`;
   const days = Math.floor(hrs / 24);
-  if (days < 7)  return `Il y a ${days}j`;
+  if (days < 7) return `Il y a ${days}j`;
   return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }
 
@@ -52,16 +44,8 @@ interface NotificationPanelProps {
 }
 
 export default function NotificationPanel({ topOffset }: NotificationPanelProps) {
-  const {
-    notifications,
-    unreadCount,
-    isOpen,
-    dismissedIds,
-    close,
-    dismiss,
-    read,
-    readAll,
-  } = useNotifications();
+  const { notifications, unreadCount, isOpen, dismissedIds, close, dismiss, read, readAll } =
+    useNotifications();
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Close when clicking outside
@@ -81,13 +65,15 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
   // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+    };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen, close]);
 
   // Filter out locally dismissed
-  const visible = notifications.filter(n => !dismissedIds.has(n.id));
+  const visible = notifications.filter((n) => !dismissedIds.has(n.id));
 
   if (!isOpen) return null;
 
@@ -143,7 +129,7 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
               <p className="text-sm text-[#1A1A1A]/40">Aucune notification</p>
             </div>
           ) : (
-            visible.map(notif => {
+            visible.map((notif) => {
               const cfg = getTypeConfig(notif.type);
               const Icon = cfg.icon;
               return (
@@ -152,20 +138,28 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
                   className={`group relative flex gap-3 px-4 py-3 border-b border-[#1A1A1A]/[0.03] transition-colors hover:bg-[#FFF8F0]/60 ${
                     !notif.is_read ? 'bg-[#722F37]/[0.02]' : ''
                   }`}
-                  onClick={() => { if (!notif.is_read) read(notif.id); }}
+                  onClick={() => {
+                    if (!notif.is_read) read(notif.id);
+                  }}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={e => { if (e.key === 'Enter' && !notif.is_read) read(notif.id); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !notif.is_read) read(notif.id);
+                  }}
                 >
                   {/* Icon */}
-                  <div className={`flex-shrink-0 w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center mt-0.5`}>
+                  <div
+                    className={`flex-shrink-0 w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center mt-0.5`}
+                  >
                     <Icon className={`w-4 h-4 ${cfg.color}`} />
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     {notif.title && (
-                      <p className={`text-sm leading-tight ${!notif.is_read ? 'font-semibold text-[#1A1A1A]' : 'font-medium text-[#1A1A1A]/70'}`}>
+                      <p
+                        className={`text-sm leading-tight ${!notif.is_read ? 'font-semibold text-[#1A1A1A]' : 'font-medium text-[#1A1A1A]/70'}`}
+                      >
                         {notif.title}
                       </p>
                     )}
@@ -186,7 +180,10 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
 
                   {/* Dismiss button */}
                   <button
-                    onClick={e => { e.stopPropagation(); dismiss(notif.id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dismiss(notif.id);
+                    }}
                     className="absolute top-2 right-2 p-1.5 sm:p-0.5 rounded opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#1A1A1A]/5"
                     aria-label="Masquer cette notification"
                   >

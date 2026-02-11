@@ -27,7 +27,7 @@ export function TextArea({
   error,
 }: TextAreaProps) {
   const textareaClasses = buildTextAreaClasses(error);
-  
+
   return (
     <div className="textarea-wrapper">
       {label && <TextAreaLabel htmlFor={id} required={required} label={label} />}
@@ -55,7 +55,15 @@ function buildTextAreaClasses(error?: string): string {
   return classes.join(' ');
 }
 
-function TextAreaLabel({ htmlFor, required, label }: { htmlFor: string; required: boolean; label: string }) {
+function TextAreaLabel({
+  htmlFor,
+  required,
+  label,
+}: {
+  htmlFor: string;
+  required: boolean;
+  label: string;
+}) {
   return (
     <label htmlFor={htmlFor} className="textarea-label">
       {label}
@@ -64,11 +72,29 @@ function TextAreaLabel({ htmlFor, required, label }: { htmlFor: string; required
   );
 }
 
-function TextAreaFooter({ value, maxLength, error, id }: { value: string; maxLength?: number; error?: string; id: string }) {
+function TextAreaFooter({
+  value,
+  maxLength,
+  error,
+  id,
+}: {
+  value: string;
+  maxLength?: number;
+  error?: string;
+  id: string;
+}) {
   return (
     <div className="textarea-footer">
-      {error && <span id={`${id}-error`} className="textarea-error-msg" role="alert">{error}</span>}
-      {maxLength && <span className="textarea-count">{value.length}/{maxLength}</span>}
+      {error && (
+        <span id={`${id}-error`} className="textarea-error-msg" role="alert">
+          {error}
+        </span>
+      )}
+      {maxLength && (
+        <span className="textarea-count">
+          {value.length}/{maxLength}
+        </span>
+      )}
     </div>
   );
 }

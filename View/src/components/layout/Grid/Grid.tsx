@@ -15,7 +15,7 @@ interface GridProps {
 
 export function Grid({ children, columns = 'auto', gap = 'md' }: GridProps) {
   const classes = buildClasses(columns, gap);
-  
+
   return <div className={classes}>{children}</div>;
 }
 
