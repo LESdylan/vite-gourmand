@@ -174,9 +174,44 @@ $$;
 
 
 -- ═══════════════════════════════════════════════
--- 4. Fix materialized view refresh functions (if they exist)
+-- 4. Fix views: SECURITY INVOKER instead of DEFINER
 -- ═══════════════════════════════════════════════
--- These are referenced in the Supabase health check.
+-- Supabase flags views with SECURITY DEFINER because
+-- they bypass the querying user's RLS policies.
+-- Setting security_invoker = true ensures RLS is
+-- enforced as the calling user, not the view owner.
+-- ═══════════════════════════════════════════════
+
+CREATE OR REPLACE VIEW "v_active_menus"
+WITH (security_invoker = true)
+AS
+SELECT m.*, d."name" AS "diet_name", t."name" AS "theme_name"
+FROM "Menu" m
+LEFT JOIN "Diet" d ON m."diet_id" = d."id"
+LEFT JOIN "Theme" t ON m."theme_id" = t."id"
+WHERE m."status" = 'published';
+
+CREATE OR REPLACE VIEW "v_low_stock_ingredients"
+WITH (security_invoker = true)
+AS
+SELECT "id", "name", "unit", "current_stock", "min_stock_level"
+FROM "Ingredient"
+WHERE "current_stock" <= "min_stock_level";
+
+CREATE OR REPLACE VIEW "v_pending_reviews"
+WITH (security_invoker = true)
+AS
+SELECT p."id", p."note", p."description", p."created_at",
+       u."first_name", u."last_name", u."email"
+FROM "Publish" p
+JOIN "User" u ON p."user_id" = u."id"
+WHERE p."status" = 'pending'
+ORDER BY p."created_at" ASC;
+
+
+-- ═══════════════════════════════════════════════
+-- 5. Fix materialized view refresh functions
+-- ═══════════════════════════════════════════════
 -- Recreate with explicit search_path.
 -- ═══════════════════════════════════════════════
 
@@ -211,6 +246,21 @@ BEGIN
     REFRESH MATERIALIZED VIEW public."mv_orders_by_status";
 END;
 $$;
+
+-- ═══════════════════════════════════════════════
+-- 6. Revoke anon/authenticated access to materialized views
+-- ═══════════════════════════════════════════════
+-- Materialized views are not protected by RLS.
+-- Block PostgREST roles from querying them directly.
+-- Only postgres/service_role should access these.
+-- ═══════════════════════════════════════════════
+
+REVOKE ALL ON "mv_orders_by_status" FROM anon, authenticated;
+REVOKE ALL ON "mv_monthly_revenue"  FROM anon, authenticated;
+
+GRANT ALL ON "mv_orders_by_status" TO postgres, service_role;
+GRANT ALL ON "mv_monthly_revenue"  TO postgres, service_role;
+
 
 CREATE OR REPLACE FUNCTION refresh_mv_monthly_revenue()
 RETURNS void

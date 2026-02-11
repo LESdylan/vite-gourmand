@@ -58,19 +58,25 @@ END $$;
 -- Useful views
 -- ============================================
 
-CREATE OR REPLACE VIEW "v_active_menus" AS
+CREATE OR REPLACE VIEW "v_active_menus"
+WITH (security_invoker = true)
+AS
 SELECT m.*, d."name" AS "diet_name", t."name" AS "theme_name"
 FROM "Menu" m
 LEFT JOIN "Diet" d ON m."diet_id" = d."id"
 LEFT JOIN "Theme" t ON m."theme_id" = t."id"
 WHERE m."status" = 'published';
 
-CREATE OR REPLACE VIEW "v_low_stock_ingredients" AS
+CREATE OR REPLACE VIEW "v_low_stock_ingredients"
+WITH (security_invoker = true)
+AS
 SELECT "id", "name", "unit", "current_stock", "min_stock_level"
 FROM "Ingredient"
 WHERE "current_stock" <= "min_stock_level";
 
-CREATE OR REPLACE VIEW "v_pending_reviews" AS
+CREATE OR REPLACE VIEW "v_pending_reviews"
+WITH (security_invoker = true)
+AS
 SELECT p."id", p."note", p."description", p."created_at",
        u."first_name", u."last_name", u."email"
 FROM "Publish" p
