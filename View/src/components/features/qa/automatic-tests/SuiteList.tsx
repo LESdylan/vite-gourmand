@@ -18,13 +18,15 @@ function getStatusIcon(status: AutoTestStatus): string {
 interface SuiteListProps {
   suites: TestSuite[];
   onRunSuite?: (suiteName: string) => void;
-  onRunType?: (type: 'unit' | 'e2e') => void;
+  onRunType?: (type: 'unit' | 'e2e' | 'custom' | 'postman') => void;
   isRunning?: boolean;
 }
 
 interface GroupedSuites {
   unit: TestSuite[];
   e2e: TestSuite[];
+  custom: TestSuite[];
+  postman: TestSuite[];
 }
 
 function groupSuitesByType(suites: TestSuite[]): GroupedSuites {
@@ -32,12 +34,16 @@ function groupSuitesByType(suites: TestSuite[]): GroupedSuites {
     (acc, suite) => {
       if (suite.type === 'e2e') {
         acc.e2e.push(suite);
+      } else if (suite.type === 'custom') {
+        acc.custom.push(suite);
+      } else if (suite.type === 'postman') {
+        acc.postman.push(suite);
       } else {
         acc.unit.push(suite);
       }
       return acc;
     },
-    { unit: [], e2e: [] }
+    { unit: [], e2e: [], custom: [], postman: [] }
   );
 }
 
@@ -62,8 +68,8 @@ function calculateGroupStats(suites: TestSuite[]): GroupStats {
   );
 }
 
-export function SuiteList({ suites, onRunSuite, onRunType, isRunning }: Readonly<SuiteListProps>) {
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['unit', 'e2e']));
+export function SuiteList({ suites, onRunSuite: _onRunSuite, onRunType, isRunning }: Readonly<SuiteListProps>) {
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['unit', 'e2e', 'custom', 'postman']));
   const [expandedSuites, setExpandedSuites] = useState<Set<string>>(new Set());
 
   const toggleGroup = (groupName: string) => {
@@ -94,11 +100,78 @@ export function SuiteList({ suites, onRunSuite, onRunType, isRunning }: Readonly
   const grouped = groupSuitesByType(suites);
   const unitStats = calculateGroupStats(grouped.unit);
   const e2eStats = calculateGroupStats(grouped.e2e);
+  const customStats = calculateGroupStats(grouped.custom);
+  const postmanStats = calculateGroupStats(grouped.postman);
 
   // Total stats
-  const totalTests = unitStats.tests + e2eStats.tests;
-  const totalPassed = unitStats.passed + e2eStats.passed;
-  const totalFailed = unitStats.failed + e2eStats.failed;
+  const totalTests = unitStats.tests + e2eStats.tests + customStats.tests + postmanStats.tests;
+  const totalPassed = unitStats.passed + e2eStats.passed + customStats.passed + postmanStats.passed;
+  const totalFailed = unitStats.failed + e2eStats.failed + customStats.failed + postmanStats.failed;
+
+  // Show loading state when running with no data
+  if (isRunning && suites.length === 0) {
+    return (
+      <div className="suite-list">
+        <div className="suite-list__loading">
+          <div className="suite-list__loading-animation">
+            <svg viewBox="0 0 120 120" className="suite-list__loader-svg">
+              {/* Background circle */}
+              <circle
+                cx="60"
+                cy="60"
+                r="54"
+                fill="none"
+                stroke="var(--color-border, #e5e7eb)"
+                strokeWidth="2"
+              />
+              {/* Animated arc */}
+              <circle
+                cx="60"
+                cy="60"
+                r="54"
+                fill="none"
+                stroke="var(--color-primary, #722F37)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray="85 255"
+                className="suite-list__loader-ring"
+              />
+              
+              {/* Central test tube / beaker shape */}
+              <g className="suite-list__loader-beaker">
+                <path
+                  d="M52 35 L52 55 L45 75 Q43 82 50 85 L70 85 Q77 82 75 75 L68 55 L68 35"
+                  fill="none"
+                  stroke="var(--color-primary, #722F37)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Liquid bubbles */}
+                <circle cx="55" cy="72" r="4" fill="var(--color-success, #059669)" className="suite-list__bubble suite-list__bubble--1" />
+                <circle cx="62" cy="68" r="3" fill="var(--color-warning, #d97706)" className="suite-list__bubble suite-list__bubble--2" />
+                <circle cx="66" cy="75" r="3.5" fill="var(--color-primary, #722F37)" className="suite-list__bubble suite-list__bubble--3" />
+              </g>
+              
+              {/* Orbiting checkmark and X */}
+              <g className="suite-list__loader-orbit">
+                <circle cx="60" cy="8" r="8" fill="var(--color-success, #059669)" />
+                <path d="M56 8 L59 11 L65 5" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              </g>
+              <g className="suite-list__loader-orbit suite-list__loader-orbit--reverse">
+                <circle cx="60" cy="8" r="7" fill="var(--color-error, #dc2626)" />
+                <path d="M57 5 L63 11 M63 5 L57 11" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
+              </g>
+            </svg>
+          </div>
+          <h3 className="suite-list__loading-title">Executing Tests...</h3>
+          <p className="suite-list__loading-text">
+            Running all test suites. This may take a minute or two.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (suites.length === 0) {
     return (
@@ -118,7 +191,7 @@ export function SuiteList({ suites, onRunSuite, onRunType, isRunning }: Readonly
   }
 
   const renderGroup = (
-    type: 'unit' | 'e2e',
+    type: 'unit' | 'e2e' | 'custom' | 'postman',
     label: string,
     groupSuites: TestSuite[],
     stats: GroupStats
@@ -272,6 +345,8 @@ export function SuiteList({ suites, onRunSuite, onRunType, isRunning }: Readonly
       <div className="suite-list__groups">
         {grouped.unit.length > 0 && renderGroup('unit', 'Unit Tests', grouped.unit, unitStats)}
         {grouped.e2e.length > 0 && renderGroup('e2e', 'E2E Tests', grouped.e2e, e2eStats)}
+        {grouped.custom.length > 0 && renderGroup('custom', 'Custom Tests', grouped.custom, customStats)}
+        {grouped.postman.length > 0 && renderGroup('postman', 'Postman Tests', grouped.postman, postmanStats)}
       </div>
     </div>
   );

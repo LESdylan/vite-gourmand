@@ -38,7 +38,7 @@ interface UseTestRunnerReturn {
   // Actions
   runTest: (testId: TestConfigId) => Promise<void>;
   runSuite: (suiteName: string) => Promise<void>;
-  runType: (type: 'unit' | 'e2e') => Promise<void>;
+  runType: (type: 'unit' | 'e2e' | 'custom' | 'postman') => Promise<void>;
   runAll: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -142,6 +142,9 @@ export function useTestRunner(): UseTestRunnerReturn {
     setIsRunning(true);
     setCurrentTest(TEST_CONFIGS[testId].name);
     setError(null);
+    // Reset results to show "running" state with zeroed metrics
+    setResults(null);
+    setRawOutput(null);
     
     try {
       // Always request verbose output to show CLI results
@@ -164,6 +167,9 @@ export function useTestRunner(): UseTestRunnerReturn {
     setIsRunning(true);
     setCurrentTest(suiteName);
     setError(null);
+    // Reset results to show "running" state with zeroed metrics
+    setResults(null);
+    setRawOutput(null);
     
     try {
       // Run the appropriate test type
@@ -178,10 +184,19 @@ export function useTestRunner(): UseTestRunnerReturn {
     }
   }, []);
 
-  const runType = useCallback(async (type: 'unit' | 'e2e') => {
+  const runType = useCallback(async (type: 'unit' | 'e2e' | 'custom' | 'postman') => {
     setIsRunning(true);
-    setCurrentTest(type === 'unit' ? 'Unit Tests' : 'E2E Tests');
+    const typeLabels: Record<string, string> = {
+      unit: 'Unit Tests',
+      e2e: 'E2E Tests',
+      custom: 'Custom Tests',
+      postman: 'Postman Tests',
+    };
+    setCurrentTest(typeLabels[type] || type);
     setError(null);
+    // Reset results to show "running" state with zeroed metrics
+    setResults(null);
+    setRawOutput(null);
     
     try {
       const response = await runTests(type as TestConfigId, { verbose: true });
@@ -199,6 +214,9 @@ export function useTestRunner(): UseTestRunnerReturn {
     setIsRunning(true);
     setCurrentTest('All Tests');
     setError(null);
+    // Reset results to show "running" state with zeroed metrics
+    setResults(null);
+    setRawOutput(null);
     
     try {
       // Always request verbose output to show CLI results

@@ -16,7 +16,7 @@ export interface AutoTest {
 
 export interface TestSuite {
   name: string;
-  type: 'jest' | 'e2e' | 'postman';
+  type: 'jest' | 'e2e' | 'postman' | 'custom';
   tests: AutoTest[];
   totalPassed: number;
   totalFailed: number;

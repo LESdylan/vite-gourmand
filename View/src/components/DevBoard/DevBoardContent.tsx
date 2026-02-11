@@ -120,6 +120,7 @@ export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }
             passedTests={metrics.passed}
             failedTests={metrics.failed}
             passRate={Math.max(0, metrics.passRate)}
+            isLoading={isRunning}
           />
         </section>
       )}

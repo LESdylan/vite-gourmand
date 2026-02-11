@@ -18,7 +18,7 @@ export interface TestResult {
 
 export interface TestSuite {
   name: string;
-  type: 'jest' | 'postman' | 'e2e';
+  type: 'jest' | 'postman' | 'e2e' | 'custom';
   tests: TestResult[];
   totalPassed: number;
   totalFailed: number;
@@ -60,12 +60,12 @@ export const TEST_CONFIGS = {
     description: 'End-to-end API tests',
     type: 'jest' as const,
   },
-  orders: {
-    id: 'orders',
-    name: 'Orders API',
-    command: 'npm run test:orders',
-    description: 'Order flow integration tests',
-    type: 'jest' as const,
+  custom: {
+    id: 'custom',
+    name: 'Custom Tests',
+    command: 'ts-node',
+    description: 'Custom unit tests in src/test/unit_tests',
+    type: 'custom' as const,
   },
   postman: {
     id: 'postman',
@@ -73,6 +73,13 @@ export const TEST_CONFIGS = {
     command: 'newman run',
     description: 'Postman API collection tests',
     type: 'postman' as const,
+  },
+  orders: {
+    id: 'orders',
+    name: 'Orders API',
+    command: 'npm run test:orders',
+    description: 'Order flow integration tests',
+    type: 'jest' as const,
   },
 };
 
