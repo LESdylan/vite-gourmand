@@ -8,4 +8,5 @@ export { AdminOrders } from './AdminOrders';
 export { AdminMenu } from './AdminMenu';
 export { AdminStats } from './AdminStats';
 export { AdminSettings } from './AdminSettings';
+export { AdminTickets } from './AdminTickets';
 export { StaffList } from './StaffList';

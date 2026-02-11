@@ -2,12 +2,13 @@ import { useState, useRef } from 'react';
 import {
   MapPin, Phone, Mail, Clock, Send, CheckCircle,
   MessageSquare, ArrowRight, Sparkles, User, FileText,
-  ChevronRight, ExternalLink,
+  ChevronRight, ExternalLink, Ticket,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { usePublicData } from '../contexts/PublicDataContext';
+import { apiRequest } from '../services/api';
 
 /* ── Quick-reply suggestions ── */
 const QUICK_SUBJECTS = [
@@ -28,6 +29,8 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [ticketNumber, setTicketNumber] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const { siteInfo, workingHours } = usePublicData();
   const formRef = useRef<HTMLFormElement>(null);
@@ -35,12 +38,26 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate send — in production this POSTs to /api/contact
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    setSubmitSuccess(true);
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-    setIsSubmitting(false);
-    setTimeout(() => setSubmitSuccess(false), 8000);
+    setSubmitError(null);
+    try {
+      const result = await apiRequest<{ id: number; ticket_number: string }>('/api/contact', {
+        method: 'POST',
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          title: formData.subject,
+          description: formData.message,
+        },
+      });
+      setTicketNumber(result.ticket_number);
+      setSubmitSuccess(true);
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -161,17 +178,53 @@ export default function ContactPage() {
               </div>
 
               <div className="p-6 sm:p-8">
-                {/* Success banner */}
+                {/* Success banner with ticket number */}
                 {submitSuccess && (
-                  <div className="mb-6 flex items-start gap-4 bg-gradient-to-r from-[#556B2F]/10 to-[#556B2F]/5 border border-[#556B2F]/20 rounded-2xl p-5 animate-in slide-in-from-top-2 duration-300">
-                    <div className="w-10 h-10 rounded-full bg-[#556B2F]/15 flex items-center justify-center shrink-0">
-                      <CheckCircle className="h-5 w-5 text-[#556B2F]" />
+                  <div className="mb-6 bg-gradient-to-r from-[#556B2F]/10 to-[#556B2F]/5 border border-[#556B2F]/20 rounded-2xl p-5 animate-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-[#556B2F]/15 flex items-center justify-center shrink-0">
+                        <CheckCircle className="h-5 w-5 text-[#556B2F]" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#1A1A1A] text-sm">Message envoyé avec succès !</p>
+                        <p className="text-[#1A1A1A]/50 text-xs mt-0.5">
+                          Un email de confirmation vous a été envoyé.
+                        </p>
+                      </div>
+                    </div>
+                    {ticketNumber && (
+                      <div className="bg-white rounded-xl border border-[#D4AF37]/30 p-4 flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center shrink-0">
+                          <Ticket className="h-5 w-5 text-[#D4AF37]" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider font-semibold">Votre numéro de ticket</p>
+                          <p className="font-black text-lg text-[#1A1A1A] tracking-wide">{ticketNumber}</p>
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-xs text-[#1A1A1A]/40 mt-3">
+                      Conservez ce numéro pour suivre votre demande. Nous vous répondrons sous 24 – 48 h.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => { setSubmitSuccess(false); setTicketNumber(null); }}
+                      className="mt-3 text-xs text-[#722F37] hover:text-[#722F37]/80 font-semibold underline underline-offset-2"
+                    >
+                      Envoyer un nouveau message
+                    </button>
+                  </div>
+                )}
+
+                {/* Error banner */}
+                {submitError && (
+                  <div className="mb-6 flex items-start gap-4 bg-red-50 border border-red-200 rounded-2xl p-5">
+                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                      <span className="text-red-500 text-lg">✕</span>
                     </div>
                     <div>
-                      <p className="font-bold text-[#1A1A1A] text-sm">Message envoyé avec succès !</p>
-                      <p className="text-[#1A1A1A]/50 text-xs mt-0.5">
-                        Merci pour votre message. Nous vous répondrons sous 24 – 48 h ouvrées.
-                      </p>
+                      <p className="font-bold text-red-800 text-sm">Erreur lors de l'envoi</p>
+                      <p className="text-red-600 text-xs mt-0.5">{submitError}</p>
                     </div>
                   </div>
                 )}

@@ -16,7 +16,7 @@ import { useMockData } from './useMockData';
 import type { useTestRunner } from './useTestRunner';
 import { VerboseOutput } from './VerboseOutput';
 // Admin widgets
-import { AdminOverview, AdminOrders, AdminMenu, AdminStats, AdminSettings } from '../admin';
+import { AdminOverview, AdminOrders, AdminMenu, AdminStats, AdminSettings, AdminTickets } from '../admin';
 // Employee widgets
 import { EmployeeOverview, EmployeeOrders, EmployeeTasks, EmployeeProfile } from '../employee';
 import './DevBoardContent.css';
@@ -44,7 +44,7 @@ const adminLabels: Record<TestCategory, string> = {
   scenarios: 'Scénarios',
   database: 'Gestion Menu',
   settings: 'Paramètres',
-  logs: 'Logs',
+  logs: 'Tickets',
   metrics: 'Statistiques',
   activity: 'Commandes',
 };
@@ -215,6 +215,8 @@ function renderAdminContent(category: TestCategory) {
       return <AdminOrders />;
     case 'database':
       return <AdminMenu />;
+    case 'logs':
+      return <AdminTickets />;
     case 'metrics':
       return <AdminStats />;
     case 'settings':
