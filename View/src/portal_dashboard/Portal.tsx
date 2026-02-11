@@ -145,9 +145,8 @@ function getDashboardRoute(role: string): string {
     case 'superadmin':
     case 'admin':
     case 'employee':
-      return '/dashboard';
     case 'customer':
-      return '/unauthorized';
+      return '/dashboard';
     default:
       return '/portal';
   }

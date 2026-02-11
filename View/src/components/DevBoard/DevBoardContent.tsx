@@ -19,6 +19,8 @@ import { VerboseOutput } from './VerboseOutput';
 import { AdminOverview, AdminOrders, AdminMenu, AdminStats, AdminSettings, AdminTickets, AdminAiAgent } from '../admin';
 // Employee widgets
 import { EmployeeOverview, EmployeeOrders, EmployeeTasks, EmployeeProfile } from '../employee';
+// Client widgets
+import { ClientOverview, ClientOrders, ClientLoyalty, ClientSupport, ClientReviews, ClientProfile } from '../client';
 import './DevBoardContent.css';
 
 interface DevBoardContentProps {
@@ -60,10 +62,22 @@ const employeeLabels: Record<TestCategory, string> = {
   activity: 'Commandes',
 };
 
+const clientLabels: Record<TestCategory, string> = {
+  overview: 'Mon Espace',
+  'test-automatics': 'Tests',
+  scenarios: 'Mes Avis',
+  database: 'Database',
+  settings: 'Mon Profil',
+  logs: 'Support',
+  metrics: 'Fidélité',
+  activity: 'Mes Commandes',
+};
+
 function getLabels(roleView: RoleView): Record<TestCategory, string> {
   switch (roleView) {
     case 'admin': return adminLabels;
     case 'employee': return employeeLabels;
+    case 'client': return clientLabels;
     default: return devLabels;
   }
 }
@@ -173,6 +187,8 @@ function renderContent(
       return renderAdminContent(category);
     case 'employee':
       return renderEmployeeContent(category);
+    case 'client':
+      return renderClientContent(category);
     default:
       return renderDevContent(category, tests, autoTests, suites, logs, connected, clear, metrics, isRunning, runSuite, runType);
   }
@@ -240,5 +256,24 @@ function renderEmployeeContent(category: TestCategory) {
       return <EmployeeProfile />;
     default:
       return <EmployeeOverview />;
+  }
+}
+
+function renderClientContent(category: TestCategory) {
+  switch (category) {
+    case 'overview':
+      return <ClientOverview />;
+    case 'activity':
+      return <ClientOrders />;
+    case 'metrics':
+      return <ClientLoyalty />;
+    case 'logs':
+      return <ClientSupport />;
+    case 'scenarios':
+      return <ClientReviews />;
+    case 'settings':
+      return <ClientProfile />;
+    default:
+      return <ClientOverview />;
   }
 }

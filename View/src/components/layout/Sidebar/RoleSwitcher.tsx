@@ -24,6 +24,7 @@ const ROLE_OPTIONS: RoleOption[] = [
   { id: 'dev', label: 'DevBoard', icon: '🛠️', description: 'QA & Development', allowedRoles: ['superadmin'] },
   { id: 'admin', label: 'Admin', icon: '👔', description: 'Administration', allowedRoles: ['superadmin', 'admin'] },
   { id: 'employee', label: 'Employé', icon: '👷', description: 'Espace Employé', allowedRoles: ['superadmin', 'admin', 'employee'] },
+  { id: 'client', label: 'Client', icon: '👤', description: 'Mon Espace', allowedRoles: ['superadmin', 'admin', 'customer'] },
 ];
 
 /** Get available views for a user role */
@@ -37,6 +38,7 @@ export function getDefaultViewForRole(userRole: string): RoleView {
     case 'superadmin': return 'dev';
     case 'admin': return 'admin';
     case 'employee': return 'employee';
+    case 'customer': return 'client';
     default: return 'employee';
   }
 }

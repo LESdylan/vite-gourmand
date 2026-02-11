@@ -6,7 +6,7 @@
 import type { CategoryData, TestCategory } from '../features/qa/sidebar';
 
 /** Role view types */
-export type RoleView = 'dev' | 'admin' | 'employee';
+export type RoleView = 'dev' | 'admin' | 'employee' | 'client';
 
 /** DEV categories - QA & Development tools */
 export const DEV_CATEGORIES: CategoryData[] = [
@@ -39,11 +39,22 @@ export const EMPLOYEE_CATEGORIES: CategoryData[] = [
   { id: 'settings', label: 'Profil', icon: 'settings', group: 'utility', description: 'Mon profil' },
 ];
 
+/** CLIENT categories - Customer dashboard */
+export const CLIENT_CATEGORIES: CategoryData[] = [
+  { id: 'overview', label: 'Mon Espace', icon: 'overview', group: 'main', description: 'Tableau de bord' },
+  { id: 'activity', label: 'Mes Commandes', icon: 'activity', group: 'main', description: 'Historique & suivi' },
+  { id: 'metrics', label: 'Fidélité', icon: 'metrics', group: 'main', description: 'Points & récompenses' },
+  { id: 'logs', label: 'Support', icon: 'logs', group: 'main', description: 'Aide & réclamations' },
+  { id: 'scenarios', label: 'Mes Avis', icon: 'scenarios', group: 'main', description: 'Évaluations' },
+  { id: 'settings', label: 'Mon Profil', icon: 'settings', group: 'utility', description: 'Informations personnelles' },
+];
+
 /** Get categories for a specific role view */
 export function getCategoriesForRole(role: RoleView): CategoryData[] {
   switch (role) {
     case 'admin': return ADMIN_CATEGORIES;
     case 'employee': return EMPLOYEE_CATEGORIES;
+    case 'client': return CLIENT_CATEGORIES;
     default: return DEV_CATEGORIES;
   }
 }

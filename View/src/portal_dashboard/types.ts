@@ -43,7 +43,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   superadmin: ['*'], // All access + debug tools
   admin: ['metrics', 'activity', 'database', 'logs', 'settings', 'orders', 'users'],
   employee: ['tasks', 'orders', 'activity'],
-  customer: [], // No dashboard access
+  customer: ['orders', 'loyalty', 'support', 'reviews', 'profile'], // Client dashboard
 };
 
 /** Check if role has permission */
@@ -54,5 +54,5 @@ export function hasPermission(role: UserRole, permission: string): boolean {
 
 /** Check if role can access dashboard */
 export function canAccessDashboard(role: UserRole): boolean {
-  return role !== 'customer';
+  return true; // All authenticated roles can access their dashboard
 }
