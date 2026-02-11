@@ -4,10 +4,12 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
+import { MailService } from '../mail/mail.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -21,6 +23,8 @@ describe('AuthService', () => {
     password: 'hashedPassword',
     first_name: 'John',
     last_name: 'Doe',
+    is_active: true,
+    is_deleted: false,
     Role: { id: 2, name: 'client' },
   };
 
@@ -44,12 +48,30 @@ describe('AuthService', () => {
       validatePasswordResetToken: jest.fn().mockResolvedValue(1),
     };
 
+    const mockConfigService = {
+      get: jest.fn((key: string, defaultValue?: string) => {
+        const config: Record<string, string> = {
+          GOOGLE_CLIENT_ID: 'test-google-client-id',
+          FRONTEND_URL: 'http://localhost:5173',
+        };
+        return config[key] ?? defaultValue;
+      }),
+    };
+
+    const mockMailService = {
+      send: jest.fn().mockResolvedValue(true),
+      sendPasswordReset: jest.fn().mockResolvedValue(true),
+      sendOrderConfirmation: jest.fn().mockResolvedValue(true),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: PasswordService, useValue: mockPasswordService },
         { provide: TokenService, useValue: mockTokenService },
+        { provide: ConfigService, useValue: mockConfigService },
+        { provide: MailService, useValue: mockMailService },
       ],
     }).compile();
 
