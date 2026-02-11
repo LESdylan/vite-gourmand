@@ -62,6 +62,10 @@ export class RolesGuard implements CanActivate {
     if (!user?.role) {
       throw new ForbiddenException('Access denied: No role assigned');
     }
+    // Superadmin bypasses all role checks — full system access
+    if (user.role === 'superadmin') {
+      return true;
+    }
     if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException('Access denied: Insufficient permissions');
     }

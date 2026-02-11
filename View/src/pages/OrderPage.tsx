@@ -28,6 +28,7 @@ import { getProfile, type AuthUserMapped } from '../services/auth';
 import { getMenus, type Menu } from '../services/menus';
 import { createOrder, type CreateOrderData } from '../services/orders';
 import LazyImage from '../components/ui/LazyImage';
+import AiMenuComposer from '../components/AiMenuComposer';
 import type { Page } from './Home';
 
 /* ── Constants ── */
@@ -451,32 +452,12 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                     )}
                   </>
                 ) : (
-                  /* Custom request form */
-                  <div className="space-y-4">
-                    <div className="bg-gradient-to-br from-[#FFF8F0] to-[#D4AF37]/5 rounded-2xl p-5 border border-[#D4AF37]/20">
-                      <div className="flex items-start gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-[#D4AF37]/10 flex items-center justify-center shrink-0">
-                          <Sparkles className="h-5 w-5 text-[#D4AF37]" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-[#1A1A1A] text-sm">Menu sur mesure</h3>
-                          <p className="text-xs text-[#1A1A1A]/50 mt-0.5">
-                            Décrivez le type de menu souhaité : thème, régime, plats, budget... Notre chef vous proposera une création adaptée.
-                          </p>
-                        </div>
-                      </div>
-                      <textarea
-                        value={customMenuDescription}
-                        onChange={e => setCustomMenuDescription(e.target.value)}
-                        rows={5}
-                        placeholder="Ex: Je souhaite un menu végétarien pour 20 personnes, ambiance champêtre, budget autour de 35€/personne. Entrée, plat, fromage, dessert. Pas de noix..."
-                        className="w-full rounded-xl border border-[#D4AF37]/20 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#722F37] resize-none bg-white placeholder:text-[#1A1A1A]/30"
-                      />
-                      <p className="text-[10px] text-[#1A1A1A]/30 mt-2 text-right">
-                        {customMenuDescription.length} / 10 caractères minimum
-                      </p>
-                    </div>
-                  </div>
+                  /* AI-powered custom menu composer */
+                  <AiMenuComposer
+                    onBriefReady={(brief) => {
+                      setCustomMenuDescription(brief);
+                    }}
+                  />
                 )}
               </div>
             )}

@@ -43,6 +43,7 @@ import { UnsplashModule } from './unsplash';
 import { SeedModule } from './seed';
 import { SiteInfoModule } from './site-info';
 import { PromotionModule } from './promotion';
+import { AiAgentModule } from './ai-agent';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -141,6 +142,7 @@ import {
     SeedModule,
     SiteInfoModule,
     PromotionModule,
+    AiAgentModule,
   ],
   controllers: [AppController],
   providers: [

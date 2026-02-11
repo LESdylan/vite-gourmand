@@ -16,7 +16,7 @@ import { useMockData } from './useMockData';
 import type { useTestRunner } from './useTestRunner';
 import { VerboseOutput } from './VerboseOutput';
 // Admin widgets
-import { AdminOverview, AdminOrders, AdminMenu, AdminStats, AdminSettings, AdminTickets } from '../admin';
+import { AdminOverview, AdminOrders, AdminMenu, AdminStats, AdminSettings, AdminTickets, AdminAiAgent } from '../admin';
 // Employee widgets
 import { EmployeeOverview, EmployeeOrders, EmployeeTasks, EmployeeProfile } from '../employee';
 import './DevBoardContent.css';
@@ -40,7 +40,7 @@ const devLabels: Record<TestCategory, string> = {
 
 const adminLabels: Record<TestCategory, string> = {
   overview: 'Tableau de bord',
-  'test-automatics': 'Tests',
+  'test-automatics': 'Menu Personnalisé',
   scenarios: 'Scénarios',
   database: 'Gestion Menu',
   settings: 'Paramètres',
@@ -215,6 +215,8 @@ function renderAdminContent(category: TestCategory) {
       return <AdminOrders />;
     case 'database':
       return <AdminMenu />;
+    case 'test-automatics':
+      return <AdminAiAgent />;
     case 'logs':
       return <AdminTickets />;
     case 'metrics':

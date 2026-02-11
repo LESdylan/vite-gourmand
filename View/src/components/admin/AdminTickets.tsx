@@ -77,12 +77,12 @@ export function AdminTickets() {
 
   const fetchTickets = useCallback(async () => {
     try {
-      const [data, statsData] = await Promise.all([
-        apiRequest<Ticket[]>('/api/support'),
-        apiRequest<Stats>('/api/support/stats'),
+      const [ticketsRes, statsRes] = await Promise.all([
+        apiRequest<{ data: Ticket[] }>('/api/support'),
+        apiRequest<{ data: Stats }>('/api/support/stats'),
       ]);
-      setTickets(data);
-      setStats(statsData);
+      setTickets(Array.isArray(ticketsRes) ? ticketsRes : ticketsRes.data ?? []);
+      setStats('data' in statsRes ? statsRes.data : statsRes);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de chargement');
@@ -306,9 +306,11 @@ function TicketCard({
   const date = new Date(ticket.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelect(ticket)}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(ticket); } }}
       style={{
         background: 'white', borderRadius: 10, padding: 12, cursor: 'pointer',
         border: '1px solid #e8e8e8', boxShadow: '0 1px 3px rgba(0,0,0,.04)',
@@ -375,7 +377,7 @@ function TicketCard({
           )}
         </div>
       )}
-    </button>
+    </div>
   );
 }
 

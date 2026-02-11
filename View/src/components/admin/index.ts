@@ -9,4 +9,5 @@ export { AdminMenu } from './AdminMenu';
 export { AdminStats } from './AdminStats';
 export { AdminSettings } from './AdminSettings';
 export { AdminTickets } from './AdminTickets';
+export { AdminAiAgent } from './AdminAiAgent';
 export { StaffList } from './StaffList';

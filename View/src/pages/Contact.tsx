@@ -1,8 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   MapPin, Phone, Mail, Clock, Send, CheckCircle,
   MessageSquare, ArrowRight, Sparkles, User, FileText,
-  ChevronRight, ExternalLink, Ticket,
+  ChevronRight, ExternalLink, Ticket, Bot,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -35,12 +35,51 @@ export default function ContactPage() {
   const { siteInfo, workingHours } = usePublicData();
   const formRef = useRef<HTMLFormElement>(null);
 
+  /* ── AI Chat state ─────────────────────────────────────── */
+  const [aiMessages, setAiMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [aiInput, setAiInput] = useState('');
+  const [aiConvId, setAiConvId] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const aiScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (aiScrollRef.current) aiScrollRef.current.scrollTop = aiScrollRef.current.scrollHeight;
+  }, [aiMessages, aiLoading]);
+
+  const sendAiMessage = useCallback(async (text?: string) => {
+    const msg = text || aiInput.trim();
+    if (!msg || aiLoading) return;
+
+    setAiInput('');
+    setAiMessages(prev => [...prev, { role: 'user', content: msg }]);
+    setAiLoading(true);
+
+    try {
+      const body: Record<string, unknown> = { message: msg };
+      if (aiConvId) body.conversationId = aiConvId;
+
+      const raw = await apiRequest<{ data: { conversationId: string; message: string } } | { conversationId: string; message: string }>('/api/ai-agent/chat', {
+        method: 'POST',
+        body,
+      });
+      const res = 'data' in raw ? raw.data : raw;
+
+      setAiConvId(res.conversationId);
+      setAiMessages(prev => [...prev, { role: 'assistant', content: res.message }]);
+    } catch {
+      setAiMessages(prev => [...prev, { role: 'assistant', content: '⚠️ Erreur de communication. Veuillez réessayer.' }]);
+    } finally {
+      setAiLoading(false);
+    }
+  }, [aiInput, aiLoading, aiConvId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const result = await apiRequest<{ id: number; ticket_number: string }>('/api/contact', {
+      const raw = await apiRequest<{ data: { id: number; ticket_number: string } } | { id: number; ticket_number: string }>('/api/contact', {
         method: 'POST',
         body: {
           name: formData.name,
@@ -50,6 +89,7 @@ export default function ContactPage() {
           description: formData.message,
         },
       });
+      const result = 'data' in raw ? raw.data : raw;
       setTicketNumber(result.ticket_number);
       setSubmitSuccess(true);
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -493,31 +533,140 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* CTA card — Premium gradient */}
-            <div className="relative bg-gradient-to-br from-[#722F37] via-[#8B3A42] to-[#722F37] rounded-3xl p-6 text-white overflow-hidden shadow-xl shadow-[#722F37]/20">
-              {/* Decorative circles */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#D4AF37]/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-              
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/20 flex items-center justify-center">
-                    <Sparkles className="h-4 w-4 text-[#D4AF37]" />
+            {/* AI Menu Assistant — interactive chat widget */}
+            <div className="bg-white rounded-3xl shadow-xl shadow-[#1A1A1A]/8 border border-[#D4AF37]/20 overflow-hidden">
+              {/* Header */}
+              <button
+                type="button"
+                onClick={() => setAiOpen(o => !o)}
+                className="w-full bg-gradient-to-br from-[#722F37] via-[#8B3A42] to-[#722F37] p-5 text-white text-left relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#D4AF37]/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center">
+                      <Sparkles className="h-4 w-4 text-[#D4AF37]" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm">Menu sur mesure</h3>
+                      <p className="text-white/50 text-[11px] mt-0.5">Assistant IA • Décrivez vos besoins</p>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-base">Menu sur mesure</h3>
+                  <div className={`w-6 h-6 rounded-full bg-white/10 flex items-center justify-center transition-transform ${aiOpen ? 'rotate-180' : ''}`}>
+                    <ArrowRight className="h-3 w-3 text-white rotate-90" />
+                  </div>
                 </div>
-                <p className="text-white/70 text-sm leading-relaxed mb-4">
-                  Notre chef crée des menus personnalisés pour sublimer chacun de vos événements. Décrivez votre projet et recevez un devis gratuit.
-                </p>
-                <div className="flex items-center gap-3 text-[#D4AF37] text-xs font-semibold">
-                  <span className="flex items-center gap-1.5 bg-[#D4AF37]/10 px-3 py-1.5 rounded-full">
-                    ✓ Devis gratuit
-                  </span>
-                  <span className="flex items-center gap-1.5 bg-[#D4AF37]/10 px-3 py-1.5 rounded-full">
-                    ✓ Sans engagement
-                  </span>
+                {!aiOpen && (
+                  <div className="relative flex items-center gap-2 mt-3 text-[#D4AF37] text-[10px] font-semibold">
+                    <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Gratuit</span>
+                    <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Instantané</span>
+                    <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Sur mesure</span>
+                  </div>
+                )}
+              </button>
+
+              {/* Chat body */}
+              {aiOpen && (
+                <div className="flex flex-col" style={{ height: 380 }}>
+                  {/* Messages */}
+                  <div ref={aiScrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#faf8f6]">
+                    {aiMessages.length === 0 && !aiLoading && (
+                      <div className="text-center py-6">
+                        <Bot className="h-8 w-8 text-[#D4AF37]/40 mx-auto mb-2" />
+                        <p className="text-xs text-[#1A1A1A]/40 leading-relaxed max-w-[220px] mx-auto">
+                          Décrivez votre événement, nombre de convives, budget et préférences. L'IA vous proposera un menu adapté.
+                        </p>
+                        <div className="flex flex-wrap gap-1.5 justify-center mt-4">
+                          {[
+                            { icon: '🎂', text: 'Anniversaire 20 pers' },
+                            { icon: '💍', text: 'Mariage 80 pers' },
+                            { icon: '🥗', text: 'Menu végétarien' },
+                          ].map(q => (
+                            <button
+                              key={q.text}
+                              type="button"
+                              onClick={() => sendAiMessage(q.text)}
+                              className="text-[10px] px-2.5 py-1.5 rounded-full border border-[#D4AF37]/20 text-[#722F37] hover:bg-[#722F37]/5 transition-colors"
+                            >
+                              {q.icon} {q.text}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {aiMessages.map((msg, i) => (
+                      <div key={`${msg.role}-${i}-${msg.content.slice(0, 20)}`} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className="max-w-[85%]">
+                          <div
+                            className={`rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
+                              msg.role === 'user'
+                                ? 'bg-gradient-to-br from-[#722F37] to-[#8B3A42] text-white rounded-br-sm'
+                                : 'bg-white border border-[#1A1A1A]/5 text-[#333] rounded-bl-sm shadow-sm'
+                            }`}
+                            style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                          >
+                            {msg.content}
+                          </div>
+                          {msg.role === 'assistant' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  subject: prev.subject || 'Demande de menu personnalisé',
+                                  message: prev.message
+                                    ? prev.message + '\n\n--- Proposition IA ---\n' + msg.content
+                                    : msg.content,
+                                }));
+                                formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }}
+                              className="mt-1 text-[10px] text-[#722F37]/60 hover:text-[#722F37] flex items-center gap-1 ml-1 transition-colors"
+                            >
+                              <ArrowRight className="h-2.5 w-2.5 rotate-[-90deg]" />
+                              Copier dans le formulaire
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+
+                    {aiLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white border border-[#1A1A1A]/5 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+                          <div className="flex gap-1.5 items-center h-4">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Input */}
+                  <div className="border-t border-[#1A1A1A]/5 p-3 flex gap-2 bg-white">
+                    <input
+                      type="text"
+                      value={aiInput}
+                      onChange={e => setAiInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage(); } }}
+                      placeholder="Décrivez vos besoins…"
+                      className="flex-1 text-sm border border-[#1A1A1A]/8 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#722F37] bg-[#FFF8F0]/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => sendAiMessage()}
+                      disabled={!aiInput.trim() || aiLoading}
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors disabled:opacity-30"
+                      style={{ background: aiInput.trim() && !aiLoading ? '#722F37' : '#eee' }}
+                    >
+                      <Send className="h-4 w-4" style={{ color: aiInput.trim() && !aiLoading ? 'white' : '#999' }} />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Trust badges */}

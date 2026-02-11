@@ -24,6 +24,7 @@ export const DEV_CATEGORIES: CategoryData[] = [
 export const ADMIN_CATEGORIES: CategoryData[] = [
   { id: 'overview', label: 'Tableau de bord', icon: 'overview', group: 'main', description: 'Vue d\'ensemble' },
   { id: 'database', label: 'Gestion Menu', icon: 'database', group: 'main', description: 'Plats & catégories' },
+  { id: 'test-automatics', label: 'Menu Personnalisé', icon: 'tests', group: 'main', description: 'Assistant IA menus' },
   { id: 'activity', label: 'Commandes', icon: 'activity', group: 'main', description: 'Suivi commandes' },
   { id: 'logs', label: 'Tickets', icon: 'logs', group: 'main', description: 'Support & tickets' },
   { id: 'metrics', label: 'Statistiques', icon: 'metrics', group: 'utility', description: 'Chiffres clés' },
