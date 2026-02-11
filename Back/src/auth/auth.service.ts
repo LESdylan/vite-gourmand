@@ -240,6 +240,8 @@ export class AuthService {
       include: { Role: true },
     });
     if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user.is_active) throw new UnauthorizedException('Account is deactivated');
+    if (user.is_deleted) throw new UnauthorizedException('Account no longer exists');
     await this.passwordService.verify(pass, user.password);
     return user;
   }
@@ -249,7 +251,8 @@ export class AuthService {
       where: { id: userId },
       include: { Role: true },
     });
-    if (!user) throw new NotFoundException('User not found');
+    if (!user || user.is_deleted) throw new NotFoundException('User not found');
+    if (!user.is_active) throw new UnauthorizedException('Account is deactivated');
     return user;
   }
 
