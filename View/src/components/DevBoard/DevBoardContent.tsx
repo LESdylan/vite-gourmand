@@ -8,7 +8,7 @@ import { TestCardGrid } from '../features/qa/test-cards';
 import { SuiteList, RunAllButton } from '../features/qa/automatic-tests';
 import { Overview } from '../features/qa/overview';
 import { Activity } from '../features/qa/activity';
-import { LogViewer, useMockLogs } from '../features/logs';
+import { LogViewer, useRealLogs } from '../features/logs';
 import { DatabaseViewer } from '../database';
 import type { TestCategory } from '../features/qa/sidebar';
 import type { RoleView } from './constants';
@@ -71,7 +71,7 @@ function getLabels(roleView: RoleView): Record<TestCategory, string> {
 export function DevBoardContent({ activeCategory, testRunner, roleView = 'dev' }: DevBoardContentProps) {
   const { tests } = useMockData(activeCategory);
   const { autoTests, suites, metrics, isRunning, runAll, runSuite, runType, rawOutput, error } = testRunner;
-  const { logs, connected, clear } = useMockLogs();
+  const { logs, connected, clear } = useRealLogs();
 
   const labels = getLabels(roleView);
   
@@ -159,7 +159,7 @@ function renderContent(
   tests: ReturnType<typeof useMockData>['tests'],
   autoTests: ReturnType<typeof useTestRunner>['autoTests'],
   suites: ReturnType<typeof useTestRunner>['suites'],
-  logs: ReturnType<typeof useMockLogs>['logs'],
+  logs: ReturnType<typeof useRealLogs>['logs'],
   connected: boolean,
   clear: () => void,
   metrics: ReturnType<typeof useTestRunner>['metrics'],
@@ -183,7 +183,7 @@ function renderDevContent(
   tests: ReturnType<typeof useMockData>['tests'],
   autoTests: ReturnType<typeof useTestRunner>['autoTests'],
   suites: ReturnType<typeof useTestRunner>['suites'],
-  logs: ReturnType<typeof useMockLogs>['logs'],
+  logs: ReturnType<typeof useRealLogs>['logs'],
   connected: boolean,
   clear: () => void,
   metrics: ReturnType<typeof useTestRunner>['metrics'],

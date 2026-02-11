@@ -73,38 +73,67 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-lg);
-  background: var(--color-bg-primary);
+  background: linear-gradient(135deg, var(--color-bg-card), var(--color-bg-secondary));
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   text-align: center;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-stat::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary-400), var(--color-accent-500));
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .quick-stat:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(124, 58, 237, 0.12);
+  transform: translateY(-4px);
+}
+
+.quick-stat:hover::before {
+  opacity: 1;
 }
 
 .quick-stat--highlight {
-  background: var(--color-primary-bg);
-  border-color: var(--color-primary-light);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  border-color: var(--color-primary-200);
+}
+
+.quick-stat--highlight::before {
+  opacity: 1;
+  background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-700));
 }
 
 .quick-stat--warning {
-  background: var(--color-warning-bg);
-  border-color: var(--color-warning);
+  background: linear-gradient(135deg, var(--color-warning-50), var(--color-warning-100));
+  border-color: var(--color-warning-200);
+}
+
+.quick-stat--warning::before {
+  opacity: 1;
+  background: linear-gradient(90deg, var(--color-warning-500), var(--color-warning-600));
 }
 
 .quick-stat-icon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.75rem;
-  background: var(--glass-bg);
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(124, 58, 237, 0.08));
+  border-radius: var(--radius-lg);
   margin-bottom: var(--spacing-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .quick-stat--highlight .quick-stat-icon {
