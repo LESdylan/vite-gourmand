@@ -11,6 +11,7 @@ import {
   Body,
   Param,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PromotionService } from './promotion.service';
@@ -114,8 +115,10 @@ export class PromotionController {
   async update(
     @Param('id', SafeParseIntPipe) id: number,
     @Body() dto: UpdatePromotionDto,
+    @Req() req: any,
   ) {
-    return this.promotionService.update(id, dto);
+    const user = req.user;
+    return this.promotionService.update(id, dto, user?.sub);
   }
 
   @Delete(':id')

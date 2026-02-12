@@ -12,6 +12,7 @@ import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { NewsletterModule } from '../newsletter';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
       }),
       inject: [ConfigService],
     }),
+    NewsletterModule,
   ],
   controllers: [AuthController],
   providers: [

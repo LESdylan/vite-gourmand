@@ -15,6 +15,7 @@ import { PrismaService } from '../prisma';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 import { MailService } from '../mail';
+import { NewsletterService } from '../newsletter';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -29,6 +30,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
+    private readonly newsletterService: NewsletterService,
   ) {
     const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
     if (clientId) {
@@ -152,10 +154,33 @@ export class AuthService {
 
   private async createUser(dto: RegisterDto) {
     const hash = await this.passwordService.hash(dto.password);
-    return this.prisma.user.create({
-      data: { email: dto.email, password: hash, first_name: dto.firstName },
+    const now = new Date();
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password: hash,
+        first_name: dto.firstName,
+        // RGPD consent (always true at this point — validated by DTO)
+        gdpr_consent: true,
+        gdpr_consent_date: now,
+        marketing_consent: dto.newsletterConsent ?? false,
+        newsletter_consent: dto.newsletterConsent ?? false,
+        newsletter_consent_date: dto.newsletterConsent ? now : null,
+      },
       include: { Role: true },
     });
+
+    // Auto-subscribe to newsletter if opted in
+    if (dto.newsletterConsent) {
+      this.newsletterService
+        .subscribe({ email: dto.email, firstName: dto.firstName }, user.id)
+        .catch((err) =>
+          this.logger.error(`Newsletter auto-subscribe failed for ${dto.email}: ${err.message}`),
+        );
+    }
+
+    return user;
   }
 
   private async sendWelcomeEmail(email: string, firstName: string): Promise<void> {

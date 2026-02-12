@@ -44,6 +44,8 @@ export interface RegisterData {
   firstName: string;
   telephoneNumber?: string;
   city?: string;
+  gdprConsent: boolean;
+  newsletterConsent?: boolean;
 }
 
 export interface LoginData {

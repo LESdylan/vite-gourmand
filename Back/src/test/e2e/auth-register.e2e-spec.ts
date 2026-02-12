@@ -23,6 +23,7 @@ describe('Auth Registration (e2e)', () => {
         email: testUtils.uniqueEmail('register'),
         password: 'SecurePassword123!',
         firstName: 'Test',
+        gdprConsent: true,
       });
 
     expect(response.status).toBe(201);

@@ -1,5 +1,7 @@
-import { ChefHat, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { ChefHat, Clock, Mail, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { usePublicData } from '../../contexts/PublicDataContext';
+import { subscribeNewsletter } from '../../services/newsletter';
 
 type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
 
@@ -20,9 +22,35 @@ const FALLBACK_HOURS = [
 export default function Footer({ setCurrentPage }: FooterProps) {
   const { siteInfo, workingHours } = usePublicData();
   const hours = workingHours.length > 0 ? workingHours : FALLBACK_HOURS;
+
+  // Newsletter state
+  const [nlEmail, setNlEmail] = useState('');
+  const [nlLoading, setNlLoading] = useState(false);
+  const [nlSuccess, setNlSuccess] = useState('');
+  const [nlError, setNlError] = useState('');
+
   const handleNavClick = (page: Page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nlEmail.trim()) return;
+    setNlLoading(true);
+    setNlError('');
+    setNlSuccess('');
+    try {
+      const result = await subscribeNewsletter(nlEmail.trim());
+      setNlSuccess(result.message || 'Inscription réussie !');
+      setNlEmail('');
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Erreur lors de l'inscription.";
+      setNlError(msg);
+    } finally {
+      setNlLoading(false);
+    }
   };
 
   const linkStyle = { color: 'rgba(255,255,255,0.6)' };
@@ -30,8 +58,8 @@ export default function Footer({ setCurrentPage }: FooterProps) {
 
   return (
     <footer className="bg-[#1A1A1A]">
-      <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-[12px]">
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-[12px]">
           {/* Col 1 — Brand + Contact */}
           <div className="space-y-3">
             <button
@@ -128,6 +156,55 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                 Conditions générales de vente
               </button>
             </div>
+          </div>
+
+          {/* Col 4 — Newsletter */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Mail className="h-4 w-4 text-[#D4AF37]" />
+              <span style={{ color: '#ffffff' }} className="font-semibold text-[13px]">
+                Newsletter
+              </span>
+            </div>
+            <p style={mutedStyle} className="text-[11px] leading-relaxed mb-3">
+              Recevez nos menus, promotions et actualités gourmandes directement dans votre boîte mail.
+            </p>
+
+            <form onSubmit={handleNewsletterSubmit} className="flex gap-1.5">
+              <input
+                type="email"
+                value={nlEmail}
+                onChange={(e) => setNlEmail(e.target.value)}
+                placeholder="votre@email.fr"
+                required
+                className="flex-1 min-w-0 bg-white/10 border border-white/10 rounded-md px-3 py-2 text-white text-[12px] placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={nlLoading}
+                className="shrink-0 bg-[#D4AF37] hover:bg-[#C9A030] disabled:opacity-50 text-[#1A1A1A] rounded-md px-3 py-2 transition-colors"
+                aria-label="S'inscrire à la newsletter"
+              >
+                <Send size={14} />
+              </button>
+            </form>
+
+            {nlSuccess && (
+              <div className="flex items-start gap-1.5 mt-2 text-[11px] text-emerald-400">
+                <CheckCircle size={13} className="shrink-0 mt-0.5" />
+                <span>{nlSuccess}</span>
+              </div>
+            )}
+            {nlError && (
+              <div className="flex items-start gap-1.5 mt-2 text-[11px] text-red-400">
+                <AlertCircle size={13} className="shrink-0 mt-0.5" />
+                <span>{nlError}</span>
+              </div>
+            )}
+
+            <p style={mutedStyle} className="text-[10px] mt-2 leading-relaxed">
+              En vous inscrivant, vous acceptez de recevoir nos communications. Désinscription possible à tout moment.
+            </p>
           </div>
         </div>
 

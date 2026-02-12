@@ -1,6 +1,6 @@
 /**
  * Register DTO
- * Validation for user registration
+ * Validation for user registration (with RGPD consent + newsletter opt-in)
  */
 import {
   IsEmail,
@@ -8,8 +8,11 @@ import {
   MinLength,
   MaxLength,
   IsOptional,
+  IsBoolean,
+  Equals,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class RegisterDto {
   @ApiProperty({ example: 'user@example.com' })
@@ -40,4 +43,22 @@ export class RegisterDto {
   @IsString()
   @MaxLength(20)
   telephoneNumber?: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'RGPD consent — must be true to register',
+  })
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  @Equals(true, { message: 'Vous devez accepter la politique de confidentialité (RGPD) pour créer un compte.' })
+  gdprConsent!: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Newsletter subscription opt-in',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  newsletterConsent?: boolean;
 }

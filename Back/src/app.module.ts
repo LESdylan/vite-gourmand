@@ -44,6 +44,7 @@ import { SeedModule } from './seed';
 import { SiteInfoModule } from './site-info';
 import { PromotionModule } from './promotion';
 import { AiAgentModule } from './ai-agent';
+import { NewsletterModule } from './newsletter';
 import {
   JwtAuthGuard,
   RolesGuard,
@@ -143,6 +144,7 @@ import {
     SiteInfoModule,
     PromotionModule,
     AiAgentModule,
+    NewsletterModule,
   ],
   controllers: [AppController],
   providers: [

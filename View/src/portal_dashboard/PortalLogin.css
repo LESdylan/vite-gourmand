@@ -393,3 +393,205 @@
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Consent section (RGPD + Newsletter) ── */
+.pf-consent-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 16px;
+  background: #faf7f5;
+  border-radius: 10px;
+  border: 1px solid rgba(139, 69, 87, 0.1);
+}
+.pf-checkbox--consent {
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #5a4a4e;
+}
+.pf-checkbox--consent input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.pf-checkbox--newsletter {
+  padding-top: 10px;
+  border-top: 1px solid rgba(139, 69, 87, 0.08);
+}
+.pf-link--inline {
+  display: inline;
+  padding: 0;
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── RGPD Modal Overlay ── */
+.pf-rgpd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  animation: pf-fadeIn 0.2s ease-out;
+  padding: 16px;
+}
+.pf-rgpd-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  animation: pf-slideUp 0.3s ease-out;
+}
+@keyframes pf-slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pf-rgpd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #722F37, #5a252c);
+  color: #fff;
+  flex-shrink: 0;
+}
+.pf-rgpd-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+}
+.pf-rgpd-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.pf-rgpd-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+.pf-rgpd-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: #333;
+}
+.pf-rgpd-body::-webkit-scrollbar {
+  width: 6px;
+}
+.pf-rgpd-body::-webkit-scrollbar-thumb {
+  background: rgba(114, 47, 55, 0.3);
+  border-radius: 3px;
+}
+.pf-rgpd-intro {
+  font-size: 0.9rem;
+  color: #444;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+.pf-rgpd-section {
+  margin-bottom: 22px;
+}
+.pf-rgpd-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #722F37;
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #D4AF37;
+}
+.pf-rgpd-section p {
+  margin: 6px 0;
+}
+.pf-rgpd-section ul {
+  margin: 8px 0;
+  padding-left: 20px;
+  list-style: disc;
+}
+.pf-rgpd-section li {
+  margin-bottom: 4px;
+}
+.pf-rgpd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 12px 0;
+}
+.pf-rgpd-table th,
+.pf-rgpd-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid #e5e2df;
+}
+.pf-rgpd-table th {
+  background: #722F37;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+.pf-rgpd-table tr:nth-child(even) {
+  background: #faf7f5;
+}
+.pf-rgpd-note {
+  background: #fff8f0;
+  border-left: 3px solid #D4AF37;
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  margin: 10px 0;
+  font-size: 0.84rem;
+}
+.pf-rgpd-updated {
+  color: #722F37;
+  font-size: 0.84rem;
+  margin-top: 8px;
+}
+.pf-rgpd-contact {
+  background: #f0f7f0;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(85, 107, 47, 0.2);
+}
+.pf-rgpd-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #faf7f5;
+}
+.pf-rgpd-accept {
+  background: linear-gradient(135deg, #722F37, #5a252c);
+  color: #fff;
+  border: none;
+  padding: 10px 32px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.pf-rgpd-accept:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(114, 47, 55, 0.3);
+}

@@ -20,6 +20,7 @@ import { AiAssistantWidget } from '../components/ui/AiAssistantWidget';
 import { PublicDataProvider } from '../contexts/PublicDataContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { fetchActivePromotions, type ActivePromotion } from '../services/public';
+import { confirmNewsletter, unsubscribeNewsletter } from '../services/newsletter';
 
 interface PublicSPAProps {
   user?: UserType | null;
@@ -41,8 +42,38 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   const [promotions, setPromotions] = useState<ActivePromotion[]>([]);
   const [bannerHeight, setBannerHeight] = useState(0);
   const [orderMenuId, setOrderMenuId] = useState<number | null>(null);
+  const [newsletterMsg, setNewsletterMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const currentPageRef = useRef<Page>('home');
+
+  // Handle newsletter confirm/unsubscribe from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('newsletter');
+    const token = params.get('token');
+
+    if (!action || !token) return;
+
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+
+    if (action === 'confirm') {
+      confirmNewsletter(token)
+        .then((res) => setNewsletterMsg({ type: 'success', text: res.message }))
+        .catch(() => setNewsletterMsg({ type: 'error', text: 'Token invalide ou expiré.' }));
+    } else if (action === 'unsubscribe') {
+      unsubscribeNewsletter(token)
+        .then((res) => setNewsletterMsg({ type: 'success', text: res.message }))
+        .catch(() => setNewsletterMsg({ type: 'error', text: 'Token invalide.' }));
+    }
+  }, []);
+
+  // Auto-dismiss newsletter message after 8 seconds
+  useEffect(() => {
+    if (!newsletterMsg) return;
+    const timer = setTimeout(() => setNewsletterMsg(null), 8000);
+    return () => clearTimeout(timer);
+  }, [newsletterMsg]);
 
   const handleBannerHeightChange = useCallback((h: number) => {
     setBannerHeight(h);
@@ -182,6 +213,26 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
               pageContext={currentPage === 'menu' ? 'menu' : currentPage === 'order' ? 'order' : 'home'}
               onNavigateToContact={() => handlePageChange('contact')}
             />
+          )}
+
+          {/* Newsletter confirmation/unsubscribe toast */}
+          {newsletterMsg && (
+            <div
+              className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] max-w-md w-[90vw] px-5 py-4 rounded-xl shadow-2xl text-sm font-medium flex items-center gap-3 transition-all duration-300 ${
+                newsletterMsg.type === 'success'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-red-600 text-white'
+              }`}
+            >
+              <span>{newsletterMsg.type === 'success' ? '✅' : '❌'}</span>
+              <span className="flex-1">{newsletterMsg.text}</span>
+              <button
+                onClick={() => setNewsletterMsg(null)}
+                className="text-white/70 hover:text-white ml-2"
+              >
+                ✕
+              </button>
+            </div>
           )}
         </div>
       </PublicDataProvider>

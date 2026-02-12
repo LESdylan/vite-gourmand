@@ -61,6 +61,9 @@ export function PortalLoginForm() {
   const [regPassword, setRegPassword] = useState('');
   const [regConfirm, setRegConfirm] = useState('');
   const [showRegPassword, setShowRegPassword] = useState(false);
+  const [gdprConsent, setGdprConsent] = useState(false);
+  const [newsletterConsent, setNewsletterConsent] = useState(false);
+  const [showRgpdModal, setShowRgpdModal] = useState(false);
 
   // Forgot fields
   const [forgotEmail, setForgotEmail] = useState('');
@@ -118,6 +121,10 @@ export function PortalLoginForm() {
       setLocalError('Les mots de passe ne correspondent pas.');
       return;
     }
+    if (!gdprConsent) {
+      setLocalError('Vous devez accepter la politique de confidentialité (RGPD) pour créer un compte.');
+      return;
+    }
 
     try {
       await register({
@@ -125,7 +132,9 @@ export function PortalLoginForm() {
         password: regPassword,
         firstName: `${regPrenom.trim()} ${regNom.trim()}`,
         telephoneNumber: regPhone || undefined,
-        city: regAddress || undefined, // Backend expects 'city', not 'postalAddress'
+        city: regAddress || undefined,
+        gdprConsent: true,
+        newsletterConsent: newsletterConsent || undefined,
       });
       // On success, PortalAuthContext sets user → Portal.tsx will redirect
     } catch {
@@ -534,6 +543,45 @@ export function PortalLoginForm() {
               )}
             </div>
 
+            {/* ── RGPD Consent (required) ── */}
+            <div className="pf-consent-section">
+              <label className="pf-checkbox pf-checkbox--consent">
+                <input
+                  type="checkbox"
+                  checked={gdprConsent}
+                  onChange={(e) => setGdprConsent(e.target.checked)}
+                  required
+                />
+                <span>
+                  J'accepte la{' '}
+                  <a
+                    href="#legal-mentions"
+                    className="pf-link pf-link--inline"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      // Open the RGPD modal overlay
+                      setShowRgpdModal(true);
+                    }}
+                  >
+                    politique de confidentialité
+                  </a>{' '}
+                  et le traitement de mes données personnelles conformément au RGPD. *
+                </span>
+              </label>
+
+              {/* Newsletter opt-in (optional) */}
+              <label className="pf-checkbox pf-checkbox--consent pf-checkbox--newsletter">
+                <input
+                  type="checkbox"
+                  checked={newsletterConsent}
+                  onChange={(e) => setNewsletterConsent(e.target.checked)}
+                />
+                <span>
+                  📬 Je souhaite recevoir la newsletter avec les actualités, menus et promotions de Vite & Gourmand.
+                </span>
+              </label>
+            </div>
+
             <button type="submit" className="pf-submit" disabled={isLoading}>
               {isLoading ? (
                 'Création…'
@@ -545,7 +593,7 @@ export function PortalLoginForm() {
             </button>
 
             <p className="pf-hint">
-              En vous inscrivant, vous recevrez un email de bienvenue. Le rôle « utilisateur » vous
+              En vous inscrivant, vous acceptez notre politique de confidentialité. Le rôle « utilisateur » vous
               sera attribué.
             </p>
           </form>
@@ -595,6 +643,218 @@ export function PortalLoginForm() {
           </form>
         )}
       </div>
+
+      {/* ── RGPD Modal Overlay ── */}
+      {showRgpdModal && (
+        <div
+          className="pf-rgpd-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Politique de confidentialité RGPD"
+          onClick={() => setShowRgpdModal(false)}
+          onKeyDown={(e) => { if (e.key === 'Escape') setShowRgpdModal(false); }}
+          tabIndex={-1}
+        >
+          <div className="pf-rgpd-modal" role="document" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+            <div className="pf-rgpd-header">
+              <h2 className="pf-rgpd-title">🔒 Politique de Confidentialité &amp; RGPD</h2>
+              <button
+                type="button"
+                className="pf-rgpd-close"
+                onClick={() => setShowRgpdModal(false)}
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="pf-rgpd-body">
+              <p className="pf-rgpd-intro">
+                Conformément au Règlement (UE) 2016/679 du Parlement européen et du Conseil du 27
+                avril 2016 (Règlement Général sur la Protection des Données — RGPD) et à la loi
+                n°78-17 du 6 janvier 1978 modifiée dite « Informatique et Libertés », la société
+                Vite &amp; Gourmand s'engage à protéger vos données personnelles.
+              </p>
+
+              <section className="pf-rgpd-section">
+                <h3>1. Responsable du traitement</h3>
+                <p>
+                  <strong>Vite &amp; Gourmand</strong> — Entreprise individuelle<br />
+                  15 Rue Sainte-Catherine, 33000 Bordeaux<br />
+                  Email : <em>rgpd@vite-gourmand.fr</em><br />
+                  Tél. : +33 5 56 00 00 00<br />
+                  Directeurs de la publication : Julie et José Martinez
+                </p>
+              </section>
+
+              <section className="pf-rgpd-section">
+                <h3>2. Données personnelles collectées</h3>
+                <p>Dans le cadre de l'utilisation du site et de nos services, nous collectons :</p>
+                <ul>
+                  <li><strong>Données d'identification :</strong> nom, prénom, adresse email, numéro de téléphone, adresse postale</li>
+                  <li><strong>Données de connexion :</strong> adresse IP, logs de connexion, horodatage, type de navigateur et système d'exploitation</li>
+                  <li><strong>Données de commande :</strong> historique des commandes, préférences alimentaires, allergènes déclarés, montants des achats</li>
+                  <li><strong>Données de navigation :</strong> pages visitées, durée de visite, interactions avec le site (cookies techniques)</li>
+                  <li><strong>Données de communication :</strong> messages envoyés via le formulaire de contact, échanges avec le support ou l'assistant IA</li>
+                  <li><strong>Données de fidélité :</strong> points accumulés, historique des récompenses, code d'affiliation</li>
+                  <li><strong>Données newsletter :</strong> consentement newsletter, adresse email d'inscription, date d'inscription et préférences de communication</li>
+                </ul>
+              </section>
+
+              <section className="pf-rgpd-section">
+                <h3>3. Bases légales et finalités du traitement</h3>
+                <table className="pf-rgpd-table">
+                  <thead>
+                    <tr>
+                      <th>Finalité</th>
+                      <th>Base légale</th>
+                      <th>Durée de conservation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Gestion des comptes utilisateurs</td>
+                      <td>Exécution du contrat (Art. 6.1.b)</td>
+                      <td>Durée du compte + 3 ans</td>
+                    </tr>
+                    <tr>
+                      <td>Traitement et suivi des commandes</td>
+                      <td>Exécution du contrat (Art. 6.1.b)</td>
+                      <td>5 ans (obligation comptable)</td>
+                    </tr>
+                    <tr>
+                      <td>Programme de fidélité et affiliation</td>
+                      <td>Consentement (Art. 6.1.a)</td>
+                      <td>Durée du compte + 1 an</td>
+                    </tr>
+                    <tr>
+                      <td>Envoi de newsletters et promotions</td>
+                      <td>Consentement explicite (Art. 6.1.a)</td>
+                      <td>Jusqu'au retrait du consentement</td>
+                    </tr>
+                    <tr>
+                      <td>Réponse aux demandes de contact</td>
+                      <td>Intérêt légitime (Art. 6.1.f)</td>
+                      <td>1 an après le dernier échange</td>
+                    </tr>
+                    <tr>
+                      <td>Assistant IA (chatbot)</td>
+                      <td>Consentement (Art. 6.1.a)</td>
+                      <td>Durée de la session</td>
+                    </tr>
+                    <tr>
+                      <td>Sécurité et prévention des fraudes</td>
+                      <td>Intérêt légitime (Art. 6.1.f)</td>
+                      <td>12 mois glissants</td>
+                    </tr>
+                    <tr>
+                      <td>Obligations légales et fiscales</td>
+                      <td>Obligation légale (Art. 6.1.c)</td>
+                      <td>10 ans (documents comptables)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section className="pf-rgpd-section">
+                <h3>4. Destinataires des données</h3>
+                <p>Vos données sont traitées par :</p>
+                <ul>
+                  <li><strong>Personnel interne :</strong> équipe de direction, service client, équipe technique — accès limité au strict nécessaire</li>
+                  <li><strong>Hébergeur :</strong> infrastructure cloud sécurisée, serveurs situés en Union Européenne (conformité RGPD)</li>
+                  <li><strong>Prestataire base de données :</strong> Supabase (PostgreSQL managé, données chiffrées au repos et en transit, certifié SOC2)</li>
+                  <li><strong>Prestataire IA :</strong> Groq (modèle LLaMA) — les conversations ne sont ni stockées ni utilisées pour l'entraînement</li>
+                  <li><strong>Service email :</strong> prestataire SMTP pour l'envoi transactionnel et newsletters — aucune revente de données</li>
+                </ul>
+                <p className="pf-rgpd-note">
+                  ⚠️ Aucune donnée n'est transférée hors de l'Espace Économique Européen (EEE).
+                  Aucune donnée n'est vendue, louée ou cédée à des tiers à des fins commerciales.
+                </p>
+              </section>
+
+              <section className="pf-rgpd-section">
+                <h3>5. Vos droits</h3>
+                <p>Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants :</p>
+                <ul>
+                  <li><strong>Droit d'accès (Art. 15) :</strong> obtenir la confirmation que vos données sont traitées et en recevoir une copie</li>
+                  <li><strong>Droit de rectification (Art. 16) :</strong> corriger des données inexactes ou compléter des données incomplètes</li>
+                  <li><strong>Droit à l'effacement (Art. 17) :</strong> demander la suppression de vos données (« droit à l'oubli »)</li>
+                  <li><strong>Droit à la limitation (Art. 18) :</strong> restreindre le traitement de vos données dans certains cas</li>
+                  <li><strong>Droit à la portabilité (Art. 20) :</strong> recevoir vos données dans un format structuré, couramment utilisé et lisible par machine</li>
+                  <li><strong>Droit d'opposition (Art. 21) :</strong> vous opposer au traitement de vos données, notamment à des fins de prospection commerciale</li>
+                  <li><strong>Droit de retirer votre consentement :</strong> à tout moment, sans affecter la licéité du traitement antérieur</li>
+                  <li><strong>Droit d'introduire une réclamation :</strong> auprès de la CNIL (Commission Nationale de l'Informatique et des Libertés) — <em>www.cnil.fr</em></li>
+                </ul>
+                <p>
+                  Pour exercer vos droits, envoyez un email à{' '}
+                  <strong>rgpd@vite-gourmand.fr</strong> avec une copie d'une pièce d'identité.
+                  Nous nous engageons à répondre dans un délai maximum de 30 jours.
+                </p>
+              </section>
+
+              <section className="pf-rgpd-section">
+                <h3>6. Cookies</h3>
+                <p>Notre site utilise exclusivement des <strong>cookies techniques</strong> nécessaires au bon fonctionnement de l'application :</p>
+                <ul>
+                  <li><strong>Cookie de session :</strong> maintien de votre connexion durant la navigation (durée : session)</li>
+                  <li><strong>Cookie « Se souvenir de moi » :</strong> persistance de la connexion si activé (durée : 30 jours)</li>
+                  <li><strong>Token JWT :</strong> authentification sécurisée des requêtes API (durée : 24h)</li>
+                </ul>
+                <p className="pf-rgpd-note">
+                  🚫 Aucun cookie publicitaire, de tracking ou d'analyse comportementale n'est utilisé.
+                  Aucun outil de type Google Analytics, Facebook Pixel ou similaire n'est installé.
+                </p>
+              </section>
+
+              <section className="pf-rgpd-section">
+                <h3>7. Sécurité des données</h3>
+                <p>Nous mettons en œuvre les mesures techniques et organisationnelles suivantes :</p>
+                <ul>
+                  <li>Chiffrement TLS/SSL de toutes les communications (HTTPS)</li>
+                  <li>Mots de passe hashés avec bcrypt (12 rounds de salage)</li>
+                  <li>Authentification JWT avec expiration et refresh tokens</li>
+                  <li>Politique de mots de passe robuste : 10 caractères min., majuscules, minuscules, chiffres et caractères spéciaux</li>
+                  <li>Row Level Security (RLS) sur la base de données — chaque utilisateur n'accède qu'à ses propres données</li>
+                  <li>Contrôle d'accès par rôles (RBAC) : client, manager, admin, superadmin</li>
+                  <li>Protection CSRF, rate limiting et validation stricte des entrées</li>
+                  <li>Sauvegardes automatiques régulières des bases de données</li>
+                </ul>
+              </section>
+
+              <section className="pf-rgpd-section">
+                <h3>8. Modifications de la politique</h3>
+                <p>
+                  Nous nous réservons le droit de modifier cette politique de confidentialité à tout
+                  moment. En cas de modification substantielle, vous serez informé(e) par email ou
+                  via une notification sur le site. La version en vigueur est toujours accessible
+                  depuis le pied de page du site et le portail de connexion.
+                </p>
+                <p className="pf-rgpd-updated">
+                  <strong>Dernière mise à jour :</strong> Février 2026
+                </p>
+              </section>
+
+              <section className="pf-rgpd-section pf-rgpd-contact">
+                <h3>9. Contact DPO</h3>
+                <p>
+                  Pour toute question relative à la protection de vos données personnelles :<br />
+                  📧 <strong>rgpd@vite-gourmand.fr</strong><br />
+                  📮 Vite &amp; Gourmand — Service RGPD, 15 Rue Sainte-Catherine, 33000 Bordeaux<br />
+                  📞 +33 5 56 00 00 00
+                </p>
+              </section>
+            </div>
+            <div className="pf-rgpd-footer">
+              <button
+                type="button"
+                className="pf-rgpd-accept"
+                onClick={() => setShowRgpdModal(false)}
+              >
+                J'ai lu et compris
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

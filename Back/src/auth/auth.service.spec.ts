@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma';
 import { PasswordService } from './password.service';
 import { TokenService } from './token.service';
 import { MailService } from '../mail/mail.service';
+import { NewsletterService } from '../newsletter/newsletter.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -64,6 +65,10 @@ describe('AuthService', () => {
       sendOrderConfirmation: jest.fn().mockResolvedValue(true),
     };
 
+    const mockNewsletterService = {
+      subscribe: jest.fn().mockResolvedValue({ message: 'ok' }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -72,6 +77,7 @@ describe('AuthService', () => {
         { provide: TokenService, useValue: mockTokenService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: MailService, useValue: mockMailService },
+        { provide: NewsletterService, useValue: mockNewsletterService },
       ],
     }).compile();
 
@@ -90,6 +96,7 @@ describe('AuthService', () => {
         email: 'new@test.com',
         password: 'password123',
         firstName: 'Jane',
+        gdprConsent: true,
       });
 
       expect(result).toHaveProperty('accessToken');
@@ -105,6 +112,7 @@ describe('AuthService', () => {
           email: 'test@example.com',
           password: 'password',
           firstName: 'Test',
+          gdprConsent: true,
         }),
       ).rejects.toThrow(ConflictException);
     });

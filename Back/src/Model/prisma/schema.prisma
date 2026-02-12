@@ -330,6 +330,36 @@ model Message {
   User_Message_sender_idToUser    User?     @relation("Message_sender_idToUser", fields: [sender_id], references: [id], onUpdate: NoAction)
 }
 
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model NewsletterSendLog {
+  id               Int       @id @default(autoincrement())
+  promotion_id     Int
+  recipients_count Int       @default(0)
+  sent_at          DateTime? @default(now()) @db.Timestamptz(6)
+  sent_by          Int?
+  status           String?   @default("sent") @db.VarChar(20)
+
+  @@index([promotion_id], map: "idx_newsletter_log_promo")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model NewsletterSubscriber {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique @db.VarChar(255)
+  user_id         Int?
+  first_name      String?   @db.VarChar(100)
+  is_active       Boolean?  @default(true)
+  token           String    @unique @db.VarChar(255)
+  confirmed_at    DateTime? @db.Timestamptz(6)
+  unsubscribed_at DateTime? @db.Timestamptz(6)
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([is_active], map: "idx_newsletter_active", where: raw("(is_active = true)"))
+  @@index([email], map: "idx_newsletter_email")
+  @@index([user_id], map: "idx_newsletter_user")
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Notification {
   id         Int       @id @default(autoincrement())
@@ -618,6 +648,8 @@ model User {
   created_at                                                 DateTime?             @default(now()) @db.Timestamptz(6)
   updated_at                                                 DateTime?             @default(now()) @db.Timestamptz(6)
   last_login_at                                              DateTime?             @db.Timestamptz(6)
+  newsletter_consent                                         Boolean?              @default(false)
+  newsletter_consent_date                                    DateTime?             @db.Timestamptz(6)
   CompanyOwner                                               CompanyOwner[]
   DataDeletionRequest_DataDeletionRequest_processed_byToUser DataDeletionRequest[] @relation("DataDeletionRequest_processed_byToUser")
   DataDeletionRequest_DataDeletionRequest_user_idToUser      DataDeletionRequest[] @relation("DataDeletionRequest_user_idToUser")

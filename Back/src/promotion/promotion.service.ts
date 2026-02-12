@@ -2,14 +2,20 @@
  * Promotion Service
  * Manages promotions, publicity banners, and user-targeted offers.
  */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma';
+import { NewsletterService } from '../newsletter';
 import { CreatePromotionDto, UpdatePromotionDto } from './dto/promotion.dto';
 import { PaginationDto, buildPaginationMeta } from '../common';
 
 @Injectable()
 export class PromotionService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(PromotionService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly newsletterService: NewsletterService,
+  ) {}
 
   /**
    * PUBLIC: Get currently active public promotions (banners / publicity).
@@ -86,7 +92,7 @@ export class PromotionService {
    * ADMIN: Create a new promotion.
    */
   async create(dto: CreatePromotionDto, createdBy: number) {
-    return this.prisma.promotion.create({
+    const promo = await this.prisma.promotion.create({
       data: {
         title: dto.title,
         description: dto.description,
@@ -107,19 +113,41 @@ export class PromotionService {
         created_by: createdBy,
       },
     });
+
+    // Auto-send newsletter if promotion is active and public
+    if (promo.is_active && promo.is_public) {
+      this.newsletterService
+        .sendPromotionNewsletter(promo.id, createdBy)
+        .catch((err) =>
+          this.logger.error(`Newsletter auto-send failed for promo #${promo.id}: ${err.message}`),
+        );
+    }
+
+    return promo;
   }
 
   /**
    * ADMIN: Update a promotion.
    */
-  async update(id: number, dto: UpdatePromotionDto) {
+  async update(id: number, dto: UpdatePromotionDto, updatedBy?: number) {
     await this.ensureExists(id);
 
     const data: Record<string, unknown> = { ...dto, updated_at: new Date() };
     if (dto.start_date) data.start_date = new Date(dto.start_date);
     if (dto.end_date) data.end_date = new Date(dto.end_date);
 
-    return this.prisma.promotion.update({ where: { id }, data });
+    const promo = await this.prisma.promotion.update({ where: { id }, data });
+
+    // Auto-send newsletter if promotion just got activated + is public
+    if (dto.is_active === true && promo.is_public) {
+      this.newsletterService
+        .sendPromotionNewsletter(promo.id, updatedBy)
+        .catch((err) =>
+          this.logger.error(`Newsletter auto-send on update failed for promo #${promo.id}: ${err.message}`),
+        );
+    }
+
+    return promo;
   }
 
   /**
