@@ -39,21 +39,32 @@ export BW_ITEM_NAME
 #  ⚡ BOOTSTRAP (default target: make)
 # ============================================
 # Running `make` with no arguments does everything:
-#   1. Fetch .env from Bitwarden vault (skipped if exists)
-#   2. npm install for Back & View
-#   3. Generate Prisma client
-#   4. Start backend + frontend dev servers in background
-#   5. Open VS Code Simple Browser preview
-#   6. Print URLs
+#   1. Build Bitwarden CLI Docker image
+#   2. Interactive login → fetch .env from vault → Back/.env
+#   3. npm install for Back & View
+#   4. Generate Prisma client
+#   5. Compile TypeScript (verify no errors)
+#   6. Start backend + frontend dev servers
+#   7. Print summary with URLs
 #
 # Databases are cloud-hosted (Supabase + MongoDB Atlas)
-# so no Docker containers are needed for development.
+# so no local Docker DB containers are needed.
 # ============================================
 
-.PHONY: all banner fetch-env secrets secrets-force install-all \
-        dev-start dev-backend dev-frontend show-urls
+.PHONY: all bootstrap banner fetch-env secrets secrets-force \
+        install-all compile-check turn-on turn-off show-urls summary
 
-all: banner fetch-env install-all turn-on  ## ⚡ Full bootstrap (default)
+# Default target: full bootstrap
+all: bootstrap
+
+# Full bootstrap chain — each step depends on the previous
+bootstrap:
+	@$(MAKE) --no-print-directory banner
+	@$(MAKE) --no-print-directory step-1-secrets
+	@$(MAKE) --no-print-directory step-2-install
+	@$(MAKE) --no-print-directory step-3-compile
+	@$(MAKE) --no-print-directory step-4-start
+	@$(MAKE) --no-print-directory summary
 
 banner:
 	@echo ""
@@ -61,83 +72,206 @@ banner:
 	@echo "║     🍽️  VITE GOURMAND — Full Bootstrap                       ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
+	@echo "This will:"
+	@echo "  1. 🔐 Fetch .env from Bitwarden vault (interactive login)"
+	@echo "  2. 📦 Install npm dependencies (Back + View)"
+	@echo "  3. 🔨 Compile TypeScript & generate Prisma client"
+	@echo "  4. 🚀 Start development servers"
+	@echo "  5. 📋 Print summary with URLs"
+	@echo ""
 
-fetch-env:  ## 🔐 Fetch .env from Bitwarden (skips if exists)
+# ── Step 1: Fetch secrets ────────────────────────────
+step-1-secrets:
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  STEP 1/4 — 🔐 Fetching Secrets from Bitwarden               ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@$(SCRIPTS_PATH)/docker/bw-fetch-env.sh
+	@if [ ! -f $(BACKEND_PATH)/.env ]; then \
+		echo ""; \
+		echo "❌ Back/.env is required to continue."; \
+		echo "   Create it manually or re-run: make secrets-force"; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "✅ Step 1 complete: Back/.env is ready"
 
-secrets: ## 🔐 Alias: fetch .env from Bitwarden
-	@$(SCRIPTS_PATH)/docker/bw-fetch-env.sh
+# ── Step 2: Install dependencies ─────────────────────
+step-2-install:
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  STEP 2/4 — 📦 Installing Dependencies                       ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "📦 [1/3] Backend dependencies..."
+	@cd $(BACKEND_PATH) && npm install
+	@echo ""
+	@echo "📦 [2/3] Frontend dependencies..."
+	@cd $(FRONTEND_PATH) && npm install
+	@echo ""
+	@echo "📦 [3/3] Generating Prisma client..."
+	@cd $(BACKEND_PATH) && npx prisma generate
+	@echo ""
+	@echo "✅ Step 2 complete: All dependencies installed"
 
-secrets-force:  ## 🔐 Force re-fetch .env from Bitwarden (overwrites)
+# ── Step 3: Compile & verify ─────────────────────────
+step-3-compile:
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  STEP 3/4 — 🔨 Compiling TypeScript                          ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "🔨 Checking Backend compilation..."
+	@cd $(BACKEND_PATH) && npx tsc --noEmit || { echo "❌ TypeScript errors in Backend"; exit 1; }
+	@echo "✅ Backend compiles cleanly"
+	@echo ""
+	@echo "🔨 Checking Frontend compilation..."
+	@cd $(FRONTEND_PATH) && npx tsc --noEmit || { echo "❌ TypeScript errors in Frontend"; exit 1; }
+	@echo "✅ Frontend compiles cleanly"
+	@echo ""
+	@echo "✅ Step 3 complete: No compilation errors"
+
+# ── Step 4: Start dev servers ────────────────────────
+step-4-start:
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  STEP 4/4 — 🚀 Starting Development Servers                  ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@# Kill any existing processes on our ports
+	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
+	@-fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true
+	@rm -f $(BACKEND_PID) $(FRONTEND_PID)
+	@sleep 1
+	@echo "🔧 Starting Backend (NestJS) on port $(BACKEND_PORT)..."
+	@cd $(BACKEND_PATH) && nohup npm run start:dev > /tmp/vg-backend.log 2>&1 & echo $$! > $(CURDIR)/$(BACKEND_PID)
+	@echo "   PID: $$(cat $(CURDIR)/$(BACKEND_PID))"
+	@echo ""
+	@echo "🖥️  Starting Frontend (Vite) on port $(FRONTEND_PORT)..."
+	@cd $(FRONTEND_PATH) && nohup npm run dev > /tmp/vg-frontend.log 2>&1 & echo $$! > $(CURDIR)/$(FRONTEND_PID)
+	@echo "   PID: $$(cat $(CURDIR)/$(FRONTEND_PID))"
+	@echo ""
+	@echo "⏳ Waiting for servers to start..."
+	@sleep 5
+	@echo "✅ Step 4 complete: Servers started"
+
+# ── Summary ──────────────────────────────────────────
+summary:
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  🎉  VITE GOURMAND — BOOTSTRAP COMPLETE                      ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║                                                              ║"
+	@echo "║  ✅ Secrets fetched from Bitwarden                           ║"
+	@echo "║  ✅ Dependencies installed (Back + View)                     ║"
+	@echo "║  ✅ TypeScript compiled successfully                         ║"
+	@echo "║  ✅ Development servers running                              ║"
+	@echo "║                                                              ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  🌐 URLS                                                     ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  🖥️  Frontend  → http://localhost:$(FRONTEND_PORT)                   ║"
+	@echo "║  🔧 Backend   → http://localhost:$(BACKEND_PORT)/api                 ║"
+	@echo "║  📚 API Docs  → http://localhost:$(BACKEND_PORT)/api/docs            ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  🗄️  PostgreSQL → Supabase (cloud-hosted)                    ║"
+	@echo "║  🍃 MongoDB    → Atlas (cloud-hosted)                        ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  📋 COMMANDS                                                 ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  make turn-off     Stop all servers                          ║"
+	@echo "║  make turn-on      Restart servers                           ║"
+	@echo "║  make logs         View server logs                          ║"
+	@echo "║  make help         Show all commands                         ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "📝 Logs:"
+	@echo "   Backend:  tail -f /tmp/vg-backend.log"
+	@echo "   Frontend: tail -f /tmp/vg-frontend.log"
+	@echo ""
+
+# ── Aliases for manual steps ─────────────────────────
+fetch-env: step-1-secrets  ## 🔐 Fetch .env from Bitwarden (interactive)
+
+secrets: step-1-secrets  ## 🔐 Alias for fetch-env
+
+secrets-force:  ## 🔐 Force re-fetch .env (overwrites existing)
 	@rm -f $(BACKEND_PATH)/.env
-	@$(SCRIPTS_PATH)/docker/bw-fetch-env.sh
+	@$(MAKE) --no-print-directory step-1-secrets
 
-install-all:  ## 📦 Install npm deps for Back & View + Prisma generate
-	@echo "📦 Installing Backend dependencies..."
-	@cd $(BACKEND_PATH) && npm install --silent 2>&1 | tail -3
-	@echo "📦 Installing Frontend dependencies..."
-	@cd $(FRONTEND_PATH) && npm install --silent 2>&1 | tail -3
-	@echo "📦 Generating Prisma client..."
-	@cd $(BACKEND_PATH) && npx prisma generate 2>/dev/null || true
-	@echo "✅ All dependencies installed!"
+install-all: step-2-install  ## 📦 Install all dependencies
+
+compile-check: step-3-compile  ## 🔨 Check TypeScript compilation
 
 # ============================================
 #  🔌 TURN-ON / TURN-OFF
 # ============================================
-# turn-on  → start backend + frontend dev servers + open preview
-# turn-off → gracefully stop everything
+# Quick start/stop for when dependencies are already installed
 # ============================================
 
-.PHONY: turn-on turn-off
+.PHONY: turn-on turn-off logs
 
-turn-on:  ## 🔌 Start backend + frontend & open VS Code preview
+turn-on:  ## 🔌 Start servers (assumes deps are installed)
 	@echo ""
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║     🔌  TURNING ON VITE GOURMAND                             ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "🔧 Starting backend (NestJS) on port $(BACKEND_PORT)..."
-	@if [ -f $(BACKEND_PID) ] && kill -0 $$(cat $(BACKEND_PID)) 2>/dev/null; then \
-		echo "   ↳ Backend already running (PID: $$(cat $(BACKEND_PID)))"; \
-	else \
-		cd $(BACKEND_PATH) && nohup npm run start:dev > /tmp/vg-backend.log 2>&1 & echo $$! > $(CURDIR)/$(BACKEND_PID); \
-		sleep 3; \
-		echo "   ✅ Backend started (PID: $$(cat $(CURDIR)/$(BACKEND_PID)))"; \
+	@# Verify .env exists
+	@if [ ! -f $(BACKEND_PATH)/.env ]; then \
+		echo "❌ Back/.env not found. Run 'make' first for full bootstrap."; \
+		exit 1; \
 	fi
-	@echo "🖥️  Starting frontend (Vite) on port $(FRONTEND_PORT)..."
-	@if [ -f $(FRONTEND_PID) ] && kill -0 $$(cat $(FRONTEND_PID)) 2>/dev/null; then \
-		echo "   ↳ Frontend already running (PID: $$(cat $(FRONTEND_PID)))"; \
-	else \
-		cd $(FRONTEND_PATH) && nohup npm run dev > /tmp/vg-frontend.log 2>&1 & echo $$! > $(CURDIR)/$(FRONTEND_PID); \
-		sleep 3; \
-		echo "   ✅ Frontend started (PID: $$(cat $(CURDIR)/$(FRONTEND_PID)))"; \
-	fi
-	@$(MAKE) --no-print-directory show-urls
+	@# Kill existing processes
+	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
+	@-fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true
+	@rm -f $(BACKEND_PID) $(FRONTEND_PID)
+	@sleep 1
+	@echo "🔧 Starting Backend (NestJS) on port $(BACKEND_PORT)..."
+	@cd $(BACKEND_PATH) && nohup npm run start:dev > /tmp/vg-backend.log 2>&1 & echo $$! > $(CURDIR)/$(BACKEND_PID)
+	@echo "   PID: $$(cat $(CURDIR)/$(BACKEND_PID))"
+	@echo ""
+	@echo "🖥️  Starting Frontend (Vite) on port $(FRONTEND_PORT)..."
+	@cd $(FRONTEND_PATH) && nohup npm run dev > /tmp/vg-frontend.log 2>&1 & echo $$! > $(CURDIR)/$(FRONTEND_PID)
+	@echo "   PID: $$(cat $(CURDIR)/$(FRONTEND_PID))"
+	@echo ""
+	@sleep 3
+	@echo "✅ Servers started!"
+	@echo ""
+	@echo "  🖥️  Frontend → http://localhost:$(FRONTEND_PORT)"
+	@echo "  🔧 Backend  → http://localhost:$(BACKEND_PORT)/api"
+	@echo ""
 
-turn-off:  ## 🔌 Gracefully shut down everything
+turn-off:  ## 🔌 Stop all servers
 	@echo ""
 	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║  🔌  SHUTTING DOWN VITE GOURMAND                             ║"
+	@echo "║     🔌  SHUTTING DOWN VITE GOURMAND                          ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@echo "🛑 Stopping frontend..."
-	@if [ -f $(FRONTEND_PID) ]; then \
-		kill $$(cat $(FRONTEND_PID)) 2>/dev/null || true; \
-		rm -f $(FRONTEND_PID); \
-	fi
+	@if [ -f $(FRONTEND_PID) ]; then kill $$(cat $(FRONTEND_PID)) 2>/dev/null || true; rm -f $(FRONTEND_PID); fi
 	@-fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true
 	@echo "   ✅ Frontend stopped"
+	@echo ""
 	@echo "🛑 Stopping backend..."
-	@if [ -f $(BACKEND_PID) ]; then \
-		kill $$(cat $(BACKEND_PID)) 2>/dev/null || true; \
-		rm -f $(BACKEND_PID); \
-	fi
+	@if [ -f $(BACKEND_PID) ]; then kill $$(cat $(BACKEND_PID)) 2>/dev/null || true; rm -f $(BACKEND_PID); fi
 	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
 	@echo "   ✅ Backend stopped"
-	@-rm -f /tmp/vg-backend.log /tmp/vg-frontend.log
 	@echo ""
-	@echo "✅ Everything shut down cleanly."
+	@rm -f /tmp/vg-backend.log /tmp/vg-frontend.log 2>/dev/null || true
+	@echo "✅ Everything shut down."
 	@echo ""
+
+logs:  ## 📋 View server logs (WHICH=backend|frontend|both)
+	@WHICH="$${WHICH:-both}"; \
+	if [ "$$WHICH" = "backend" ] || [ "$$WHICH" = "both" ]; then \
+		echo "═══ Backend Log ═══"; \
+		tail -50 /tmp/vg-backend.log 2>/dev/null || echo "(no log yet)"; \
+	fi; \
+	if [ "$$WHICH" = "frontend" ] || [ "$$WHICH" = "both" ]; then \
+		echo ""; echo "═══ Frontend Log ═══"; \
+		tail -50 /tmp/vg-frontend.log 2>/dev/null || echo "(no log yet)"; \
+	fi
 
 show-urls:
 	@echo ""
@@ -210,7 +344,7 @@ restart:  ## Restart Docker containers
 ps:  ## Show container status
 	@$(SCRIPTS_PATH)/docker/ps.sh
 
-logs:  ## Stream container logs (SERVICE=name for specific)
+docker-logs:  ## Stream Docker container logs (SERVICE=name for specific)
 	@SERVICE="$(SERVICE)" TAIL="$(TAIL)" $(SCRIPTS_PATH)/docker/logs.sh
 
 docker-clean:  ## Remove containers and images (DEEP=1 for volumes)
@@ -465,6 +599,33 @@ env-check:  ## Check required environment variables
 
 clean:  ## Clean build artifacts (DEEP=1 for node_modules)
 	@DEEP="$(DEEP)" $(SCRIPTS_PATH)/utils/clean.sh
+
+fclean:  ## 🧹 Full clean: remove .env, node_modules, build artifacts, PID files
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  🧹 FULL CLEAN — Removing all generated files                ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@# Stop any running servers first
+	@-$(MAKE) --no-print-directory turn-off 2>/dev/null || true
+	@echo "🗑️  Removing Back/.env..."
+	@rm -f $(BACKEND_PATH)/.env
+	@echo "🗑️  Removing Backend node_modules & build..."
+	@rm -rf $(BACKEND_PATH)/node_modules $(BACKEND_PATH)/dist $(BACKEND_PATH)/coverage
+	@rm -f $(BACKEND_PATH)/package-lock.json
+	@echo "🗑️  Removing Frontend node_modules & build..."
+	@rm -rf $(FRONTEND_PATH)/node_modules $(FRONTEND_PATH)/dist $(FRONTEND_PATH)/coverage
+	@rm -f $(FRONTEND_PATH)/package-lock.json
+	@echo "🗑️  Removing Prisma generated client..."
+	@rm -rf $(BACKEND_PATH)/node_modules/.prisma 2>/dev/null || true
+	@echo "🗑️  Removing PID files & logs..."
+	@rm -f $(BACKEND_PID) $(FRONTEND_PID)
+	@rm -f /tmp/vg-backend.log /tmp/vg-frontend.log
+	@echo ""
+	@echo "✅ Full clean complete. Run 'make' to bootstrap from scratch."
+	@echo ""
+
+re: fclean all  ## 🔄 Full rebuild: fclean + make
 
 # ============================================
 #  📋 HELP

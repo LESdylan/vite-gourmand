@@ -64,8 +64,9 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
-    env_file:
-      - ./Back/.env
+    # env_file is NOT listed here to avoid parse errors on fresh clones
+    # (Back/.env may not exist yet). Pass it at runtime instead:
+    #   docker-compose --profile production run --env-file ./Back/.env app
     profiles:
       - production
 
