@@ -93,7 +93,8 @@ const AI_SCENARIOS = [
     emoji: '🍷',
     title: 'Dégustation',
     subtitle: 'Soirée œnologique',
-    prompt: "J'organise une soirée dégustation de vins avec accords mets et je cherche un traiteur.",
+    prompt:
+      "J'organise une soirée dégustation de vins avec accords mets et je cherche un traiteur.",
     color: '#B8860B',
     suggestions: ['Accords mets-vins', 'Plateau fromages', 'Tapas premium', 'Sommelier'],
   },
@@ -253,23 +254,27 @@ ${formData.message}
   }, [formData.message, formData.subject, isEnhancing]);
 
   /* ── AI Scenario click handler ──────────────────────────── */
-  const handleScenarioClick = useCallback((scenario: typeof AI_SCENARIOS[number]) => {
-    setActiveScenario(scenario.title);
-    const titleLower = scenario.title.toLowerCase();
-    const subjectLabel = titleLower === 'sur mesure'
-      ? 'un événement sur mesure'
-      : titleLower === 'entreprise'
-        ? "un événement d'entreprise"
-        : `un ${titleLower}`;
-    setFormData((prev) => ({
-      ...prev,
-      subject: prev.subject || `Devis pour ${subjectLabel}`,
-    }));
-    // Open AI chat and send the scenario prompt
-    setAiOpen(true);
-    // Small delay so the chat is open before sending
-    setTimeout(() => sendAiMessage(scenario.prompt), 100);
-  }, [sendAiMessage]);
+  const handleScenarioClick = useCallback(
+    (scenario: (typeof AI_SCENARIOS)[number]) => {
+      setActiveScenario(scenario.title);
+      const titleLower = scenario.title.toLowerCase();
+      const subjectLabel =
+        titleLower === 'sur mesure'
+          ? 'un événement sur mesure'
+          : titleLower === 'entreprise'
+            ? "un événement d'entreprise"
+            : `un ${titleLower}`;
+      setFormData((prev) => ({
+        ...prev,
+        subject: prev.subject || `Devis pour ${subjectLabel}`,
+      }));
+      // Open AI chat and send the scenario prompt
+      setAiOpen(true);
+      // Small delay so the chat is open before sending
+      setTimeout(() => sendAiMessage(scenario.prompt), 100);
+    },
+    [sendAiMessage],
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -692,8 +697,7 @@ ${formData.message}
                             </>
                           ) : (
                             <>
-                              <Wand2 className="h-3 w-3" />
-                              ✨ Améliorer avec l'IA
+                              <Wand2 className="h-3 w-3" />✨ Améliorer avec l'IA
                             </>
                           )}
                         </button>
@@ -931,7 +935,9 @@ ${formData.message}
                 {!aiOpen && (
                   <div className="relative flex items-center gap-2 mt-3 text-[#D4AF37] text-[10px] font-semibold">
                     <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Gratuit</span>
-                    <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Aide au devis</span>
+                    <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">
+                      ✓ Aide au devis
+                    </span>
                     <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Sur mesure</span>
                   </div>
                 )}
@@ -959,11 +965,32 @@ ${formData.message}
                         </p>
                         <div className="space-y-1.5">
                           {[
-                            { icon: '💒', text: 'Planifier un mariage', prompt: 'Je prépare un mariage et je cherche un traiteur pour la réception.' },
-                            { icon: '🎂', text: 'Organiser un anniversaire', prompt: "J'organise un anniversaire et j'aimerais un buffet ou menu." },
-                            { icon: '🏢', text: 'Événement d\'entreprise', prompt: "J'organise un événement d'entreprise." },
-                            { icon: '🍽️', text: 'Menu sur mesure', prompt: "J'aimerais créer un menu personnalisé pour un événement." },
-                            { icon: '💰', text: 'Connaître vos tarifs', prompt: 'Quels sont vos tarifs et formules disponibles ?' },
+                            {
+                              icon: '💒',
+                              text: 'Planifier un mariage',
+                              prompt:
+                                'Je prépare un mariage et je cherche un traiteur pour la réception.',
+                            },
+                            {
+                              icon: '🎂',
+                              text: 'Organiser un anniversaire',
+                              prompt: "J'organise un anniversaire et j'aimerais un buffet ou menu.",
+                            },
+                            {
+                              icon: '🏢',
+                              text: "Événement d'entreprise",
+                              prompt: "J'organise un événement d'entreprise.",
+                            },
+                            {
+                              icon: '🍽️',
+                              text: 'Menu sur mesure',
+                              prompt: "J'aimerais créer un menu personnalisé pour un événement.",
+                            },
+                            {
+                              icon: '💰',
+                              text: 'Connaître vos tarifs',
+                              prompt: 'Quels sont vos tarifs et formules disponibles ?',
+                            },
                           ].map((q) => (
                             <button
                               key={q.text}

@@ -41,7 +41,6 @@ export function useDatabase() {
 
   // Auto-load tables on mount
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadTables();
   }, [loadTables]);
 

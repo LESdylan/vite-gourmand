@@ -6,7 +6,12 @@
  *
  * Read-only access to Promotion table for email content.
  */
-import { Injectable, Logger, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma';
 import { MailService } from '../mail';
 import { ConfigService } from '@nestjs/config';
@@ -33,7 +38,9 @@ export class NewsletterService {
 
     if (existing) {
       if (existing.is_active) {
-        throw new ConflictException('Cet email est déjà inscrit à la newsletter.');
+        throw new ConflictException(
+          'Cet email est déjà inscrit à la newsletter.',
+        );
       }
       // Re-activate a previously unsubscribed email
       const token = this.generateToken();
@@ -47,8 +54,15 @@ export class NewsletterService {
           user_id: userId || existing.user_id,
         },
       });
-      await this.sendConfirmationEmail(dto.email, dto.firstName || existing.first_name || '', token);
-      return { message: 'Réinscription effectuée ! Vérifiez votre email pour confirmer.' };
+      await this.sendConfirmationEmail(
+        dto.email,
+        dto.firstName || existing.first_name || '',
+        token,
+      );
+      return {
+        message:
+          'Réinscription effectuée ! Vérifiez votre email pour confirmer.',
+      };
     }
 
     const token = this.generateToken();
@@ -64,21 +78,33 @@ export class NewsletterService {
 
     // If the user is registered, update their newsletter_consent
     if (userId) {
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { newsletter_consent: true, newsletter_consent_date: new Date() },
-      }).catch(() => { /* ignore if user doesn't exist */ });
+      await this.prisma.user
+        .update({
+          where: { id: userId },
+          data: {
+            newsletter_consent: true,
+            newsletter_consent_date: new Date(),
+          },
+        })
+        .catch(() => {
+          /* ignore if user doesn't exist */
+        });
     }
 
     await this.sendConfirmationEmail(dto.email, dto.firstName || '', token);
-    return { message: 'Inscription à la newsletter réussie ! Vérifiez votre email pour confirmer.' };
+    return {
+      message:
+        'Inscription à la newsletter réussie ! Vérifiez votre email pour confirmer.',
+    };
   }
 
   /**
    * Confirm a subscription via token.
    */
   async confirm(token: string) {
-    const sub = await this.prisma.newsletterSubscriber.findUnique({ where: { token } });
+    const sub = await this.prisma.newsletterSubscriber.findUnique({
+      where: { token },
+    });
     if (!sub) throw new NotFoundException('Token invalide ou expiré.');
 
     await this.prisma.newsletterSubscriber.update({
@@ -86,14 +112,19 @@ export class NewsletterService {
       data: { confirmed_at: new Date(), is_active: true },
     });
 
-    return { message: 'Inscription confirmée ! Vous recevrez nos prochaines actualités.' };
+    return {
+      message:
+        'Inscription confirmée ! Vous recevrez nos prochaines actualités.',
+    };
   }
 
   /**
    * Unsubscribe via token.
    */
   async unsubscribe(token: string) {
-    const sub = await this.prisma.newsletterSubscriber.findUnique({ where: { token } });
+    const sub = await this.prisma.newsletterSubscriber.findUnique({
+      where: { token },
+    });
     if (!sub) throw new NotFoundException('Token invalide.');
 
     await this.prisma.newsletterSubscriber.update({
@@ -103,13 +134,17 @@ export class NewsletterService {
 
     // Update user newsletter_consent if linked
     if (sub.user_id) {
-      await this.prisma.user.update({
-        where: { id: sub.user_id },
-        data: { newsletter_consent: false },
-      }).catch(() => {});
+      await this.prisma.user
+        .update({
+          where: { id: sub.user_id },
+          data: { newsletter_consent: false },
+        })
+        .catch(() => {});
     }
 
-    return { message: 'Désinscription effectuée. Vous ne recevrez plus nos emails.' };
+    return {
+      message: 'Désinscription effectuée. Vous ne recevrez plus nos emails.',
+    };
   }
 
   /**
@@ -129,7 +164,9 @@ export class NewsletterService {
     const [total, active, confirmed] = await Promise.all([
       this.prisma.newsletterSubscriber.count(),
       this.prisma.newsletterSubscriber.count({ where: { is_active: true } }),
-      this.prisma.newsletterSubscriber.count({ where: { confirmed_at: { not: null }, is_active: true } }),
+      this.prisma.newsletterSubscriber.count({
+        where: { confirmed_at: { not: null }, is_active: true },
+      }),
     ]);
     return { total, active, confirmed };
   }
@@ -141,7 +178,9 @@ export class NewsletterService {
   async sendPromotionNewsletter(promotionId: number, sentBy?: number) {
     const promotion = await this.prisma.promotion.findUnique({
       where: { id: promotionId },
-      include: { Discount: { select: { code: true, type: true, value: true } } },
+      include: {
+        Discount: { select: { code: true, type: true, value: true } },
+      },
     });
     if (!promotion) throw new NotFoundException('Promotion introuvable.');
 
@@ -154,10 +193,15 @@ export class NewsletterService {
       return { sent: 0 };
     }
 
-    this.logger.log(`Sending promotion "${promotion.title}" to ${subscribers.length} subscribers...`);
+    this.logger.log(
+      `Sending promotion "${promotion.title}" to ${subscribers.length} subscribers...`,
+    );
 
     let sentCount = 0;
-    const frontendUrl = this.config.get<string>('FRONTEND_URL', 'http://localhost:5173');
+    const frontendUrl = this.config.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:5173',
+    );
 
     // Send emails in parallel batches of 5
     const batches = this.chunk(subscribers, 5);
@@ -181,11 +225,18 @@ export class NewsletterService {
         promotion_id: promotionId,
         recipients_count: sentCount,
         sent_by: sentBy,
-        status: sentCount === subscribers.length ? 'sent' : sentCount > 0 ? 'partial' : 'failed',
+        status:
+          sentCount === subscribers.length
+            ? 'sent'
+            : sentCount > 0
+              ? 'partial'
+              : 'failed',
       },
     });
 
-    this.logger.log(`Newsletter sent: ${sentCount}/${subscribers.length} delivered.`);
+    this.logger.log(
+      `Newsletter sent: ${sentCount}/${subscribers.length} delivered.`,
+    );
     return { sent: sentCount, total: subscribers.length };
   }
 
@@ -198,13 +249,13 @@ export class NewsletterService {
       take: 50,
     });
     // Manually fetch promotion info for each log
-    const promoIds = [...new Set(logs.map(l => l.promotion_id))];
+    const promoIds = [...new Set(logs.map((l) => l.promotion_id))];
     const promos = await this.prisma.promotion.findMany({
       where: { id: { in: promoIds } },
       select: { id: true, title: true, type: true },
     });
-    const promoMap = new Map(promos.map(p => [p.id, p]));
-    return logs.map(log => ({
+    const promoMap = new Map(promos.map((p) => [p.id, p]));
+    return logs.map((log) => ({
       ...log,
       promotion: promoMap.get(log.promotion_id) || null,
     }));
@@ -226,8 +277,15 @@ export class NewsletterService {
     return chunks;
   }
 
-  private async sendConfirmationEmail(email: string, firstName: string, token: string) {
-    const frontendUrl = this.config.get<string>('FRONTEND_URL', 'http://localhost:5173');
+  private async sendConfirmationEmail(
+    email: string,
+    firstName: string,
+    token: string,
+  ) {
+    const frontendUrl = this.config.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:5173',
+    );
     const confirmUrl = `${frontendUrl}/?newsletter=confirm&token=${token}`;
     const unsubUrl = `${frontendUrl}/?newsletter=unsubscribe&token=${token}`;
 
@@ -293,7 +351,9 @@ export class NewsletterService {
     const unsubUrl = `${frontendUrl}/?newsletter=unsubscribe&token=${subscriber.token}`;
     const bgColor = promotion.bg_color || '#722F37';
     const textColor = promotion.text_color || '#FFFFFF';
-    const linkUrl = promotion.link_url ? `${frontendUrl}${promotion.link_url}` : frontendUrl;
+    const linkUrl = promotion.link_url
+      ? `${frontendUrl}${promotion.link_url}`
+      : frontendUrl;
     const discountCode = promotion.Discount?.code;
 
     return `
@@ -332,14 +392,18 @@ export class NewsletterService {
       <p>Bonjour ${subscriber.first_name || ''} 👋</p>
       ${promotion.description ? `<p>${promotion.description}</p>` : ''}
       ${promotion.image_url ? `<img src="${promotion.image_url}" alt="${promotion.title}" class="promo-img" />` : ''}
-      ${discountCode ? `
+      ${
+        discountCode
+          ? `
       <div class="code-box">
         <div class="code">${discountCode}</div>
         <p>Utilisez ce code lors de votre commande</p>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
       <div class="cta">
-        <a href="${linkUrl}" class="btn">${promotion.link_label || 'Découvrir l\'offre'} →</a>
+        <a href="${linkUrl}" class="btn">${promotion.link_label || "Découvrir l'offre"} →</a>
       </div>
     </div>
     <div class="footer">

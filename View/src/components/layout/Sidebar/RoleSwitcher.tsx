@@ -84,7 +84,6 @@ export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Get available views for current user
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const availableViews = useMemo(() => {
     if (!user?.role) return [];
     return getAvailableViews(user.role);

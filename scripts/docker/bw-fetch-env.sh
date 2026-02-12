@@ -143,9 +143,9 @@ else
         exit 1
     fi
 
-    # 2. Build the BW CLI image (show errors — do NOT hide stderr)
+    # 2. Build the BW CLI image (filter deprecation warnings, show real errors)
     log "No local bw found — building Docker image from Dockerfile.bw..."
-    (cd "$PROJECT_ROOT" && $DC --profile tools build secrets) || {
+    (cd "$PROJECT_ROOT" && $DC --profile tools build secrets 2>&1 | grep -v "DEPRECATED\|Install the buildx\|https://docs.docker.com/go/buildx") || {
         print_error "Failed to build Bitwarden CLI Docker image"
         echo ""
         echo "  Check that Dockerfile.bw and docker-compose.yml are valid."
@@ -158,6 +158,7 @@ else
     # 3. Run the fetch script inside the container
     #    docker compose run allocates a TTY so interactive
     #    bw login/unlock prompts reach the user's terminal.
+    #    NOTE: Do NOT pipe this through grep - it breaks TTY allocation for interactive prompts!
     cd "$PROJECT_ROOT"
     $DC --profile tools run --rm \
         --entrypoint bash \

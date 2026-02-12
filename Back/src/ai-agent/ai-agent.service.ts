@@ -14,7 +14,12 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma';
 import OpenAI from 'openai';
 import { ChatMessageDto } from './dto/ai-agent.dto';
-import { Prisma, Allergen, Diet, Theme } from '../../generated/prisma/client.js';
+import {
+  Prisma,
+  Allergen,
+  Diet,
+  Theme,
+} from '../../generated/prisma/client.js';
 
 type DishWithRelations = Prisma.DishGetPayload<{
   include: {
@@ -78,19 +83,22 @@ export class AiAgentService implements OnModuleInit {
     }
 
     // Cleanup stale conversations (older than 2h)
-    this.cleanupInterval = setInterval(() => {
-      const cutoff = Date.now() - 2 * 60 * 60 * 1000;
-      for (const [id, conv] of this.conversations) {
-        if (conv.createdAt.getTime() < cutoff) this.conversations.delete(id);
-      }
-    }, 30 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      () => {
+        const cutoff = Date.now() - 2 * 60 * 60 * 1000;
+        for (const [id, conv] of this.conversations) {
+          if (conv.createdAt.getTime() < cutoff) this.conversations.delete(id);
+        }
+      },
+      30 * 60 * 1000,
+    );
   }
 
   /* ═══════════════════════════════════════════════════════════
      Database context gathering
      ═══════════════════════════════════════════════════════════ */
 
-  private async gatherDatabaseContext(dto: ChatMessageDto): Promise<string> {
+  private async gatherDatabaseContext(): Promise<string> {
     const [dishes, menus, diets, themes, allergens] = await Promise.all([
       this.prisma.dish.findMany({
         include: {
@@ -112,20 +120,40 @@ export class AiAgentService implements OnModuleInit {
       this.prisma.allergen.findMany(),
     ]);
 
-    const dishList = dishes.map((d: DishWithRelations) => {
-      const allergenNames = d.DishAllergen.map((da: { Allergen: { name: string } }) => da.Allergen.name).join(', ');
-      const ingredients = d.DishIngredient.map((di: { Ingredient: { name: string; unit: string | null }; quantity: unknown }) => `${di.Ingredient.name} (${di.quantity}${di.Ingredient.unit})`).join(', ');
-      return `  - [ID:${d.id}] "${d.title}" (${d.course_type ?? 'plat'}) — ${d.description || 'Pas de description'}. Allergènes: ${allergenNames || 'aucun'}. Ingrédients: ${ingredients || 'non renseignés'}`;
-    }).join('\n');
+    const dishList = dishes
+      .map((d: DishWithRelations) => {
+        const allergenNames = d.DishAllergen.map(
+          (da: { Allergen: { name: string } }) => da.Allergen.name,
+        ).join(', ');
+        const ingredients = d.DishIngredient.map(
+          (di: {
+            Ingredient: { name: string; unit: string | null };
+            quantity: unknown;
+          }) =>
+            `${di.Ingredient.name} (${String(di.quantity)}${di.Ingredient.unit ?? ''})`,
+        ).join(', ');
+        return `  - [ID:${d.id}] "${d.title}" (${d.course_type ?? 'plat'}) — ${d.description || 'Pas de description'}. Allergènes: ${allergenNames || 'aucun'}. Ingrédients: ${ingredients || 'non renseignés'}`;
+      })
+      .join('\n');
 
-    const menuList = menus.map((m: MenuWithRelations) => {
-      const dishNames = m.Dish.map((d: { title: string }) => d.title).join(', ');
-      return `  - [ID:${m.id}] "${m.title}" — ${m.price_per_person}€/pers, min ${m.person_min} pers. Régime: ${m.Diet?.name || 'aucun'}. Thème: ${m.Theme?.name || 'aucun'}. Plats: ${dishNames || 'aucun'}${m.is_seasonal ? ' (saisonnier)' : ''}`;
-    }).join('\n');
+    const menuList = menus
+      .map((m: MenuWithRelations) => {
+        const dishNames = m.Dish.map((d: { title: string }) => d.title).join(
+          ', ',
+        );
+        return `  - [ID:${m.id}] "${m.title}" — ${String(m.price_per_person)}€/pers, min ${m.person_min} pers. Régime: ${m.Diet?.name || 'aucun'}. Thème: ${m.Theme?.name || 'aucun'}. Plats: ${dishNames || 'aucun'}${m.is_seasonal ? ' (saisonnier)' : ''}`;
+      })
+      .join('\n');
 
-    const dietList = diets.map((d: Diet) => `  - [ID:${d.id}] ${d.name}: ${d.description}`).join('\n');
-    const themeList = themes.map((t: Theme) => `  - [ID:${t.id}] ${t.name}: ${t.description}`).join('\n');
-    const allergenList = allergens.map((a: Allergen) => `  - [ID:${a.id}] ${a.name}`).join('\n');
+    const dietList = diets
+      .map((d: Diet) => `  - [ID:${d.id}] ${d.name}: ${d.description}`)
+      .join('\n');
+    const themeList = themes
+      .map((t: Theme) => `  - [ID:${t.id}] ${t.name}: ${t.description}`)
+      .join('\n');
+    const allergenList = allergens
+      .map((a: Allergen) => `  - [ID:${a.id}] ${a.name}`)
+      .join('\n');
 
     return `
 ═══ BASE DE DONNÉES VITE & GOURMAND ═══
@@ -335,13 +363,13 @@ ${dbContext}`;
     // Get or create conversation
     let conversation = this.conversations.get(convId);
     if (!conversation) {
-      const dbContext = await this.gatherDatabaseContext(dto);
-      const systemPrompt = isPublicAssistant 
+      const dbContext = await this.gatherDatabaseContext();
+      const systemPrompt = isPublicAssistant
         ? this.buildPublicAssistantPrompt(dbContext)
         : isEventPlanner
           ? this.buildEventPlannerPrompt(dbContext)
           : this.buildSystemPrompt(dbContext);
-      
+
       conversation = {
         messages: [{ role: 'system', content: systemPrompt }],
         context: {
@@ -358,10 +386,14 @@ ${dbContext}`;
       // Add initial context message if constraints were provided
       const constraints: string[] = [];
       if (dto.guestCount) constraints.push(`${dto.guestCount} convives`);
-      if (dto.budgetPerPerson) constraints.push(`budget ${dto.budgetPerPerson}€/personne`);
+      if (dto.budgetPerPerson)
+        constraints.push(`budget ${dto.budgetPerPerson}€/personne`);
       if (dto.dietId) constraints.push(`régime alimentaire ID:${dto.dietId}`);
       if (dto.themeId) constraints.push(`thème ID:${dto.themeId}`);
-      if (dto.excludeAllergens?.length) constraints.push(`allergènes à exclure IDs: ${dto.excludeAllergens.join(', ')}`);
+      if (dto.excludeAllergens?.length)
+        constraints.push(
+          `allergènes à exclure IDs: ${dto.excludeAllergens.join(', ')}`,
+        );
 
       if (constraints.length > 0) {
         conversation.messages.push({
@@ -376,13 +408,17 @@ ${dbContext}`;
 
     // Get AI response
     const assistantMessage = await this.getAiResponse(conversation.messages);
-    conversation.messages.push({ role: 'assistant', content: assistantMessage });
+    conversation.messages.push({
+      role: 'assistant',
+      content: assistantMessage,
+    });
 
     return {
       conversationId: convId,
       message: assistantMessage,
       context: conversation.context,
-      messageCount: conversation.messages.filter(m => m.role !== 'system').length,
+      messageCount: conversation.messages.filter((m) => m.role !== 'system')
+        .length,
     };
   }
 
@@ -395,14 +431,17 @@ ${dbContext}`;
       try {
         const response = await this.openai.chat.completions.create({
           model: 'llama-3.3-70b-versatile',
-          messages: messages.map(m => ({ role: m.role, content: m.content })),
+          messages: messages.map((m) => ({ role: m.role, content: m.content })),
           temperature: 0.7,
           max_tokens: 2048,
         });
-        return response.choices[0]?.message?.content || 'Désolé, je n\'ai pas pu générer de réponse.';
+        return (
+          response.choices[0]?.message?.content ||
+          "Désolé, je n'ai pas pu générer de réponse."
+        );
       } catch (err) {
         this.logger.error('Groq API error', err);
-        return 'Erreur de communication avec l\'IA. Veuillez réessayer dans quelques instants.';
+        return "Erreur de communication avec l'IA. Veuillez réessayer dans quelques instants.";
       }
     }
 
@@ -411,9 +450,10 @@ ${dbContext}`;
   }
 
   private getDemoResponse(messages: ConversationEntry[]): string {
-    const userMessages = messages.filter(m => m.role === 'user');
+    const userMessages = messages.filter((m) => m.role === 'user');
     const lastMsg = userMessages.at(-1)?.content.toLowerCase() || '';
-    const systemPrompt = messages.find(m => m.role === 'system')?.content || '';
+    const systemPrompt =
+      messages.find((m) => m.role === 'system')?.content || '';
     const isPublicAssistant = systemPrompt.includes('assistant virtuel');
     const isEventPlanner = systemPrompt.includes('Concierge Événementiel');
 
@@ -445,7 +485,11 @@ N'hésitez pas, je suis là pour vous guider ! 😊
 > ℹ️ **Mode démo** — Les réponses sont pré-configurées. En production, l'IA génère de vraies propositions de menus basées sur notre carte.`;
     }
 
-    if (lastMsg.includes('convive') || lastMsg.includes('personne') || /\d+\s*(pers|invit|conviv)/.test(lastMsg)) {
+    if (
+      lastMsg.includes('convive') ||
+      lastMsg.includes('personne') ||
+      /\d+\s*(pers|invit|conviv)/.test(lastMsg)
+    ) {
       return `Parfait, j'ai bien noté ! 👥
 
 Maintenant, quel **budget par personne** envisagez-vous ?
@@ -456,7 +500,11 @@ Cela me permettra de vous proposer un menu adapté parmi nos créations. 🍽️
 > ℹ️ Mode démo — réponses pré-définies.`;
     }
 
-    if (lastMsg.includes('budget') || lastMsg.includes('€') || lastMsg.includes('euro')) {
+    if (
+      lastMsg.includes('budget') ||
+      lastMsg.includes('€') ||
+      lastMsg.includes('euro')
+    ) {
       return `Excellent, budget noté ! 💰
 
 Y a-t-il des **contraintes alimentaires** à prendre en compte ?
@@ -487,11 +535,18 @@ En attendant, n'hésitez pas à remplir le **formulaire de contact** à gauche a
      Public Assistant Demo Response
      ═══════════════════════════════════════════════════════════ */
 
-  private getPublicAssistantDemoResponse(userMessages: ConversationEntry[], lastMsg: string): string {
+  private getPublicAssistantDemoResponse(
+    userMessages: ConversationEntry[],
+    lastMsg: string,
+  ): string {
     // First message — welcome
     if (userMessages.length === 1) {
       // Detect intent from first message
-      if (lastMsg.includes('concept') || lastMsg.includes('qui êtes') || lastMsg.includes('c\'est quoi')) {
+      if (
+        lastMsg.includes('concept') ||
+        lastMsg.includes('qui êtes') ||
+        lastMsg.includes("c'est quoi")
+      ) {
         return `🍽️ **Vite & Gourmand**, c'est votre traiteur gastronomique pour tous vos événements !
 
 Notre équipe passionnée crée des menus sur mesure avec des produits frais et de saison. Que ce soit pour un mariage, un anniversaire ou un séminaire d'entreprise, nous nous adaptons à vos envies et contraintes.
@@ -499,7 +554,11 @@ Notre équipe passionnée crée des menus sur mesure avec des produits frais et 
 Vous souhaitez en savoir plus sur nos menus ou nos services ? 😊`;
       }
 
-      if (lastMsg.includes('menu') || lastMsg.includes('plat') || lastMsg.includes('carte')) {
+      if (
+        lastMsg.includes('menu') ||
+        lastMsg.includes('plat') ||
+        lastMsg.includes('carte')
+      ) {
         return `📋 Nous proposons une variété de menus pour tous les goûts !
 
 - 🥗 **Entrées** : Foie gras, carpaccio, velouté de saison…
@@ -509,7 +568,11 @@ Vous souhaitez en savoir plus sur nos menus ou nos services ? 😊`;
 Chaque menu est personnalisable selon vos besoins (végétarien, sans gluten, halal…). Rendez-vous sur la page **Nos Menus** pour découvrir toutes nos créations ! 🎨`;
       }
 
-      if (lastMsg.includes('promo') || lastMsg.includes('offre') || lastMsg.includes('réduction')) {
+      if (
+        lastMsg.includes('promo') ||
+        lastMsg.includes('offre') ||
+        lastMsg.includes('réduction')
+      ) {
         return `🎉 Bonne nouvelle ! Nous avons régulièrement des offres spéciales.
 
 Actuellement, profitez de :
@@ -520,7 +583,12 @@ Actuellement, profitez de :
 Contactez-nous pour un devis personnalisé et découvrir les offres du moment ! ✨`;
       }
 
-      if (lastMsg.includes('contact') || lastMsg.includes('message') || lastMsg.includes('écrire') || lastMsg.includes('rédiger')) {
+      if (
+        lastMsg.includes('contact') ||
+        lastMsg.includes('message') ||
+        lastMsg.includes('écrire') ||
+        lastMsg.includes('rédiger')
+      ) {
         return `✉️ Je peux vous aider à préparer votre message !
 
 Pour que l'équipe puisse vous répondre au mieux, indiquez-moi :
@@ -545,7 +613,11 @@ Comment puis-je vous aider aujourd'hui ? 😊`;
     }
 
     // Follow-up messages
-    if (lastMsg.includes('contact') || lastMsg.includes('devis') || lastMsg.includes('commander')) {
+    if (
+      lastMsg.includes('contact') ||
+      lastMsg.includes('devis') ||
+      lastMsg.includes('commander')
+    ) {
       return `Parfait ! 📝
 
 Pour faire une demande de devis, rendez-vous sur notre page **Contact**. Vous y trouverez un formulaire simple où vous pourrez détailler vos besoins.
@@ -555,7 +627,11 @@ Notre équipe vous répondra sous 24h avec une proposition personnalisée ! 🚀
 > 💡 Cliquez sur le bouton "Aller au formulaire de contact" ci-dessous pour y accéder directement.`;
     }
 
-    if (lastMsg.includes('merci') || lastMsg.includes('super') || lastMsg.includes('parfait')) {
+    if (
+      lastMsg.includes('merci') ||
+      lastMsg.includes('super') ||
+      lastMsg.includes('parfait')
+    ) {
       return `Avec plaisir ! 😊
 
 N'hésitez pas si vous avez d'autres questions. Je suis là pour vous aider !
@@ -580,7 +656,10 @@ Ou rendez-vous directement sur la page **Contact** pour une demande de devis per
      Event Planner Demo Response
      ═══════════════════════════════════════════════════════════ */
 
-  private getEventPlannerDemoResponse(userMessages: ConversationEntry[], lastMsg: string): string {
+  private getEventPlannerDemoResponse(
+    userMessages: ConversationEntry[],
+    lastMsg: string,
+  ): string {
     if (userMessages.length === 1) {
       // Detect event type from first message
       if (lastMsg.includes('mariage') || lastMsg.includes('noce')) {
@@ -603,7 +682,11 @@ Pour créer un moment mémorable, dites-moi :
 Nos formules anniversaire commencent à partir de 25€/personne avec entrée + plat + dessert. Et notre option "dessert spectacle" avec gâteau sur mesure fait toujours sensation ! ✨`;
       }
 
-      if (lastMsg.includes('entreprise') || lastMsg.includes('séminaire') || lastMsg.includes('corporate')) {
+      if (
+        lastMsg.includes('entreprise') ||
+        lastMsg.includes('séminaire') ||
+        lastMsg.includes('corporate')
+      ) {
         return `🏢 Événement professionnel, excellent choix ! Nous accompagnons régulièrement des entreprises bordelaises.
 
 Pour adapter notre proposition :
@@ -625,7 +708,11 @@ Je vous guiderai vers la formule idéale et vous aiderai à rédiger une demande
 
     // Second message — budget & details
     if (userMessages.length === 2) {
-      if (lastMsg.includes('budget') || lastMsg.includes('€') || /\d+\s*eur/.test(lastMsg)) {
+      if (
+        lastMsg.includes('budget') ||
+        lastMsg.includes('€') ||
+        /\d+\s*eur/.test(lastMsg)
+      ) {
         return `Parfait, j'ai noté votre budget ! 💰
 
 Pour affiner ma proposition, avez-vous des préférences ou contraintes ?
@@ -679,8 +766,8 @@ Cliquez sur **"Copier dans le formulaire"** ci-dessous puis envoyez votre demand
     return {
       conversationId,
       messages: conv.messages
-        .filter(m => m.role !== 'system')
-        .map(m => ({ role: m.role, content: m.content })),
+        .filter((m) => m.role !== 'system')
+        .map((m) => ({ role: m.role, content: m.content })),
       context: conv.context,
       createdAt: conv.createdAt,
     };
@@ -691,7 +778,7 @@ Cliquez sur **"Copier dans le formulaire"** ci-dessous puis envoyez votre demand
     for (const [id, conv] of this.conversations) {
       result.push({
         id,
-        messageCount: conv.messages.filter(m => m.role !== 'system').length,
+        messageCount: conv.messages.filter((m) => m.role !== 'system').length,
         createdAt: conv.createdAt,
       });
     }

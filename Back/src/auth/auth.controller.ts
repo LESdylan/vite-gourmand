@@ -62,7 +62,9 @@ export class AuthController {
 
   @Public()
   @Get('verify-reset-token')
-  @ApiOperation({ summary: 'Verify if a password reset token is valid (without consuming it)' })
+  @ApiOperation({
+    summary: 'Verify if a password reset token is valid (without consuming it)',
+  })
   async verifyResetToken(@Req() req: { query: { token?: string } }) {
     const token = req.query.token;
     if (!token) {

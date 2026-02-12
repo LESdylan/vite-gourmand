@@ -19,7 +19,6 @@ export function useMinitalk() {
     if (selectedOrder) {
       const updated = orders.find((o) => o.id === selectedOrder.id);
       if (updated && updated.status !== selectedOrder.status) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedOrder(updated);
 
         setStatusChanged(updated.id);

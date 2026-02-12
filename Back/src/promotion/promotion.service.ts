@@ -119,7 +119,9 @@ export class PromotionService {
       this.newsletterService
         .sendPromotionNewsletter(promo.id, createdBy)
         .catch((err) =>
-          this.logger.error(`Newsletter auto-send failed for promo #${promo.id}: ${err.message}`),
+          this.logger.error(
+            `Newsletter auto-send failed for promo #${promo.id}: ${err.message}`,
+          ),
         );
     }
 
@@ -143,7 +145,9 @@ export class PromotionService {
       this.newsletterService
         .sendPromotionNewsletter(promo.id, updatedBy)
         .catch((err) =>
-          this.logger.error(`Newsletter auto-send on update failed for promo #${promo.id}: ${err.message}`),
+          this.logger.error(
+            `Newsletter auto-send on update failed for promo #${promo.id}: ${err.message}`,
+          ),
         );
     }
 

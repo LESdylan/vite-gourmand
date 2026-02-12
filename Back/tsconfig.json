@@ -24,6 +24,12 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true
-  }
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "jest"],
+    "paths": {
+      "@generated/*": ["./generated/*"]
+    }
+  },
+  "include": ["src/**/*", "generated/**/*"],
+  "exclude": ["node_modules", "dist", "scripts", "prisma", "postman", "test", "**/*.spec.ts", "**/*.test.ts"]
 }

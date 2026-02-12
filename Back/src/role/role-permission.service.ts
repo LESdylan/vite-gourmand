@@ -22,7 +22,9 @@ export class RolePermissionService {
       select: { permission_id: true },
     });
 
-    const existingIds = existing.map((p: { permission_id: number }) => p.permission_id);
+    const existingIds = existing.map(
+      (p: { permission_id: number }) => p.permission_id,
+    );
     const newIds = permissionIds.filter((id) => !existingIds.includes(id));
 
     if (newIds.length > 0) {
@@ -53,7 +55,8 @@ export class RolePermissionService {
     const user = await this.getUserWithPermissions(userId);
     if (!user?.Role) return false;
     return user.Role.RolePermission.some(
-      (rp: RolePermissionWithPermission) => rp.Permission.name === permissionName,
+      (rp: RolePermissionWithPermission) =>
+        rp.Permission.name === permissionName,
     );
   }
 
@@ -61,7 +64,9 @@ export class RolePermissionService {
   async getUserPermissions(userId: number) {
     const user = await this.getUserWithPermissions(userId);
     if (!user?.Role) return [];
-    return user.Role.RolePermission.map((rp: RolePermissionWithPermission) => rp.Permission);
+    return user.Role.RolePermission.map(
+      (rp: RolePermissionWithPermission) => rp.Permission,
+    );
   }
 
   private async validateRoleExists(roleId: number) {

@@ -75,7 +75,6 @@ export function PortalLoginForm() {
   // Pre-fill remember me
   useEffect(() => {
     if (rememberMeData) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(rememberMeData.email);
 
       setRemember(true);
@@ -84,7 +83,6 @@ export function PortalLoginForm() {
 
   // Clear messages on mode change
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSuccessMsg('');
 
     setLocalError('');
@@ -122,7 +120,9 @@ export function PortalLoginForm() {
       return;
     }
     if (!gdprConsent) {
-      setLocalError('Vous devez accepter la politique de confidentialité (RGPD) pour créer un compte.');
+      setLocalError(
+        'Vous devez accepter la politique de confidentialité (RGPD) pour créer un compte.',
+      );
       return;
     }
 
@@ -577,7 +577,8 @@ export function PortalLoginForm() {
                   onChange={(e) => setNewsletterConsent(e.target.checked)}
                 />
                 <span>
-                  📬 Je souhaite recevoir la newsletter avec les actualités, menus et promotions de Vite & Gourmand.
+                  📬 Je souhaite recevoir la newsletter avec les actualités, menus et promotions de
+                  Vite & Gourmand.
                 </span>
               </label>
             </div>
@@ -593,8 +594,8 @@ export function PortalLoginForm() {
             </button>
 
             <p className="pf-hint">
-              En vous inscrivant, vous acceptez notre politique de confidentialité. Le rôle « utilisateur » vous
-              sera attribué.
+              En vous inscrivant, vous acceptez notre politique de confidentialité. Le rôle «
+              utilisateur » vous sera attribué.
             </p>
           </form>
         )}
@@ -652,10 +653,17 @@ export function PortalLoginForm() {
           aria-modal="true"
           aria-label="Politique de confidentialité RGPD"
           onClick={() => setShowRgpdModal(false)}
-          onKeyDown={(e) => { if (e.key === 'Escape') setShowRgpdModal(false); }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setShowRgpdModal(false);
+          }}
           tabIndex={-1}
         >
-          <div className="pf-rgpd-modal" role="document" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+          <div
+            className="pf-rgpd-modal"
+            role="document"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="pf-rgpd-header">
               <h2 className="pf-rgpd-title">🔒 Politique de Confidentialité &amp; RGPD</h2>
               <button
@@ -678,10 +686,14 @@ export function PortalLoginForm() {
               <section className="pf-rgpd-section">
                 <h3>1. Responsable du traitement</h3>
                 <p>
-                  <strong>Vite &amp; Gourmand</strong> — Entreprise individuelle<br />
-                  15 Rue Sainte-Catherine, 33000 Bordeaux<br />
-                  Email : <em>rgpd@vite-gourmand.fr</em><br />
-                  Tél. : +33 5 56 00 00 00<br />
+                  <strong>Vite &amp; Gourmand</strong> — Entreprise individuelle
+                  <br />
+                  15 Rue Sainte-Catherine, 33000 Bordeaux
+                  <br />
+                  Email : <em>rgpd@vite-gourmand.fr</em>
+                  <br />
+                  Tél. : +33 5 56 00 00 00
+                  <br />
                   Directeurs de la publication : Julie et José Martinez
                 </p>
               </section>
@@ -690,13 +702,34 @@ export function PortalLoginForm() {
                 <h3>2. Données personnelles collectées</h3>
                 <p>Dans le cadre de l'utilisation du site et de nos services, nous collectons :</p>
                 <ul>
-                  <li><strong>Données d'identification :</strong> nom, prénom, adresse email, numéro de téléphone, adresse postale</li>
-                  <li><strong>Données de connexion :</strong> adresse IP, logs de connexion, horodatage, type de navigateur et système d'exploitation</li>
-                  <li><strong>Données de commande :</strong> historique des commandes, préférences alimentaires, allergènes déclarés, montants des achats</li>
-                  <li><strong>Données de navigation :</strong> pages visitées, durée de visite, interactions avec le site (cookies techniques)</li>
-                  <li><strong>Données de communication :</strong> messages envoyés via le formulaire de contact, échanges avec le support ou l'assistant IA</li>
-                  <li><strong>Données de fidélité :</strong> points accumulés, historique des récompenses, code d'affiliation</li>
-                  <li><strong>Données newsletter :</strong> consentement newsletter, adresse email d'inscription, date d'inscription et préférences de communication</li>
+                  <li>
+                    <strong>Données d'identification :</strong> nom, prénom, adresse email, numéro
+                    de téléphone, adresse postale
+                  </li>
+                  <li>
+                    <strong>Données de connexion :</strong> adresse IP, logs de connexion,
+                    horodatage, type de navigateur et système d'exploitation
+                  </li>
+                  <li>
+                    <strong>Données de commande :</strong> historique des commandes, préférences
+                    alimentaires, allergènes déclarés, montants des achats
+                  </li>
+                  <li>
+                    <strong>Données de navigation :</strong> pages visitées, durée de visite,
+                    interactions avec le site (cookies techniques)
+                  </li>
+                  <li>
+                    <strong>Données de communication :</strong> messages envoyés via le formulaire
+                    de contact, échanges avec le support ou l'assistant IA
+                  </li>
+                  <li>
+                    <strong>Données de fidélité :</strong> points accumulés, historique des
+                    récompenses, code d'affiliation
+                  </li>
+                  <li>
+                    <strong>Données newsletter :</strong> consentement newsletter, adresse email
+                    d'inscription, date d'inscription et préférences de communication
+                  </li>
                 </ul>
               </section>
 
@@ -759,11 +792,26 @@ export function PortalLoginForm() {
                 <h3>4. Destinataires des données</h3>
                 <p>Vos données sont traitées par :</p>
                 <ul>
-                  <li><strong>Personnel interne :</strong> équipe de direction, service client, équipe technique — accès limité au strict nécessaire</li>
-                  <li><strong>Hébergeur :</strong> infrastructure cloud sécurisée, serveurs situés en Union Européenne (conformité RGPD)</li>
-                  <li><strong>Prestataire base de données :</strong> Supabase (PostgreSQL managé, données chiffrées au repos et en transit, certifié SOC2)</li>
-                  <li><strong>Prestataire IA :</strong> Groq (modèle LLaMA) — les conversations ne sont ni stockées ni utilisées pour l'entraînement</li>
-                  <li><strong>Service email :</strong> prestataire SMTP pour l'envoi transactionnel et newsletters — aucune revente de données</li>
+                  <li>
+                    <strong>Personnel interne :</strong> équipe de direction, service client, équipe
+                    technique — accès limité au strict nécessaire
+                  </li>
+                  <li>
+                    <strong>Hébergeur :</strong> infrastructure cloud sécurisée, serveurs situés en
+                    Union Européenne (conformité RGPD)
+                  </li>
+                  <li>
+                    <strong>Prestataire base de données :</strong> Supabase (PostgreSQL managé,
+                    données chiffrées au repos et en transit, certifié SOC2)
+                  </li>
+                  <li>
+                    <strong>Prestataire IA :</strong> Groq (modèle LLaMA) — les conversations ne
+                    sont ni stockées ni utilisées pour l'entraînement
+                  </li>
+                  <li>
+                    <strong>Service email :</strong> prestataire SMTP pour l'envoi transactionnel et
+                    newsletters — aucune revente de données
+                  </li>
                 </ul>
                 <p className="pf-rgpd-note">
                   ⚠️ Aucune donnée n'est transférée hors de l'Espace Économique Européen (EEE).
@@ -773,47 +821,94 @@ export function PortalLoginForm() {
 
               <section className="pf-rgpd-section">
                 <h3>5. Vos droits</h3>
-                <p>Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants :</p>
+                <p>
+                  Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants :
+                </p>
                 <ul>
-                  <li><strong>Droit d'accès (Art. 15) :</strong> obtenir la confirmation que vos données sont traitées et en recevoir une copie</li>
-                  <li><strong>Droit de rectification (Art. 16) :</strong> corriger des données inexactes ou compléter des données incomplètes</li>
-                  <li><strong>Droit à l'effacement (Art. 17) :</strong> demander la suppression de vos données (« droit à l'oubli »)</li>
-                  <li><strong>Droit à la limitation (Art. 18) :</strong> restreindre le traitement de vos données dans certains cas</li>
-                  <li><strong>Droit à la portabilité (Art. 20) :</strong> recevoir vos données dans un format structuré, couramment utilisé et lisible par machine</li>
-                  <li><strong>Droit d'opposition (Art. 21) :</strong> vous opposer au traitement de vos données, notamment à des fins de prospection commerciale</li>
-                  <li><strong>Droit de retirer votre consentement :</strong> à tout moment, sans affecter la licéité du traitement antérieur</li>
-                  <li><strong>Droit d'introduire une réclamation :</strong> auprès de la CNIL (Commission Nationale de l'Informatique et des Libertés) — <em>www.cnil.fr</em></li>
+                  <li>
+                    <strong>Droit d'accès (Art. 15) :</strong> obtenir la confirmation que vos
+                    données sont traitées et en recevoir une copie
+                  </li>
+                  <li>
+                    <strong>Droit de rectification (Art. 16) :</strong> corriger des données
+                    inexactes ou compléter des données incomplètes
+                  </li>
+                  <li>
+                    <strong>Droit à l'effacement (Art. 17) :</strong> demander la suppression de vos
+                    données (« droit à l'oubli »)
+                  </li>
+                  <li>
+                    <strong>Droit à la limitation (Art. 18) :</strong> restreindre le traitement de
+                    vos données dans certains cas
+                  </li>
+                  <li>
+                    <strong>Droit à la portabilité (Art. 20) :</strong> recevoir vos données dans un
+                    format structuré, couramment utilisé et lisible par machine
+                  </li>
+                  <li>
+                    <strong>Droit d'opposition (Art. 21) :</strong> vous opposer au traitement de
+                    vos données, notamment à des fins de prospection commerciale
+                  </li>
+                  <li>
+                    <strong>Droit de retirer votre consentement :</strong> à tout moment, sans
+                    affecter la licéité du traitement antérieur
+                  </li>
+                  <li>
+                    <strong>Droit d'introduire une réclamation :</strong> auprès de la CNIL
+                    (Commission Nationale de l'Informatique et des Libertés) — <em>www.cnil.fr</em>
+                  </li>
                 </ul>
                 <p>
-                  Pour exercer vos droits, envoyez un email à{' '}
-                  <strong>rgpd@vite-gourmand.fr</strong> avec une copie d'une pièce d'identité.
-                  Nous nous engageons à répondre dans un délai maximum de 30 jours.
+                  Pour exercer vos droits, envoyez un email à <strong>rgpd@vite-gourmand.fr</strong>{' '}
+                  avec une copie d'une pièce d'identité. Nous nous engageons à répondre dans un
+                  délai maximum de 30 jours.
                 </p>
               </section>
 
               <section className="pf-rgpd-section">
                 <h3>6. Cookies</h3>
-                <p>Notre site utilise exclusivement des <strong>cookies techniques</strong> nécessaires au bon fonctionnement de l'application :</p>
+                <p>
+                  Notre site utilise exclusivement des <strong>cookies techniques</strong>{' '}
+                  nécessaires au bon fonctionnement de l'application :
+                </p>
                 <ul>
-                  <li><strong>Cookie de session :</strong> maintien de votre connexion durant la navigation (durée : session)</li>
-                  <li><strong>Cookie « Se souvenir de moi » :</strong> persistance de la connexion si activé (durée : 30 jours)</li>
-                  <li><strong>Token JWT :</strong> authentification sécurisée des requêtes API (durée : 24h)</li>
+                  <li>
+                    <strong>Cookie de session :</strong> maintien de votre connexion durant la
+                    navigation (durée : session)
+                  </li>
+                  <li>
+                    <strong>Cookie « Se souvenir de moi » :</strong> persistance de la connexion si
+                    activé (durée : 30 jours)
+                  </li>
+                  <li>
+                    <strong>Token JWT :</strong> authentification sécurisée des requêtes API (durée
+                    : 24h)
+                  </li>
                 </ul>
                 <p className="pf-rgpd-note">
-                  🚫 Aucun cookie publicitaire, de tracking ou d'analyse comportementale n'est utilisé.
-                  Aucun outil de type Google Analytics, Facebook Pixel ou similaire n'est installé.
+                  🚫 Aucun cookie publicitaire, de tracking ou d'analyse comportementale n'est
+                  utilisé. Aucun outil de type Google Analytics, Facebook Pixel ou similaire n'est
+                  installé.
                 </p>
               </section>
 
               <section className="pf-rgpd-section">
                 <h3>7. Sécurité des données</h3>
-                <p>Nous mettons en œuvre les mesures techniques et organisationnelles suivantes :</p>
+                <p>
+                  Nous mettons en œuvre les mesures techniques et organisationnelles suivantes :
+                </p>
                 <ul>
                   <li>Chiffrement TLS/SSL de toutes les communications (HTTPS)</li>
                   <li>Mots de passe hashés avec bcrypt (12 rounds de salage)</li>
                   <li>Authentification JWT avec expiration et refresh tokens</li>
-                  <li>Politique de mots de passe robuste : 10 caractères min., majuscules, minuscules, chiffres et caractères spéciaux</li>
-                  <li>Row Level Security (RLS) sur la base de données — chaque utilisateur n'accède qu'à ses propres données</li>
+                  <li>
+                    Politique de mots de passe robuste : 10 caractères min., majuscules, minuscules,
+                    chiffres et caractères spéciaux
+                  </li>
+                  <li>
+                    Row Level Security (RLS) sur la base de données — chaque utilisateur n'accède
+                    qu'à ses propres données
+                  </li>
                   <li>Contrôle d'accès par rôles (RBAC) : client, manager, admin, superadmin</li>
                   <li>Protection CSRF, rate limiting et validation stricte des entrées</li>
                   <li>Sauvegardes automatiques régulières des bases de données</li>
@@ -837,8 +932,10 @@ export function PortalLoginForm() {
                 <h3>9. Contact DPO</h3>
                 <p>
                   Pour toute question relative à la protection de vos données personnelles :<br />
-                  📧 <strong>rgpd@vite-gourmand.fr</strong><br />
-                  📮 Vite &amp; Gourmand — Service RGPD, 15 Rue Sainte-Catherine, 33000 Bordeaux<br />
+                  📧 <strong>rgpd@vite-gourmand.fr</strong>
+                  <br />
+                  📮 Vite &amp; Gourmand — Service RGPD, 15 Rue Sainte-Catherine, 33000 Bordeaux
+                  <br />
                   📞 +33 5 56 00 00 00
                 </p>
               </section>

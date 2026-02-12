@@ -39,20 +39,22 @@ export class LogController {
   @Get('stream')
   async *streamLogs(): AsyncGenerator<string> {
     let lastCount = this.logService.getCount();
-    
+
     // Send initial logs
     const initialLogs = this.logService.getLogs({ limit: 50 });
     for (const log of initialLogs) {
       yield `data: ${JSON.stringify(log)}\n\n`;
     }
-    
+
     // Poll for new logs every 500ms
     while (true) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       const currentCount = this.logService.getCount();
-      
+
       if (currentCount > lastCount) {
-        const newLogs = this.logService.getLogs({ limit: currentCount - lastCount });
+        const newLogs = this.logService.getLogs({
+          limit: currentCount - lastCount,
+        });
         for (const log of newLogs.slice(-(currentCount - lastCount))) {
           yield `data: ${JSON.stringify(log)}\n\n`;
         }

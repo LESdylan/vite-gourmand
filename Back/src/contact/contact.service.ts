@@ -22,7 +22,10 @@ export class ContactService {
     private readonly mail: MailService,
     private readonly config: ConfigService,
   ) {
-    this.ownerEmail = this.config.get<string>('TITAN_EMAIL', 'devfast@archicode.codes');
+    this.ownerEmail = this.config.get<string>(
+      'TITAN_EMAIL',
+      'devfast@archicode.codes',
+    );
   }
 
   /* ── helpers ────────────────────────────────────────────── */
@@ -36,7 +39,12 @@ export class ContactService {
 
   private mapCategory(subject: string): string {
     const s = subject.toLowerCase();
-    if (s.includes('mariage') || s.includes('anniversaire') || s.includes('événement') || s.includes('entreprise'))
+    if (
+      s.includes('mariage') ||
+      s.includes('anniversaire') ||
+      s.includes('événement') ||
+      s.includes('entreprise')
+    )
       return 'order';
     if (s.includes('menu')) return 'menu';
     return 'other';
@@ -80,22 +88,35 @@ export class ContactService {
         ticket_number: ticketNumber,
         category: this.mapCategory(dto.title),
         subject: dto.title,
-        description: `[Contact — ${dto.name}] ${dto.description}\n\n—\nEmail : ${dto.email}` + (dto.phone ? `\nTéléphone : ${dto.phone}` : ''),
+        description:
+          `[Contact — ${dto.name}] ${dto.description}\n\n—\nEmail : ${dto.email}` +
+          (dto.phone ? `\nTéléphone : ${dto.phone}` : ''),
         priority: 'normal',
         status: 'open',
       },
     });
 
-    this.logger.log(`Ticket ${ticketNumber} created from contact form (contact #${contactMessage.id}, ticket #${ticket.id})`);
+    this.logger.log(
+      `Ticket ${ticketNumber} created from contact form (contact #${contactMessage.id}, ticket #${ticket.id})`,
+    );
 
     // 3. Send confirmation email to the visitor (fire-and-forget)
     this.mail
       .send({
         to: dto.email,
         subject: `Votre demande a bien été reçue — ${ticketNumber}`,
-        html: this.getTicketConfirmationTemplate(dto.name, ticketNumber, dto.title),
+        html: this.getTicketConfirmationTemplate(
+          dto.name,
+          ticketNumber,
+          dto.title,
+        ),
       })
-      .catch((err) => this.logger.error(`Failed to send confirmation email to ${dto.email}`, err));
+      .catch((err) =>
+        this.logger.error(
+          `Failed to send confirmation email to ${dto.email}`,
+          err,
+        ),
+      );
 
     // 4. Notify the owner / admin about the new ticket
     this.mail
@@ -104,8 +125,17 @@ export class ContactService {
         subject: `[Nouveau ticket] ${ticketNumber} — ${dto.title}`,
         html: this.getOwnerNotificationTemplate(dto, ticketNumber),
       })
-      .then(() => this.logger.log(`Owner notification sent to ${this.ownerEmail} for ticket ${ticketNumber}`))
-      .catch((err) => this.logger.error(`Failed to send owner notification to ${this.ownerEmail}`, err));
+      .then(() =>
+        this.logger.log(
+          `Owner notification sent to ${this.ownerEmail} for ticket ${ticketNumber}`,
+        ),
+      )
+      .catch((err) =>
+        this.logger.error(
+          `Failed to send owner notification to ${this.ownerEmail}`,
+          err,
+        ),
+      );
 
     return {
       ...contactMessage,
@@ -127,7 +157,10 @@ export class ContactService {
 
   /* ── email templates ────────────────────────────────────── */
 
-  private getOwnerNotificationTemplate(dto: CreateContactMessageDto, ticketNumber: string): string {
+  private getOwnerNotificationTemplate(
+    dto: CreateContactMessageDto,
+    ticketNumber: string,
+  ): string {
     const phoneRow = dto.phone
       ? `<tr><td style="padding:8px 12px;font-weight:600;color:#722F37;white-space:nowrap">Téléphone</td><td style="padding:8px 12px;color:#333">${dto.phone}</td></tr>`
       : '';
@@ -183,7 +216,11 @@ export class ContactService {
 </html>`;
   }
 
-  private getTicketConfirmationTemplate(name: string, ticketNumber: string, subject: string): string {
+  private getTicketConfirmationTemplate(
+    name: string,
+    ticketNumber: string,
+    subject: string,
+  ): string {
     return `
 <!DOCTYPE html>
 <html lang="fr">

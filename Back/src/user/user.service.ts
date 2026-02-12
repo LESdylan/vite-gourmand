@@ -109,7 +109,14 @@ export class UserService {
     updated_at?: Date | null;
     last_login_at?: Date | null;
     Role?: { name: string } | null;
-    LoyaltyAccount?: { id: number; user_id: number; total_earned: number | null; total_spent: number | null; balance: number | null; last_activity_at: Date | null } | null;
+    LoyaltyAccount?: {
+      id: number;
+      user_id: number;
+      total_earned: number | null;
+      total_spent: number | null;
+      balance: number | null;
+      last_activity_at: Date | null;
+    } | null;
   }) {
     return {
       id: user.id,

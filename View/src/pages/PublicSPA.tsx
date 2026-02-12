@@ -42,7 +42,10 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   const [promotions, setPromotions] = useState<ActivePromotion[]>([]);
   const [bannerHeight, setBannerHeight] = useState(0);
   const [orderMenuId, setOrderMenuId] = useState<number | null>(null);
-  const [newsletterMsg, setNewsletterMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [newsletterMsg, setNewsletterMsg] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const currentPageRef = useRef<Page>('home');
 
@@ -210,7 +213,9 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
           {/* Floating AI Assistant — show on all pages except contact (which has its own AI chat) */}
           {currentPage !== 'contact' && (
             <AiAssistantWidget
-              pageContext={currentPage === 'menu' ? 'menu' : currentPage === 'order' ? 'order' : 'home'}
+              pageContext={
+                currentPage === 'menu' ? 'menu' : currentPage === 'order' ? 'order' : 'home'
+              }
               onNavigateToContact={() => handlePageChange('contact')}
             />
           )}

@@ -69,7 +69,7 @@ export class HttpLogInterceptor implements NestInterceptor {
     this.logger.log(
       `${method} ${url} ${statusCode} ${duration}ms - ${ip} "${userAgent}"`,
     );
-    
+
     // Store in log service for streaming
     if (this.logService) {
       this.logService.logHttp(method, url, statusCode, duration, ip);
@@ -89,10 +89,17 @@ export class HttpLogInterceptor implements NestInterceptor {
     this.logger.error(
       `${method} ${url} ${statusCode} ${duration}ms - ${ip} "${userAgent}"`,
     );
-    
+
     // Store in log service for streaming
     if (this.logService) {
-      this.logService.logHttp(method, url, statusCode, duration, ip, errorMessage);
+      this.logService.logHttp(
+        method,
+        url,
+        statusCode,
+        duration,
+        ip,
+        errorMessage,
+      );
     }
   }
 }

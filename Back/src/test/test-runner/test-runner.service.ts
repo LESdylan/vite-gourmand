@@ -115,7 +115,7 @@ export class TestRunnerService {
   /** Get cached results (or load from file) */
   async getResults(): Promise<RunTestsResponse | null> {
     if (this.cachedResults) return this.cachedResults;
-    
+
     // Try loading from all test result files
     const [unitData, e2eData, customData, postmanData] = await Promise.all([
       this.readJestResultFile('test-results-unit.json'),
@@ -125,8 +125,10 @@ export class TestRunnerService {
     ]);
 
     const suites: TestSuite[] = [];
-    if (unitData) suites.push(...this.parseJestResult(unitData, 'jest', 'Unit Tests'));
-    if (e2eData) suites.push(...this.parseJestResult(e2eData, 'e2e', 'E2E Tests'));
+    if (unitData)
+      suites.push(...this.parseJestResult(unitData, 'jest', 'Unit Tests'));
+    if (e2eData)
+      suites.push(...this.parseJestResult(e2eData, 'e2e', 'E2E Tests'));
     if (customData) suites.push(...customData);
     if (postmanData) suites.push(...postmanData);
 
@@ -156,7 +158,7 @@ export class TestRunnerService {
 
     try {
       this.logger.log('🚀 Starting test execution...');
-      
+
       // Run unit tests with JSON output
       this.currentTest = 'Unit Tests';
       this.logger.log('📦 Running Unit Tests...');
@@ -190,8 +192,10 @@ export class TestRunnerService {
       ]);
 
       const suites: TestSuite[] = [];
-      if (unitData) suites.push(...this.parseJestResult(unitData, 'jest', 'Unit Tests'));
-      if (e2eData) suites.push(...this.parseJestResult(e2eData, 'e2e', 'E2E Tests'));
+      if (unitData)
+        suites.push(...this.parseJestResult(unitData, 'jest', 'Unit Tests'));
+      if (e2eData)
+        suites.push(...this.parseJestResult(e2eData, 'e2e', 'E2E Tests'));
       if (customData) suites.push(...customData);
       if (postmanData) suites.push(...postmanData);
 
@@ -199,11 +203,18 @@ export class TestRunnerService {
       summary.duration = Date.now() - startTime;
 
       // Log summary
-      const passRate = summary.total > 0 ? Math.round((summary.passed / summary.total) * 100) : 0;
+      const passRate =
+        summary.total > 0
+          ? Math.round((summary.passed / summary.total) * 100)
+          : 0;
       if (summary.failed === 0) {
-        this.logger.log(`✅ All tests passed! ${summary.passed}/${summary.total} (${passRate}%) in ${summary.duration}ms`);
+        this.logger.log(
+          `✅ All tests passed! ${summary.passed}/${summary.total} (${passRate}%) in ${summary.duration}ms`,
+        );
       } else {
-        this.logger.warn(`⚠️ Some tests failed: ${summary.passed} passed, ${summary.failed} failed (${passRate}%) in ${summary.duration}ms`);
+        this.logger.warn(
+          `⚠️ Some tests failed: ${summary.passed} passed, ${summary.failed} failed (${passRate}%) in ${summary.duration}ms`,
+        );
       }
 
       this.cachedResults = {
@@ -216,7 +227,9 @@ export class TestRunnerService {
 
       return this.cachedResults;
     } catch (error) {
-      this.logger.error(`❌ Test execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `❌ Test execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       throw error;
     } finally {
       this.isRunning = false;
@@ -241,34 +254,50 @@ export class TestRunnerService {
 
     try {
       this.logger.log(`🚀 Running ${testId} tests...`);
-      
+
       let suites: TestSuite[] = [];
 
       if (testId === 'unit' || testId === 'e2e') {
-        await this.executeJest(testId as 'unit' | 'e2e', verbose);
-        const filename = testId === 'unit' ? 'test-results-unit.json' : 'test-results-e2e.json';
+        await this.executeJest(testId, verbose);
+        const filename =
+          testId === 'unit'
+            ? 'test-results-unit.json'
+            : 'test-results-e2e.json';
         const suiteType = testId === 'unit' ? 'jest' : 'e2e';
         const data = await this.readJestResultFile(filename);
-        suites = data ? this.parseJestResult(data, suiteType, `${testId} Tests`) : [];
+        suites = data
+          ? this.parseJestResult(data, suiteType, `${testId} Tests`)
+          : [];
       } else if (testId === 'custom') {
         await this.executeCustomTests(verbose);
-        const data = await this.readCustomResultFile('test-results-custom.json');
+        const data = await this.readCustomResultFile(
+          'test-results-custom.json',
+        );
         suites = data || [];
       } else if (testId === 'postman') {
         await this.executePostmanTests(verbose);
-        const data = await this.readPostmanResultFile('test-results-postman.json');
+        const data = await this.readPostmanResultFile(
+          'test-results-postman.json',
+        );
         suites = data || [];
       }
-      
+
       const summary = this.calculateSummary(suites);
       summary.duration = Date.now() - startTime;
 
       // Log summary
-      const passRate = summary.total > 0 ? Math.round((summary.passed / summary.total) * 100) : 0;
+      const passRate =
+        summary.total > 0
+          ? Math.round((summary.passed / summary.total) * 100)
+          : 0;
       if (summary.failed === 0) {
-        this.logger.log(`✅ ${testId} tests passed! ${summary.passed}/${summary.total} (${passRate}%) in ${summary.duration}ms`);
+        this.logger.log(
+          `✅ ${testId} tests passed! ${summary.passed}/${summary.total} (${passRate}%) in ${summary.duration}ms`,
+        );
       } else {
-        this.logger.warn(`⚠️ ${testId} tests: ${summary.passed} passed, ${summary.failed} failed (${passRate}%)`);
+        this.logger.warn(
+          `⚠️ ${testId} tests: ${summary.passed} passed, ${summary.failed} failed (${passRate}%)`,
+        );
       }
 
       this.cachedResults = {
@@ -280,7 +309,9 @@ export class TestRunnerService {
 
       return this.cachedResults;
     } catch (error) {
-      this.logger.error(`❌ ${testId} test execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `❌ ${testId} test execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       throw error;
     } finally {
       this.isRunning = false;
@@ -289,14 +320,20 @@ export class TestRunnerService {
   }
 
   /** Execute Jest directly with JSON output */
-  private executeJest(testType: 'unit' | 'e2e', streamOutput = true): Promise<{ code: number; output: string }> {
+  private executeJest(
+    testType: 'unit' | 'e2e',
+    streamOutput = true,
+  ): Promise<{ code: number; output: string }> {
     return new Promise((resolve, reject) => {
-      const outputFile = testType === 'unit' ? 'test-results-unit.json' : 'test-results-e2e.json';
-      
+      const outputFile =
+        testType === 'unit'
+          ? 'test-results-unit.json'
+          : 'test-results-e2e.json';
+
       // Build full command as a string for shell execution
       // The --localstorage-file flag is a custom Node.js option that requires shell interpretation
       let command = `node --max-old-space-size=1024 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --runInBand --json --outputFile=${outputFile}`;
-      
+
       if (testType === 'e2e') {
         command += ' --config ./src/test/e2e/jest-e2e.json';
       }
@@ -310,7 +347,7 @@ export class TestRunnerService {
       });
 
       let output = '';
-      
+
       proc.stdout?.on('data', (data) => {
         const text = data.toString();
         output += text;
@@ -339,7 +376,10 @@ export class TestRunnerService {
   }
 
   /** Execute npm script with streamed output parsing (legacy) */
-  private executeNpm(script: string, streamOutput = true): Promise<{ code: number; output: string }> {
+  private executeNpm(
+    script: string,
+    streamOutput = true,
+  ): Promise<{ code: number; output: string }> {
     return new Promise((resolve, reject) => {
       const proc = spawn('npm', ['run', script], {
         cwd: process.cwd(),
@@ -348,7 +388,7 @@ export class TestRunnerService {
       });
 
       let output = '';
-      
+
       proc.stdout?.on('data', (data) => {
         const text = data.toString();
         output += text;
@@ -379,16 +419,20 @@ export class TestRunnerService {
 
   /** Stream and parse test output with proper log levels */
   private streamTestOutput(text: string, isStderr: boolean): void {
-    const lines = text.split('\n').filter(line => line.trim());
-    
+    const lines = text.split('\n').filter((line) => line.trim());
+
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       // Skip empty lines and noise
-      if (!trimmed || trimmed.startsWith('>') || trimmed.includes('node_modules')) {
+      if (
+        !trimmed ||
+        trimmed.startsWith('>') ||
+        trimmed.includes('node_modules')
+      ) {
         continue;
       }
-      
+
       // Detect test status from output
       if (trimmed.startsWith('PASS ')) {
         this.logger.log(`✅ ${trimmed}`);
@@ -398,13 +442,20 @@ export class TestRunnerService {
         this.logger.log(`   ${trimmed}`);
       } else if (trimmed.includes('✕') || trimmed.includes('✗')) {
         this.logger.error(`   ${trimmed}`);
-      } else if (trimmed.startsWith('Test Suites:') || trimmed.startsWith('Tests:') || trimmed.startsWith('Time:')) {
+      } else if (
+        trimmed.startsWith('Test Suites:') ||
+        trimmed.startsWith('Tests:') ||
+        trimmed.startsWith('Time:')
+      ) {
         this.logger.log(trimmed);
       } else if (trimmed.includes('passed') && !trimmed.includes('failed')) {
         this.logger.log(trimmed);
       } else if (trimmed.includes('failed')) {
         this.logger.warn(trimmed);
-      } else if (isStderr && (trimmed.includes('Error') || trimmed.includes('error'))) {
+      } else if (
+        isStderr &&
+        (trimmed.includes('Error') || trimmed.includes('error'))
+      ) {
         this.logger.error(trimmed);
       } else {
         // Default: log at debug level for verbose output
@@ -414,7 +465,9 @@ export class TestRunnerService {
   }
 
   /** Read Jest JSON result file */
-  private async readJestResultFile(filename: string): Promise<JestResult | null> {
+  private async readJestResultFile(
+    filename: string,
+  ): Promise<JestResult | null> {
     try {
       const filePath = path.join(process.cwd(), filename);
       if (!fs.existsSync(filePath)) {
@@ -430,25 +483,29 @@ export class TestRunnerService {
   }
 
   /** Parse Jest result into our TestSuite format */
-  private parseJestResult(data: JestResult, type: 'jest' | 'e2e' | 'postman', suiteName: string): TestSuite[] {
+  private parseJestResult(
+    data: JestResult,
+    type: 'jest' | 'e2e' | 'postman',
+    suiteName: string,
+  ): TestSuite[] {
     const suites: TestSuite[] = [];
-    
+
     for (const testFile of data.testResults) {
       const fileName = path.basename(testFile.name);
       const tests: TestResult[] = [];
       let passed = 0;
       let failed = 0;
       let totalDuration = 0;
-      
+
       for (const assertion of testFile.assertionResults) {
         const status = this.mapAssertionStatus(assertion.status);
-        
+
         if (status === 'passed') passed++;
         else if (status === 'failed') failed++;
-        
+
         const duration = assertion.duration || 0;
         totalDuration += duration;
-        
+
         tests.push({
           id: `${type}-${fileName}-${tests.length}`,
           name: assertion.fullName || assertion.title,
@@ -457,7 +514,7 @@ export class TestRunnerService {
           error: assertion.failureMessages.join('\n') || undefined,
         });
       }
-      
+
       suites.push({
         name: fileName,
         type,
@@ -467,20 +524,30 @@ export class TestRunnerService {
         totalDuration,
       });
     }
-    
+
     return suites;
   }
 
   /** Map Jest assertion status to our status type */
-  private mapAssertionStatus(jestStatus: string): 'passed' | 'failed' | 'skipped' {
+  private mapAssertionStatus(
+    jestStatus: string,
+  ): 'passed' | 'failed' | 'skipped' {
     if (jestStatus === 'passed') return 'passed';
     if (jestStatus === 'failed') return 'failed';
     return 'skipped';
   }
 
   /** Calculate summary from suites */
-  private calculateSummary(suites: TestSuite[]): { total: number; passed: number; failed: number; duration: number } {
-    let total = 0, passed = 0, failed = 0, duration = 0;
+  private calculateSummary(suites: TestSuite[]): {
+    total: number;
+    passed: number;
+    failed: number;
+    duration: number;
+  } {
+    let total = 0,
+      passed = 0,
+      failed = 0,
+      duration = 0;
     for (const suite of suites) {
       total += suite.tests.length;
       passed += suite.totalPassed;
@@ -491,12 +558,14 @@ export class TestRunnerService {
   }
 
   /** Execute custom unit tests */
-  private executeCustomTests(streamOutput = true): Promise<{ code: number; output: string }> {
+  private executeCustomTests(
+    streamOutput = true,
+  ): Promise<{ code: number; output: string }> {
     return new Promise((resolve) => {
       const startTime = Date.now();
       const customTestsDir = path.join(process.cwd(), 'src/test/unit_tests');
       const outputFile = path.join(process.cwd(), 'test-results-custom.json');
-      
+
       // Check if custom tests directory exists
       if (!fs.existsSync(customTestsDir)) {
         this.logger.warn('Custom tests directory not found');
@@ -506,9 +575,10 @@ export class TestRunnerService {
       }
 
       // Get all test files (excluding base.test.ts which is the base class)
-      const testFiles = fs.readdirSync(customTestsDir)
-        .filter(f => f.endsWith('.test.ts') && f !== 'base.test.ts');
-      
+      const testFiles = fs
+        .readdirSync(customTestsDir)
+        .filter((f) => f.endsWith('.test.ts') && f !== 'base.test.ts');
+
       if (testFiles.length === 0) {
         fs.writeFileSync(outputFile, JSON.stringify([]));
         resolve({ code: 0, output: 'No custom test files found' });
@@ -568,11 +638,11 @@ export class TestRunnerService {
 
       let output = '';
       let jsonOutput = '';
-      
+
       proc.stdout?.on('data', (data) => {
         const text = data.toString();
         output += text;
-        
+
         // Try to extract JSON from output
         const lines = text.split('\n');
         for (const line of lines) {
@@ -596,21 +666,27 @@ export class TestRunnerService {
 
       proc.on('close', (code) => {
         const duration = Date.now() - startTime;
-        
+
         // Parse results and write to file
         try {
           const results = jsonOutput ? JSON.parse(jsonOutput) : [];
           const suites = this.convertCustomResultsToSuites(results);
           fs.writeFileSync(outputFile, JSON.stringify(suites));
-          
-          const passed = results.filter((r: CustomTestResult) => r.passed).length;
-          const failed = results.filter((r: CustomTestResult) => !r.passed).length;
-          
-          this.logger.log(`Custom tests: ${passed} passed, ${failed} failed in ${duration}ms`);
+
+          const passed = results.filter(
+            (r: CustomTestResult) => r.passed,
+          ).length;
+          const failed = results.filter(
+            (r: CustomTestResult) => !r.passed,
+          ).length;
+
+          this.logger.log(
+            `Custom tests: ${passed} passed, ${failed} failed in ${duration}ms`,
+          );
         } catch {
           fs.writeFileSync(outputFile, JSON.stringify([]));
         }
-        
+
         resolve({ code: code ?? 0, output });
       });
 
@@ -622,45 +698,56 @@ export class TestRunnerService {
   }
 
   /** Convert custom test results to TestSuite format */
-  private convertCustomResultsToSuites(results: CustomTestResult[]): TestSuite[] {
+  private convertCustomResultsToSuites(
+    results: CustomTestResult[],
+  ): TestSuite[] {
     if (!results || results.length === 0) return [];
-    
+
     const tests: TestResult[] = results.map((r, idx) => ({
       id: `custom-${idx}`,
       name: r.name || `Test ${idx + 1}`,
-      status: r.passed ? 'passed' as const : 'failed' as const,
+      status: r.passed ? ('passed' as const) : ('failed' as const),
       duration: r.duration || 0,
       error: r.errors?.join('\n'),
     }));
-    
-    const passed = tests.filter(t => t.status === 'passed').length;
-    const failed = tests.filter(t => t.status === 'failed').length;
+
+    const passed = tests.filter((t) => t.status === 'passed').length;
+    const failed = tests.filter((t) => t.status === 'failed').length;
     const totalDuration = tests.reduce((sum, t) => sum + (t.duration || 0), 0);
-    
-    return [{
-      name: 'custom-unit-tests',
-      type: 'custom',
-      tests,
-      totalPassed: passed,
-      totalFailed: failed,
-      totalDuration,
-    }];
+
+    return [
+      {
+        name: 'custom-unit-tests',
+        type: 'custom',
+        tests,
+        totalPassed: passed,
+        totalFailed: failed,
+        totalDuration,
+      },
+    ];
   }
 
   /** Read custom test results file */
-  private async readCustomResultFile(filename: string): Promise<TestSuite[] | null> {
+  private async readCustomResultFile(
+    filename: string,
+  ): Promise<TestSuite[] | null> {
     return this.readResultFile(filename);
   }
 
   /** Execute Postman tests using Newman */
-  private executePostmanTests(streamOutput = true): Promise<{ code: number; output: string }> {
+  private executePostmanTests(
+    streamOutput = true,
+  ): Promise<{ code: number; output: string }> {
     return new Promise((resolve) => {
       const startTime = Date.now();
       const postmanDir = path.join(process.cwd(), 'postman');
       const outputFile = path.join(process.cwd(), 'test-results-postman.json');
-      const collectionFile = path.join(postmanDir, 'vite-gourmand-ecf-complete.json');
+      const collectionFile = path.join(
+        postmanDir,
+        'vite-gourmand-ecf-complete.json',
+      );
       const envFile = path.join(postmanDir, 'env.local.json');
-      
+
       // Check if collection exists
       if (!fs.existsSync(collectionFile)) {
         this.logger.warn('Postman collection not found');
@@ -671,12 +758,14 @@ export class TestRunnerService {
 
       // Build newman command
       let command = `npx newman run "${collectionFile}" --reporters cli,json --reporter-json-export test-results-postman-raw.json`;
-      
+
       if (fs.existsSync(envFile)) {
         command += ` --environment "${envFile}"`;
       }
 
-      this.logger.log(`📮 Running Postman tests: ${path.basename(collectionFile)}`);
+      this.logger.log(
+        `📮 Running Postman tests: ${path.basename(collectionFile)}`,
+      );
 
       const proc = spawn(command, [], {
         cwd: process.cwd(),
@@ -685,7 +774,7 @@ export class TestRunnerService {
       });
 
       let output = '';
-      
+
       proc.stdout?.on('data', (data) => {
         const text = data.toString();
         output += text;
@@ -700,18 +789,28 @@ export class TestRunnerService {
 
       proc.on('close', (code) => {
         const duration = Date.now() - startTime;
-        
+
         // Parse Newman JSON output and convert to our format
         try {
-          const rawResultPath = path.join(process.cwd(), 'test-results-postman-raw.json');
+          const rawResultPath = path.join(
+            process.cwd(),
+            'test-results-postman-raw.json',
+          );
           if (fs.existsSync(rawResultPath)) {
-            const rawResult = JSON.parse(fs.readFileSync(rawResultPath, 'utf-8')) as NewmanResult;
+            const rawResult = JSON.parse(
+              fs.readFileSync(rawResultPath, 'utf-8'),
+            ) as NewmanResult;
             const suites = this.parseNewmanResult(rawResult);
             fs.writeFileSync(outputFile, JSON.stringify(suites));
-            
-            const stats = rawResult.run?.stats?.assertions || { total: 0, failed: 0 };
+
+            const stats = rawResult.run?.stats?.assertions || {
+              total: 0,
+              failed: 0,
+            };
             const passed = stats.total - stats.failed;
-            this.logger.log(`Postman tests: ${passed} passed, ${stats.failed} failed in ${duration}ms`);
+            this.logger.log(
+              `Postman tests: ${passed} passed, ${stats.failed} failed in ${duration}ms`,
+            );
           } else {
             fs.writeFileSync(outputFile, JSON.stringify([]));
           }
@@ -719,7 +818,7 @@ export class TestRunnerService {
           this.logger.error('Failed to parse Postman results', err);
           fs.writeFileSync(outputFile, JSON.stringify([]));
         }
-        
+
         resolve({ code: code ?? 0, output });
       });
 
@@ -734,20 +833,20 @@ export class TestRunnerService {
   /** Parse Newman result into TestSuite format */
   private parseNewmanResult(result: NewmanResult): TestSuite[] {
     if (!result?.run?.executions) return [];
-    
+
     const tests: TestResult[] = [];
     let passed = 0;
     let failed = 0;
     let totalDuration = 0;
-    
+
     for (const execution of result.run.executions) {
       const itemName = execution.item?.name || 'Unknown Request';
       const responseTime = execution.response?.responseTime || 0;
       totalDuration += responseTime;
-      
+
       // Each execution can have multiple assertions
       const assertions = execution.assertions || [];
-      
+
       if (assertions.length === 0) {
         // No assertions - count as passed if no error
         tests.push({
@@ -767,25 +866,29 @@ export class TestRunnerService {
             duration: responseTime / assertions.length,
             error: assertion.error?.message,
           });
-          
+
           if (hasFailed) failed++;
           else passed++;
         }
       }
     }
-    
-    return [{
-      name: result.collection?.info?.name || 'Postman Collection',
-      type: 'postman',
-      tests,
-      totalPassed: passed,
-      totalFailed: failed,
-      totalDuration,
-    }];
+
+    return [
+      {
+        name: result.collection?.info?.name || 'Postman Collection',
+        type: 'postman',
+        tests,
+        totalPassed: passed,
+        totalFailed: failed,
+        totalDuration,
+      },
+    ];
   }
 
   /** Read Postman test results file */
-  private async readPostmanResultFile(filename: string): Promise<TestSuite[] | null> {
+  private async readPostmanResultFile(
+    filename: string,
+  ): Promise<TestSuite[] | null> {
     return this.readResultFile(filename);
   }
 
@@ -805,17 +908,24 @@ export class TestRunnerService {
 
   /** Stream Postman test output */
   private streamPostmanOutput(text: string): void {
-    const lines = text.split('\n').filter(line => line.trim());
-    
+    const lines = text.split('\n').filter((line) => line.trim());
+
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
-      
+
       if (trimmed.includes('✓') || trimmed.includes('✔')) {
         this.logger.log(`   ${trimmed}`);
-      } else if (trimmed.includes('✗') || trimmed.includes('✕') || trimmed.includes('failed')) {
+      } else if (
+        trimmed.includes('✗') ||
+        trimmed.includes('✕') ||
+        trimmed.includes('failed')
+      ) {
         this.logger.error(`   ${trimmed}`);
-      } else if (trimmed.includes('assertions') || trimmed.includes('requests')) {
+      } else if (
+        trimmed.includes('assertions') ||
+        trimmed.includes('requests')
+      ) {
         this.logger.log(trimmed);
       } else {
         this.logger.debug(trimmed);
@@ -834,7 +944,10 @@ export class TestRunnerService {
     return data ? this.convertJestToLegacy(data) : [];
   }
 
-  async getSummary(): Promise<{ unit: LegacyTestSuite[]; e2e: LegacyTestSuite[] }> {
+  async getSummary(): Promise<{
+    unit: LegacyTestSuite[];
+    e2e: LegacyTestSuite[];
+  }> {
     const [unit, e2e] = await Promise.all([
       this.getUnitTestResults(),
       this.getE2eTestResults(),
@@ -844,17 +957,19 @@ export class TestRunnerService {
 
   /** Convert Jest result to legacy format */
   private convertJestToLegacy(data: JestResult): LegacyTestSuite[] {
-    return data.testResults.map(file => ({
+    return data.testResults.map((file) => ({
       name: path.basename(file.name),
-      tests: file.assertionResults.map(a => ({
+      tests: file.assertionResults.map((a) => ({
         name: a.fullName || a.title,
         status: this.mapAssertionStatus(a.status),
         duration: a.duration,
         error: a.failureMessages.join('\n') || undefined,
       })),
-      passed: file.assertionResults.filter(a => a.status === 'passed').length,
-      failed: file.assertionResults.filter(a => a.status === 'failed').length,
-      skipped: file.assertionResults.filter(a => a.status === 'pending' || a.status === 'skipped').length,
+      passed: file.assertionResults.filter((a) => a.status === 'passed').length,
+      failed: file.assertionResults.filter((a) => a.status === 'failed').length,
+      skipped: file.assertionResults.filter(
+        (a) => a.status === 'pending' || a.status === 'skipped',
+      ).length,
     }));
   }
 }
@@ -862,7 +977,12 @@ export class TestRunnerService {
 /** Legacy format for backward compatibility */
 export interface LegacyTestSuite {
   name: string;
-  tests: { name: string; status: 'passed' | 'failed' | 'skipped'; duration?: number; error?: string }[];
+  tests: {
+    name: string;
+    status: 'passed' | 'failed' | 'skipped';
+    duration?: number;
+    error?: string;
+  }[];
   passed: number;
   failed: number;
   skipped: number;

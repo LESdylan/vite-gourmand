@@ -1,16 +1,28 @@
 /**
  * Newsletter DTOs
  */
-import { IsString, IsOptional, IsEmail, IsBoolean, MaxLength, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEmail,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SubscribeNewsletterDto {
-  @ApiProperty({ example: 'marie@exemple.fr', description: 'Email address to subscribe' })
+  @ApiProperty({
+    example: 'marie@exemple.fr',
+    description: 'Email address to subscribe',
+  })
   @IsEmail()
   @MaxLength(255)
   email!: string;
 
-  @ApiPropertyOptional({ example: 'Marie', description: 'First name (optional)' })
+  @ApiPropertyOptional({
+    example: 'Marie',
+    description: 'First name (optional)',
+  })
   @IsOptional()
   @IsString()
   @MinLength(1)

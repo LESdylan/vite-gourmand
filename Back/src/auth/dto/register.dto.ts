@@ -50,7 +50,10 @@ export class RegisterDto {
   })
   @Transform(({ value }) => value === true || value === 'true')
   @IsBoolean()
-  @Equals(true, { message: 'Vous devez accepter la politique de confidentialité (RGPD) pour créer un compte.' })
+  @Equals(true, {
+    message:
+      'Vous devez accepter la politique de confidentialité (RGPD) pour créer un compte.',
+  })
   gdprConsent!: boolean;
 
   @ApiPropertyOptional({

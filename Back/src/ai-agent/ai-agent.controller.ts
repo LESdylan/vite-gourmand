@@ -16,7 +16,9 @@ export class AiAgentController {
 
   @Get('status')
   @Public()
-  @ApiOperation({ summary: 'Check AI agent status (enabled / model / active conversations)' })
+  @ApiOperation({
+    summary: 'Check AI agent status (enabled / model / active conversations)',
+  })
   getStatus() {
     return this.aiAgentService.getStatus();
   }
@@ -24,10 +26,7 @@ export class AiAgentController {
   @Post('chat')
   @Public()
   @ApiOperation({ summary: 'Send a message to the AI menu assistant (public)' })
-  async chat(
-    @Body() dto: ChatMessageDto,
-    @CurrentUser() user?: JwtPayload,
-  ) {
+  async chat(@Body() dto: ChatMessageDto, @CurrentUser() user?: JwtPayload) {
     return this.aiAgentService.chat(user?.sub ?? 0, dto);
   }
 

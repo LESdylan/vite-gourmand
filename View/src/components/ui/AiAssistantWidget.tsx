@@ -27,10 +27,22 @@ interface ChatResponse {
 
 /* ── Quick suggestions for the widget ── */
 const QUICK_SUGGESTIONS = [
-  { icon: '🍽️', label: 'Découvrir le concept', prompt: "Pouvez-vous m'expliquer le concept de Vite & Gourmand ?" },
+  {
+    icon: '🍽️',
+    label: 'Découvrir le concept',
+    prompt: "Pouvez-vous m'expliquer le concept de Vite & Gourmand ?",
+  },
   { icon: '📋', label: 'Voir les menus', prompt: 'Quels menus proposez-vous actuellement ?' },
-  { icon: '🎉', label: 'Promotions', prompt: 'Y a-t-il des promotions ou offres spéciales en ce moment ?' },
-  { icon: '✉️', label: 'Aide rédaction', prompt: "J'aimerais contacter l'équipe, pouvez-vous m'aider à rédiger mon message ?" },
+  {
+    icon: '🎉',
+    label: 'Promotions',
+    prompt: 'Y a-t-il des promotions ou offres spéciales en ce moment ?',
+  },
+  {
+    icon: '✉️',
+    label: 'Aide rédaction',
+    prompt: "J'aimerais contacter l'équipe, pouvez-vous m'aider à rédiger mon message ?",
+  },
 ];
 
 interface AiAssistantWidgetProps {
@@ -40,7 +52,10 @@ interface AiAssistantWidgetProps {
   onNavigateToContact?: () => void;
 }
 
-export function AiAssistantWidget({ pageContext = 'home', onNavigateToContact }: AiAssistantWidgetProps) {
+export function AiAssistantWidget({
+  pageContext = 'home',
+  onNavigateToContact,
+}: AiAssistantWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -140,14 +155,10 @@ export function AiAssistantWidget({ pageContext = 'home', onNavigateToContact }:
       <button
         onClick={togglePanel}
         className={`ai-widget-fab ${isOpen ? 'ai-widget-fab--open' : ''} ${showPulse ? 'ai-widget-fab--pulse' : ''}`}
-        aria-label={isOpen ? 'Fermer l\'assistant' : 'Ouvrir l\'assistant IA'}
+        aria-label={isOpen ? "Fermer l'assistant" : "Ouvrir l'assistant IA"}
         title="Assistant Vite & Gourmand"
       >
-        {isOpen ? (
-          <X size={24} />
-        ) : (
-          <Bot size={28} />
-        )}
+        {isOpen ? <X size={24} /> : <Bot size={28} />}
       </button>
 
       {/* Chat panel */}
@@ -166,7 +177,11 @@ export function AiAssistantWidget({ pageContext = 'home', onNavigateToContact }:
                 </span>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="ai-widget-close" aria-label="Fermer">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="ai-widget-close"
+              aria-label="Fermer"
+            >
               <X size={18} />
             </button>
           </div>
@@ -180,8 +195,8 @@ export function AiAssistantWidget({ pageContext = 'home', onNavigateToContact }:
                 </div>
                 <h4>Bonjour ! 👋</h4>
                 <p>
-                  Je suis votre assistant virtuel. Je peux vous renseigner sur nos menus,
-                  nos promotions, ou vous aider à préparer votre demande de devis.
+                  Je suis votre assistant virtuel. Je peux vous renseigner sur nos menus, nos
+                  promotions, ou vous aider à préparer votre demande de devis.
                 </p>
                 <div className="ai-widget-suggestions">
                   {QUICK_SUGGESTIONS.map((sug, i) => (
@@ -208,9 +223,7 @@ export function AiAssistantWidget({ pageContext = 'home', onNavigateToContact }:
                         <Bot size={14} />
                       </div>
                     )}
-                    <div className="ai-widget-message__content">
-                      {msg.content}
-                    </div>
+                    <div className="ai-widget-message__content">{msg.content}</div>
                   </div>
                 ))}
                 {isLoading && (

@@ -1,16 +1,28 @@
 /**
  * AI Agent DTOs
  */
-import { IsString, IsOptional, IsNumber, IsArray, IsObject, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  IsObject,
+  Min,
+  Max,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ChatContextDto {
-  @ApiPropertyOptional({ description: 'Current page context (home, menu, contact, profile, order)' })
+  @ApiPropertyOptional({
+    description: 'Current page context (home, menu, contact, profile, order)',
+  })
   @IsString()
   @IsOptional()
   page?: string;
 
-  @ApiPropertyOptional({ description: 'Mode of operation (public_assistant, menu_builder)' })
+  @ApiPropertyOptional({
+    description: 'Mode of operation (public_assistant, menu_builder)',
+  })
   @IsString()
   @IsOptional()
   mode?: string;
@@ -26,7 +38,9 @@ export class ChatMessageDto {
   @IsOptional()
   conversationId?: string;
 
-  @ApiPropertyOptional({ description: 'Context about where the user is (page, mode)' })
+  @ApiPropertyOptional({
+    description: 'Context about where the user is (page, mode)',
+  })
   @IsObject()
   @IsOptional()
   context?: ChatContextDto;

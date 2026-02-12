@@ -26,13 +26,10 @@ export async function subscribeNewsletter(
   email: string,
   firstName?: string,
 ): Promise<NewsletterResponse> {
-  const wrapper = await apiRequest<ApiWrapper<NewsletterResponse>>(
-    '/api/newsletter/subscribe',
-    {
-      method: 'POST',
-      body: { email, firstName },
-    },
-  );
+  const wrapper = await apiRequest<ApiWrapper<NewsletterResponse>>('/api/newsletter/subscribe', {
+    method: 'POST',
+    body: { email, firstName },
+  });
   return wrapper.data;
 }
 
@@ -60,8 +57,6 @@ export async function unsubscribeNewsletter(token: string): Promise<NewsletterRe
  * Get newsletter stats (admin only)
  */
 export async function getNewsletterStats(): Promise<NewsletterStats> {
-  const wrapper = await apiRequest<ApiWrapper<NewsletterStats>>(
-    '/api/newsletter/stats',
-  );
+  const wrapper = await apiRequest<ApiWrapper<NewsletterStats>>('/api/newsletter/stats');
   return wrapper.data;
 }

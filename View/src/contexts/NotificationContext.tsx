@@ -130,7 +130,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     stoppedRef.current = false;
 
     // Initial fetch
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
 
     intervalRef.current = setInterval(refresh, POLL_INTERVAL);

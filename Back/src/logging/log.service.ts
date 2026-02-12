@@ -40,8 +40,13 @@ export class LogService {
     ip: string,
     error?: string,
   ): void {
-    const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
-    const source = url.includes('/auth') ? 'auth' : url.includes('/api') ? 'api' : 'http';
+    const level =
+      statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
+    const source = url.includes('/auth')
+      ? 'auth'
+      : url.includes('/api')
+        ? 'api'
+        : 'http';
 
     this.addLog({
       timestamp: new Date().toISOString(),

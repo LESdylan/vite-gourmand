@@ -2,9 +2,20 @@
  * Test Runner Controller
  * API endpoints for running and fetching test results
  */
-import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
-import { TestRunnerService, RunTestsResponse, LegacyTestSuite } from './test-runner.service';
+import {
+  TestRunnerService,
+  RunTestsResponse,
+  LegacyTestSuite,
+} from './test-runner.service';
 import { Public } from '../../common';
 
 interface RunTestsDto {
@@ -25,7 +36,11 @@ export class TestRunnerController {
       return await this.service.runTests(dto.testId || 'unit', dto.verbose);
     } catch (error) {
       throw new HttpException(
-        { success: false, message: error instanceof Error ? error.message : 'Test execution failed' },
+        {
+          success: false,
+          message:
+            error instanceof Error ? error.message : 'Test execution failed',
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -39,7 +54,11 @@ export class TestRunnerController {
       return await this.service.runAllTests(dto.verbose);
     } catch (error) {
       throw new HttpException(
-        { success: false, message: error instanceof Error ? error.message : 'Test execution failed' },
+        {
+          success: false,
+          message:
+            error instanceof Error ? error.message : 'Test execution failed',
+        },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -80,7 +99,10 @@ export class TestRunnerController {
   @Public()
   @ApiOperation({ summary: 'Get all test results summary (legacy)' })
   @ApiOkResponse({ description: 'All test results' })
-  async getSummary(): Promise<{ unit: LegacyTestSuite[]; e2e: LegacyTestSuite[] }> {
+  async getSummary(): Promise<{
+    unit: LegacyTestSuite[];
+    e2e: LegacyTestSuite[];
+  }> {
     return this.service.getSummary();
   }
 }

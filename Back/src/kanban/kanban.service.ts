@@ -143,7 +143,9 @@ export class KanbanService {
     const orders = await this.prisma.order.findMany({
       where: {
         status: {
-          in: columns.map((c: KanbanColumn) => c.mapped_status).filter(Boolean) as string[],
+          in: columns
+            .map((c: KanbanColumn) => c.mapped_status)
+            .filter(Boolean) as string[],
         },
       },
       include: {

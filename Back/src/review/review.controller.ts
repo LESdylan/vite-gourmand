@@ -23,7 +23,9 @@ export class ReviewController {
 
   @Public()
   @Get('stats')
-  @ApiOperation({ summary: 'Get public review statistics (avg rating, count, satisfaction %)' })
+  @ApiOperation({
+    summary: 'Get public review statistics (avg rating, count, satisfaction %)',
+  })
   async getStats() {
     return this.reviewService.getPublicStats();
   }

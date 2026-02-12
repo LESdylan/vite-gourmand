@@ -19,6 +19,11 @@ SHELL := /usr/bin/bash
 # ── Variables ────────────────────────────────────────
 # Auto-detect: docker compose (v2 plugin) or docker-compose (v1 standalone)
 DOCKER_COMPOSE := $(shell docker compose version >/dev/null 2>&1 && echo 'docker compose' || echo 'docker-compose')
+
+# Disable BuildKit to use legacy builder (buildx not installed on this system)
+# The deprecation warning is harmless - legacy builder still works fine
+export DOCKER_BUILDKIT := 0
+
 BACKEND_PATH     = ./Back
 FRONTEND_PATH    = ./View
 SCRIPTS_PATH     = ./scripts
@@ -612,7 +617,7 @@ docker-build-dev:  ## 🐳 Build the development Docker image
 	@echo "║  🐳 Building Development Container                           ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@$(DOCKER_COMPOSE) --profile dev build dev
+	@$(DOCKER_COMPOSE) --profile dev build dev 2>&1 | grep -v "DEPRECATED\|Install the buildx\|https://docs.docker.com/go/buildx"
 	@echo ""
 	@echo "✅ Development container image built"
 

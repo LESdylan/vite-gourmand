@@ -44,7 +44,7 @@ export class SiteInfoService {
       if (companyData) {
         return companyData;
       }
-    } catch (error) {
+    } catch {
       this.logger.warn(
         'Company tables not available, falling back to legacy method',
       );
@@ -153,12 +153,14 @@ export class SiteInfoService {
         slogan: "Traiteur d'exception pour tous vos événements",
         description: null,
       },
-      owners: owners.map((o: { first_name: string; last_name: string | null }) => ({
-        firstName: o.first_name,
-        lastName: o.last_name,
-        role: 'owner',
-        isPrimary: false,
-      })),
+      owners: owners.map(
+        (o: { first_name: string; last_name: string | null }) => ({
+          firstName: o.first_name,
+          lastName: o.last_name,
+          role: 'owner',
+          isPrimary: false,
+        }),
+      ),
       yearsOfExperience,
       establishedYear,
       eventCount,

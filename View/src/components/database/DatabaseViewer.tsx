@@ -32,7 +32,6 @@ export function DatabaseViewer() {
   useEffect(() => {
     if (db.activeTable) {
       const table = db.tables.find((t) => t.name === db.activeTable);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setColumns(table?.columns || []);
     }
   }, [db.activeTable, db.tables]);

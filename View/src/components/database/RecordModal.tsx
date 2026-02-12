@@ -114,7 +114,6 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
       columns.forEach((c) => {
         data[c.name] = record[c.name];
       });
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm(data);
     } else {
       // Initialize with defaults for new records

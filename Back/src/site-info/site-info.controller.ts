@@ -14,7 +14,9 @@ export class SiteInfoController {
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'Get public site information (owners, stats, contact)' })
+  @ApiOperation({
+    summary: 'Get public site information (owners, stats, contact)',
+  })
   async getInfo() {
     return this.siteInfoService.getPublicInfo();
   }

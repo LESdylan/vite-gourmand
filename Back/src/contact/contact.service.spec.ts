@@ -27,7 +27,9 @@ describe('ContactService', () => {
         delete: jest.fn(),
       },
       supportTicket: {
-        create: jest.fn().mockResolvedValue({ id: 1, ticket_number: 'TK202602-ABC123' }),
+        create: jest
+          .fn()
+          .mockResolvedValue({ id: 1, ticket_number: 'TK202602-ABC123' }),
       },
     };
 

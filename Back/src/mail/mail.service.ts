@@ -20,7 +20,10 @@ export class MailService implements OnModuleInit {
   private readonly fromEmail: string;
 
   constructor(private readonly config: ConfigService) {
-    this.fromEmail = this.config.get<string>('TITAN_EMAIL', 'devfast@archicode.codes');
+    this.fromEmail = this.config.get<string>(
+      'TITAN_EMAIL',
+      'devfast@archicode.codes',
+    );
     this.initTransporter();
   }
 
@@ -29,7 +32,10 @@ export class MailService implements OnModuleInit {
       await this.transporter.verify();
       this.logger.log('SMTP transporter verified — ready to send emails');
     } catch (err) {
-      this.logger.error('SMTP transporter verification failed', (err as Error).message);
+      this.logger.error(
+        'SMTP transporter verification failed',
+        (err as Error).message,
+      );
     }
   }
 
@@ -41,7 +47,9 @@ export class MailService implements OnModuleInit {
     const pass = this.config.get<string>('TITAN_PASSWORD');
     const secure = port === 465;
 
-    this.logger.log(`Initializing mail transporter: ${host}:${port} (secure=${secure}) user=${user}`);
+    this.logger.log(
+      `Initializing mail transporter: ${host}:${port} (secure=${secure}) user=${user}`,
+    );
 
     this.transporter = nodemailer.createTransport({
       host,
@@ -86,7 +94,7 @@ export class MailService implements OnModuleInit {
         headers: {
           'X-Mailer': 'ViteGourmand/1.0',
           'X-Priority': '3',
-          'Precedence': 'bulk',
+          Precedence: 'bulk',
           'List-Unsubscribe': `<mailto:${this.fromEmail}?subject=unsubscribe>`,
           'MIME-Version': '1.0',
         },

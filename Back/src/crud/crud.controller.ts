@@ -1,7 +1,7 @@
 /**
  * CRUD Controller - Dynamic database operations for DevBoard
  * Provides schema, counts, and CRUD operations for all Prisma models
- * 
+ *
  * Note: Prisma 7 removed DMMF access, so we use static schema definitions
  */
 import {
@@ -208,9 +208,20 @@ const MODEL_STRING_FIELDS: Record<string, string[]> = {
  * List of model names for counting
  */
 const MODEL_NAMES = [
-  'user', 'role', 'order', 'menu', 'dish', 'diet', 'theme',
-  'allergen', 'ingredient', 'review', 'discount', 'promotion',
-  'workingHours', 'session'
+  'user',
+  'role',
+  'order',
+  'menu',
+  'dish',
+  'diet',
+  'theme',
+  'allergen',
+  'ingredient',
+  'review',
+  'discount',
+  'promotion',
+  'workingHours',
+  'session',
 ];
 
 @Controller('crud')
@@ -238,21 +249,28 @@ export class CrudController {
   @Get('counts')
   async getCounts(): Promise<Record<string, number>> {
     const counts: Record<string, number> = {};
-    
+
     // Get count for each model
     for (const modelName of MODEL_NAMES) {
       try {
-        const prismaModel = (this.prisma as unknown as Record<string, { count: () => Promise<number> }>)[modelName];
+        const prismaModel = (
+          this.prisma as unknown as Record<
+            string,
+            { count: () => Promise<number> }
+          >
+        )[modelName];
         if (prismaModel?.count) {
-          const pascalName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
+          const pascalName =
+            modelName.charAt(0).toUpperCase() + modelName.slice(1);
           counts[pascalName] = await prismaModel.count();
         }
       } catch {
-        const pascalName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
+        const pascalName =
+          modelName.charAt(0).toUpperCase() + modelName.slice(1);
         counts[pascalName] = 0;
       }
     }
-    
+
     return counts;
   }
 
@@ -268,7 +286,10 @@ export class CrudController {
     @Query('search') search?: string,
     @Query('orderBy') orderBy?: string,
     @Query('order') order?: string,
-  ): Promise<PaginatedResult<Record<string, unknown>> | { data: unknown[]; total: number }> {
+  ): Promise<
+    | PaginatedResult<Record<string, unknown>>
+    | { data: unknown[]; total: number }
+  > {
     const modelName = this.getModelName(table);
     if (!modelName) {
       return { data: [], total: 0 };
@@ -276,7 +297,7 @@ export class CrudController {
 
     const pageNum = parseInt(page || '1', 10);
     const limitNum = parseInt(limit || '20', 10);
-    
+
     // Build where clause with search
     let where: Record<string, unknown> = {};
     if (search) {
@@ -287,7 +308,7 @@ export class CrudController {
     // Build orderBy
     let orderByClause: Record<string, 'asc' | 'desc'> = {};
     if (orderBy) {
-      orderByClause = { [orderBy]: (order === 'desc' ? 'desc' : 'asc') };
+      orderByClause = { [orderBy]: order === 'desc' ? 'desc' : 'asc' };
     }
 
     return this.crudService.findAll(modelName, {
@@ -389,9 +410,12 @@ export class CrudController {
   /**
    * Build search where clause for string fields
    */
-  private buildSearchWhere(modelName: string, search: string): Record<string, unknown> {
+  private buildSearchWhere(
+    modelName: string,
+    search: string,
+  ): Record<string, unknown> {
     const stringFields = MODEL_STRING_FIELDS[modelName];
-    
+
     if (!stringFields || stringFields.length === 0) return {};
 
     // Build OR clause for search across all string fields

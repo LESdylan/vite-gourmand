@@ -41,12 +41,12 @@ export class AuthService {
   async register(dto: RegisterDto) {
     await this.ensureEmailAvailable(dto.email);
     const user = await this.createUser(dto);
-    
+
     // Send welcome email (non-blocking)
-    this.sendWelcomeEmail(user.email, user.first_name).catch(err => 
-      this.logger.error(`Failed to send welcome email: ${err.message}`)
+    this.sendWelcomeEmail(user.email, user.first_name).catch((err) =>
+      this.logger.error(`Failed to send welcome email: ${err.message}`),
     );
-    
+
     return this.generateAuthResponse(user);
   }
 
@@ -66,9 +66,11 @@ export class AuthService {
     if (user) {
       const token = await this.tokenService.createPasswordResetToken(user.id);
       // Send password reset email (non-blocking)
-      this.mailService.sendPasswordReset(user.email, token).catch(err => 
-        this.logger.error(`Failed to send reset email: ${err.message}`)
-      );
+      this.mailService
+        .sendPasswordReset(user.email, token)
+        .catch((err) =>
+          this.logger.error(`Failed to send reset email: ${err.message}`),
+        );
     }
     return { message: 'If email exists, reset link sent' };
   }
@@ -176,15 +178,23 @@ export class AuthService {
       this.newsletterService
         .subscribe({ email: dto.email, firstName: dto.firstName }, user.id)
         .catch((err) =>
-          this.logger.error(`Newsletter auto-subscribe failed for ${dto.email}: ${err.message}`),
+          this.logger.error(
+            `Newsletter auto-subscribe failed for ${dto.email}: ${err.message}`,
+          ),
         );
     }
 
     return user;
   }
 
-  private async sendWelcomeEmail(email: string, firstName: string): Promise<void> {
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173');
+  private async sendWelcomeEmail(
+    email: string,
+    firstName: string,
+  ): Promise<void> {
+    const frontendUrl = this.configService.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:5173',
+    );
     await this.mailService.send({
       to: email,
       subject: 'Bienvenue chez Vite & Gourmand ! 🎉',
@@ -192,7 +202,10 @@ export class AuthService {
     });
   }
 
-  private getWelcomeEmailTemplate(firstName: string, frontendUrl: string): string {
+  private getWelcomeEmailTemplate(
+    firstName: string,
+    frontendUrl: string,
+  ): string {
     return `
 <!DOCTYPE html>
 <html>
@@ -265,8 +278,10 @@ export class AuthService {
       include: { Role: true },
     });
     if (!user) throw new UnauthorizedException('Invalid credentials');
-    if (!user.is_active) throw new UnauthorizedException('Account is deactivated');
-    if (user.is_deleted) throw new UnauthorizedException('Account no longer exists');
+    if (!user.is_active)
+      throw new UnauthorizedException('Account is deactivated');
+    if (user.is_deleted)
+      throw new UnauthorizedException('Account no longer exists');
     await this.passwordService.verify(pass, user.password);
     return user;
   }
@@ -277,7 +292,8 @@ export class AuthService {
       include: { Role: true },
     });
     if (!user || user.is_deleted) throw new NotFoundException('User not found');
-    if (!user.is_active) throw new UnauthorizedException('Account is deactivated');
+    if (!user.is_active)
+      throw new UnauthorizedException('Account is deactivated');
     return user;
   }
 

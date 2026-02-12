@@ -2,7 +2,7 @@
  * Update test user passwords to match Postman collection credentials
  */
 import 'dotenv/config';
-import { PrismaClient } from '../generated/prisma/client.js';
+import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';

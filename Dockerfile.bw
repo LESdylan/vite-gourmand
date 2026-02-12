@@ -19,8 +19,13 @@
 
 FROM node:22-alpine
 
+# Suppress npm deprecation warnings and funding messages
+ENV NPM_CONFIG_LOGLEVEL=error
+ENV NPM_CONFIG_FUND=false
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+
 # Install Bitwarden CLI + utilities
-RUN npm install -g @bitwarden/cli && \
+RUN npm install -g @bitwarden/cli 2>/dev/null && \
     apk add --no-cache jq bash curl
 
 WORKDIR /work

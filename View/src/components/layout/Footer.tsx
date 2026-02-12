@@ -45,8 +45,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
       setNlSuccess(result.message || 'Inscription réussie !');
       setNlEmail('');
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Erreur lors de l'inscription.";
+      const msg = err instanceof Error ? err.message : "Erreur lors de l'inscription.";
       setNlError(msg);
     } finally {
       setNlLoading(false);
@@ -167,7 +166,8 @@ export default function Footer({ setCurrentPage }: FooterProps) {
               </span>
             </div>
             <p style={mutedStyle} className="text-[11px] leading-relaxed mb-3">
-              Recevez nos menus, promotions et actualités gourmandes directement dans votre boîte mail.
+              Recevez nos menus, promotions et actualités gourmandes directement dans votre boîte
+              mail.
             </p>
 
             <form onSubmit={handleNewsletterSubmit} className="flex gap-1.5">
@@ -203,7 +203,8 @@ export default function Footer({ setCurrentPage }: FooterProps) {
             )}
 
             <p style={mutedStyle} className="text-[10px] mt-2 leading-relaxed">
-              En vous inscrivant, vous acceptez de recevoir nos communications. Désinscription possible à tout moment.
+              En vous inscrivant, vous acceptez de recevoir nos communications. Désinscription
+              possible à tout moment.
             </p>
           </div>
         </div>
