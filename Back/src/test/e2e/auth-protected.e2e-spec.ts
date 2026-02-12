@@ -15,7 +15,7 @@ describe('Protected Routes (e2e)', () => {
     const email = testUtils.uniqueEmail('protected');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'SecurePassword123!', firstName: 'Protected' });
+      .send({ email, password: 'SecurePassword123!', firstName: 'Protected', gdprConsent: true });
 
     const loginRes = await request(app.getHttpServer())
       .post('/api/auth/login')

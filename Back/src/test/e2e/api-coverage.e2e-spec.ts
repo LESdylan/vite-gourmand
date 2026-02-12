@@ -14,7 +14,7 @@ describe('API Endpoint Coverage (e2e)', () => {
     const email = testUtils.uniqueEmail('coverage');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'Coverage' });
+      .send({ email, password: 'Test123!', firstName: 'Coverage', gdprConsent: true });
 
     const login = await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -99,6 +99,7 @@ describe('API Endpoint Coverage (e2e)', () => {
           email: testUtils.uniqueEmail('reg'),
           password: 'Test123!',
           firstName: 'New',
+          gdprConsent: true,
         });
       expect([200, 201]).toContain(response.status);
     });
@@ -107,7 +108,7 @@ describe('API Endpoint Coverage (e2e)', () => {
       const email = testUtils.uniqueEmail('logintest');
       await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({ email, password: 'Test123!', firstName: 'Login' });
+        .send({ email, password: 'Test123!', firstName: 'Login', gdprConsent: true });
 
       const response = await request(app.getHttpServer())
         .post('/api/auth/login')

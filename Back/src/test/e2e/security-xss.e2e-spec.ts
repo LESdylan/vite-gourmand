@@ -14,7 +14,7 @@ describe('XSS Prevention (e2e)', () => {
     const email = testUtils.uniqueEmail('xss');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'XSS' });
+      .send({ email, password: 'Test123!', firstName: 'XSS', gdprConsent: true });
 
     const login = await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -52,6 +52,7 @@ describe('XSS Prevention (e2e)', () => {
             email: testUtils.uniqueEmail(`xss${i}`),
             password: 'Test123!',
             firstName: payload,
+            gdprConsent: true,
           });
 
         expect([200, 201, 400]).toContain(response.status);

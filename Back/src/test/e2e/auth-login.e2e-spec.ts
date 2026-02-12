@@ -16,7 +16,7 @@ describe('Auth Login (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: testEmail, password: testPassword, firstName: 'Login' });
+      .send({ email: testEmail, password: testPassword, firstName: 'Login', gdprConsent: true });
   });
 
   afterAll(async () => {

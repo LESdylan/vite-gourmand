@@ -14,7 +14,7 @@ describe('Authorization Escalation Prevention (e2e)', () => {
     const email = testUtils.uniqueEmail('authz');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'Client' });
+      .send({ email, password: 'Test123!', firstName: 'Client', gdprConsent: true });
 
     const login = await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -116,6 +116,7 @@ describe('Authorization Escalation Prevention (e2e)', () => {
           password: 'Test123!',
           firstName: 'Test',
           role: 'admin',
+          gdprConsent: true,
         });
 
       expect([200, 201, 400]).toContain(response.status);

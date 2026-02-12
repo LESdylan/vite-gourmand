@@ -37,7 +37,7 @@ describe('Input Validation Edge Cases (e2e)', () => {
       it(`rejects invalid email format #${i + 1}: ${email.slice(0, 20)}`, async () => {
         const response = await request(app.getHttpServer())
           .post('/api/auth/register')
-          .send({ email, password: 'Test123!', firstName: 'Test' });
+          .send({ email, password: 'Test123!', firstName: 'Test', gdprConsent: true });
 
         expect(response.status).toBe(400);
       });
@@ -59,6 +59,7 @@ describe('Input Validation Edge Cases (e2e)', () => {
             email: testUtils.uniqueEmail(`weak${i}`),
             password,
             firstName: 'Test',
+            gdprConsent: true,
           });
 
         expect(response.status).toBe(400);
@@ -129,6 +130,7 @@ describe('Input Validation Edge Cases (e2e)', () => {
           email: testUtils.uniqueEmail('long'),
           password: 'Test123!',
           firstName: 'a'.repeat(10000),
+          gdprConsent: true,
         });
 
       // 400 = validation rejects, 500 = Prisma column overflow (known issue - should add MaxLength)
@@ -142,6 +144,7 @@ describe('Input Validation Edge Cases (e2e)', () => {
           email: testUtils.uniqueEmail('empty'),
           password: 'Test123!',
           firstName: '',
+          gdprConsent: true,
         });
 
       expect(response.status).toBe(400);

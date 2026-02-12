@@ -14,7 +14,7 @@ describe('Users (e2e)', () => {
     const email = testUtils.uniqueEmail('user');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'UserTest' });
+      .send({ email, password: 'Test123!', firstName: 'UserTest', gdprConsent: true });
 
     const login = await request(app.getHttpServer())
       .post('/api/auth/login')

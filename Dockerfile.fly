@@ -1,0 +1,31 @@
+# ============================================
+# Fly.io CLI - Deployment Container
+# ============================================
+# Runs flyctl in a container without needing to install it on host.
+#
+# Prerequisites:
+#   1. Set FLY_API_TOKEN environment variable (create at https://fly.io/user/personal_access_tokens)
+#   2. Or run interactively for `flyctl auth login`
+#
+# Usage (via docker compose):
+#   docker compose run --rm flyctl deploy
+#   docker compose run --rm flyctl status
+#
+# Usage (via make):
+#   make deploy
+#   make deploy-status
+# ============================================
+
+FROM flyio/flyctl:latest AS flyctl
+
+# The flyio/flyctl image already has flyctl installed
+# We just need to set up the working directory
+
+WORKDIR /app
+
+# Copy only what's needed for deployment
+# (The actual files are mounted via docker-compose volume)
+
+# Default command
+ENTRYPOINT ["flyctl"]
+CMD ["help"]

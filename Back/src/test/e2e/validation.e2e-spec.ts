@@ -19,7 +19,7 @@ describe('Validation (e2e)', () => {
   it('should reject missing required fields', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({});
+      .send({ gdprConsent: true });
 
     expect(response.status).toBe(400);
     expect(response.body.success).toBe(false);
@@ -33,6 +33,7 @@ describe('Validation (e2e)', () => {
         email: 'invalid',
         password: '123',
         firstName: 'A',
+        gdprConsent: true,
       });
 
     expect(response.status).toBe(400);

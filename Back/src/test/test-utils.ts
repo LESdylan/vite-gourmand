@@ -6,6 +6,7 @@
 import { Test, TestingModule, TestingModuleBuilder } from '@nestjs/testing';
 import { INestApplication, ValidationPipe, CanActivate } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import request from 'supertest';
 import { AppModule } from '../app.module';
 
 const mockThrottlerGuard: CanActivate = { canActivate: () => true };
@@ -29,6 +30,18 @@ export async function createTestApp(): Promise<INestApplication> {
 
   await app.init();
   return app;
+}
+
+/**
+ * Register a user for e2e tests (always includes gdprConsent)
+ */
+export async function registerTestUser(
+  app: INestApplication,
+  data: { email: string; password: string; firstName: string; [key: string]: unknown },
+) {
+  return request(app.getHttpServer())
+    .post('/api/auth/register')
+    .send({ gdprConsent: true, ...data });
 }
 
 /** Test utilities */

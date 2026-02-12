@@ -5,7 +5,7 @@
  * Uses connection pooling for optimal performance.
  */
 
-import { MongoClient, Db, ServerApiVersion } from 'mongodb';
+import { MongoClient, Db } from 'mongodb';
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
@@ -28,11 +28,6 @@ function getMongoUri(): string {
  */
 function createClient(): MongoClient {
   return new MongoClient(getMongoUri(), {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    },
     maxPoolSize: 10,
     minPoolSize: 1,
     maxIdleTimeMS: 30000,

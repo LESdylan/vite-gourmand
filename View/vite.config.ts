@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    host: true,
     proxy: {
       '/auth': {
         target: 'http://localhost:3000',

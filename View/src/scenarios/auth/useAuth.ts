@@ -69,6 +69,7 @@ export function useAuth() {
             password: form.password,
             firstName: form.name,
             telephoneNumber: form.phone || undefined,
+            gdprConsent: true, // User must have accepted GDPR to submit form
           });
           addToast('Inscription réussie ! Bienvenue sur Vite Gourmand.', 'success');
           navigate('/');

@@ -14,7 +14,7 @@ describe('Menu CRUD (e2e)', () => {
     const email = testUtils.uniqueEmail('menu-crud');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'MenuTest' });
+      .send({ email, password: 'Test123!', firstName: 'MenuTest', gdprConsent: true });
 
     const login = await request(app.getHttpServer())
       .post('/api/auth/login')

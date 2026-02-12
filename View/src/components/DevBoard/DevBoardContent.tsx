@@ -249,7 +249,7 @@ function renderContent(
 function renderDevContent(
   category: TestCategory,
   tests: ReturnType<typeof useMockData>['tests'],
-  autoTests: ReturnType<typeof useTestRunner>['autoTests'],
+  _autoTests: ReturnType<typeof useTestRunner>['autoTests'],
   suites: ReturnType<typeof useTestRunner>['suites'],
   logs: ReturnType<typeof useRealLogs>['logs'],
   connected: boolean,

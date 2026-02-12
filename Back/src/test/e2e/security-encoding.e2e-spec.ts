@@ -45,6 +45,7 @@ describe('Unicode and Encoding Security (e2e)', () => {
           email: testUtils.uniqueEmail('emoji'),
           password: 'Test123!',
           firstName: 'Test 😀🎉',
+          gdprConsent: true,
         });
 
       expect([200, 201, 400]).toContain(response.status);

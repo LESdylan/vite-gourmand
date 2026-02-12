@@ -226,7 +226,8 @@ export default function AiMenuComposer({
         setLoading(false);
       }
     },
-    [input, loading, convId, autoExtractBrief],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [input, loading, convId],
   );
 
   /* ── Auto-extract brief fields from conversation ── */

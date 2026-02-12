@@ -39,6 +39,7 @@ describe('Auth Registration (e2e)', () => {
         email: 'invalid-email',
         password: 'SecurePassword123!',
         firstName: 'Test',
+        gdprConsent: true,
       });
 
     expect(response.status).toBe(400);
@@ -52,6 +53,7 @@ describe('Auth Registration (e2e)', () => {
         email: testUtils.uniqueEmail('short'),
         password: '123',
         firstName: 'Test',
+        gdprConsent: true,
       });
 
     expect(response.status).toBe(400);
@@ -61,7 +63,7 @@ describe('Auth Registration (e2e)', () => {
   it('should reject missing fields', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({});
+      .send({ gdprConsent: true });
 
     expect(response.status).toBe(400);
     expect(response.body.success).toBe(false);

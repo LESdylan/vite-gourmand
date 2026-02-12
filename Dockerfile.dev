@@ -10,6 +10,7 @@
 # Usage:
 #   make docker-dev      # Full containerized bootstrap
 #   make docker-shell    # Interactive shell in the container
+#   make deploy          # Deploy to Fly.io (flyctl included!)
 # ============================================
 
 FROM node:22-alpine
@@ -29,6 +30,13 @@ RUN apk add --no-cache \
     # For Prisma
     openssl \
     libc6-compat
+
+# Install Fly.io CLI (flyctl) - no sudo required!
+# Installed to /opt/fly (not /root/.fly) to avoid conflicts with Docker volume
+# that persists auth tokens at /root/.fly
+RUN FLYCTL_INSTALL="/opt/fly" sh -c 'curl -L https://fly.io/install.sh | sh'
+ENV FLYCTL_INSTALL="/opt/fly"
+ENV PATH="/opt/fly/bin:$PATH"
 
 # Set working directory
 WORKDIR /app

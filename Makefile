@@ -228,25 +228,52 @@ turn-on:  ## 🔌 Start servers (assumes deps are installed)
 	@echo "║     🔌  TURNING ON VITE GOURMAND                             ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@# Verify .env exists
-	@if [ ! -f $(BACKEND_PATH)/.env ]; then \
-		echo "❌ Back/.env not found. Run 'make' first for full bootstrap."; \
-		exit 1; \
+	@# Detect Docker container and delegate
+	@if docker inspect vite-gourmand-dev >/dev/null 2>&1 && \
+	    [ "$$(docker inspect -f '{{.State.Running}}' vite-gourmand-dev 2>/dev/null)" = "true" ]; then \
+		echo "🐳 Docker container detected — starting servers inside container..."; \
+		echo ""; \
+		echo "🛑 Stopping any existing servers..."; \
+		$(DOCKER_COMPOSE) exec dev pkill -f "nest start" 2>/dev/null || true; \
+		$(DOCKER_COMPOSE) exec dev pkill -f "vite" 2>/dev/null || true; \
+		sleep 2; \
+		echo "🔧 Starting Backend (NestJS) on port $(BACKEND_PORT)..."; \
+		$(DOCKER_COMPOSE) exec -d dev sh -c "cd /app/Back && npm run start:dev > /tmp/backend.log 2>&1"; \
+		echo "⏳ Waiting for Backend to be ready..."; \
+		sleep 3; \
+		for i in 1 2 3 4 5 6 7 8 9 10; do \
+			if $(DOCKER_COMPOSE) exec dev sh -c "curl -s http://localhost:3000/api/site-info > /dev/null 2>&1"; then \
+				echo "✅ Backend is ready!"; \
+				break; \
+			fi; \
+			echo "   Attempt $$i/10 - waiting..."; \
+			sleep 2; \
+		done; \
+		echo ""; \
+		echo "🖥️  Starting Frontend (Vite) on port $(FRONTEND_PORT)..."; \
+		$(DOCKER_COMPOSE) exec -d dev sh -c "cd /app/View && npm run dev > /tmp/frontend.log 2>&1"; \
+		sleep 3; \
+	else \
+		echo "💻 Local mode — starting servers on host..."; \
+		echo ""; \
+		if [ ! -f $(BACKEND_PATH)/.env ]; then \
+			echo "❌ Back/.env not found. Run 'make' first for full bootstrap."; \
+			exit 1; \
+		fi; \
+		fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true; \
+		fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true; \
+		rm -f $(BACKEND_PID) $(FRONTEND_PID); \
+		sleep 1; \
+		echo "🔧 Starting Backend (NestJS) on port $(BACKEND_PORT)..."; \
+		cd $(BACKEND_PATH) && nohup npm run start:dev > /tmp/vg-backend.log 2>&1 & echo $$! > $(CURDIR)/$(BACKEND_PID); \
+		echo "   PID: $$(cat $(CURDIR)/$(BACKEND_PID))"; \
+		echo ""; \
+		echo "🖥️  Starting Frontend (Vite) on port $(FRONTEND_PORT)..."; \
+		cd $(FRONTEND_PATH) && nohup npm run dev > /tmp/vg-frontend.log 2>&1 & echo $$! > $(CURDIR)/$(FRONTEND_PID); \
+		echo "   PID: $$(cat $(CURDIR)/$(FRONTEND_PID))"; \
+		sleep 3; \
 	fi
-	@# Kill existing processes
-	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
-	@-fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true
-	@rm -f $(BACKEND_PID) $(FRONTEND_PID)
-	@sleep 1
-	@echo "🔧 Starting Backend (NestJS) on port $(BACKEND_PORT)..."
-	@cd $(BACKEND_PATH) && nohup npm run start:dev > /tmp/vg-backend.log 2>&1 & echo $$! > $(CURDIR)/$(BACKEND_PID)
-	@echo "   PID: $$(cat $(CURDIR)/$(BACKEND_PID))"
 	@echo ""
-	@echo "🖥️  Starting Frontend (Vite) on port $(FRONTEND_PORT)..."
-	@cd $(FRONTEND_PATH) && nohup npm run dev > /tmp/vg-frontend.log 2>&1 & echo $$! > $(CURDIR)/$(FRONTEND_PID)
-	@echo "   PID: $$(cat $(CURDIR)/$(FRONTEND_PID))"
-	@echo ""
-	@sleep 3
 	@echo "✅ Servers started!"
 	@echo ""
 	@echo "  🖥️  Frontend → http://localhost:$(FRONTEND_PORT)"
@@ -259,17 +286,30 @@ turn-off:  ## 🔌 Stop all servers
 	@echo "║     🔌  SHUTTING DOWN VITE GOURMAND                          ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "🛑 Stopping frontend..."
-	@if [ -f $(FRONTEND_PID) ]; then kill $$(cat $(FRONTEND_PID)) 2>/dev/null || true; rm -f $(FRONTEND_PID); fi
-	@-fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true
-	@echo "   ✅ Frontend stopped"
+	@if docker inspect vite-gourmand-dev >/dev/null 2>&1 && \
+	    [ "$$(docker inspect -f '{{.State.Running}}' vite-gourmand-dev 2>/dev/null)" = "true" ]; then \
+		echo "🐳 Docker container detected — stopping servers inside container..."; \
+		echo "🛑 Stopping frontend..."; \
+		$(DOCKER_COMPOSE) exec dev pkill -f "vite" 2>/dev/null || true; \
+		echo "   ✅ Frontend stopped"; \
+		echo ""; \
+		echo "🛑 Stopping backend..."; \
+		$(DOCKER_COMPOSE) exec dev pkill -f "nest start" 2>/dev/null || true; \
+		echo "   ✅ Backend stopped"; \
+	else \
+		echo "💻 Local mode — stopping servers on host..."; \
+		echo "🛑 Stopping frontend..."; \
+		if [ -f $(FRONTEND_PID) ]; then kill $$(cat $(FRONTEND_PID)) 2>/dev/null || true; rm -f $(FRONTEND_PID); fi; \
+		fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true; \
+		echo "   ✅ Frontend stopped"; \
+		echo ""; \
+		echo "🛑 Stopping backend..."; \
+		if [ -f $(BACKEND_PID) ]; then kill $$(cat $(BACKEND_PID)) 2>/dev/null || true; rm -f $(BACKEND_PID); fi; \
+		fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true; \
+		echo "   ✅ Backend stopped"; \
+		rm -f /tmp/vg-backend.log /tmp/vg-frontend.log 2>/dev/null || true; \
+	fi
 	@echo ""
-	@echo "🛑 Stopping backend..."
-	@if [ -f $(BACKEND_PID) ]; then kill $$(cat $(BACKEND_PID)) 2>/dev/null || true; rm -f $(BACKEND_PID); fi
-	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
-	@echo "   ✅ Backend stopped"
-	@echo ""
-	@rm -f /tmp/vg-backend.log /tmp/vg-frontend.log 2>/dev/null || true
 	@echo "✅ Everything shut down."
 	@echo ""
 
@@ -547,27 +587,74 @@ security-all: security-audit security-secrets security-deps  ## Run all security
 	@echo "✅ All security checks completed!"
 
 # ============================================
-#  🚀 DEPLOYMENT
+#  🚀 DEPLOYMENT (via dev container - flyctl included!)
+# ============================================
+# flyctl is installed in the dev container (Dockerfile.dev).
+# After running `make` or `make docker-dev`, flyctl is available.
+#
+# First run: make fly-login (interactive authentication)
+# Then: make deploy
+#
+# Or set FLY_API_TOKEN for non-interactive CI/CD:
+#   export FLY_API_TOKEN=your_token
+#   make deploy
 # ============================================
 
-.PHONY: deploy deploy-fly deploy-check deploy-status deploy-logs
+.PHONY: deploy deploy-fly deploy-check deploy-status deploy-logs fly-login fly-auth fly-shell
 
 deploy: deploy-fly  ## Deploy to Fly.io (alias)
 
-deploy-fly:  ## Deploy to Fly.io
-	@$(SCRIPTS_PATH)/deploy/fly.sh
+deploy-fly:  ## Deploy to Fly.io (via dev container)
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║ 🚀 Deploying to Fly.io                                       ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@$(DOCKER_COMPOSE) --profile dev run --rm dev flyctl deploy --config /app/fly.toml
 
 deploy-check:  ## Run pre-deployment checks
 	@$(SCRIPTS_PATH)/deploy/check.sh
 
 deploy-status:  ## Check Fly.io deployment status
-	@$(SCRIPTS_PATH)/deploy/status.sh
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║ 📊 Fly.io Status                                             ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@$(DOCKER_COMPOSE) --profile dev run --rm dev flyctl status --config /app/fly.toml
 
 deploy-logs:  ## View Fly.io application logs
-	@$(SCRIPTS_PATH)/deploy/logs.sh
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║ 📋 Fly.io Logs                                               ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@$(DOCKER_COMPOSE) --profile dev run --rm dev flyctl logs --config /app/fly.toml
 
 deploy-safe: deploy-check deploy-fly  ## Pre-check then deploy
 	@echo "✅ Safe deployment complete!"
+
+fly-login: fly-auth  ## Authenticate with Fly.io (alias)
+
+fly-auth:  ## Authenticate with Fly.io (interactive)
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║ 🔐 Fly.io Authentication                                     ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "Opening browser for authentication..."
+	@echo "Your auth token will be saved in a Docker volume for future use."
+	@$(DOCKER_COMPOSE) --profile dev run --rm dev flyctl auth login
+
+fly-whoami:  ## Check current Fly.io authentication
+	@$(DOCKER_COMPOSE) --profile dev run --rm dev flyctl auth whoami
+
+fly-shell:  ## Open interactive shell with flyctl available
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║ 🐚 Dev Container Shell (flyctl available)                    ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "Commands: flyctl help, flyctl status, flyctl deploy, etc."
+	@echo "Type 'exit' to quit"
+	@$(DOCKER_COMPOSE) --profile dev run --rm dev /bin/bash
 
 # ============================================
 #  🔍 DIAGNOSTICS

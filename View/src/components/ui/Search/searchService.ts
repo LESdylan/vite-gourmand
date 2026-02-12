@@ -121,7 +121,7 @@ export function canViewDetailedProfile(
 /**
  * Mock data for development/testing
  */
-function _getMockUsers(_query: string): SearchResult[] {
+export function _getMockUsers(_query: string): SearchResult[] {
   const mockUsers: SearchResult[] = [
     {
       id: '1',

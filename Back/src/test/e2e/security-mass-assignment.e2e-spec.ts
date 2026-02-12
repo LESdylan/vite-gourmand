@@ -15,7 +15,7 @@ describe('Mass Assignment Protection (e2e)', () => {
     userEmail = testUtils.uniqueEmail('massassign');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email: userEmail, password: 'Test123!', firstName: 'Mass' });
+      .send({ email: userEmail, password: 'Test123!', firstName: 'Mass', gdprConsent: true });
 
     const login = await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -41,6 +41,7 @@ describe('Mass Assignment Protection (e2e)', () => {
           email: testUtils.uniqueEmail('id'),
           password: 'Test123!',
           firstName: 'Id',
+          gdprConsent: true,
         });
 
       // Should succeed (extra fields ignored) or fail validation (400)
@@ -58,6 +59,7 @@ describe('Mass Assignment Protection (e2e)', () => {
           password: 'Test123!',
           firstName: 'Created',
           createdAt: '2020-01-01T00:00:00Z',
+          gdprConsent: true,
         });
 
       expect([200, 201, 400]).toContain(response.status);
@@ -71,6 +73,7 @@ describe('Mass Assignment Protection (e2e)', () => {
           password: 'Test123!',
           firstName: 'Verified',
           isVerified: true,
+          gdprConsent: true,
         });
 
       expect([200, 201, 400]).toContain(response.status);
@@ -84,6 +87,7 @@ describe('Mass Assignment Protection (e2e)', () => {
           password: 'Test123!',
           firstName: 'Active',
           isActive: false,
+          gdprConsent: true,
         });
 
       expect([200, 201, 400]).toContain(response.status);

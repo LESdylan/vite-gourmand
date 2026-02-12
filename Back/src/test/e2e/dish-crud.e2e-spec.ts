@@ -14,7 +14,7 @@ describe('Dish CRUD (e2e)', () => {
     const email = testUtils.uniqueEmail('dish-crud');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'DishTest' });
+      .send({ email, password: 'Test123!', firstName: 'DishTest', gdprConsent: true });
 
     const login = await request(app.getHttpServer())
       .post('/api/auth/login')

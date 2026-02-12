@@ -36,7 +36,7 @@ describe('API Response Contract (e2e)', () => {
       const email = testUtils.uniqueEmail('token');
       await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({ email, password: 'Test123!', firstName: 'Token' });
+        .send({ email, password: 'Test123!', firstName: 'Token', gdprConsent: true });
 
       const response = await request(app.getHttpServer())
         .post('/api/auth/login')
@@ -104,6 +104,7 @@ describe('API Response Contract (e2e)', () => {
           email: testUtils.uniqueEmail('status'),
           password: 'Test123!',
           firstName: 'Status',
+          gdprConsent: true,
         });
       expect([200, 201]).toContain(response.status);
     });

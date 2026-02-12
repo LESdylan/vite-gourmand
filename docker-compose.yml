@@ -75,6 +75,7 @@ services:
   # ── Development Environment (Containerized Dev) ────────
   # Use this when you don't have Node.js installed on your host
   # Run: make docker-dev (or docker-compose --profile dev up)
+  # Includes: Node.js, npm, flyctl for deployment
   dev:
     build:
       context: .
@@ -93,6 +94,8 @@ services:
       - ./View:/app/View
       - ./scripts:/app/scripts
       - ./Makefile:/app/Makefile
+      - ./fly.toml:/app/fly.toml
+      - ./Dockerfile:/app/Dockerfile
       - ./docs:/app/docs:ro
       # Persist node_modules in named volumes (much faster than bind mounts)
       - back-node-modules:/app/Back/node_modules
@@ -101,15 +104,22 @@ services:
       - npm-cache:/app/.npm-cache
       # Mount Bitwarden data for secrets
       - bw-data:/root/.config/Bitwarden CLI
+      # Persist Fly.io auth tokens
+      - fly-data:/root/.fly
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true  # Required for file watching in Docker
+      # Fly.io CLI binary at /opt/fly, auth tokens persisted at /root/.fly
+      - FLYCTL_INSTALL=/opt/fly
+      - PATH=/opt/fly/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      # FLY_API_TOKEN can be set for CI/CD (optional)
+      - FLY_API_TOKEN=${FLY_API_TOKEN:-}
     profiles:
       - dev
-    # No healthcheck needed for dev container
 
 volumes:
   bw-data:
   back-node-modules:
   view-node-modules:
   npm-cache:
+  fly-data:

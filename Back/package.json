@@ -17,10 +17,10 @@
     "test:watch": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --watch --runInBand",
     "test:cov": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --coverage --runInBand",
     "test:debug": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "node --max-old-space-size=1024 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --runInBand",
+    "test:e2e": "node --max-old-space-size=2048 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --runInBand",
     "test:orders": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --testPathPattern=order --runInBand",
     "test:flows": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --testPathPattern=api-flows --runInBand",
-    "test:all": "node --max-old-space-size=384 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --runInBand",
+    "test:all": "npm test -- --passWithNoTests && npm run test:e2e -- --passWithNoTests",
     "seed": "npx tsx prisma/seed-playground.ts",
     "seed:test": "npx tsx prisma/seed-test-data.ts",
     "seed:images": "npx tsx scripts/update-menu-images.ts"
@@ -83,6 +83,7 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
     "jest": "^30.0.0",
+    "newman": "^6.2.2",
     "prettier": "^3.4.2",
     "prisma": "^7.4.0",
     "source-map-support": "^0.5.21",
@@ -105,6 +106,9 @@
     "testRegex": ".*\\.(spec|test)\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

@@ -1,0 +1,1 @@
+we should install newman into alpine of into docker
