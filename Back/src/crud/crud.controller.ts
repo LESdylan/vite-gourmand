@@ -1,6 +1,8 @@
 /**
  * CRUD Controller - Dynamic database operations for DevBoard
  * Provides schema, counts, and CRUD operations for all Prisma models
+ * 
+ * Note: Prisma 7 removed DMMF access, so we use static schema definitions
  */
 import {
   Controller,
@@ -14,7 +16,6 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -37,21 +38,180 @@ interface SchemaModel {
   columns: SchemaColumn[];
 }
 
-/** Map Prisma field types to simple types */
-function mapPrismaType(type: string): string {
-  const typeMap: Record<string, string> = {
-    String: 'string',
-    Int: 'integer',
-    Float: 'float',
-    Decimal: 'decimal',
-    Boolean: 'boolean',
-    DateTime: 'datetime',
-    Json: 'json',
-    BigInt: 'bigint',
-    Bytes: 'bytes',
-  };
-  return typeMap[type] || type.toLowerCase();
-}
+/**
+ * Static schema definitions for Prisma 7 compatibility
+ * (DMMF is no longer available in Prisma 7)
+ */
+const SCHEMA_MODELS: SchemaModel[] = [
+  {
+    name: 'User',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'email', type: 'string', isRequired: true },
+      { name: 'password_hash', type: 'string', isRequired: true },
+      { name: 'first_name', type: 'string', isRequired: true },
+      { name: 'last_name', type: 'string', isRequired: true },
+      { name: 'phone', type: 'string' },
+      { name: 'role_id', type: 'integer', isRequired: true },
+      { name: 'created_at', type: 'datetime', isRequired: true },
+      { name: 'updated_at', type: 'datetime', isRequired: true },
+    ],
+  },
+  {
+    name: 'Role',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'name', type: 'string', isRequired: true },
+      { name: 'description', type: 'string' },
+    ],
+  },
+  {
+    name: 'Order',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'user_id', type: 'integer', isRequired: true },
+      { name: 'status', type: 'string', isRequired: true },
+      { name: 'total_amount', type: 'decimal', isRequired: true },
+      { name: 'delivery_address', type: 'string' },
+      { name: 'notes', type: 'string' },
+      { name: 'created_at', type: 'datetime', isRequired: true },
+      { name: 'updated_at', type: 'datetime', isRequired: true },
+    ],
+  },
+  {
+    name: 'Menu',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'name', type: 'string', isRequired: true },
+      { name: 'description', type: 'string' },
+      { name: 'price', type: 'decimal', isRequired: true },
+      { name: 'is_active', type: 'boolean', isRequired: true },
+    ],
+  },
+  {
+    name: 'Dish',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'name', type: 'string', isRequired: true },
+      { name: 'description', type: 'string' },
+      { name: 'price', type: 'decimal', isRequired: true },
+      { name: 'category', type: 'string' },
+      { name: 'is_active', type: 'boolean', isRequired: true },
+    ],
+  },
+  {
+    name: 'Diet',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'name', type: 'string', isRequired: true },
+      { name: 'description', type: 'string' },
+    ],
+  },
+  {
+    name: 'Theme',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'name', type: 'string', isRequired: true },
+      { name: 'description', type: 'string' },
+    ],
+  },
+  {
+    name: 'Allergen',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'name', type: 'string', isRequired: true },
+      { name: 'icon_url', type: 'string' },
+    ],
+  },
+  {
+    name: 'Ingredient',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'name', type: 'string', isRequired: true },
+      { name: 'description', type: 'string' },
+    ],
+  },
+  {
+    name: 'Review',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'user_id', type: 'integer', isRequired: true },
+      { name: 'rating', type: 'integer', isRequired: true },
+      { name: 'comment', type: 'string' },
+      { name: 'created_at', type: 'datetime', isRequired: true },
+    ],
+  },
+  {
+    name: 'Discount',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'code', type: 'string', isRequired: true },
+      { name: 'description', type: 'string' },
+      { name: 'percentage', type: 'decimal' },
+      { name: 'is_active', type: 'boolean', isRequired: true },
+    ],
+  },
+  {
+    name: 'Promotion',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'name', type: 'string', isRequired: true },
+      { name: 'description', type: 'string' },
+      { name: 'start_date', type: 'datetime' },
+      { name: 'end_date', type: 'datetime' },
+      { name: 'is_active', type: 'boolean', isRequired: true },
+      { name: 'is_public', type: 'boolean', isRequired: true },
+    ],
+  },
+  {
+    name: 'WorkingHours',
+    columns: [
+      { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'day_of_week', type: 'integer', isRequired: true },
+      { name: 'open_time', type: 'string', isRequired: true },
+      { name: 'close_time', type: 'string', isRequired: true },
+      { name: 'is_closed', type: 'boolean', isRequired: true },
+    ],
+  },
+  {
+    name: 'Session',
+    columns: [
+      { name: 'id', type: 'string', isId: true, isRequired: true },
+      { name: 'user_id', type: 'integer', isRequired: true },
+      { name: 'expires_at', type: 'datetime', isRequired: true },
+      { name: 'created_at', type: 'datetime', isRequired: true },
+    ],
+  },
+];
+
+/**
+ * Map of string fields per model for search functionality
+ */
+const MODEL_STRING_FIELDS: Record<string, string[]> = {
+  user: ['email', 'first_name', 'last_name', 'phone'],
+  role: ['name', 'description'],
+  order: ['status', 'delivery_address', 'notes'],
+  menu: ['name', 'description'],
+  dish: ['name', 'description', 'category'],
+  diet: ['name', 'description'],
+  theme: ['name', 'description'],
+  allergen: ['name'],
+  ingredient: ['name', 'description'],
+  review: ['comment'],
+  discount: ['code', 'description'],
+  promotion: ['name', 'description'],
+  workingHours: ['open_time', 'close_time'],
+  session: ['id'],
+};
+
+/**
+ * List of model names for counting
+ */
+const MODEL_NAMES = [
+  'user', 'role', 'order', 'menu', 'dish', 'diet', 'theme',
+  'allergen', 'ingredient', 'review', 'discount', 'promotion',
+  'workingHours', 'session'
+];
 
 @Controller('crud')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -68,20 +228,7 @@ export class CrudController {
    */
   @Get('schema')
   async getSchema(): Promise<SchemaModel[]> {
-    // Get Prisma DMMF (Data Model Meta Format)
-    const dmmf = Prisma.dmmf;
-    
-    return dmmf.datamodel.models.map((model: Prisma.DMMF.Model) => ({
-      name: model.name,
-      columns: model.fields.map((field: Prisma.DMMF.Field) => ({
-        name: field.name,
-        type: mapPrismaType(field.type),
-        isId: field.isId,
-        isRequired: field.isRequired,
-        isList: field.isList,
-        isRelation: field.relationName !== undefined,
-      })),
-    }));
+    return SCHEMA_MODELS;
   }
 
   /**
@@ -90,19 +237,19 @@ export class CrudController {
    */
   @Get('counts')
   async getCounts(): Promise<Record<string, number>> {
-    const dmmf = Prisma.dmmf;
     const counts: Record<string, number> = {};
     
     // Get count for each model
-    for (const model of dmmf.datamodel.models) {
+    for (const modelName of MODEL_NAMES) {
       try {
-        const modelName = model.name.charAt(0).toLowerCase() + model.name.slice(1);
         const prismaModel = (this.prisma as unknown as Record<string, { count: () => Promise<number> }>)[modelName];
         if (prismaModel?.count) {
-          counts[model.name] = await prismaModel.count();
+          const pascalName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
+          counts[pascalName] = await prismaModel.count();
         }
       } catch {
-        counts[model.name] = 0;
+        const pascalName = modelName.charAt(0).toUpperCase() + modelName.slice(1);
+        counts[pascalName] = 0;
       }
     }
     
@@ -243,17 +390,9 @@ export class CrudController {
    * Build search where clause for string fields
    */
   private buildSearchWhere(modelName: string, search: string): Record<string, unknown> {
-    const dmmf = Prisma.dmmf;
-    const model = dmmf.datamodel.models.find((m: Prisma.DMMF.Model) => m.name.toLowerCase() === modelName);
+    const stringFields = MODEL_STRING_FIELDS[modelName];
     
-    if (!model) return {};
-
-    // Get string fields
-    const stringFields = model.fields
-      .filter((f: Prisma.DMMF.Field) => f.type === 'String' && !f.relationName)
-      .map((f: Prisma.DMMF.Field) => f.name);
-
-    if (stringFields.length === 0) return {};
+    if (!stringFields || stringFields.length === 0) return {};
 
     // Build OR clause for search across all string fields
     return {

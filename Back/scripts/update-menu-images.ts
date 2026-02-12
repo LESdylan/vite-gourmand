@@ -6,7 +6,7 @@
  * This script updates existing MenuImage records with real Unsplash URLs
  * SQL seeds own the menu data - we only update images
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as https from 'https';

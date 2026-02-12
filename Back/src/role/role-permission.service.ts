@@ -3,7 +3,7 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { RolePermission, Permission } from '@prisma/client';
+import { RolePermission, Permission } from '../../generated/prisma/client.js';
 
 interface RolePermissionWithPermission extends RolePermission {
   Permission: Permission;

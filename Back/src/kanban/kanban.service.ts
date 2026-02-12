@@ -3,7 +3,7 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { KanbanColumn, Order } from '@prisma/client';
+import { KanbanColumn, Order } from '../../generated/prisma/client.js';
 import {
   CreateKanbanColumnDto,
   UpdateKanbanColumnDto,

@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma';
 import OpenAI from 'openai';
 import { ChatMessageDto } from './dto/ai-agent.dto';
-import { Prisma, Allergen, Diet, Theme } from '@prisma/client';
+import { Prisma, Allergen, Diet, Theme } from '../../generated/prisma/client.js';
 
 type DishWithRelations = Prisma.DishGetPayload<{
   include: {

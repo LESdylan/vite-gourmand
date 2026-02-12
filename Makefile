@@ -609,18 +609,20 @@ fclean:  ## 🧹 Full clean: remove .env, node_modules, build artifacts, PID fil
 	@# Stop any running servers first
 	@-$(MAKE) --no-print-directory turn-off 2>/dev/null || true
 	@echo "🗑️  Removing Back/.env..."
-	@rm -f $(BACKEND_PATH)/.env
+	@-rm -f $(BACKEND_PATH)/.env 2>/dev/null || true
 	@echo "🗑️  Removing Backend node_modules & build..."
-	@rm -rf $(BACKEND_PATH)/node_modules $(BACKEND_PATH)/dist $(BACKEND_PATH)/coverage
-	@rm -f $(BACKEND_PATH)/package-lock.json
+	@-rm -rf $(BACKEND_PATH)/node_modules 2>/dev/null || true
+	@-rm -rf $(BACKEND_PATH)/dist 2>/dev/null || true
+	@-rm -rf $(BACKEND_PATH)/coverage 2>/dev/null || true
+	@-rm -f $(BACKEND_PATH)/package-lock.json 2>/dev/null || true
 	@echo "🗑️  Removing Frontend node_modules & build..."
-	@rm -rf $(FRONTEND_PATH)/node_modules $(FRONTEND_PATH)/dist $(FRONTEND_PATH)/coverage
-	@rm -f $(FRONTEND_PATH)/package-lock.json
-	@echo "🗑️  Removing Prisma generated client..."
-	@rm -rf $(BACKEND_PATH)/node_modules/.prisma 2>/dev/null || true
+	@-rm -rf $(FRONTEND_PATH)/node_modules 2>/dev/null || true
+	@-rm -rf $(FRONTEND_PATH)/dist 2>/dev/null || true
+	@-rm -rf $(FRONTEND_PATH)/coverage 2>/dev/null || true
+	@-rm -f $(FRONTEND_PATH)/package-lock.json 2>/dev/null || true
 	@echo "🗑️  Removing PID files & logs..."
-	@rm -f $(BACKEND_PID) $(FRONTEND_PID)
-	@rm -f /tmp/vg-backend.log /tmp/vg-frontend.log
+	@-rm -f $(BACKEND_PID) $(FRONTEND_PID) 2>/dev/null || true
+	@-rm -f /tmp/vg-backend.log /tmp/vg-frontend.log 2>/dev/null || true
 	@echo ""
 	@echo "✅ Full clean complete. Run 'make' to bootstrap from scratch."
 	@echo ""

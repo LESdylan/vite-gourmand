@@ -4,7 +4,7 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { User, Role } from '@prisma/client';
+import { User, Role } from '../../generated/prisma/client.js';
 import {
   PaginationDto,
   buildPaginationMeta,
