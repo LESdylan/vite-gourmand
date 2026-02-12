@@ -132,3 +132,16 @@ Forum > Questions sur vos parcours.
 Pour une question générale, pensez également à consulter la FAQ. 
 
 https://faq.studi.fr/article-categories/evaluation_examens/
+
+# How to use a fresh machine
+
+# 1. Clone & cd into repo
+git clone <repo-url> && cd vite-gourmand
+
+# 2. Login to Bitwarden once (stores session)
+export BW_SESSION=$(bw login --raw)
+# — or if already logged in —
+export BW_SESSION=$(bw unlock --raw)
+
+# 3. One command does everything
+make

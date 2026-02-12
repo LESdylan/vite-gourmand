@@ -12,6 +12,6 @@ print_header "🔄 Restarting Docker Containers"
 cd "$PROJECT_ROOT"
 
 log "Restarting containers..."
-docker compose restart
+$DC restart
 
 print_ok "Containers restarted!"

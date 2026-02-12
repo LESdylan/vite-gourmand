@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   db:
     image: postgres:15-alpine
@@ -50,3 +52,35 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
+  # ── Application (Production build) ──────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./Back/.env
+    profiles:
+      - production
+
+  # ── Bitwarden CLI (Secret Fetcher) ────────
+  secrets:
+    build:
+      context: .
+      dockerfile: Dockerfile.bw
+    environment:
+      - BW_SESSION
+    volumes:
+      - ./Back:/work/Back
+      - bw-data:/root/.config/Bitwarden CLI
+    profiles:
+      - tools
+
+volumes:
+  bw-data:

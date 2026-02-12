@@ -29,3 +29,8 @@ data/mongo
 frontend/node_modules
 vitegourmand/
 vendor/vitegourmand/
+
+# Dev server PID files
+.backend.pid
+.frontend.pid
+/tmp/vg-*.log

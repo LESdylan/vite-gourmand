@@ -1,0 +1,32 @@
+# ============================================
+# Bitwarden CLI - Secret Fetcher
+# ============================================
+# Fetches .env secrets from Bitwarden vault
+#
+# Prerequisites:
+#   1. Store your Back/.env content as a Bitwarden Secure Note
+#      named "vite-gourmand-env" (or set BW_ITEM_NAME)
+#   2. Provide credentials via env vars or interactive login
+#
+# Usage (via docker compose):
+#   docker compose --profile tools run --rm secrets login
+#   docker compose --profile tools run --rm secrets sync --session <key>
+#   docker compose --profile tools run --rm secrets get notes "vite-gourmand-env" --session <key>
+#
+# Usage (via make):
+#   make secrets
+# ============================================
+
+FROM node:22-alpine
+
+# Install Bitwarden CLI + utilities
+RUN npm install -g @bitwarden/cli && \
+    apk add --no-cache jq bash curl
+
+WORKDIR /work
+
+# Bitwarden CLI stores data in this directory
+VOLUME ["/root/.config/Bitwarden CLI"]
+
+ENTRYPOINT ["bw"]
+CMD ["--help"]

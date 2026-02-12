@@ -16,8 +16,8 @@ TAIL="${TAIL:-100}"
 
 if [ -n "$SERVICE" ]; then
     log "Streaming logs for: $SERVICE (last $TAIL lines)"
-    docker compose logs -f --tail="$TAIL" "$SERVICE"
+    $DC logs -f --tail="$TAIL" "$SERVICE"
 else
     log "Streaming all container logs (last $TAIL lines)"
-    docker compose logs -f --tail="$TAIL"
+    $DC logs -f --tail="$TAIL"
 fi

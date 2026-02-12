@@ -13,7 +13,7 @@ cd "$PROJECT_ROOT"
 
 log "Container status:"
 echo ""
-docker compose ps
+$DC ps
 
 echo ""
 log "Resource usage:"

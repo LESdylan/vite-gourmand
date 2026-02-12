@@ -19,12 +19,12 @@ if [ "${DEEP:-}" = "1" ]; then
         log "Aborted."
         exit 0
     fi
-    docker compose down -v --rmi all
+    $DC down -v --rmi all
     log "Pruning unused Docker resources..."
     docker system prune -f
 else
     log "Removing containers and images (keeping volumes)..."
-    docker compose down --rmi all
+    $DC down --rmi all
 fi
 
 print_ok "Docker cleanup completed!"

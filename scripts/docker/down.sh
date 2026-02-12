@@ -12,6 +12,6 @@ print_header "🛑 Stopping Docker Containers"
 cd "$PROJECT_ROOT"
 
 log "Stopping containers..."
-docker compose down
+$DC down
 
 print_ok "Containers stopped!"

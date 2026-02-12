@@ -9,13 +9,20 @@ SCRIPT_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="$(cd "$SCRIPT_LIB_DIR/.." && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPTS_DIR/.." && pwd)"
 BACKEND_PATH="$PROJECT_ROOT/Back"
-FRONTEND_PATH="$PROJECT_ROOT/Front"
+FRONTEND_PATH="$PROJECT_ROOT/View"
 DOCS_PATH="$PROJECT_ROOT/docs"
 ENV_FILE="$BACKEND_PATH/.env"
 
 # Docker container names (match docker-compose.yml)
 POSTGRES_CONTAINER="vite-gourmand-db-1"
 MONGO_CONTAINER="vite-gourmand-mongo-1"
+
+# Auto-detect docker compose command (v2 plugin vs v1 standalone)
+if docker compose version >/dev/null 2>&1; then
+    DC="docker compose"
+else
+    DC="docker-compose"
+fi
 
 # Colors
 RED='\033[0;31m'

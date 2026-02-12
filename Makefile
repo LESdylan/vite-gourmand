@@ -5,22 +5,178 @@
 # Run 'make help' to see all available targets
 # ============================================
 
+# Force bash as the shell (required — default shell may not support & or pipes)
+SHELL := /usr/bin/bash
+.SHELLFLAGS := -ec
+
 .PHONY: help
-.DEFAULT_GOAL := help
+.DEFAULT_GOAL := all
 
 # ── Variables ────────────────────────────────────────
-DOCKER_COMPOSE   = docker compose
+# Auto-detect: docker compose (v2 plugin) or docker-compose (v1 standalone)
+DOCKER_COMPOSE := $(shell docker compose version >/dev/null 2>&1 && echo 'docker compose' || echo 'docker-compose')
 BACKEND_PATH     = ./Back
-FRONTEND_PATH    = ./Front
+FRONTEND_PATH    = ./View
 SCRIPTS_PATH     = ./scripts
 PRISMA_SCHEMA    = $(BACKEND_PATH)/src/Model/prisma/schema.prisma
 
-# Load environment if available
--include $(BACKEND_PATH)/.env
-export
+# Ports
+BACKEND_PORT     = 3000
+FRONTEND_PORT    = 5173
+
+# PID files (for background dev servers)
+BACKEND_PID      = .backend.pid
+FRONTEND_PID     = .frontend.pid
+
+# Bitwarden vault item name (override: BW_ITEM_NAME=xxx make secrets)
+BW_ITEM_NAME    ?= vite-gourmand-env
+export BW_ITEM_NAME
+
+# NOTE: Do NOT include Back/.env here — Make corrupts URLs containing & chars.
+# NestJS loads .env automatically via dotenv from the working directory.
 
 # ============================================
-#  🚀 QUICK START
+#  ⚡ BOOTSTRAP (default target: make)
+# ============================================
+# Running `make` with no arguments does everything:
+#   1. Fetch .env from Bitwarden vault (skipped if exists)
+#   2. npm install for Back & View
+#   3. Generate Prisma client
+#   4. Start backend + frontend dev servers in background
+#   5. Open VS Code Simple Browser preview
+#   6. Print URLs
+#
+# Databases are cloud-hosted (Supabase + MongoDB Atlas)
+# so no Docker containers are needed for development.
+# ============================================
+
+.PHONY: all banner fetch-env secrets secrets-force install-all \
+        dev-start dev-backend dev-frontend show-urls
+
+all: banner fetch-env install-all turn-on  ## ⚡ Full bootstrap (default)
+
+banner:
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║     🍽️  VITE GOURMAND — Full Bootstrap                       ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+
+fetch-env:  ## 🔐 Fetch .env from Bitwarden (skips if exists)
+	@$(SCRIPTS_PATH)/docker/bw-fetch-env.sh
+
+secrets: ## 🔐 Alias: fetch .env from Bitwarden
+	@$(SCRIPTS_PATH)/docker/bw-fetch-env.sh
+
+secrets-force:  ## 🔐 Force re-fetch .env from Bitwarden (overwrites)
+	@rm -f $(BACKEND_PATH)/.env
+	@$(SCRIPTS_PATH)/docker/bw-fetch-env.sh
+
+install-all:  ## 📦 Install npm deps for Back & View + Prisma generate
+	@echo "📦 Installing Backend dependencies..."
+	@cd $(BACKEND_PATH) && npm install --silent 2>&1 | tail -3
+	@echo "📦 Installing Frontend dependencies..."
+	@cd $(FRONTEND_PATH) && npm install --silent 2>&1 | tail -3
+	@echo "📦 Generating Prisma client..."
+	@cd $(BACKEND_PATH) && npx prisma generate 2>/dev/null || true
+	@echo "✅ All dependencies installed!"
+
+# ============================================
+#  🔌 TURN-ON / TURN-OFF
+# ============================================
+# turn-on  → start backend + frontend dev servers + open preview
+# turn-off → gracefully stop everything
+# ============================================
+
+.PHONY: turn-on turn-off
+
+turn-on:  ## 🔌 Start backend + frontend & open VS Code preview
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║     🔌  TURNING ON VITE GOURMAND                             ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "🔧 Starting backend (NestJS) on port $(BACKEND_PORT)..."
+	@if [ -f $(BACKEND_PID) ] && kill -0 $$(cat $(BACKEND_PID)) 2>/dev/null; then \
+		echo "   ↳ Backend already running (PID: $$(cat $(BACKEND_PID)))"; \
+	else \
+		cd $(BACKEND_PATH) && nohup npm run start:dev > /tmp/vg-backend.log 2>&1 & echo $$! > $(CURDIR)/$(BACKEND_PID); \
+		sleep 3; \
+		echo "   ✅ Backend started (PID: $$(cat $(CURDIR)/$(BACKEND_PID)))"; \
+	fi
+	@echo "🖥️  Starting frontend (Vite) on port $(FRONTEND_PORT)..."
+	@if [ -f $(FRONTEND_PID) ] && kill -0 $$(cat $(FRONTEND_PID)) 2>/dev/null; then \
+		echo "   ↳ Frontend already running (PID: $$(cat $(FRONTEND_PID)))"; \
+	else \
+		cd $(FRONTEND_PATH) && nohup npm run dev > /tmp/vg-frontend.log 2>&1 & echo $$! > $(CURDIR)/$(FRONTEND_PID); \
+		sleep 3; \
+		echo "   ✅ Frontend started (PID: $$(cat $(CURDIR)/$(FRONTEND_PID)))"; \
+	fi
+	@$(MAKE) --no-print-directory show-urls
+
+turn-off:  ## 🔌 Gracefully shut down everything
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  🔌  SHUTTING DOWN VITE GOURMAND                             ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "🛑 Stopping frontend..."
+	@if [ -f $(FRONTEND_PID) ]; then \
+		kill $$(cat $(FRONTEND_PID)) 2>/dev/null || true; \
+		rm -f $(FRONTEND_PID); \
+	fi
+	@-fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true
+	@echo "   ✅ Frontend stopped"
+	@echo "🛑 Stopping backend..."
+	@if [ -f $(BACKEND_PID) ]; then \
+		kill $$(cat $(BACKEND_PID)) 2>/dev/null || true; \
+		rm -f $(BACKEND_PID); \
+	fi
+	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
+	@echo "   ✅ Backend stopped"
+	@-rm -f /tmp/vg-backend.log /tmp/vg-frontend.log
+	@echo ""
+	@echo "✅ Everything shut down cleanly."
+	@echo ""
+
+show-urls:
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  ✅  VITE GOURMAND IS RUNNING                                ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  🖥️  Frontend  → http://localhost:$(FRONTEND_PORT)                   ║"
+	@echo "║  🔧 Backend   → http://localhost:$(BACKEND_PORT)/api                 ║"
+	@echo "║  🗄️  Postgres  → Supabase (cloud)                            ║"
+	@echo "║  🍃 MongoDB   → Atlas (cloud)                                ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  Turn off : make turn-off                                    ║"
+	@echo "║  Logs back: tail -f /tmp/vg-backend.log                      ║"
+	@echo "║  Logs front: tail -f /tmp/vg-frontend.log                    ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+
+# ============================================
+#  🛑 STOP / KILL INDIVIDUAL PROCESSES
+# ============================================
+
+.PHONY: kill-backend kill-frontend kill-all
+
+kill-backend:  ## 🛑 Stop backend dev server
+	@echo "🛑 Stopping backend..."
+	@if [ -f $(BACKEND_PID) ]; then kill $$(cat $(BACKEND_PID)) 2>/dev/null || true; rm -f $(BACKEND_PID); fi
+	@-fuser -k $(BACKEND_PORT)/tcp 2>/dev/null || true
+	@echo "✅ Backend stopped (port $(BACKEND_PORT) freed)"
+
+kill-frontend:  ## 🛑 Stop frontend dev server
+	@echo "🛑 Stopping frontend..."
+	@if [ -f $(FRONTEND_PID) ]; then kill $$(cat $(FRONTEND_PID)) 2>/dev/null || true; rm -f $(FRONTEND_PID); fi
+	@-fuser -k $(FRONTEND_PORT)/tcp 2>/dev/null || true
+	@echo "✅ Frontend stopped (port $(FRONTEND_PORT) freed)"
+
+kill-all: turn-off  ## 🛑 Alias for turn-off
+
+# ============================================
+#  🚀 QUICK START (legacy)
 # ============================================
 
 .PHONY: quick-start quick-start-local quick-start-cloud

@@ -11,13 +11,13 @@ print_header "🐳 Starting Docker Containers"
 
 cd "$PROJECT_ROOT"
 
-log "Starting containers with docker compose..."
-docker compose up -d --build
+log "Starting containers with $DC..."
+$DC up -d --build
 
 log "Waiting for containers to be healthy..."
 sleep 3
 
 # Show status
-docker compose ps
+$DC ps
 
 print_ok "Containers started!"
