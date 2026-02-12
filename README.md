@@ -7,33 +7,64 @@
 ---
 ## Quick Start
 
-### Option 1: Local Development (Docker)
+### 🐳 Option 1: Containerized Development (Recommended for School/Restricted Systems)
+
+**Only Docker required on your host machine!** No Node.js, npm, or other dependencies needed.
+
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd vite-gourmand
 
-# Full automatic setup (Docker + PostgreSQL + MongoDB + seed data)
-make quick-start-local
+# Full containerized development (everything runs in Docker)
+make docker-dev
 ```
 
-### Option 2: Supabase (Production/Staging)
+This will:
+1. Build a development container with Node.js 22
+2. Fetch `.env` from Bitwarden vault (interactive)
+3. Install all dependencies inside the container
+4. Compile TypeScript and generate Prisma client
+5. Start dev servers (accessible at localhost:3000 and localhost:5173)
+
+**Useful Docker commands:**
+```bash
+make docker-shell    # Open interactive shell inside container
+make docker-dev-logs # View server logs
+make docker-stop     # Stop the dev container
+make docker-fclean   # Full cleanup (remove containers & volumes)
+make docker-restart  # Restart servers inside container
+```
+
+### 💻 Option 2: Local Development (Host Node.js)
+
+If you have Node.js 20+ installed on your machine:
+
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd vite-gourmand
 
-# Interactive setup with Supabase
-make quick-start-supabase
+# Full automatic setup
+make
 ```
+
+### 🔧 VS Code Dev Container (Best IDE Experience)
+
+For full IDE support inside Docker:
+1. Install the "Dev Containers" VS Code extension
+2. Open the project folder
+3. Click "Reopen in Container" when prompted (or F1 → "Dev Containers: Reopen in Container")
+4. VS Code will build the container and open your workspace inside it
 
 ### Available Make Commands
 ```bash
 make help                  # Show all available commands
-make setup-supabase        # Configure Supabase connection
-make setup-local           # Configure local Docker database
-make supabase-migrate      # Deploy migrations to Supabase
-make supabase-seed         # Seed Supabase database
+make                       # Full bootstrap (local Node.js)
+make docker-dev            # Full bootstrap (containerized)
+make turn-on / turn-off    # Start/stop servers
+make logs                  # View server logs
+make fclean                # Full cleanup
 ```
 
 ---

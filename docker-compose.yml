@@ -83,5 +83,44 @@ services:
     profiles:
       - tools
 
+  # ── Development Environment (Containerized Dev) ────────
+  # Use this when you don't have Node.js installed on your host
+  # Run: make docker-dev (or docker-compose --profile dev up)
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: vite-gourmand-dev
+    working_dir: /app
+    stdin_open: true     # Keep STDIN open for interactive commands
+    tty: true            # Allocate a pseudo-TTY
+    ports:
+      - "3000:3000"      # Backend
+      - "5173:5173"      # Frontend (Vite)
+      - "5555:5555"      # Prisma Studio (optional)
+    volumes:
+      # Mount source code
+      - ./Back:/app/Back
+      - ./View:/app/View
+      - ./scripts:/app/scripts
+      - ./Makefile:/app/Makefile
+      - ./docs:/app/docs:ro
+      # Persist node_modules in named volumes (much faster than bind mounts)
+      - back-node-modules:/app/Back/node_modules
+      - view-node-modules:/app/View/node_modules
+      # Persist npm cache
+      - npm-cache:/app/.npm-cache
+      # Mount Bitwarden data for secrets
+      - bw-data:/root/.config/Bitwarden CLI
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # Required for file watching in Docker
+    profiles:
+      - dev
+    # No healthcheck needed for dev container
+
 volumes:
   bw-data:
+  back-node-modules:
+  view-node-modules:
+  npm-cache:

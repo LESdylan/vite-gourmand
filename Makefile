@@ -3,6 +3,10 @@
 # ============================================
 # Usage: make <target>
 # Run 'make help' to see all available targets
+#
+# 🐳 FULLY CONTAINERIZED: Only Docker required!
+#    Running `make` bootstraps everything inside Docker containers.
+#    No Node.js, npm, or other dependencies needed on your host.
 # ============================================
 
 # Force bash as the shell (required — default shell may not support & or pipes)
@@ -24,7 +28,7 @@ PRISMA_SCHEMA    = $(BACKEND_PATH)/src/Model/prisma/schema.prisma
 BACKEND_PORT     = 3000
 FRONTEND_PORT    = 5173
 
-# PID files (for background dev servers)
+# PID files (for background dev servers - used in local mode)
 BACKEND_PID      = .backend.pid
 FRONTEND_PID     = .frontend.pid
 
@@ -38,47 +42,49 @@ export BW_ITEM_NAME
 # ============================================
 #  ⚡ BOOTSTRAP (default target: make)
 # ============================================
-# Running `make` with no arguments does everything:
-#   1. Build Bitwarden CLI Docker image
-#   2. Interactive login → fetch .env from vault → Back/.env
-#   3. npm install for Back & View
-#   4. Generate Prisma client
-#   5. Compile TypeScript (verify no errors)
-#   6. Start backend + frontend dev servers
+# 🐳 CONTAINERIZED BY DEFAULT
+#
+# Running `make` with no arguments does everything INSIDE DOCKER:
+#   1. Build development Docker container (Node.js 22 Alpine)
+#   2. Build Bitwarden CLI container & fetch .env interactively
+#   3. npm install for Back & View (inside container)
+#   4. Generate Prisma client (inside container)
+#   5. Compile TypeScript (inside container)
+#   6. Start backend + frontend dev servers (inside container)
 #   7. Print summary with URLs
 #
-# Databases are cloud-hosted (Supabase + MongoDB Atlas)
-# so no local Docker DB containers are needed.
+# Your host machine only needs DOCKER installed!
+# Databases are cloud-hosted (Supabase + MongoDB Atlas).
+#
+# For local development with host Node.js, use: make local
 # ============================================
 
 .PHONY: all bootstrap banner fetch-env secrets secrets-force \
-        install-all compile-check turn-on turn-off show-urls summary
+        install-all compile-check turn-on turn-off show-urls summary local local-bootstrap
 
-# Default target: full bootstrap
-all: bootstrap
+# Default target: CONTAINERIZED bootstrap (Docker-only)
+all: docker-bootstrap
 
-# Full bootstrap chain — each step depends on the previous
-bootstrap:
-	@$(MAKE) --no-print-directory banner
+# Alias for clarity
+bootstrap: docker-bootstrap
+
+# Local development with host Node.js (if you prefer not using Docker)
+local: local-bootstrap  ## 💻 Local bootstrap (requires Node.js on host)
+
+local-bootstrap:  ## 💻 Bootstrap using host Node.js (not Docker)
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  💻 VITE GOURMAND — Local Development (Host Node.js)         ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "⚠️  This mode requires Node.js and npm installed on your host."
+	@echo "   For containerized development, use: make"
+	@echo ""
 	@$(MAKE) --no-print-directory step-1-secrets
 	@$(MAKE) --no-print-directory step-2-install
 	@$(MAKE) --no-print-directory step-3-compile
 	@$(MAKE) --no-print-directory step-4-start
 	@$(MAKE) --no-print-directory summary
-
-banner:
-	@echo ""
-	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║     🍽️  VITE GOURMAND — Full Bootstrap                       ║"
-	@echo "╚══════════════════════════════════════════════════════════════╝"
-	@echo ""
-	@echo "This will:"
-	@echo "  1. 🔐 Fetch .env from Bitwarden vault (interactive login)"
-	@echo "  2. 📦 Install npm dependencies (Back + View)"
-	@echo "  3. 🔨 Compile TypeScript & generate Prisma client"
-	@echo "  4. 🚀 Start development servers"
-	@echo "  5. 📋 Print summary with URLs"
-	@echo ""
 
 # ── Step 1: Fetch secrets ────────────────────────────
 step-1-secrets:
@@ -262,7 +268,7 @@ turn-off:  ## 🔌 Stop all servers
 	@echo "✅ Everything shut down."
 	@echo ""
 
-logs:  ## 📋 View server logs (WHICH=backend|frontend|both)
+local-logs:  ## 📋 View local server logs (WHICH=backend|frontend|both)
 	@WHICH="$${WHICH:-both}"; \
 	if [ "$$WHICH" = "backend" ] || [ "$$WHICH" = "both" ]; then \
 		echo "═══ Backend Log ═══"; \
@@ -338,13 +344,13 @@ up:  ## Start all Docker containers
 down:  ## Stop all Docker containers
 	@$(SCRIPTS_PATH)/docker/down.sh
 
-restart:  ## Restart Docker containers
+docker-containers-restart:  ## Restart Docker containers (production/tools)
 	@$(SCRIPTS_PATH)/docker/restart.sh
 
 ps:  ## Show container status
 	@$(SCRIPTS_PATH)/docker/ps.sh
 
-docker-logs:  ## Stream Docker container logs (SERVICE=name for specific)
+docker-service-logs:  ## Stream Docker container logs (SERVICE=name for specific)
 	@SERVICE="$(SERVICE)" TAIL="$(TAIL)" $(SCRIPTS_PATH)/docker/logs.sh
 
 docker-clean:  ## Remove containers and images (DEEP=1 for volumes)
@@ -580,7 +586,212 @@ diagnostic-perf:  ## Check performance
 	@CHECK=perf $(SCRIPTS_PATH)/diagnostic/run.sh
 
 # ============================================
-#  🛠️ UTILITIES
+#  🐳 CONTAINERIZED DEVELOPMENT (DEFAULT)
+# ============================================
+# This is the DEFAULT mode when you run `make`.
+# Everything runs inside Docker containers.
+# Your host machine only needs Docker installed!
+#
+# Usage:
+#   make              # Full containerized bootstrap (default)
+#   make stop         # Stop the dev container
+#   make shell        # Interactive shell in dev container
+#   make logs         # View container logs
+#   make fclean       # Full cleanup
+#
+# For local development with host Node.js: make local
+# ============================================
+
+.PHONY: docker-bootstrap docker-dev docker-shell docker-stop docker-build-dev \
+        docker-install docker-compile docker-start docker-fclean stop shell logs restart
+
+# Build the development container image
+docker-build-dev:  ## 🐳 Build the development Docker image
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  🐳 Building Development Container                           ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@$(DOCKER_COMPOSE) --profile dev build dev
+	@echo ""
+	@echo "✅ Development container image built"
+
+# Main containerized bootstrap (DEFAULT when you run `make`)
+docker-bootstrap:  ## 🐳 Full containerized bootstrap (DEFAULT)
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  🐳 VITE GOURMAND — Containerized Development                ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "🐳 Everything runs inside Docker containers."
+	@echo "   Your host machine only needs Docker installed!"
+	@echo ""
+	@echo "Steps:"
+	@echo "  1. 🏗️  Build dev container (Node.js 22 Alpine)"
+	@echo "  2. 🔐 Fetch .env from Bitwarden (interactive)"
+	@echo "  3. 📦 Install dependencies inside container"
+	@echo "  4. 🔨 Generate Prisma client & compile TypeScript"
+	@echo "  5. 🚀 Start dev servers inside container"
+	@echo ""
+	@# Step 1: Build dev image
+	@$(MAKE) --no-print-directory docker-build-dev
+	@# Step 2: Fetch secrets (uses existing bw-fetch-env.sh which uses Docker)
+	@$(MAKE) --no-print-directory step-1-secrets
+	@# Step 3-5: Run install, compile, and start inside the container
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  🐳 Starting Development Environment                         ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@$(DOCKER_COMPOSE) --profile dev up -d dev
+	@echo "⏳ Waiting for container to start..."
+	@sleep 3
+	@# Install dependencies inside container
+	@echo ""
+	@echo "📦 [1/3] Installing Backend dependencies (inside container)..."
+	@$(DOCKER_COMPOSE) exec dev sh -c "cd /app/Back && npm install --loglevel=error"
+	@echo ""
+	@echo "📦 [2/3] Installing Frontend dependencies (inside container)..."
+	@$(DOCKER_COMPOSE) exec dev sh -c "cd /app/View && npm install --loglevel=error"
+	@echo ""
+	@echo "📦 [3/3] Generating Prisma client..."
+	@# Clean generated directory first to avoid stale files conflict
+	@$(DOCKER_COMPOSE) exec dev sh -c "rm -rf /app/Back/generated/prisma 2>/dev/null || true"
+	@$(DOCKER_COMPOSE) exec dev sh -c "cd /app/Back && npx prisma generate"
+	@echo ""
+	@echo "🔨 Checking TypeScript compilation..."
+	@$(DOCKER_COMPOSE) exec dev sh -c "cd /app/Back && npx tsc --noEmit"
+	@$(DOCKER_COMPOSE) exec dev sh -c "cd /app/View && npx tsc --noEmit"
+	@echo "✅ TypeScript compiles cleanly"
+	@echo ""
+	@echo "🚀 Starting Backend server..."
+	@$(DOCKER_COMPOSE) exec -d dev sh -c "cd /app/Back && npm run start:dev > /tmp/backend.log 2>&1"
+	@echo "⏳ Waiting for Backend to be ready..."
+	@sleep 3
+	@for i in 1 2 3 4 5 6 7 8 9 10; do \
+		if $(DOCKER_COMPOSE) exec dev sh -c "curl -s http://localhost:3000/api/site-info > /dev/null 2>&1"; then \
+			echo "✅ Backend is ready!"; \
+			break; \
+		fi; \
+		echo "   Attempt $$i/10 - waiting..."; \
+		sleep 2; \
+	done
+	@echo ""
+	@echo "🚀 Starting Frontend server..."
+	@$(DOCKER_COMPOSE) exec -d dev sh -c "cd /app/View && npm run dev -- --host 0.0.0.0 > /tmp/frontend.log 2>&1"
+	@sleep 3
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  🎉 VITE GOURMAND — READY!                                   ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║                                                              ║"
+	@echo "║  ✅ Running inside Docker (Node.js 22 Alpine)                ║"
+	@echo "║  ✅ Secrets fetched from Bitwarden                           ║"
+	@echo "║  ✅ Dependencies installed                                   ║"
+	@echo "║  ✅ TypeScript compiled successfully                         ║"
+	@echo "║  ✅ Development servers running                              ║"
+	@echo "║                                                              ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  🌐 URLS                                                     ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  🖥️  Frontend  → http://localhost:$(FRONTEND_PORT)                   ║"
+	@echo "║  🔧 Backend   → http://localhost:$(BACKEND_PORT)/api                 ║"
+	@echo "║  📚 API Docs  → http://localhost:$(BACKEND_PORT)/api/docs            ║"
+	@echo "║                                                              ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  🗄️  PostgreSQL → Supabase (cloud-hosted)                    ║"
+	@echo "║  🍃 MongoDB    → Atlas (cloud-hosted)                        ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  📋 COMMANDS                                                 ║"
+	@echo "╠══════════════════════════════════════════════════════════════╣"
+	@echo "║  make stop      Stop containers                              ║"
+	@echo "║  make shell     Open shell in container                      ║"
+	@echo "║  make logs      View server logs                             ║"
+	@echo "║  make restart   Restart servers                              ║"
+	@echo "║  make fclean    Full cleanup                                 ║"
+	@echo "║  make help      Show all commands                            ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+
+# Alias for backward compatibility
+docker-dev: docker-bootstrap  ## 🐳 Alias for docker-bootstrap
+
+# Convenient short aliases
+stop: docker-stop  ## 🛑 Stop the dev container (alias)
+shell: docker-shell  ## 🐚 Open shell in container (alias)
+restart: docker-restart  ## 🔄 Restart servers (alias)
+
+# Interactive shell inside the dev container
+docker-shell:  ## 🐳 Open an interactive shell inside the dev container
+	@echo "🐳 Opening shell in development container..."
+	@echo "   (Type 'exit' to leave)"
+	@echo ""
+	@$(DOCKER_COMPOSE) --profile dev exec dev /bin/bash || \
+		$(DOCKER_COMPOSE) --profile dev run --rm dev /bin/bash
+
+# View logs from inside the container
+docker-logs:  ## 🐳 View dev server logs (inside container)
+	@echo "═══ Backend Log (from container) ═══"
+	@$(DOCKER_COMPOSE) exec dev tail -100 /tmp/backend.log 2>/dev/null || echo "(no log yet)"
+	@echo ""
+	@echo "═══ Frontend Log (from container) ═══"
+	@$(DOCKER_COMPOSE) exec dev tail -100 /tmp/frontend.log 2>/dev/null || echo "(no log yet)"
+
+# Also make 'logs' work for both Docker and local mode
+logs:  ## 📋 View server logs
+	@if $(DOCKER_COMPOSE) ps 2>/dev/null | grep -q "dev.*Up"; then \
+		$(MAKE) --no-print-directory docker-logs; \
+	else \
+		echo "═══ Backend Log ═══"; \
+		tail -50 /tmp/vg-backend.log 2>/dev/null || echo "(no log yet)"; \
+		echo ""; \
+		echo "═══ Frontend Log ═══"; \
+		tail -50 /tmp/vg-frontend.log 2>/dev/null || echo "(no log yet)"; \
+	fi
+
+# Stop the dev container
+docker-stop:  ## 🐳 Stop the development container
+	@echo "🛑 Stopping development container..."
+	@$(DOCKER_COMPOSE) --profile dev down
+	@echo "✅ Development container stopped"
+
+# Full Docker cleanup (removes volumes too)
+docker-fclean:  ## 🐳 Full Docker clean: stop containers, remove volumes
+	@echo ""
+	@echo "╔══════════════════════════════════════════════════════════════╗"
+	@echo "║  🧹 FULL DOCKER CLEAN — Removing containers & volumes        ║"
+	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "🛑 Stopping all containers..."
+	@-$(DOCKER_COMPOSE) --profile dev --profile tools --profile production down 2>/dev/null || true
+	@echo "🗑️  Removing Docker volumes (node_modules, npm-cache)..."
+	@-docker volume rm vite-gourmand_back-node-modules 2>/dev/null || true
+	@-docker volume rm vite-gourmand_view-node-modules 2>/dev/null || true
+	@-docker volume rm vite-gourmand_npm-cache 2>/dev/null || true
+	@echo "🗑️  Removing Back/.env..."
+	@-rm -f $(BACKEND_PATH)/.env 2>/dev/null || true
+	@echo ""
+	@echo "✅ Docker cleanup complete. Run 'make' to start fresh."
+	@echo ""
+
+# Restart servers inside the container
+docker-restart:  ## 🐳 Restart dev servers inside container
+	@echo "🔄 Restarting servers inside container..."
+	@# Kill existing processes
+	@-$(DOCKER_COMPOSE) exec dev pkill -f "nest start" 2>/dev/null || true
+	@-$(DOCKER_COMPOSE) exec dev pkill -f "vite" 2>/dev/null || true
+	@sleep 2
+	@# Start them again
+	@$(DOCKER_COMPOSE) exec -d dev sh -c "cd /app/Back && npm run start:dev > /tmp/backend.log 2>&1"
+	@$(DOCKER_COMPOSE) exec -d dev sh -c "cd /app/View && npm run dev -- --host 0.0.0.0 > /tmp/frontend.log 2>&1"
+	@sleep 3
+	@echo "✅ Servers restarted!"
+	@echo ""
+	@echo "  🖥️  Frontend → http://localhost:$(FRONTEND_PORT)"
+	@echo "  🔧 Backend  → http://localhost:$(BACKEND_PORT)/api"
+
+# ============================================
+#  �🛠️ UTILITIES
 # ============================================
 
 .PHONY: status doctor env-show env-check clean
@@ -600,34 +811,90 @@ env-check:  ## Check required environment variables
 clean:  ## Clean build artifacts (DEEP=1 for node_modules)
 	@DEEP="$(DEEP)" $(SCRIPTS_PATH)/utils/clean.sh
 
-fclean:  ## 🧹 Full clean: remove .env, node_modules, build artifacts, PID files
+fclean:  ## 🧹 NUCLEAR clean: ALL Docker images, containers, volumes + local files
 	@echo ""
 	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║  🧹 FULL CLEAN — Removing all generated files                ║"
+	@echo "║  🧹 NUCLEAR CLEAN — Removing EVERYTHING                      ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@# Stop any running servers first
+	@# Stop any local servers first
 	@-$(MAKE) --no-print-directory turn-off 2>/dev/null || true
-	@echo "🗑️  Removing Back/.env..."
+	@echo ""
+	@echo "🛑 [1/7] Force stopping ALL project containers..."
+	@# First attempt: normal docker commands
+	@-docker kill $$(docker ps -q --filter "name=vite-gourmand") 2>/dev/null || true
+	@-docker kill $$(docker ps -q --filter "name=vite_gourmand") 2>/dev/null || true
+	@# Check if containers are still running
+	@if docker ps -q --filter "name=vite-gourmand" --filter "name=vite_gourmand" 2>/dev/null | grep -q .; then \
+		echo "   ⚠️  Containers still running - trying with elevated privileges..."; \
+		sudo docker kill $$(sudo docker ps -q --filter "name=vite-gourmand") 2>/dev/null || true; \
+		sudo docker kill $$(sudo docker ps -q --filter "name=vite_gourmand") 2>/dev/null || true; \
+	fi
+	@# Check again - if still running, AppArmor might be blocking
+	@if docker ps -q --filter "name=vite-gourmand" --filter "name=vite_gourmand" 2>/dev/null | grep -q .; then \
+		echo "   ⚠️  Containers STILL running - AppArmor may be blocking. Removing docker-default profile..."; \
+		sudo aa-remove-unknown 2>/dev/null || true; \
+		sudo systemctl restart docker 2>/dev/null || true; \
+		sleep 2; \
+		docker kill $$(docker ps -q --filter "name=vite-gourmand") 2>/dev/null || true; \
+		docker kill $$(docker ps -q --filter "name=vite_gourmand") 2>/dev/null || true; \
+	fi
+	@echo "   ✅ Containers stopped"
+	@echo ""
+	@echo "🗑️  [2/7] Removing ALL project containers..."
+	@-docker rm -f $$(docker ps -aq --filter "name=vite-gourmand") 2>/dev/null || true
+	@-docker rm -f $$(docker ps -aq --filter "name=vite_gourmand") 2>/dev/null || true
+	@# Fallback with sudo if needed
+	@-sudo docker rm -f $$(sudo docker ps -aq --filter "name=vite-gourmand") 2>/dev/null || true
+	@-sudo docker rm -f $$(sudo docker ps -aq --filter "name=vite_gourmand") 2>/dev/null || true
+	@echo "   ✅ Containers removed"
+	@echo ""
+	@echo "🗑️  [3/7] Removing ALL project Docker images..."
+	@-docker rmi -f vite-gourmand_dev vite-gourmand-dev 2>/dev/null || true
+	@-docker rmi -f $$(docker images -q --filter "reference=vite-gourmand*") 2>/dev/null || true
+	@-docker rmi -f $$(docker images -q --filter "reference=*vite-gourmand*") 2>/dev/null || true
+	@-docker images --format '{{.Repository}}:{{.Tag}}' | grep -i vite | grep -i gourmand | xargs -r docker rmi -f 2>/dev/null || true
+	@echo "   ✅ Images removed"
+	@echo ""
+	@echo "🗑️  [4/7] Removing ALL project Docker volumes..."
+	@-docker volume rm -f $$(docker volume ls -q | grep -i vite | grep -i gourmand) 2>/dev/null || true
+	@-docker volume rm -f vite-gourmand_back-node-modules vite-gourmand_view-node-modules vite-gourmand_npm-cache vite-gourmand_postgres-data vite-gourmand_mongo-data 2>/dev/null || true
+	@echo "   ✅ Volumes removed"
+	@echo ""
+	@echo "🗑️  [5/7] Pruning dangling images & build cache..."
+	@-docker image prune -f 2>/dev/null || true
+	@-docker builder prune -f 2>/dev/null || true
+	@echo "   ✅ Cache pruned"
+	@echo ""
+	@echo "🗑️  [6/7] Removing Back/.env & generated files..."
 	@-rm -f $(BACKEND_PATH)/.env 2>/dev/null || true
-	@echo "🗑️  Removing Backend node_modules & build..."
+	@-rm -rf $(BACKEND_PATH)/generated 2>/dev/null || true
+	@echo "   ✅ Generated files removed"
+	@echo ""
+	@echo "🗑️  [7/7] Removing local node_modules, builds, logs..."
 	@-rm -rf $(BACKEND_PATH)/node_modules 2>/dev/null || true
 	@-rm -rf $(BACKEND_PATH)/dist 2>/dev/null || true
 	@-rm -rf $(BACKEND_PATH)/coverage 2>/dev/null || true
 	@-rm -f $(BACKEND_PATH)/package-lock.json 2>/dev/null || true
-	@echo "🗑️  Removing Frontend node_modules & build..."
 	@-rm -rf $(FRONTEND_PATH)/node_modules 2>/dev/null || true
 	@-rm -rf $(FRONTEND_PATH)/dist 2>/dev/null || true
 	@-rm -rf $(FRONTEND_PATH)/coverage 2>/dev/null || true
 	@-rm -f $(FRONTEND_PATH)/package-lock.json 2>/dev/null || true
-	@echo "🗑️  Removing PID files & logs..."
 	@-rm -f $(BACKEND_PID) $(FRONTEND_PID) 2>/dev/null || true
 	@-rm -f /tmp/vg-backend.log /tmp/vg-frontend.log 2>/dev/null || true
+	@echo "   ✅ Local files removed"
 	@echo ""
-	@echo "✅ Full clean complete. Run 'make' to bootstrap from scratch."
+	@# Final verification
+	@if docker ps -q --filter "name=vite-gourmand" --filter "name=vite_gourmand" 2>/dev/null | grep -q .; then \
+		echo "⚠️  WARNING: Some containers may still exist. Manual intervention may be required."; \
+		echo "   Try: sudo systemctl restart docker"; \
+	else \
+		echo "✅ NUCLEAR CLEAN COMPLETE. Run 'make' to bootstrap from scratch."; \
+	fi
 	@echo ""
 
-re: fclean all  ## 🔄 Full rebuild: fclean + make
+re: fclean  ## 🔄 Full rebuild: fclean + make
+	@$(MAKE) --no-print-directory all
 
 # ============================================
 #  📋 HELP
@@ -638,6 +905,9 @@ help:  ## Show this help message
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║     🍽️  VITE GOURMAND - Available Commands                    ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "🐳 DEFAULT: Everything runs inside Docker containers."
+	@echo "   Your machine only needs Docker installed!"
 	@echo ""
 	@echo "Usage: make <target> [VARIABLE=value]"
 	@echo ""
@@ -651,11 +921,12 @@ help:  ## Show this help message
 			printf "\n\033[1;33m%s\033[0m\n", $$0 \
 		}' $(MAKEFILE_LIST)
 	@echo ""
-	@echo "Examples:"
-	@echo "  make quick-start         # Full local setup"
-	@echo "  make dev                 # Start development server"
-	@echo "  make test-all            # Run all tests"
-	@echo "  make lint FIX=1          # Fix linting errors"
-	@echo "  make db-query SQL=\"...\"  # Run custom SQL"
-	@echo "  make logs SERVICE=db     # View specific container logs"
+	@echo "Quick Reference:"
+	@echo "  make               # Full bootstrap (Docker, default)"
+	@echo "  make stop          # Stop containers"
+	@echo "  make shell         # Shell in container"
+	@echo "  make logs          # View logs"
+	@echo "  make restart       # Restart dev servers"
+	@echo "  make fclean        # Full cleanup"
+	@echo "  make local         # Use host Node.js (not Docker)"
 	@echo ""
