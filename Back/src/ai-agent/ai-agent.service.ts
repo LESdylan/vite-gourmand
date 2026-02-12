@@ -205,6 +205,77 @@ ${dbContext}`;
   }
 
   /* ═══════════════════════════════════════════════════════════
+     System prompt for Event Planner / Contact page concierge
+     ═══════════════════════════════════════════════════════════ */
+
+  private buildEventPlannerPrompt(dbContext: string): string {
+    return `Tu es le "Concierge Événementiel IA" de "Vite & Gourmand", un traiteur gastronomique haut de gamme.
+Tu es intégré dans la page Contact du site. Ton rôle est triple :
+1. AIDER le client à mieux réfléchir à son événement en posant les bonnes questions
+2. INSPIRER le client avec des idées concrètes et des suggestions premium
+3. GÉNÉRER un message de demande de devis parfaitement structuré et détaillé
+
+TU ES UN VENDEUR SUBTIL : tu enrichis naturellement la demande du client en suggérant des prestations complémentaires, sans jamais forcer. Tu plantes des idées qui donnent envie.
+
+PROCESSUS CONVERSATIONNEL :
+Étape 1 — DÉCOUVERTE (pose 1-2 questions max à la fois, jamais plus)
+  • Type d'événement + occasion spéciale ?
+  • Nombre de convives approximatif ?
+  • Date / période envisagée ?
+  • Lieu (chez eux, salle louée, plein air ?) ?
+
+Étape 2 — APPROFONDISSEMENT (dès que tu as le type + nb convives)
+  • Budget par personne ? (si hésitant, donne des fourchettes : "nos formules vont de 25€ à 65€/pers")
+  • Ambiance souhaitée ? (élégant, champêtre, décontracté, thématique…)
+  • Contraintes alimentaires ? (végétarien, halal, allergies…)
+  • Attentes particulières ? (animations, décoration, bar à cocktails…)
+
+Étape 3 — INSPIRATION & UPSELL SUBTIL
+  Quand tu as assez d'infos, propose 2-3 idées concrètes tirées des vrais menus de la base :
+  • Un menu adapté avec prix indicatif
+  • Des options "signature" qui font la différence (ex : "Pour un mariage de 80 pers, notre menu Gastronomie avec bar à fromages serait magnifique")
+  • Services complémentaires : "Avez-vous pensé à notre service de mise en place ? Ou à un bar à cocktails pour l'apéritif ?"
+  NE POUSSE PAS, INSPIRE. Phrase type : "Beaucoup de nos clients pour ce type d'événement apprécient aussi…"
+
+Étape 4 — GÉNÉRATION DU MESSAGE
+  Quand le client est satisfait, génère un message de demande de devis structuré :
+
+  📋 DEMANDE DE DEVIS — [Type d'événement]
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📅 Date : [date]
+  👥 Nombre de convives : [nombre]
+  📍 Lieu : [lieu]
+  💰 Budget envisagé : [budget]€/personne
+
+  🍽️ Formule souhaitée :
+  • [détails menu / préférences]
+
+  🥗 Contraintes alimentaires :
+  • [régimes / allergies]
+
+  ✨ Services complémentaires souhaités :
+  • [liste des extras]
+
+  💬 Précisions supplémentaires :
+  [notes additionnelles du client]
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Dis ensuite : "Voici votre demande ! Cliquez sur 'Copier dans le formulaire' et envoyez — notre équipe vous répondra sous 24h avec un devis détaillé."
+
+RÈGLES STRICTES :
+- Parle TOUJOURS en français, chaleureux et professionnel
+- JAMAIS plus de 2 questions à la fois — c'est une conversation, pas un interrogatoire
+- Base tes suggestions sur les VRAIS menus et plats de la base de données
+- Donne des prix indicatifs réalistes basés sur les menus existants
+- Valorise CHAQUE événement : un anniversaire de 15 personnes mérite autant d'attention qu'un mariage de 200
+- Quand tu suggères un extra, explique POURQUOI ça améliore l'expérience
+- Sois concis : max 5-6 lignes par réponse (sauf la proposition finale)
+- Utilise les emojis avec goût, pas trop
+
+${dbContext}`;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      System prompt for Public Assistant mode
      ═══════════════════════════════════════════════════════════ */
 
@@ -259,6 +330,7 @@ ${dbContext}`;
   async chat(userId: number, dto: ChatMessageDto) {
     const convId = dto.conversationId || this.generateConversationId();
     const isPublicAssistant = dto.context?.mode === 'public_assistant';
+    const isEventPlanner = dto.context?.mode === 'event_planner';
 
     // Get or create conversation
     let conversation = this.conversations.get(convId);
@@ -266,7 +338,9 @@ ${dbContext}`;
       const dbContext = await this.gatherDatabaseContext(dto);
       const systemPrompt = isPublicAssistant 
         ? this.buildPublicAssistantPrompt(dbContext)
-        : this.buildSystemPrompt(dbContext);
+        : isEventPlanner
+          ? this.buildEventPlannerPrompt(dbContext)
+          : this.buildSystemPrompt(dbContext);
       
       conversation = {
         messages: [{ role: 'system', content: systemPrompt }],
@@ -341,10 +415,16 @@ ${dbContext}`;
     const lastMsg = userMessages.at(-1)?.content.toLowerCase() || '';
     const systemPrompt = messages.find(m => m.role === 'system')?.content || '';
     const isPublicAssistant = systemPrompt.includes('assistant virtuel');
+    const isEventPlanner = systemPrompt.includes('Concierge Événementiel');
 
     // Public assistant mode — general questions
     if (isPublicAssistant) {
       return this.getPublicAssistantDemoResponse(userMessages, lastMsg);
+    }
+
+    // Event planner mode — contact page concierge
+    if (isEventPlanner) {
+      return this.getEventPlannerDemoResponse(userMessages, lastMsg);
     }
 
     // Menu builder mode — existing logic
@@ -494,6 +574,99 @@ Vous pouvez me poser des questions sur :
 Ou rendez-vous directement sur la page **Contact** pour une demande de devis personnalisé.
 
 > ℹ️ Mode démo — En production, je peux répondre à toutes vos questions en détail !`;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Event Planner Demo Response
+     ═══════════════════════════════════════════════════════════ */
+
+  private getEventPlannerDemoResponse(userMessages: ConversationEntry[], lastMsg: string): string {
+    if (userMessages.length === 1) {
+      // Detect event type from first message
+      if (lastMsg.includes('mariage') || lastMsg.includes('noce')) {
+        return `💒 Félicitations pour votre mariage ! C'est un plaisir de vous accompagner dans ce moment unique.
+
+Pour vous proposer le menu parfait, j'aurais besoin de quelques précisions :
+- 👥 Combien de convives attendez-vous ?
+- 📅 Quelle est la date prévue ?
+
+En attendant, sachez que notre **formule Mariage** inclut un cocktail dînatoire, un menu 3 services et le gâteau. Beaucoup de nos mariés adorent notre bar à fromages artisanal en supplément ! 🧀`;
+      }
+
+      if (lastMsg.includes('anniversaire') || lastMsg.includes('fête')) {
+        return `🎂 Un anniversaire, quelle belle occasion de se réunir !
+
+Pour créer un moment mémorable, dites-moi :
+- 👥 Combien de convives prévoyez-vous ?
+- 🎯 C'est pour quel âge ? (ça m'aide à adapter l'ambiance !)
+
+Nos formules anniversaire commencent à partir de 25€/personne avec entrée + plat + dessert. Et notre option "dessert spectacle" avec gâteau sur mesure fait toujours sensation ! ✨`;
+      }
+
+      if (lastMsg.includes('entreprise') || lastMsg.includes('séminaire') || lastMsg.includes('corporate')) {
+        return `🏢 Événement professionnel, excellent choix ! Nous accompagnons régulièrement des entreprises bordelaises.
+
+Pour adapter notre proposition :
+- 👥 Combien de collaborateurs seront présents ?
+- 🎯 Quel format : déjeuner assis, cocktail dînatoire, buffet ?
+
+Notre formule entreprise inclut des options comme le plateau de viennoiseries pour les pauses et le service en salle. Qu'en pensez-vous ? 💼`;
+      }
+
+      // Default welcome
+      return `Bonjour ! 👋 Je suis le concierge événementiel de Vite & Gourmand.
+
+Je suis là pour vous aider à imaginer et planifier votre événement. Dites-moi :
+- 🎉 Quel type d'événement organisez-vous ?
+- 👥 Combien de convives environ ?
+
+Je vous guiderai vers la formule idéale et vous aiderai à rédiger une demande complète ! 😊`;
+    }
+
+    // Second message — budget & details
+    if (userMessages.length === 2) {
+      if (lastMsg.includes('budget') || lastMsg.includes('€') || /\d+\s*eur/.test(lastMsg)) {
+        return `Parfait, j'ai noté votre budget ! 💰
+
+Pour affiner ma proposition, avez-vous des préférences ou contraintes ?
+- 🥗 Régimes alimentaires (végétarien, sans gluten, halal…)
+- ⚠️ Allergies à prendre en compte
+- 🎨 Ambiance souhaitée (élégant, champêtre, moderne…)
+
+Beaucoup de nos clients apprécient aussi notre **service de mise en place** avec nappage et décoration de table — c'est un vrai plus pour l'ambiance ! 🌸`;
+      }
+
+      return `Merci pour ces informations ! 📝
+
+Pour que notre proposition soit vraiment sur mesure :
+- 💰 Avez-vous un **budget par personne** en tête ? Nos formules vont de 25€ à 65€/personne.
+- 📍 Le lieu est-il déjà défini ?
+
+Et si vous le souhaitez, nous proposons aussi un **service boissons** avec accord mets-vins sélectionné par notre sommelier ! 🍷`;
+    }
+
+    // Third+ message — generate the request
+    return `Merci pour tous ces détails ! Voici votre demande de devis prête à envoyer :
+
+📋 **DEMANDE DE DEVIS**
+━━━━━━━━━━━━━━━━━━━━━━
+📅 Date : à confirmer
+👥 Convives : à préciser
+💰 Budget : selon vos indications
+
+🍽️ Formule souhaitée :
+• Menu personnalisé selon vos préférences
+
+✨ Services complémentaires :
+• Mise en place et décoration
+• Service en salle
+
+💬 Vos précisions sont les bienvenues !
+━━━━━━━━━━━━━━━━━━━━━━
+
+Cliquez sur **"Copier dans le formulaire"** ci-dessous puis envoyez votre demande. Notre équipe vous répondra sous 24h avec un devis détaillé ! 🚀
+
+> ℹ️ Mode démo — En production, cette proposition sera personnalisée avec vos vrais menus et tarifs.`;
   }
 
   /* ═══════════════════════════════════════════════════════════

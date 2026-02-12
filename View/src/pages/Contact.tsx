@@ -15,6 +15,16 @@ import {
   ExternalLink,
   Ticket,
   Bot,
+  Wand2,
+  ChefHat,
+  Wine,
+  Heart,
+  Building2,
+  PartyPopper,
+  Baby,
+  Loader2,
+  Lightbulb,
+  Zap,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -30,6 +40,92 @@ const QUICK_SUBJECTS = [
   { label: '🍽️ Menu sur mesure', value: 'Demande de menu personnalisé' },
   { label: '❓ Question', value: 'Question générale' },
 ];
+
+/* ── AI Event Scenario Cards ── */
+const AI_SCENARIOS = [
+  {
+    icon: Heart,
+    emoji: '💒',
+    title: 'Mariage',
+    subtitle: 'Réception & Cocktail',
+    prompt: 'Je prépare un mariage et je cherche un traiteur pour la réception.',
+    color: '#722F37',
+    suggestions: ['Menu gastronomique', 'Bar à cocktails', 'Pièce montée', 'Service en salle'],
+  },
+  {
+    icon: PartyPopper,
+    emoji: '🎂',
+    title: 'Anniversaire',
+    subtitle: 'Fête & Célébration',
+    prompt: "J'organise un anniversaire et j'aimerais un buffet ou menu sur mesure.",
+    color: '#D4AF37',
+    suggestions: ['Buffet varié', 'Gâteau personnalisé', 'Finger food', 'Options enfants'],
+  },
+  {
+    icon: Building2,
+    emoji: '🏢',
+    title: 'Entreprise',
+    subtitle: 'Séminaire & Team building',
+    prompt: "J'organise un événement d'entreprise (séminaire, team building, cocktail).",
+    color: '#556B2F',
+    suggestions: ['Cocktail dînatoire', 'Pauses café', 'Déjeuner assis', 'Buffet debout'],
+  },
+  {
+    icon: Baby,
+    emoji: '👶',
+    title: 'Baptême',
+    subtitle: 'Cérémonie & Réception',
+    prompt: 'Je prépare un baptême et je recherche un traiteur pour la réception.',
+    color: '#4A90D9',
+    suggestions: ['Menu familial', 'Dragées', 'Brunch', 'Desserts variés'],
+  },
+  {
+    icon: ChefHat,
+    emoji: '🍽️',
+    title: 'Sur mesure',
+    subtitle: 'Événement personnalisé',
+    prompt: "J'ai un projet d'événement particulier et j'aimerais créer un menu sur mesure.",
+    color: '#8B5CF6',
+    suggestions: ['Menu signature', 'Chef à domicile', 'Accord mets-vins', 'Expérience unique'],
+  },
+  {
+    icon: Wine,
+    emoji: '🍷',
+    title: 'Dégustation',
+    subtitle: 'Soirée œnologique',
+    prompt: "J'organise une soirée dégustation de vins avec accords mets et je cherche un traiteur.",
+    color: '#B8860B',
+    suggestions: ['Accords mets-vins', 'Plateau fromages', 'Tapas premium', 'Sommelier'],
+  },
+];
+
+/* ── AI Smart Tips by subject ── */
+const SMART_TIPS: Record<string, string[]> = {
+  mariage: [
+    '💡 Pensez à prévoir les régimes alimentaires de vos invités',
+    '🥂 Un cocktail dînatoire en attendant le dîner fait toujours sensation',
+    '🍰 Notre pièce montée choux est la préférée de nos mariés',
+    '📍 Indiquez le lieu pour adapter la logistique',
+  ],
+  anniversaire: [
+    "💡 Mentionnez l'âge pour adapter l'ambiance du menu",
+    '🎵 Nos formules incluent des options animation',
+    '🍰 Un gâteau personnalisé est toujours un plus',
+    "👶 Précisez s'il y aura des enfants pour des menus adaptés",
+  ],
+  entreprise: [
+    '💡 Précisez le format : assis, debout ou cocktail',
+    '☕ Nos pauses café/viennoiseries sont un classique',
+    '🥗 Les formules végétariennes sont souvent appréciées en entreprise',
+    '🧾 Nous fournissons des factures pour vos notes de frais',
+  ],
+  default: [
+    '💡 Plus votre message est détaillé, plus notre devis sera précis',
+    '📅 Indiquez la date, même approximative',
+    '👥 Le nombre de convives nous aide à estimer le budget',
+    '🥗 Mentionnez les régimes alimentaires ou allergies',
+  ],
+};
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -57,9 +153,33 @@ export default function ContactPage() {
   const [aiOpen, setAiOpen] = useState(false);
   const aiScrollRef = useRef<HTMLDivElement>(null);
 
+  /* ── AI Enhance state ─────────────────────────────────── */
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [activeScenario, setActiveScenario] = useState<string | null>(null);
+  const [showSmartTips, setShowSmartTips] = useState(false);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+
   useEffect(() => {
     if (aiScrollRef.current) aiScrollRef.current.scrollTop = aiScrollRef.current.scrollHeight;
   }, [aiMessages, aiLoading]);
+
+  /* ── Smart tips rotation ─────────────────────────────── */
+  const getSmartTipsKey = useCallback(() => {
+    const subject = formData.subject.toLowerCase();
+    if (subject.includes('mariage')) return 'mariage';
+    if (subject.includes('anniversaire')) return 'anniversaire';
+    if (subject.includes('entreprise') || subject.includes('séminaire')) return 'entreprise';
+    return 'default';
+  }, [formData.subject]);
+
+  useEffect(() => {
+    if (!showSmartTips) return;
+    const interval = setInterval(() => {
+      const tips = SMART_TIPS[getSmartTipsKey()];
+      setCurrentTipIndex((prev) => (prev + 1) % tips.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [showSmartTips, getSmartTipsKey]);
 
   const sendAiMessage = useCallback(
     async (text?: string) => {
@@ -71,7 +191,10 @@ export default function ContactPage() {
       setAiLoading(true);
 
       try {
-        const body: Record<string, unknown> = { message: msg };
+        const body: Record<string, unknown> = {
+          message: msg,
+          context: { mode: 'event_planner', page: 'contact' },
+        };
         if (aiConvId) body.conversationId = aiConvId;
 
         const raw = await apiRequest<
@@ -96,6 +219,57 @@ export default function ContactPage() {
     },
     [aiInput, aiLoading, aiConvId],
   );
+
+  /* ── AI Enhance Message ─────────────────────────────────── */
+  const enhanceMessage = useCallback(async () => {
+    if (!formData.message.trim() || isEnhancing) return;
+    setIsEnhancing(true);
+    try {
+      const enhancePrompt = `Le client a rédigé ce brouillon de message pour une demande de devis traiteur. Reformule-le en un message professionnel, structuré et complet, en gardant toutes les informations originales mais en ajoutant de la clarté et de la structure. Si des informations manquent (date, nombre de convives, budget, allergies), ajoute un petit paragraphe "[À compléter]" à la fin pour rappeler au client de les ajouter. Réponds UNIQUEMENT avec le message amélioré, sans commentaire.
+
+Brouillon du client :
+"""
+Sujet : ${formData.subject}
+${formData.message}
+"""`;
+
+      const raw = await apiRequest<
+        | { data: { conversationId: string; message: string } }
+        | { conversationId: string; message: string }
+      >('/api/ai-agent/chat', {
+        method: 'POST',
+        body: {
+          message: enhancePrompt,
+          context: { mode: 'event_planner', page: 'contact' },
+        },
+      });
+      const res = 'data' in raw ? raw.data : raw;
+      setFormData((prev) => ({ ...prev, message: res.message }));
+    } catch {
+      // silently fail — keep original message
+    } finally {
+      setIsEnhancing(false);
+    }
+  }, [formData.message, formData.subject, isEnhancing]);
+
+  /* ── AI Scenario click handler ──────────────────────────── */
+  const handleScenarioClick = useCallback((scenario: typeof AI_SCENARIOS[number]) => {
+    setActiveScenario(scenario.title);
+    const titleLower = scenario.title.toLowerCase();
+    const subjectLabel = titleLower === 'sur mesure'
+      ? 'un événement sur mesure'
+      : titleLower === 'entreprise'
+        ? "un événement d'entreprise"
+        : `un ${titleLower}`;
+    setFormData((prev) => ({
+      ...prev,
+      subject: prev.subject || `Devis pour ${subjectLabel}`,
+    }));
+    // Open AI chat and send the scenario prompt
+    setAiOpen(true);
+    // Small delay so the chat is open before sending
+    setTimeout(() => sendAiMessage(scenario.prompt), 100);
+  }, [sendAiMessage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,9 +389,82 @@ export default function ContactPage() {
       </header>
 
       {/* ═══════════════════════════════════════════════════════════
+          AI Event Wizard — Scenario Cards
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-8 relative z-20">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-[#D4AF37]/20 p-4 sm:p-5 shadow-lg">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#B8960B] flex items-center justify-center">
+              <Zap className="h-3.5 w-3.5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-bold text-[#1A1A1A] text-sm">
+                🪄 Assistant IA — Quel est votre événement ?
+              </h2>
+              <p className="text-[#1A1A1A]/40 text-[10px]">
+                Cliquez pour démarrer une conversation guidée avec notre IA
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            {AI_SCENARIOS.map((scenario) => {
+              const Icon = scenario.icon;
+              const isActive = activeScenario === scenario.title;
+              return (
+                <button
+                  key={scenario.title}
+                  type="button"
+                  onClick={() => handleScenarioClick(scenario)}
+                  className={`group relative flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all duration-200 text-center ${
+                    isActive
+                      ? 'border-[#D4AF37] bg-gradient-to-b from-[#D4AF37]/10 to-[#D4AF37]/5 shadow-md scale-[1.02]'
+                      : 'border-[#1A1A1A]/5 bg-white hover:border-[#D4AF37]/30 hover:shadow-md hover:scale-[1.02]'
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${isActive ? 'shadow-md' : ''}`}
+                    style={{ background: `${scenario.color}15` }}
+                  >
+                    <Icon className="h-5 w-5" style={{ color: scenario.color }} />
+                  </div>
+                  <span className="font-bold text-[#1A1A1A] text-xs leading-tight">
+                    {scenario.emoji} {scenario.title}
+                  </span>
+                  <span className="text-[9px] text-[#1A1A1A]/40 leading-tight hidden sm:block">
+                    {scenario.subtitle}
+                  </span>
+                  {isActive && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#556B2F] flex items-center justify-center">
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active scenario suggestions */}
+          {activeScenario && (
+            <div className="mt-3 flex flex-wrap items-center gap-1.5 animate-in slide-in-from-top-2 duration-200">
+              <span className="text-[10px] text-[#1A1A1A]/30 font-medium mr-1">Populaire :</span>
+              {AI_SCENARIOS.find((s) => s.title === activeScenario)?.suggestions.map((sug) => (
+                <span
+                  key={sug}
+                  className="text-[10px] px-2 py-0.5 rounded-full bg-[#722F37]/5 text-[#722F37]/70 border border-[#722F37]/10"
+                >
+                  {sug}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
           Content — Form + Sidebar
           ═══════════════════════════════════════════════════════════ */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10 relative z-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 mt-4 sm:mt-5 relative z-10">
         <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
           {/* ── Contact Form (3 cols) ── */}
           <div className="lg:col-span-3">
@@ -422,25 +669,68 @@ export default function ContactPage() {
                   <div
                     className={`relative transition-all duration-200 ${focusedField === 'message' ? 'scale-[1.01]' : ''}`}
                   >
-                    <Label
-                      htmlFor="message"
-                      className="text-[#1A1A1A] font-semibold text-sm flex items-center gap-1.5 mb-2"
-                    >
-                      <MessageSquare className="h-3.5 w-3.5 text-[#D4AF37]" />
-                      Votre message <span className="text-red-400 text-xs">*</span>
-                    </Label>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label
+                        htmlFor="message"
+                        className="text-[#1A1A1A] font-semibold text-sm flex items-center gap-1.5"
+                      >
+                        <MessageSquare className="h-3.5 w-3.5 text-[#D4AF37]" />
+                        Votre message <span className="text-red-400 text-xs">*</span>
+                      </Label>
+                      {/* AI Enhance button */}
+                      {formData.message.length > 20 && (
+                        <button
+                          type="button"
+                          onClick={enhanceMessage}
+                          disabled={isEnhancing}
+                          className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-[#D4AF37]/10 to-[#D4AF37]/5 border border-[#D4AF37]/20 text-[#D4AF37] hover:from-[#D4AF37]/20 hover:to-[#D4AF37]/10 transition-all disabled:opacity-50"
+                        >
+                          {isEnhancing ? (
+                            <>
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                              Amélioration…
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="h-3 w-3" />
+                              ✨ Améliorer avec l'IA
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
                     <textarea
                       id="message"
                       name="message"
                       value={formData.message}
-                      onChange={handleChange}
-                      onFocus={() => setFocusedField('message')}
-                      onBlur={() => setFocusedField(null)}
+                      onChange={(e) => {
+                        handleChange(e);
+                        if (e.target.value.length > 5 && !showSmartTips) setShowSmartTips(true);
+                      }}
+                      onFocus={() => {
+                        setFocusedField('message');
+                        if (formData.message.length > 5) setShowSmartTips(true);
+                      }}
+                      onBlur={() => {
+                        setFocusedField(null);
+                        setTimeout(() => setShowSmartTips(false), 300);
+                      }}
                       placeholder="Décrivez votre projet, le nombre d'invités, vos préférences alimentaires, votre budget…"
                       required
                       rows={6}
                       className="flex w-full rounded-xl border border-[#1A1A1A]/8 bg-[#FFF8F0]/50 px-4 py-3 text-sm placeholder:text-[#1A1A1A]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#722F37] focus-visible:ring-offset-2 resize-none hover:border-[#722F37]/30 transition-colors"
                     />
+
+                    {/* AI Smart Tips */}
+                    {showSmartTips && (
+                      <div className="mt-2 flex items-start gap-2 p-2.5 bg-gradient-to-r from-[#D4AF37]/5 to-transparent border border-[#D4AF37]/10 rounded-lg animate-in slide-in-from-bottom-1 duration-200">
+                        <Lightbulb className="h-3.5 w-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
+                        <p className="text-[11px] text-[#1A1A1A]/60 leading-relaxed transition-opacity duration-300">
+                          {SMART_TIPS[getSmartTipsKey()][currentTipIndex]}
+                        </p>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between mt-1.5">
                       <p className="text-[10px] text-[#1A1A1A]/25">
                         💡 Soyez aussi précis que possible pour un devis plus rapide
@@ -609,7 +899,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* AI Menu Assistant — interactive chat widget */}
+            {/* AI Event Concierge — interactive chat widget */}
             <div className="bg-white rounded-3xl shadow-xl shadow-[#1A1A1A]/8 border border-[#D4AF37]/20 overflow-hidden">
               {/* Header */}
               <button
@@ -621,13 +911,14 @@ export default function ContactPage() {
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#D4AF37]/10 rounded-full translate-y-1/2 -translate-x-1/2" />
                 <div className="relative flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-xl bg-[#D4AF37]/20 flex items-center justify-center relative">
                       <Sparkles className="h-4 w-4 text-[#D4AF37]" />
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#556B2F] border-2 border-[#722F37] animate-pulse" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm">Menu sur mesure</h3>
+                      <h3 className="font-bold text-sm">🪄 Concierge Événementiel IA</h3>
                       <p className="text-white/50 text-[11px] mt-0.5">
-                        Assistant IA • Décrivez vos besoins
+                        Planifiez • Inspirez-vous • Demandez un devis
                       </p>
                     </div>
                   </div>
@@ -640,7 +931,7 @@ export default function ContactPage() {
                 {!aiOpen && (
                   <div className="relative flex items-center gap-2 mt-3 text-[#D4AF37] text-[10px] font-semibold">
                     <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Gratuit</span>
-                    <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Instantané</span>
+                    <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Aide au devis</span>
                     <span className="bg-[#D4AF37]/10 px-2.5 py-1 rounded-full">✓ Sur mesure</span>
                   </div>
                 )}
@@ -648,32 +939,41 @@ export default function ContactPage() {
 
               {/* Chat body */}
               {aiOpen && (
-                <div className="flex flex-col" style={{ height: 380 }}>
+                <div className="flex flex-col" style={{ height: 420 }}>
                   {/* Messages */}
                   <div
                     ref={aiScrollRef}
                     className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#faf8f6]"
                   >
                     {aiMessages.length === 0 && !aiLoading && (
-                      <div className="text-center py-6">
-                        <Bot className="h-8 w-8 text-[#D4AF37]/40 mx-auto mb-2" />
-                        <p className="text-xs text-[#1A1A1A]/40 leading-relaxed max-w-[220px] mx-auto">
-                          Décrivez votre événement, nombre de convives, budget et préférences. L'IA
-                          vous proposera un menu adapté.
+                      <div className="text-center py-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#722F37]/10 flex items-center justify-center mx-auto mb-3">
+                          <Bot className="h-6 w-6 text-[#D4AF37]" />
+                        </div>
+                        <p className="font-semibold text-[#1A1A1A] text-xs mb-1">
+                          Comment puis-je vous aider ?
                         </p>
-                        <div className="flex flex-wrap gap-1.5 justify-center mt-4">
+                        <p className="text-[10px] text-[#1A1A1A]/40 leading-relaxed max-w-[240px] mx-auto mb-4">
+                          Je vous aide à planifier votre événement, choisir le menu idéal et
+                          préparer votre demande de devis.
+                        </p>
+                        <div className="space-y-1.5">
                           {[
-                            { icon: '🎂', text: 'Anniversaire 20 pers' },
-                            { icon: '💍', text: 'Mariage 80 pers' },
-                            { icon: '🥗', text: 'Menu végétarien' },
+                            { icon: '💒', text: 'Planifier un mariage', prompt: 'Je prépare un mariage et je cherche un traiteur pour la réception.' },
+                            { icon: '🎂', text: 'Organiser un anniversaire', prompt: "J'organise un anniversaire et j'aimerais un buffet ou menu." },
+                            { icon: '🏢', text: 'Événement d\'entreprise', prompt: "J'organise un événement d'entreprise." },
+                            { icon: '🍽️', text: 'Menu sur mesure', prompt: "J'aimerais créer un menu personnalisé pour un événement." },
+                            { icon: '💰', text: 'Connaître vos tarifs', prompt: 'Quels sont vos tarifs et formules disponibles ?' },
                           ].map((q) => (
                             <button
                               key={q.text}
                               type="button"
-                              onClick={() => sendAiMessage(q.text)}
-                              className="text-[10px] px-2.5 py-1.5 rounded-full border border-[#D4AF37]/20 text-[#722F37] hover:bg-[#722F37]/5 transition-colors"
+                              onClick={() => sendAiMessage(q.prompt)}
+                              className="w-full flex items-center gap-2.5 text-left text-[11px] px-3 py-2 rounded-xl border border-[#D4AF37]/15 text-[#1A1A1A]/70 hover:bg-[#722F37]/5 hover:border-[#722F37]/20 hover:text-[#722F37] transition-all"
                             >
-                              {q.icon} {q.text}
+                              <span className="text-sm">{q.icon}</span>
+                              <span className="font-medium">{q.text}</span>
+                              <ChevronRight className="h-3 w-3 ml-auto opacity-30" />
                             </button>
                           ))}
                         </div>
@@ -745,38 +1045,45 @@ export default function ContactPage() {
                   </div>
 
                   {/* Input */}
-                  <div className="border-t border-[#1A1A1A]/5 p-3 flex gap-2 bg-white">
-                    <input
-                      type="text"
-                      value={aiInput}
-                      onChange={(e) => setAiInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          sendAiMessage();
-                        }
-                      }}
-                      placeholder="Décrivez vos besoins…"
-                      className="flex-1 text-sm border border-[#1A1A1A]/8 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#722F37] bg-[#FFF8F0]/50"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => sendAiMessage()}
-                      disabled={!aiInput.trim() || aiLoading}
-                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors disabled:opacity-30"
-                      style={{ background: aiInput.trim() && !aiLoading ? '#722F37' : '#eee' }}
-                    >
-                      <Send
-                        className="h-4 w-4"
-                        style={{ color: aiInput.trim() && !aiLoading ? 'white' : '#999' }}
+                  <div className="border-t border-[#1A1A1A]/5 p-3 bg-white">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={aiInput}
+                        onChange={(e) => setAiInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendAiMessage();
+                          }
+                        }}
+                        placeholder="Parlez-moi de votre événement…"
+                        className="flex-1 text-sm border border-[#1A1A1A]/8 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#722F37] bg-[#FFF8F0]/50"
                       />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => sendAiMessage()}
+                        disabled={!aiInput.trim() || aiLoading}
+                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors disabled:opacity-30"
+                        style={{ background: aiInput.trim() && !aiLoading ? '#722F37' : '#eee' }}
+                      >
+                        <Send
+                          className="h-4 w-4"
+                          style={{ color: aiInput.trim() && !aiLoading ? 'white' : '#999' }}
+                        />
+                      </button>
+                    </div>
+                    {aiMessages.length > 0 && (
+                      <p className="text-[9px] text-[#1A1A1A]/25 text-center mt-1.5">
+                        Les réponses IA sont un copier-coller direct vers le formulaire ↗
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Trust badges */}
+            {/* Trust badges + AI value props */}
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white rounded-2xl border border-[#1A1A1A]/5 p-4 text-center shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-2xl font-black text-[#722F37] mb-0.5">24h</p>
@@ -785,9 +1092,9 @@ export default function ContactPage() {
                 </p>
               </div>
               <div className="bg-white rounded-2xl border border-[#1A1A1A]/5 p-4 text-center shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-2xl font-black text-[#D4AF37] mb-0.5">100%</p>
+                <p className="text-2xl font-black text-[#D4AF37] mb-0.5">🤖</p>
                 <p className="text-[9px] text-[#1A1A1A]/40 uppercase tracking-wider font-semibold">
-                  Gratuit
+                  IA Concierge
                 </p>
               </div>
               <div className="bg-white rounded-2xl border border-[#1A1A1A]/5 p-4 text-center shadow-sm hover:shadow-md transition-shadow">
@@ -795,6 +1102,36 @@ export default function ContactPage() {
                 <p className="text-[9px] text-[#1A1A1A]/40 uppercase tracking-wider font-semibold">
                   Service
                 </p>
+              </div>
+            </div>
+
+            {/* AI Explanation mini-card */}
+            <div className="bg-gradient-to-br from-[#722F37]/5 to-[#D4AF37]/5 rounded-2xl border border-[#D4AF37]/15 p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Wand2 className="h-4 w-4 text-[#D4AF37]" />
+                </div>
+                <div>
+                  <p className="font-bold text-[#1A1A1A] text-xs mb-1">L'IA à votre service</p>
+                  <ul className="space-y-1 text-[10px] text-[#1A1A1A]/50 leading-relaxed">
+                    <li className="flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
+                      Cliquez un type d'événement ci-dessus
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
+                      L'IA vous guide pas à pas
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
+                      Copiez la proposition dans le formulaire
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
+                      Votre message est amélioré ✨
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
