@@ -13,32 +13,70 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = new Logger('Bootstrap');
 
-  // Serve static frontend files in production
-  // In production: __dirname = /app/dist/src, so we go up 2 levels to /app
-  if (process.env.NODE_ENV === 'production') {
-    const publicPath = join(__dirname, '..', '..', 'public');
-    logger.log(`📁 Static assets path: ${publicPath}`);
-    app.useStaticAssets(publicPath);
-  }
-
-  // Security headers with Helmet
-  // Configured to allow Google Identity Services (popup-based OAuth)
+  // Security headers with Helmet — MUST come before static assets
+  // Configured to allow Google Identity Services (popup-based OAuth),
+  // Unsplash images, and API / WebSocket connections
   app.use(
     helmet({
-      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow Google OAuth popup
-      crossOriginEmbedderPolicy: false, // Disable for Google scripts
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+      crossOriginEmbedderPolicy: false,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "'unsafe-eval'",
+            'https://accounts.google.com',
+            'https://apis.google.com',
+          ],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https://accounts.google.com', 'https://fonts.googleapis.com'],
+          imgSrc: [
+            "'self'",
+            'data:',
+            'blob:',
+            'https://images.unsplash.com',
+            'https://*.unsplash.com',
+            'https://lh3.googleusercontent.com',
+          ],
+          fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+          connectSrc: [
+            "'self'",
+            'https://accounts.google.com',
+            'https://*.supabase.co',
+            // Allow same-origin API + WebSocket in production
+            'ws:',
+            'wss:',
+          ],
+          frameSrc: ["'self'", 'https://accounts.google.com'],
+          objectSrc: ["'none'"],
+          baseUri: ["'self'"],
+        },
+      },
     }),
   );
 
   // Response compression for better performance
   app.use(compression());
 
+  // Serve static frontend files in production (after Helmet so CSP headers apply)
+  if (process.env.NODE_ENV === 'production') {
+    const publicPath = join(__dirname, '..', '..', 'public');
+    logger.log(`📁 Static assets path: ${publicPath}`);
+    app.useStaticAssets(publicPath);
+  }
+
   // Enable CORS for frontend
+  const corsOrigins: (string | RegExp)[] = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ];
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (frontendUrl && !corsOrigins.includes(frontendUrl)) {
+    corsOrigins.push(frontendUrl);
+  }
   app.enableCors({
-    origin: process.env.FRONTEND_URL || [
-      'http://localhost:5173',
-      'http://localhost:5174',
-    ],
+    origin: corsOrigins,
     credentials: true,
   });
 

@@ -20,6 +20,11 @@ const MODEL_TO_ENDPOINT: Record<string, string> = {
   Dish: 'dishes',
   Allergen: 'allergens',
   WorkingHours: 'working-hours',
+  Ingredient: 'ingredients',
+  Publish: 'reviews',
+  Discount: 'discounts',
+  Promotion: 'promotions',
+  UserSession: 'sessions',
 };
 
 /** Schema column from backend */

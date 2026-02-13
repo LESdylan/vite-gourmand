@@ -330,13 +330,17 @@ export class TestRunnerService {
           ? 'test-results-unit.json'
           : 'test-results-e2e.json';
 
+      // Use higher memory for e2e tests (match package.json settings)
+      const maxMemory = testType === 'e2e' ? 2048 : 384;
+
       // Build full command as a string for shell execution
-      // The --localstorage-file flag is a custom Node.js option that requires shell interpretation
-      let command = `node --max-old-space-size=1024 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --runInBand --json --outputFile=${outputFile}`;
+      let command = `node --max-old-space-size=${maxMemory} node_modules/.bin/jest --runInBand --forceExit --json --outputFile=${outputFile}`;
 
       if (testType === 'e2e') {
         command += ' --config ./src/test/e2e/jest-e2e.json';
       }
+
+      command += ' --passWithNoTests';
 
       this.logger.log(`🧪 Running ${testType} tests: ${command}`);
 
@@ -345,6 +349,13 @@ export class TestRunnerService {
         shell: true,
         env: { ...process.env, FORCE_COLOR: '1' },
       });
+
+      // Timeout: 5 min for unit, 10 min for e2e
+      const timeoutMs = testType === 'e2e' ? 600_000 : 300_000;
+      const timer = setTimeout(() => {
+        this.logger.warn(`⏰ ${testType} tests timed out after ${timeoutMs / 1000}s — killing process`);
+        proc.kill('SIGKILL');
+      }, timeoutMs);
 
       let output = '';
 
@@ -365,11 +376,13 @@ export class TestRunnerService {
       });
 
       proc.on('close', (code) => {
+        clearTimeout(timer);
         // Jest exits with code 1 when tests fail - that's OK
         resolve({ code: code ?? 0, output });
       });
 
       proc.on('error', (err) => {
+        clearTimeout(timer);
         reject(err);
       });
     });
@@ -636,6 +649,12 @@ export class TestRunnerService {
         env: { ...process.env },
       });
 
+      // Timeout: 3 min for custom tests
+      const timer = setTimeout(() => {
+        this.logger.warn('⏰ Custom tests timed out after 180s — killing process');
+        proc.kill('SIGKILL');
+      }, 180_000);
+
       let output = '';
       let jsonOutput = '';
 
@@ -665,6 +684,7 @@ export class TestRunnerService {
       });
 
       proc.on('close', (code) => {
+        clearTimeout(timer);
         const duration = Date.now() - startTime;
 
         // Parse results and write to file
@@ -691,6 +711,7 @@ export class TestRunnerService {
       });
 
       proc.on('error', () => {
+        clearTimeout(timer);
         fs.writeFileSync(outputFile, JSON.stringify([]));
         resolve({ code: 1, output: 'Failed to execute custom tests' });
       });
@@ -773,6 +794,12 @@ export class TestRunnerService {
         env: { ...process.env },
       });
 
+      // Timeout: 5 min for Postman tests
+      const timer = setTimeout(() => {
+        this.logger.warn('⏰ Postman tests timed out after 300s — killing process');
+        proc.kill('SIGKILL');
+      }, 300_000);
+
       let output = '';
 
       proc.stdout?.on('data', (data) => {
@@ -788,6 +815,7 @@ export class TestRunnerService {
       });
 
       proc.on('close', (code) => {
+        clearTimeout(timer);
         const duration = Date.now() - startTime;
 
         // Parse Newman JSON output and convert to our format
@@ -823,6 +851,7 @@ export class TestRunnerService {
       });
 
       proc.on('error', (err) => {
+        clearTimeout(timer);
         this.logger.error('Failed to run Postman tests', err);
         fs.writeFileSync(outputFile, JSON.stringify([]));
         resolve({ code: 1, output: 'Failed to execute Postman tests' });
