@@ -7,9 +7,8 @@
 # Node modules (installed fresh inside containers)
 **/node_modules
 
-# Local data volumes
-data/postgres
-data/mongo
+# Local data volumes (entire directory - postgres subdirs have restricted perms)
+data/
 
 # Environment files (secrets - never bake into images)
 **/.env
