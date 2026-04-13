@@ -12,7 +12,8 @@ SHELL := /usr/bin/bash
 
 DOCKER_COMPOSE := $(shell docker compose version >/dev/null 2>&1 && echo 'docker compose' || echo 'docker-compose')
 INFRA_DIR := ./mini-baas-infra
-DC := cd $(INFRA_DIR) && $(DOCKER_COMPOSE)
+# Use both BaaS infra compose AND our app-specific override
+DC := $(DOCKER_COMPOSE) --env-file $(INFRA_DIR)/.env -f $(INFRA_DIR)/docker-compose.yml -f docker-compose.override.yml
 
 # ── Help ──────────────────────────────────────────────
 .PHONY: help

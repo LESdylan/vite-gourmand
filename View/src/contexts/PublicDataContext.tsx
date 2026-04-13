@@ -64,7 +64,8 @@ export function PublicDataProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
-        const [info, hours, rawReviews, stats] = await Promise.all([
+        // Use allSettled so one failure doesn't kill all data
+        const [infoResult, hoursResult, reviewsResult, statsResult] = await Promise.allSettled([
           fetchSiteInfo(),
           fetchWorkingHours(),
           fetchApprovedReviews(1, 20),
@@ -72,6 +73,19 @@ export function PublicDataProvider({ children }: { children: ReactNode }) {
         ]);
 
         if (cancelled) return;
+
+        const info = infoResult.status === 'fulfilled' ? infoResult.value : null;
+        const hours = hoursResult.status === 'fulfilled' ? hoursResult.value : [];
+        const rawReviews = reviewsResult.status === 'fulfilled' ? reviewsResult.value : [];
+        const stats = statsResult.status === 'fulfilled' ? statsResult.value : null;
+
+        // Log any rejected promises for debugging
+        [infoResult, hoursResult, reviewsResult, statsResult].forEach((r, i) => {
+          if (r.status === 'rejected') {
+            const labels = ['siteInfo', 'workingHours', 'reviews', 'reviewStats'];
+            console.warn(`[PublicDataProvider] ${labels[i]} failed:`, r.reason);
+          }
+        });
 
         // Sort hours by weekday
         hours.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));

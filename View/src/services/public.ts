@@ -69,7 +69,7 @@ export async function fetchApprovedReviews(page = 1, limit = 20): Promise<Public
 
   const { data, error } = await supabase
     .from('reviews')
-    .select('*, profiles(first_name)')
+    .select('*, profiles!user_id(first_name)')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
     .range(from, to);
@@ -129,7 +129,9 @@ export async function fetchSiteInfo(): Promise<SiteInfo> {
     }),
   );
 
-  const establishedYear = company?.established_year ?? new Date().getFullYear();
+  const establishedYear = company?.first_opening_date
+    ? new Date(company.first_opening_date).getFullYear()
+    : new Date().getFullYear();
   const yearsOfExperience = new Date().getFullYear() - establishedYear;
 
   return {
