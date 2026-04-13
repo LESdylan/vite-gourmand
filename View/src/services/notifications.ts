@@ -1,9 +1,11 @@
 /**
  * Notification Service
  * CRUD operations against the notifications table via PostgREST / Supabase client.
+ * Includes realtime subscription for live notification delivery.
  */
 
 import { supabase } from '../lib/supabase';
+import { getRealtimeClient, type RealtimeEvent, type RealtimeSubscription } from '../lib/realtime';
 
 // ── Types matching database schema ──
 
@@ -87,4 +89,47 @@ export async function deleteNotification(id: string): Promise<void> {
     .eq('id', id);
 
   if (error) throw new Error(error.message);
+}
+
+// ── Realtime subscription ──
+
+/**
+ * Subscribe to live notification events via the realtime-agnostic WebSocket.
+ * Calls `onNew` whenever a new notification is INSERTed for the current user.
+ *
+ * @returns An unsubscribe function to tear down the subscription.
+ *
+ * @example
+ * ```ts
+ * const unsub = subscribeToNotifications((notif) => {
+ *   toast.info(notif.title ?? 'Nouvelle notification');
+ * });
+ * // later:
+ * unsub();
+ * ```
+ */
+export function subscribeToNotifications(
+  onNew: (notification: Notification) => void,
+): () => void {
+  const client = getRealtimeClient();
+
+  // Ensure WebSocket is connected
+  (async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    client.connect(session?.access_token);
+  })();
+
+  const sub: RealtimeSubscription = client.subscribe<Notification>(
+    'notifications',
+    'postgresql',
+    (event: RealtimeEvent<Notification>) => {
+      // Only forward INSERTs (new notifications)
+      if (event.type === 'INSERT' && event.record) {
+        onNew(event.record);
+      }
+    },
+    'INSERT',
+  );
+
+  return () => sub.unsubscribe();
 }
