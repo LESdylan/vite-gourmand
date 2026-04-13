@@ -1,11 +1,14 @@
 /**
  * useDatabase - State management hook for database viewer
- * Handles table loading, record fetching, search, and pagination
+ * Handles table loading, record fetching, search, pagination,
+ * and realtime synchronisation via the realtime-agnostic engine.
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { DatabaseService } from './DatabaseService';
-import type { FilterConfig, DatabaseState } from './types';
+import { useRealtimeSync } from './useRealtimeSync';
+import type { FilterConfig, DatabaseState, TableRecord } from './types';
+import type { RealtimeEvent } from '../../lib/realtime';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -154,9 +157,85 @@ export function useDatabase() {
     };
   }, []);
 
+  // ── Realtime sync ──────────────────────────────────────────────
+  // Resolve the PK column for the active table from loaded metadata
+  const activePk =
+    state.tables
+      .find((t) => t.name === state.activeTable)
+      ?.columns.find((c) => c.isPrimary)?.name ?? 'id';
+
+  const handleRealtimeEvent = useCallback(
+    (event: RealtimeEvent<TableRecord>) => {
+      const pk = activePk;
+
+      setState((prev) => {
+        // 1. Apply the event to the current records array
+        let nextRecords = prev.records;
+        switch (event.type) {
+          case 'INSERT': {
+            const rec = event.record;
+            if (!nextRecords.some((r) => r[pk] === rec[pk])) {
+              nextRecords = [...nextRecords, rec];
+            }
+            break;
+          }
+          case 'UPDATE': {
+            const rec = event.record;
+            const idx = nextRecords.findIndex((r) => r[pk] === rec[pk]);
+            if (idx !== -1) {
+              nextRecords = [...nextRecords];
+              nextRecords[idx] = { ...nextRecords[idx], ...rec };
+            }
+            break;
+          }
+          case 'DELETE': {
+            const old = event.old_record ?? event.record;
+            nextRecords = nextRecords.filter((r) => r[pk] !== old[pk]);
+            break;
+          }
+        }
+
+        // 2. Update the row count for this table in the sidebar
+        let delta = 0;
+        if (event.type === 'INSERT') delta = 1;
+        else if (event.type === 'DELETE') delta = -1;
+
+        const nextTables =
+          delta === 0
+            ? prev.tables
+            : prev.tables.map((t) =>
+                t.name === event.table
+                  ? { ...t, rowCount: Math.max(0, t.rowCount + delta) }
+                  : t,
+              );
+
+        // 3. Adjust total count for pagination
+        const nextTotal =
+          delta === 0
+            ? prev.pagination.total
+            : Math.max(0, prev.pagination.total + delta);
+
+        return {
+          ...prev,
+          records: nextRecords,
+          tables: nextTables,
+          pagination: { ...prev.pagination, total: nextTotal },
+        };
+      });
+    },
+    [activePk],
+  );
+
+  const { connectionState: realtimeState, eventCount: realtimeEventCount } =
+    useRealtimeSync(state.activeTable, handleRealtimeEvent, {
+      pkColumn: activePk,
+    });
+
   return {
     ...state,
     searchTerm,
+    realtimeState,
+    realtimeEventCount,
     loadTables,
     selectTable,
     setPage,

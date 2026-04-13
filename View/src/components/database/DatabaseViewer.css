@@ -189,3 +189,38 @@
     width: 100%;
   }
 }
+
+/* ── Realtime live indicator ──────────────────────────────────── */
+
+.realtime-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.realtime-badge--reconnecting {
+  color: #d97706;
+  background: #fef3c7;
+}
+
+.realtime-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  animation: realtime-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes realtime-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

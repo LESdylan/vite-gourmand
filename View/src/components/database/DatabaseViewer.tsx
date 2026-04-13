@@ -45,7 +45,7 @@ export function DatabaseViewer() {
         await DatabaseService.create(db.activeTable, data);
       }
       setModal(null);
-      db.refresh();
+      // No manual db.refresh() needed — realtime sync handles it
     } catch (e) {
       alert(`Erreur: ${e instanceof Error ? e.message : "Échec de l'opération"}`);
     }
@@ -71,6 +71,19 @@ export function DatabaseViewer() {
       <header className="database-viewer-header">
         <div className="header-left">
           <TableSelector tables={db.tables} active={db.activeTable} onSelect={db.selectTable} />
+          {db.realtimeState === 'connected' && (
+            <span
+              className="realtime-badge"
+              title={`Realtime connecté — ${db.realtimeEventCount} événement(s)`}
+            >
+              <span className="realtime-dot" /> LIVE
+            </span>
+          )}
+          {db.realtimeState === 'reconnecting' && (
+            <span className="realtime-badge realtime-badge--reconnecting" title="Reconnexion...">
+              ⟳ Reconnexion
+            </span>
+          )}
         </div>
         <div className="header-actions">
           <button
