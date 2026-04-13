@@ -64,7 +64,7 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
   if (dismissed || promotions.length === 0) return null;
 
   const promo = promotions[currentIndex];
-  const discountCode = promo.Discount?.code;
+  const discountCode = promo.discounts?.code;
 
   return (
     <div

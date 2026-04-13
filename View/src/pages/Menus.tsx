@@ -43,7 +43,7 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import { useMenus } from '../services/useMenus';
-import type { Menu, MenuImage, Dish } from '../services/menus';
+import type { Menu, MenuImage, Dish, DishAllergen } from '../services/menus';
 import LazyImage from '../components/ui/LazyImage';
 import { useToast } from '../contexts/ToastContext';
 import type { Page } from './Home';
@@ -221,7 +221,7 @@ function FullGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
    Dish Item (used inside detail modal) — refined design
    ══════════════════════════════════════════════════════════ */
 function DishItem({ dish, accentColor }: { dish: Dish; accentColor: string }) {
-  const allergens = dish.DishAllergen?.map((da) => da.Allergen?.name).filter(Boolean) || [];
+  const allergens = dish.dish_allergens?.map((da: DishAllergen) => da.allergens?.name).filter(Boolean) || [];
   return (
     <div className="flex items-start gap-4 py-3 px-4 rounded-xl bg-white border border-[#1A1A1A]/5 hover:border-[#D4AF37]/30 hover:shadow-sm transition-all group/dish">
       {dish.photo_url ? (
@@ -729,7 +729,7 @@ function CategoryNav({
   selected,
   onSelect,
 }: {
-  themes: { id: number; name: string }[];
+  themes: { id: string; name: string }[];
   selected: string;
   onSelect: (t: string) => void;
 }) {

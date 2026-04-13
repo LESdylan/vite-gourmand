@@ -19,10 +19,36 @@ DC := cd $(INFRA_DIR) && $(DOCKER_COMPOSE)
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
+# ── Quick Start ───────────────────────────────────────
+.PHONY: init start
+
+init: env frontend-install frontend-build ## First-time setup: generate env, install deps, build frontend
+	@echo "✔ Ready — run 'make start' to launch all services."
+
+start: env-check frontend-build up ## Build frontend then start all services
+
+# ── Environment ───────────────────────────────────────
+.PHONY: env env-check
+
+env: ## Generate fresh .env in mini-baas-infra/ (safe — skips if exists)
+	@if [ ! -f $(INFRA_DIR)/.env ]; then \
+		cd $(INFRA_DIR) && bash scripts/generate-env.sh .env; \
+		echo "✔ Generated $(INFRA_DIR)/.env"; \
+	else \
+		echo "• $(INFRA_DIR)/.env already exists (use 'make env-reset' to regenerate)"; \
+	fi
+
+env-reset: ## Regenerate .env (overwrites existing)
+	cd $(INFRA_DIR) && FORCE=1 bash scripts/generate-env.sh .env
+	@echo "✔ Regenerated $(INFRA_DIR)/.env"
+
+env-check:
+	@test -f $(INFRA_DIR)/.env || (echo "ERROR: $(INFRA_DIR)/.env missing — run 'make env' first" && exit 1)
+
 # ── Infrastructure ────────────────────────────────────
 .PHONY: up down restart logs ps build
 
-up: ## Start all services (infra + domain bootstrap + frontend)
+up: env-check ## Start all services (infra + domain bootstrap + frontend)
 	$(DC) up -d --build --remove-orphans
 
 down: ## Stop all services and remove containers
@@ -59,12 +85,15 @@ db-shell: ## Open psql shell
 	$(DC) exec postgres psql -U postgres -d postgres
 
 # ── Frontend ──────────────────────────────────────────
-.PHONY: frontend-build frontend-dev
+.PHONY: frontend-install frontend-build frontend-dev
 
-frontend-build: ## Build the Vue SPA for production
+frontend-install: ## Install frontend npm dependencies
+	cd View && npm install
+
+frontend-build: ## Build the React SPA for production
 	cd View && npm run build
 
-frontend-dev: ## Start Vue dev server (hot reload, port 5173)
+frontend-dev: ## Start Vite dev server (hot reload, port 5173)
 	cd View && npm run dev
 
 # ── Extras ────────────────────────────────────────────
@@ -84,9 +113,3 @@ clean: down ## Stop everything and remove volumes
 
 prune: ## Docker system prune (removes dangling images, build cache)
 	docker system prune -f
-
-# ── Env ───────────────────────────────────────────────
-.PHONY: env
-
-env: ## Generate fresh .env in mini-baas-infra/
-	cd $(INFRA_DIR) && FORCE=1 bash scripts/generate-env.sh

@@ -37,19 +37,19 @@ export interface NotificationState {
   /** Whether the notification panel is open */
   isOpen: boolean;
   /** IDs that the user dismissed locally (hidden from toast) */
-  dismissedIds: Set<number>;
+  dismissedIds: Set<string>;
   /** Toggle the panel open/closed */
   toggle: () => void;
   /** Close the panel */
   close: () => void;
   /** Dismiss a single notification locally (hides it) */
-  dismiss: (id: number) => void;
+  dismiss: (id: string) => void;
   /** Mark a single notification as read on the server */
-  read: (id: number) => Promise<void>;
+  read: (id: string) => Promise<void>;
   /** Mark all as read */
   readAll: () => Promise<void>;
   /** Remove a notification permanently */
-  remove: (id: number) => Promise<void>;
+  remove: (id: string) => Promise<void>;
   /** Force-refresh from server */
   refresh: () => Promise<void>;
 }
@@ -89,7 +89,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [dismissedIds, setDismissedIds] = useState<Set<number>>(new Set());
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   /** Set to true after a 401 — prevents any further network calls */
   const stoppedRef = useRef(false);
@@ -142,11 +142,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
 
-  const dismiss = useCallback((id: number) => {
+  const dismiss = useCallback((id: string) => {
     setDismissedIds((prev) => new Set(prev).add(id));
   }, []);
 
-  const read = useCallback(async (id: number) => {
+  const read = useCallback(async (id: string) => {
     try {
       await markAsRead(id);
       setNotifications((prev) =>
@@ -173,7 +173,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const remove = useCallback(
-    async (id: number) => {
+    async (id: string) => {
       try {
         await deleteNotification(id);
         setNotifications((prev) => prev.filter((n) => n.id !== id));

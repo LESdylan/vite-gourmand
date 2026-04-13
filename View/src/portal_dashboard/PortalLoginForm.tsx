@@ -162,7 +162,7 @@ export function PortalLoginForm() {
   const [googleReady, setGoogleReady] = useState(false);
 
   const onGoogleCredential = useCallback(
-    async (response: { credential: string }) => {
+    async (_response: { credential: string }) => {
       try {
         await loginWithGoogle();
       } catch {

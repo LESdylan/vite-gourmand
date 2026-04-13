@@ -752,7 +752,7 @@ export default function HomePage({ setCurrentPage }: HomePageProps) {
   // Map DB reviews to the component format
   const reviews: Review[] = rawReviews.map((r) => ({
     id: String(r.id),
-    userName: r.User_Publish_user_idToUser?.first_name ?? 'Client',
+    userName: r.profiles?.first_name ?? 'Client',
     rating: r.note,
     text: r.description,
     createdAt: r.created_at,
