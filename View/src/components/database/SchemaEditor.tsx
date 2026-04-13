@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { apiRequest } from '../../services/api';
+import { DatabaseService, invalidateSpecCache } from './DatabaseService';
 import type { TableMeta } from './types';
 import './SchemaEditor.css';
 
@@ -88,21 +88,18 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
     setError(null);
 
     try {
-      await apiRequest('/api/crud/schema/table', {
-        method: 'POST',
-        body: {
-          tableName: newTableName.trim(),
-          columns: columns.map((c) => ({
-            name: c.name.trim(),
-            type: c.type,
-            nullable: c.nullable,
-            defaultValue: c.defaultValue || null,
-            isPrimary: c.isPrimary,
-            isUnique: c.isUnique,
-            foreignKey: c.foreignKey,
-          })),
-        },
-      });
+      await DatabaseService.createTable(
+        newTableName.trim(),
+        columns.map((c) => ({
+          name: c.name.trim(),
+          type: c.type,
+          nullable: c.nullable,
+          defaultValue: c.defaultValue || null,
+          isPrimary: c.isPrimary,
+          isUnique: c.isUnique,
+        })),
+        'default',
+      );
       onSuccess();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Échec de la création');
@@ -121,20 +118,20 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
     setError(null);
 
     try {
-      await apiRequest('/api/crud/schema/column', {
-        method: 'POST',
-        body: {
-          tableName,
-          column: {
-            name: singleColumn.name.trim(),
-            type: singleColumn.type,
-            nullable: singleColumn.nullable,
-            defaultValue: singleColumn.defaultValue || null,
-            isUnique: singleColumn.isUnique,
-            foreignKey: singleColumn.foreignKey,
-          },
-        },
-      });
+      // Adding a single column uses the same schema-service endpoint
+      // but with the existing tableName and one column
+      await DatabaseService.createTable(
+        tableName!,
+        [{
+          name: singleColumn.name.trim(),
+          type: singleColumn.type,
+          nullable: singleColumn.nullable,
+          defaultValue: singleColumn.defaultValue || null,
+          isUnique: singleColumn.isUnique,
+        }],
+        'default',
+      );
+      invalidateSpecCache();
       onSuccess();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Échec de l'ajout");

@@ -10,7 +10,7 @@ interface Props {
   columns: TableColumn[];
   records: TableRecord[];
   onEdit: (record: TableRecord) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string | number) => void;
 }
 
 export function DatabaseCards({ columns, records, onEdit, onDelete }: Props) {
@@ -26,7 +26,7 @@ export function DatabaseCards({ columns, records, onEdit, onDelete }: Props) {
           record={record}
           columns={columns}
           onEdit={() => onEdit(record)}
-          onDelete={() => onDelete(record.id as number)}
+          onDelete={() => onDelete(record.id)}
         />
       ))}
     </div>

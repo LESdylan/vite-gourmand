@@ -9,7 +9,7 @@ interface Props {
   columns: TableColumn[];
   records: TableRecord[];
   onEdit: (record: TableRecord) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string | number) => void;
 }
 
 export function DataTable({ columns, records, onEdit, onDelete }: Props) {

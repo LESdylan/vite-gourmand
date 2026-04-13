@@ -39,6 +39,10 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/schemas/v1': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
     },
   },
 });

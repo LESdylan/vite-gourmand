@@ -51,7 +51,7 @@ export function DatabaseViewer() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string | number) => {
     if (!db.activeTable || !confirm('Supprimer cet enregistrement ?')) return;
     try {
       await DatabaseService.delete(db.activeTable, id);

@@ -11,7 +11,7 @@ export interface TableColumn {
 }
 
 export interface TableRecord {
-  id: number;
+  id: string | number;
   [key: string]: unknown;
 }
 
