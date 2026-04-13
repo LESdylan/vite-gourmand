@@ -425,12 +425,13 @@ export class RealtimeClient {
 
   /**
    * Transform a wire EVENT into a normalised RealtimeEvent
-   * and dispatch to the matching subscription callbacks.
+   * and dispatch to **all** subscriptions whose topic matches.
+   *
+   * The server may or may not populate `sub_id`, so we always
+   * resolve matching subscriptions by comparing the event's topic
+   * against each subscription's glob pattern.
    */
   private handleEvent(msg: WireServerEvent): void {
-    const entry = this.subscriptions.get(msg.sub_id);
-    if (!entry) return;
-
     const p = msg.event.payload;
     if (!p || typeof p.table !== 'string') return;
 
@@ -455,16 +456,23 @@ export class RealtimeClient {
       timestamp: new Date(msg.event.timestamp).getTime() / 1000,
     };
 
-    // Apply optional event filter
-    if (
-      entry.eventFilter &&
-      entry.eventFilter !== '*' &&
-      entry.eventFilter !== operation
-    ) {
-      return;
-    }
+    const eventTopic = msg.event.topic; // e.g. "pg/working_hours/updated"
 
-    entry.callbacks.forEach((cb) => cb(normalised));
+    // Find all subscriptions whose topic glob matches this event
+    this.subscriptions.forEach((entry) => {
+      if (!topicMatches(entry.topic, eventTopic)) return;
+
+      // Apply optional event filter
+      if (
+        entry.eventFilter &&
+        entry.eventFilter !== '*' &&
+        entry.eventFilter !== operation
+      ) {
+        return;
+      }
+
+      entry.callbacks.forEach((cb) => cb(normalised));
+    });
   }
 
   private startHeartbeat(): void {
@@ -497,6 +505,53 @@ export class RealtimeClient {
       this.connect();
     }, delay);
   }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+
+/**
+ * Match an event topic against a subscription glob pattern.
+ *
+ * Supported wildcards:
+ *   `*`  — matches exactly one path segment
+ *   `**` — matches zero or more path segments (must be a full segment)
+ *
+ * Examples:
+ *   topicMatches("pg/orders/*",       "pg/orders/inserted")  → true
+ *   topicMatches("pg/orders/updated", "pg/orders/updated")   → true
+ *   topicMatches("pg/**",             "pg/orders/inserted")  → true
+ *   topicMatches("pg/orders/*",       "pg/menus/inserted")   → false
+ */
+function topicMatches(pattern: string, topic: string): boolean {
+  const pat = pattern.split('/');
+  const top = topic.split('/');
+
+  let pi = 0;
+  let ti = 0;
+  while (pi < pat.length && ti < top.length) {
+    if (pat[pi] === '**') {
+      // trailing ** matches everything remaining
+      if (pi === pat.length - 1) return true;
+      // try matching rest of pattern from every remaining position
+      for (let k = ti; k <= top.length; k++) {
+        if (
+          topicMatches(
+            pat.slice(pi + 1).join('/'),
+            top.slice(k).join('/'),
+          )
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }
+    if (pat[pi] !== '*' && pat[pi] !== top[ti]) return false;
+    pi++;
+    ti++;
+  }
+  // consume trailing ** in pattern
+  while (pi < pat.length && pat[pi] === '**') pi++;
+  return pi === pat.length && ti === top.length;
 }
 
 // ── Singleton ──────────────────────────────────────────────────────
