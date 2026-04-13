@@ -2,24 +2,28 @@
 
 ## Accès à l'application
 
-Au premier lancement, l'application affiche automatiquement la page de configuration des comptes de démonstration.
+Les comptes de démonstration sont créés automatiquement par le seed SQL
+(`database/seeds/002_users.sql`) lors du bootstrap de la base de données.
 
-### Étape 1 : Initialisation
-Cliquez sur **"Créer les comptes de démonstration"** pour initialiser tous les comptes de test.
+Rendez-vous sur **http://localhost:5173** et connectez-vous avec l'un des
+identifiants ci-dessous.
 
-### Étape 2 : Connexion
-Une fois les comptes créés, utilisez les identifiants ci-dessous pour vous connecter.
+> **Mot de passe universel pour tous les comptes de démo : `Test123!`**
 
 ---
 
-## 👑 Compte Administrateur (Super Admin)
+## 👑 Comptes Administrateurs
 
 **Accès complet à toutes les fonctionnalités**
 
+| Email | Nom | Rôle |
+|-------|-----|------|
+| `dylan@vitegourmand.dev` | Dylan Lesieur | superadmin |
+| `jose@vitegourmand.fr` | José Garcia | admin |
+| `julie@vitegourmand.fr` | Julie Martin | admin |
+
 ```
-Email    : admin@demo.app
-Password : Admin123!@#
-Rôle     : Administrateur
+Password : Test123!
 ```
 
 ### Fonctionnalités accessibles :
@@ -34,14 +38,19 @@ Rôle     : Administrateur
 
 ---
 
-## 👔 Compte Employé
+## 👔 Comptes Employés
 
 **Accès aux fonctions de gestion opérationnelle**
 
+| Email | Nom | Actif |
+|-------|-----|-------|
+| `pierre@vitegourmand.fr` | Pierre Dupont | ✅ |
+| `sophie@vitegourmand.fr` | Sophie Bernard | ✅ |
+| `lucie@vitegourmand.fr` | Lucie Moreau | ✅ |
+| `marc@vitegourmand.fr` | Marc Lefebvre | ❌ (désactivé) |
+
 ```
-Email    : employee@demo.app
-Password : Employee123!@#
-Rôle     : Employé
+Password : Test123!
 ```
 
 ### Fonctionnalités accessibles :
@@ -55,15 +64,31 @@ Rôle     : Employé
 
 ---
 
-## 👤 Compte Utilisateur Standard
+## 👤 Comptes Utilisateurs (Clients)
 
 **Accès client pour commander et gérer ses commandes**
 
+| Email | Nom | Ville |
+|-------|-----|-------|
+| `alice@example.fr` | Alice Durand | Bordeaux |
+| `bob@example.fr` | Bob Petit | Mérignac |
+| `claire@example.fr` | Claire Roux | Pessac |
+| `david@example.fr` | David Fournier | Talence |
+| `emma@example.fr` | Emma Girard | Bordeaux |
+| `francois@example.fr` | François André | Bègles |
+| `helene@example.fr` | Hélène Leroy | Bordeaux |
+| `igor@example.fr` | Igor Simon | Cenon |
+| `julie.client@example.fr` | Julie Laurent | Bordeaux |
+| `karim@example.fr` | Karim Benali | Lormont |
+| `laura@example.fr` | Laura Dubois | Bordeaux |
+| `nicolas@example.fr` | Nicolas Thomas | Gradignan |
+
 ```
-Email    : user@demo.app
-Password : User123!@#
-Rôle     : Utilisateur
+Password : Test123!
 ```
+
+> Le compte `deleted.user@example.fr` est un utilisateur soft-deleted (marqué
+> supprimé il y a 30 jours) pour tester les flux de purge RGPD.
 
 ### Fonctionnalités accessibles :
 - ✅ Navigation et consultation des menus
