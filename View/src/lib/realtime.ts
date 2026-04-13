@@ -1,15 +1,34 @@
 /**
- * Realtime WebSocket Client for `realtime-agnostic` engine.
+ * Realtime WebSocket Client for the `realtime-agnostic` Rust engine.
  *
- * The engine speaks a simple JSON protocol over WebSocket:
+ * Protocol (JSON over WebSocket):
  *
- *   → { action: "subscribe",   channel: "public.posts", adapter: "postgresql" }
- *   → { action: "unsubscribe", channel: "public.posts" }
- *   ← { type: "INSERT", schema: "public", table: "posts", record: {...} }
- *   ← { type: "UPDATE", schema: "public", table: "posts", record: {...}, old_record: {...} }
- *   ← { type: "DELETE", schema: "public", table: "posts", old_record: {...} }
+ *   → { type: "AUTH",        token: "<jwt>" }
+ *   ← { type: "AUTH_OK",     conn_id: "...", server_time: "..." }
  *
- * Connection URL:  ws://<host>/realtime/v1/ws?apikey=<anon_key>&token=<jwt>
+ *   → { type: "SUBSCRIBE",   sub_id: "<uuid>", topic: "pg/orders/*" }
+ *   ← { type: "SUBSCRIBED",  sub_id: "<uuid>", seq: 0 }
+ *
+ *   → { type: "UNSUBSCRIBE", sub_id: "<uuid>" }
+ *   ← { type: "UNSUBSCRIBED", sub_id: "<uuid>" }
+ *
+ *   ← { type: "EVENT", sub_id: "<uuid>", event: { event_id, topic, event_type, sequence, timestamp, payload } }
+ *
+ *   → { type: "PING" }
+ *   ← { type: "PONG", server_time: "..." }
+ *
+ * Topics follow the pattern: {prefix}/{table}/{event_type}
+ *   - prefix:     "pg" for PostgreSQL, "mongo" for MongoDB
+ *   - table:      table or collection name
+ *   - event_type: "inserted" | "updated" | "deleted"
+ *
+ * Glob subscriptions:
+ *   "pg/**"               → all PostgreSQL CDC events
+ *   "pg/orders/*"         → all events on the orders table
+ *   "pg/orders/inserted"  → only INSERTs on orders
+ *
+ * The payload inside EVENT.event.payload is the raw pg_notify JSON:
+ *   { table, schema, operation, data, old_data }
  */
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase';
@@ -20,6 +39,10 @@ export type RealtimeAdapter = 'postgresql' | 'mongodb';
 
 export type RealtimeEventType = 'INSERT' | 'UPDATE' | 'DELETE' | '*';
 
+/**
+ * Normalised CDC event — the client transforms the engine's EventPayload
+ * into this shape so consumers don't need to know about the wire format.
+ */
 export interface RealtimeEvent<T = Record<string, unknown>> {
   type: 'INSERT' | 'UPDATE' | 'DELETE';
   schema: string;
@@ -31,48 +54,145 @@ export interface RealtimeEvent<T = Record<string, unknown>> {
 
 export interface RealtimeSubscription {
   channel: string;
-  adapter: RealtimeAdapter;
+  subId: string;
   unsubscribe: () => void;
 }
 
-type EventCallback<T = Record<string, unknown>> = (event: RealtimeEvent<T>) => void;
-
-interface SubscriptionEntry {
-  channel: string;
-  adapter: RealtimeAdapter;
-  callbacks: Map<string, EventCallback>;
-}
-
-export type ConnectionState = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
+export type ConnectionState =
+  | 'connecting'
+  | 'connected'
+  | 'disconnected'
+  | 'reconnecting';
 
 type StateCallback = (state: ConnectionState) => void;
+
+// ── Wire protocol types (Rust engine format) ───────────────────────
+
+interface WireClientAuth {
+  type: 'AUTH';
+  token: string;
+}
+interface WireClientSubscribe {
+  type: 'SUBSCRIBE';
+  sub_id: string;
+  topic: string;
+}
+interface WireClientUnsubscribe {
+  type: 'UNSUBSCRIBE';
+  sub_id: string;
+}
+interface WireClientPing {
+  type: 'PING';
+}
+
+type WireClientMessage =
+  | WireClientAuth
+  | WireClientSubscribe
+  | WireClientUnsubscribe
+  | WireClientPing;
+
+interface WireServerAuthOk {
+  type: 'AUTH_OK';
+  conn_id: string;
+  server_time: string;
+}
+interface WireServerSubscribed {
+  type: 'SUBSCRIBED';
+  sub_id: string;
+  seq: number;
+}
+interface WireServerUnsubscribed {
+  type: 'UNSUBSCRIBED';
+  sub_id: string;
+}
+interface WireEventPayload {
+  event_id: string;
+  topic: string;
+  event_type: string; // "inserted" | "updated" | "deleted"
+  sequence: number;
+  timestamp: string;
+  payload: {
+    table: string;
+    schema: string;
+    operation: string; // "INSERT" | "UPDATE" | "DELETE"
+    data: Record<string, unknown>;
+    old_data: Record<string, unknown> | null;
+  };
+}
+interface WireServerEvent {
+  type: 'EVENT';
+  sub_id: string;
+  event: WireEventPayload;
+}
+interface WireServerPong {
+  type: 'PONG';
+  server_time: string;
+}
+interface WireServerError {
+  type: 'ERROR';
+  code: string;
+  message: string;
+}
+
+type WireServerMessage =
+  | WireServerAuthOk
+  | WireServerSubscribed
+  | WireServerUnsubscribed
+  | WireServerEvent
+  | WireServerPong
+  | WireServerError;
+
+// ── Internal types ─────────────────────────────────────────────────
+
+type EventCallback<T = Record<string, unknown>> = (
+  event: RealtimeEvent<T>,
+) => void;
+
+interface SubscriptionEntry {
+  subId: string;
+  topic: string;
+  callbacks: Map<string, EventCallback>;
+  eventFilter?: RealtimeEventType;
+}
 
 // ── Client ─────────────────────────────────────────────────────────
 
 export class RealtimeClient {
   private ws: WebSocket | null = null;
-  private readonly url: string;
+  private readonly wsUrl: string;
   private readonly subscriptions = new Map<string, SubscriptionEntry>();
   private readonly stateCallbacks = new Set<StateCallback>();
   private _state: ConnectionState = 'disconnected';
+  private _connId: string | null = null;
+  private _authenticated = false;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectAttempts = 0;
-  private readonly maxReconnectAttempts = 10;
-  private readonly baseReconnectDelay = 1000; // ms
+  private readonly maxReconnectAttempts = 15;
+  private readonly baseReconnectDelay = 1000;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private disposed = false;
+  private lastToken: string | null = null;
 
   constructor(url?: string) {
-    // Build WS URL from the Supabase URL (Kong gateway)
     const base = url || SUPABASE_URL;
     const wsProtocol = base.startsWith('https') ? 'wss' : 'ws';
     const host = base.replace(/^https?:\/\//, '');
-    this.url = `${wsProtocol}://${host}/realtime/v1/ws`;
+    this.wsUrl = `${wsProtocol}://${host}/realtime/v1/ws`;
   }
 
   /** Current connection state */
   get state(): ConnectionState {
     return this._state;
+  }
+
+  /** Connection ID assigned by the server after AUTH_OK */
+  get connectionId(): string | null {
+    return this._connId;
+  }
+
+  /** Whether the AUTH handshake completed */
+  get authenticated(): boolean {
+    return this._authenticated;
   }
 
   /** Register a state change listener */
@@ -86,20 +206,24 @@ export class RealtimeClient {
     this.stateCallbacks.forEach((cb) => cb(s));
   }
 
-  /** Open the WebSocket connection */
+  // ── Connection ───────────────────────────────────────────────────
+
+  /**
+   * Open the WebSocket connection and perform AUTH handshake.
+   * The token is sent as an in-band AUTH message (not a query param).
+   */
   connect(accessToken?: string): void {
     if (this.disposed) return;
     if (this.ws?.readyState === WebSocket.OPEN) return;
 
+    if (accessToken) this.lastToken = accessToken;
+    const token = accessToken ?? this.lastToken ?? SUPABASE_ANON_KEY;
+
     this.setState('connecting');
-
-    const params = new URLSearchParams({ apikey: SUPABASE_ANON_KEY });
-    if (accessToken) params.set('token', accessToken);
-
-    const wsUrl = `${this.url}?${params}`;
+    this._authenticated = false;
 
     try {
-      this.ws = new WebSocket(wsUrl);
+      this.ws = new WebSocket(this.wsUrl);
     } catch {
       this.setState('disconnected');
       this.scheduleReconnect();
@@ -108,25 +232,22 @@ export class RealtimeClient {
 
     this.ws.onopen = () => {
       this.reconnectAttempts = 0;
-      this.setState('connected');
-      // Re-subscribe to all active channels
-      this.subscriptions.forEach((entry) => {
-        this.sendSubscribe(entry.channel, entry.adapter);
-      });
-      this.startHeartbeat();
+      // Step 1 of the protocol: send AUTH
+      this.sendWire({ type: 'AUTH', token });
     };
 
     this.ws.onmessage = (ev) => {
       try {
-        const data = JSON.parse(ev.data as string);
+        const data = JSON.parse(ev.data as string) as WireServerMessage;
         this.handleMessage(data);
       } catch {
-        // ignore malformed messages
+        // ignore malformed
       }
     };
 
     this.ws.onclose = () => {
       this.stopHeartbeat();
+      this._authenticated = false;
       if (!this.disposed) {
         this.setState('disconnected');
         this.scheduleReconnect();
@@ -134,7 +255,7 @@ export class RealtimeClient {
     };
 
     this.ws.onerror = () => {
-      // onclose will fire after onerror
+      // onclose fires after onerror
     };
   }
 
@@ -151,18 +272,21 @@ export class RealtimeClient {
       this.ws.close();
       this.ws = null;
     }
+    this._authenticated = false;
     this.subscriptions.clear();
     this.setState('disconnected');
   }
 
+  // ── Subscribe / Unsubscribe ──────────────────────────────────────
+
   /**
-   * Subscribe to a table channel.
+   * Subscribe to a table's CDC events.
    *
-   * @param table  Table name (e.g. "posts" or "public.posts")
-   * @param adapter  Database adapter ("postgresql" or "mongodb")
-   * @param callback  Called for each realtime event
-   * @param eventFilter  Optional: only receive specific event types
-   * @returns A subscription handle with an `unsubscribe()` method
+   * @param table       Table name (e.g. "orders")
+   * @param adapter     "postgresql" or "mongodb"
+   * @param callback    Called for each normalised CDC event
+   * @param eventFilter Optional: "INSERT" | "UPDATE" | "DELETE" | "*"
+   * @returns           A subscription handle with `unsubscribe()`
    */
   subscribe<T = Record<string, unknown>>(
     table: string,
@@ -170,37 +294,83 @@ export class RealtimeClient {
     callback: EventCallback<T>,
     eventFilter?: RealtimeEventType,
   ): RealtimeSubscription {
-    const channel = table.includes('.') ? table : `public.${table}`;
+    const prefix = adapter === 'mongodb' ? 'mongo' : 'pg';
+
+    // Build topic with glob for all event types on this table
+    let topic: string;
+    if (eventFilter && eventFilter !== '*') {
+      const map: Record<string, string> = {
+        INSERT: 'inserted',
+        UPDATE: 'updated',
+        DELETE: 'deleted',
+      };
+      topic = `${prefix}/${table}/${map[eventFilter] ?? '*'}`;
+    } else {
+      topic = `${prefix}/${table}/*`;
+    }
+
+    const subId = crypto.randomUUID();
     const callbackId = crypto.randomUUID();
 
-    // Wrap with optional filter
-    const wrappedCb: EventCallback = (event) => {
-      if (!eventFilter || eventFilter === '*' || event.type === eventFilter) {
-        callback(event as RealtimeEvent<T>);
-      }
+    const entry: SubscriptionEntry = {
+      subId,
+      topic,
+      callbacks: new Map([[callbackId, callback as EventCallback]]),
+      eventFilter,
     };
+    this.subscriptions.set(subId, entry);
 
-    let entry = this.subscriptions.get(channel);
-    if (!entry) {
-      entry = { channel, adapter, callbacks: new Map() };
-      this.subscriptions.set(channel, entry);
-      // Send subscribe message if connected
-      if (this.ws?.readyState === WebSocket.OPEN) {
-        this.sendSubscribe(channel, adapter);
-      }
+    // Send SUBSCRIBE if already authenticated
+    if (this._authenticated && this.ws?.readyState === WebSocket.OPEN) {
+      this.sendWire({ type: 'SUBSCRIBE', sub_id: subId, topic });
     }
-    entry.callbacks.set(callbackId, wrappedCb);
 
     return {
-      channel,
-      adapter,
+      channel: topic,
+      subId,
       unsubscribe: () => {
         entry.callbacks.delete(callbackId);
         if (entry.callbacks.size === 0) {
-          this.subscriptions.delete(channel);
+          this.subscriptions.delete(subId);
           if (this.ws?.readyState === WebSocket.OPEN) {
-            this.sendUnsubscribe(channel);
+            this.sendWire({ type: 'UNSUBSCRIBE', sub_id: subId });
           }
+        }
+      },
+    };
+  }
+
+  /**
+   * Subscribe to ALL CDC events for an adapter (all tables).
+   * Useful for admin dashboards, log viewers, etc.
+   */
+  subscribeAll<T = Record<string, unknown>>(
+    adapter: RealtimeAdapter,
+    callback: EventCallback<T>,
+  ): RealtimeSubscription {
+    const prefix = adapter === 'mongodb' ? 'mongo' : 'pg';
+    const topic = `${prefix}/**`;
+    const subId = crypto.randomUUID();
+    const callbackId = crypto.randomUUID();
+
+    const entry: SubscriptionEntry = {
+      subId,
+      topic,
+      callbacks: new Map([[callbackId, callback as EventCallback]]),
+    };
+    this.subscriptions.set(subId, entry);
+
+    if (this._authenticated && this.ws?.readyState === WebSocket.OPEN) {
+      this.sendWire({ type: 'SUBSCRIBE', sub_id: subId, topic });
+    }
+
+    return {
+      channel: topic,
+      subId,
+      unsubscribe: () => {
+        this.subscriptions.delete(subId);
+        if (this.ws?.readyState === WebSocket.OPEN) {
+          this.sendWire({ type: 'UNSUBSCRIBE', sub_id: subId });
         }
       },
     };
@@ -208,36 +378,99 @@ export class RealtimeClient {
 
   // ── Private ──────────────────────────────────────────────────────
 
-  private sendSubscribe(channel: string, adapter: RealtimeAdapter): void {
-    this.send({ action: 'subscribe', channel, adapter });
-  }
-
-  private sendUnsubscribe(channel: string): void {
-    this.send({ action: 'unsubscribe', channel });
-  }
-
-  private send(data: Record<string, unknown>): void {
+  private sendWire(msg: WireClientMessage): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(data));
+      this.ws.send(JSON.stringify(msg));
     }
   }
 
-  private handleMessage(data: Record<string, unknown>): void {
-    // CDC events have { type, schema, table, record, ... }
-    if (typeof data.type === 'string' && typeof data.table === 'string') {
-      const schema = typeof data.schema === 'string' ? data.schema : 'public';
-      const channel = `${schema}.${data.table}`;
-      const entry = this.subscriptions.get(channel);
-      if (entry) {
-        entry.callbacks.forEach((cb) => cb(data as unknown as RealtimeEvent));
-      }
+  private handleMessage(msg: WireServerMessage): void {
+    switch (msg.type) {
+      case 'AUTH_OK':
+        this._connId = msg.conn_id;
+        this._authenticated = true;
+        this.setState('connected');
+        this.startHeartbeat();
+        // Now that we're authenticated, send all pending subscriptions
+        this.subscriptions.forEach((entry) => {
+          this.sendWire({
+            type: 'SUBSCRIBE',
+            sub_id: entry.subId,
+            topic: entry.topic,
+          });
+        });
+        break;
+
+      case 'SUBSCRIBED':
+        // Subscription confirmed
+        break;
+
+      case 'UNSUBSCRIBED':
+        break;
+
+      case 'EVENT':
+        this.handleEvent(msg);
+        break;
+
+      case 'PONG':
+        break;
+
+      case 'ERROR':
+        console.warn(
+          `[RealtimeClient] Server error: ${msg.code} — ${msg.message}`,
+        );
+        break;
     }
+  }
+
+  /**
+   * Transform a wire EVENT into a normalised RealtimeEvent
+   * and dispatch to the matching subscription callbacks.
+   */
+  private handleEvent(msg: WireServerEvent): void {
+    const entry = this.subscriptions.get(msg.sub_id);
+    if (!entry) return;
+
+    const p = msg.event.payload;
+    if (!p || typeof p.table !== 'string') return;
+
+    // Map the Rust event_type ("inserted"→INSERT, etc.)
+    const opMap: Record<string, 'INSERT' | 'UPDATE' | 'DELETE'> = {
+      inserted: 'INSERT',
+      updated: 'UPDATE',
+      deleted: 'DELETE',
+      INSERT: 'INSERT',
+      UPDATE: 'UPDATE',
+      DELETE: 'DELETE',
+    };
+    const operation = opMap[msg.event.event_type] ?? opMap[p.operation];
+    if (!operation) return;
+
+    const normalised: RealtimeEvent = {
+      type: operation,
+      schema: p.schema ?? 'public',
+      table: p.table,
+      record: (p.data ?? {}) as Record<string, unknown>,
+      old_record: (p.old_data ?? null) as Record<string, unknown> | null,
+      timestamp: new Date(msg.event.timestamp).getTime() / 1000,
+    };
+
+    // Apply optional event filter
+    if (
+      entry.eventFilter &&
+      entry.eventFilter !== '*' &&
+      entry.eventFilter !== operation
+    ) {
+      return;
+    }
+
+    entry.callbacks.forEach((cb) => cb(normalised));
   }
 
   private startHeartbeat(): void {
     this.stopHeartbeat();
     this.heartbeatTimer = setInterval(() => {
-      this.send({ action: 'heartbeat' });
+      this.sendWire({ type: 'PING' });
     }, 30_000);
   }
 
