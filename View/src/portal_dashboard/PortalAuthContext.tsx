@@ -1,12 +1,13 @@
 /**
  * Portal Auth Context
- * Provides authentication state across the dashboard
+ * Provides authentication state across the dashboard.
+ * Listens to supabase.auth.onAuthStateChange for reactive session management.
  */
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
 import * as authService from '../services/auth';
 import type { RegisterData } from '../services/auth';
-import { isAuthenticated } from '../services/api';
 import { getRememberMe, saveRememberMe, clearRememberMe } from './rememberMe';
 import type { PortalAuthState, UserRole } from './types';
 
@@ -14,7 +15,7 @@ interface PortalAuthContextValue extends PortalAuthState {
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   forgotPassword: (email: string) => Promise<string>;
-  loginWithGoogle: (credential: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => void;
   rememberMeData: { email: string; name: string } | null;
 }
@@ -33,31 +34,56 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     null,
   );
 
-  // Load remember me data and check existing session
+  // Subscribe to auth state changes from supabase
   useEffect(() => {
-    const init = async () => {
-      const remembered = getRememberMe();
-      if (remembered) setRememberMeData({ email: remembered.email, name: remembered.name });
+    const remembered = getRememberMe();
+    if (remembered) setRememberMeData({ email: remembered.email, name: remembered.name });
 
-      // Only attempt profile fetch if we have a token — prevents 401 spam
-      if (isAuthenticated()) {
-        try {
-          const profile = await authService.getProfile();
-          const role = mapRole(profile.role);
-          setState({
-            user: { ...profile, role },
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
-        } catch {
-          setState((s) => ({ ...s, isLoading: false }));
-        }
+    // Get the initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const meta = session.user.user_metadata ?? {};
+        const role = mapRole(meta.role ?? session.user.role ?? 'customer');
+        setState({
+          user: {
+            id: session.user.id,
+            email: session.user.email ?? '',
+            name: meta.first_name ?? meta.name ?? session.user.email?.split('@')[0] ?? '',
+            role,
+          },
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
       } else {
         setState((s) => ({ ...s, isLoading: false }));
       }
-    };
-    init();
+    });
+
+    // Listen for future changes (login, logout, token refresh)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const meta = session.user.user_metadata ?? {};
+        const role = mapRole(meta.role ?? session.user.role ?? 'customer');
+        setState({
+          user: {
+            id: session.user.id,
+            email: session.user.email ?? '',
+            name: meta.first_name ?? meta.name ?? session.user.email?.split('@')[0] ?? '',
+            role,
+          },
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
+      } else {
+        setState({ user: null, isAuthenticated: false, isLoading: false, error: null });
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = useCallback(async (email: string, password: string, remember = false) => {
@@ -78,12 +104,12 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const loginWithGoogle = useCallback(async (credential: string) => {
+  const loginWithGoogle = useCallback(async () => {
     setState((s) => ({ ...s, isLoading: true, error: null }));
     try {
-      const { user } = await authService.googleLogin(credential);
-      const role = mapRole(user.role);
-      setState({ user: { ...user, role }, isAuthenticated: true, isLoading: false, error: null });
+      await authService.googleLogin();
+      // Auth state change listener will handle state update after redirect
+      setState((s) => ({ ...s, isLoading: false }));
     } catch (e) {
       setState((s) => ({
         ...s,
@@ -126,8 +152,8 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const logout = useCallback(() => {
-    authService.logout();
+  const logout = useCallback(async () => {
+    await authService.logout();
     clearRememberMe();
     setState({ user: null, isAuthenticated: false, isLoading: false, error: null });
   }, []);
@@ -162,5 +188,5 @@ function mapRole(apiRole: string): UserRole {
   if (normalizedRole === 'superadmin') return 'superadmin';
   if (normalizedRole === 'admin') return 'admin';
   if (normalizedRole === 'employee') return 'employee';
-  return 'customer'; // Default for client/customer roles
+  return 'customer';
 }

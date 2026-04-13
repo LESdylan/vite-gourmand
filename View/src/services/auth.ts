@@ -1,20 +1,16 @@
 /**
  * Auth Service
- * API calls for authentication operations
+ * Wraps @supabase/supabase-js auth (GoTrue) while keeping the same
+ * interface the rest of the app already consumes.
  */
 
-import { apiRequest, setTokens, clearTokens } from './api';
+import { supabase } from '../lib/supabase';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-export interface AuthUser {
-  id: number;
-  email: string;
-  firstName: string;
-  role: string;
-}
+// ── Public types (consumed by components) ────────────────────────
 
-// Map to frontend user format
 export interface AuthUserMapped {
-  id: number;
+  id: string;
   email: string;
   name: string;
   role: string;
@@ -22,20 +18,6 @@ export interface AuthUserMapped {
 
 export interface AuthResponse {
   user: AuthUserMapped;
-  accessToken: string;
-  refreshToken?: string;
-}
-
-// API wraps response in { success, data, ... }
-interface ApiWrapper<T> {
-  success: boolean;
-  data: T;
-}
-
-interface RawAuthResponse {
-  user: AuthUser;
-  accessToken: string;
-  refreshToken?: string;
 }
 
 export interface RegisterData {
@@ -53,96 +35,116 @@ export interface LoginData {
   password: string;
 }
 
-/** Map API user to frontend format */
-function mapUser(user: AuthUser): AuthUserMapped {
+// ── Helpers ──────────────────────────────────────────────────────
+
+function mapUser(u: SupabaseUser): AuthUserMapped {
+  const meta = u.user_metadata ?? {};
   return {
-    id: user.id,
-    email: user.email,
-    name: user.firstName,
-    role: user.role,
+    id: u.id,
+    email: u.email ?? '',
+    name: meta.first_name ?? meta.name ?? u.email?.split('@')[0] ?? '',
+    role: meta.role ?? u.role ?? 'customer',
   };
 }
 
-/** Register a new user */
+// ── Auth operations ──────────────────────────────────────────────
+
+/** Register a new user via GoTrue */
 export async function register(data: RegisterData): Promise<AuthResponse> {
-  const wrapper = await apiRequest<ApiWrapper<RawAuthResponse>>('/api/auth/register', {
-    method: 'POST',
-    body: data,
+  const { data: result, error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      data: {
+        first_name: data.firstName,
+        telephone_number: data.telephoneNumber,
+        city: data.city,
+        gdpr_consent: data.gdprConsent,
+        newsletter_consent: data.newsletterConsent ?? false,
+        role: 'customer',
+      },
+    },
   });
-  const response = wrapper.data;
-  setTokens(response.accessToken, response.refreshToken);
-  return { ...response, user: mapUser(response.user) };
+
+  if (error) throw new Error(error.message);
+  if (!result.user) throw new Error('Registration failed — no user returned');
+
+  return { user: mapUser(result.user) };
 }
 
 /** Login with email and password */
 export async function login(data: LoginData): Promise<AuthResponse> {
-  const wrapper = await apiRequest<ApiWrapper<RawAuthResponse>>('/api/auth/login', {
-    method: 'POST',
-    body: data,
+  const { data: result, error } = await supabase.auth.signInWithPassword({
+    email: data.email,
+    password: data.password,
   });
-  const response = wrapper.data;
-  setTokens(response.accessToken, response.refreshToken);
-  return { ...response, user: mapUser(response.user) };
+
+  if (error) throw new Error(error.message);
+  if (!result.user) throw new Error('Login failed');
+
+  return { user: mapUser(result.user) };
 }
 
 /** Google OAuth login */
-export async function googleLogin(credential: string): Promise<AuthResponse> {
-  const wrapper = await apiRequest<ApiWrapper<RawAuthResponse>>('/api/auth/google/token', {
-    method: 'POST',
-    body: { credential },
+export async function googleLogin(_credential?: string): Promise<AuthResponse> {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
   });
-  const response = wrapper.data;
-  setTokens(response.accessToken, response.refreshToken);
-  return { ...response, user: mapUser(response.user) };
+
+  if (error) throw new Error(error.message);
+
+  // OAuth redirects — we'll pick up the session via onAuthStateChange
+  // Return a placeholder; auth context will update on redirect return
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Google login: session not established yet');
+  return { user: mapUser(user) };
 }
 
 /** Request password reset email */
 export async function forgotPassword(email: string): Promise<{ message: string }> {
-  const wrapper = await apiRequest<ApiWrapper<{ message: string }>>('/api/auth/forgot-password', {
-    method: 'POST',
-    body: { email },
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
   });
-  return wrapper.data;
+
+  if (error) throw new Error(error.message);
+  return { message: 'Un e-mail de réinitialisation a été envoyé.' };
 }
 
-/** Verify reset token validity */
+/** Verify reset token validity (GoTrue handles via redirect) */
 export async function verifyResetToken(
-  token: string,
+  _token: string,
 ): Promise<{ valid: boolean; message: string }> {
-  const wrapper = await apiRequest<ApiWrapper<{ valid: boolean; message: string }>>(
-    `/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`,
-  );
-  return wrapper.data;
+  // GoTrue handles token verification via the redirect URL
+  // The session is established when the user clicks the link
+  const { data } = await supabase.auth.getSession();
+  return {
+    valid: !!data.session,
+    message: data.session ? 'Token valide' : 'Token expiré ou invalide',
+  };
 }
 
-/** Reset password with token */
-export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
-  const wrapper = await apiRequest<ApiWrapper<{ message: string }>>('/api/auth/reset-password', {
-    method: 'POST',
-    body: { token, newPassword: password },
-  });
-  return wrapper.data;
+/** Reset password (user must have a valid session from the reset link) */
+export async function resetPassword(_token: string, password: string): Promise<{ message: string }> {
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw new Error(error.message);
+  return { message: 'Mot de passe mis à jour avec succès.' };
 }
 
 /** Logout user */
-export function logout(): void {
-  clearTokens();
+export async function logout(): Promise<void> {
+  await supabase.auth.signOut();
 }
 
-/** Get Google OAuth client ID from backend */
+/** Get Google OAuth client ID — not needed with supabase OAuth */
 export async function getGoogleConfig(): Promise<{ clientId: string | null }> {
-  try {
-    const wrapper =
-      await apiRequest<ApiWrapper<{ clientId: string | null }>>('/api/auth/google/config');
-    return wrapper.data;
-  } catch {
-    // If endpoint doesn't exist or fails, return null
-    return { clientId: null };
-  }
+  // supabase.auth.signInWithOAuth handles Google config internally
+  return { clientId: null };
 }
 
 /** Get current user profile */
 export async function getProfile(): Promise<AuthUserMapped> {
-  const wrapper = await apiRequest<ApiWrapper<AuthUser>>('/api/auth/me');
-  return mapUser(wrapper.data);
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) throw new Error(error?.message ?? 'Not authenticated');
+  return mapUser(user);
 }

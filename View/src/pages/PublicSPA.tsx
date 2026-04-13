@@ -41,7 +41,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   const [displayedPage, setDisplayedPage] = useState<Page>('home');
   const [promotions, setPromotions] = useState<ActivePromotion[]>([]);
   const [bannerHeight, setBannerHeight] = useState(0);
-  const [orderMenuId, setOrderMenuId] = useState<number | null>(null);
+  const [orderMenuId, setOrderMenuId] = useState<string | null>(null);
   const [newsletterMsg, setNewsletterMsg] = useState<{
     type: 'success' | 'error';
     text: string;
@@ -110,7 +110,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
 
   // Handler for ordering from menus page
   const handleOrderMenu = useCallback(
-    (menuId: number) => {
+    (menuId: string) => {
       setOrderMenuId(menuId);
       handlePageChange('order');
     },

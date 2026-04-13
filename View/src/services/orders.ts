@@ -1,9 +1,9 @@
 /**
  * Orders Service
- * API calls for order management — matches backend CreateOrderDto
+ * CRUD operations against the orders table via PostgREST / Supabase client.
  */
 
-import { apiRequest } from './api';
+import { supabase } from '../lib/supabase';
 
 // Re-export icon helper from components
 export { getStatusIcon } from '../components/icons/OrderStatusIcons';
@@ -20,9 +20,9 @@ export type OrderStatus =
   | 'cancelled';
 
 export interface Order {
-  id: number;
+  id: string;
   order_number: string;
-  user_id: number;
+  user_id: string;
   delivery_date: string;
   delivery_hour: string | null;
   delivery_address: string | null;
@@ -38,20 +38,20 @@ export interface Order {
   special_instructions: string | null;
   created_at: string;
   updated_at: string;
-  User?: { email: string; first_name: string | null };
-  OrderMenu?: { order_id: number; menu_id: number; quantity: number | null }[];
+  profiles?: { email: string; first_name: string | null };
+  order_menus?: { order_id: string; menu_id: string; quantity: number | null }[];
 }
 
-/** Matches backend CreateOrderDto */
+/** Matches the create-order payload */
 export interface CreateOrderData {
-  deliveryDate: string; // ISO date string e.g. "2024-06-15"
-  deliveryHour: string; // HH:MM format e.g. "12:00"
-  deliveryAddress: string;
-  personNumber: number;
-  menuPrice: number;
-  totalPrice: number;
-  specialInstructions?: string;
-  menuId?: number; // will be added to backend
+  delivery_date: string;
+  delivery_hour: string;
+  delivery_address: string;
+  person_number: number;
+  menu_price: number;
+  total_price: number;
+  special_instructions?: string;
+  menu_id?: string;
 }
 
 export interface OrderQuery {
@@ -62,72 +62,137 @@ export interface OrderQuery {
   toDate?: string;
 }
 
-// API wraps response in { success, data, ... }
-interface ApiWrapper<T> {
-  success: boolean;
-  data: T;
-}
-
 interface PaginatedOrders {
   items: Order[];
   meta: { page: number; limit: number; total: number; totalPages: number };
 }
 
-/** Get all orders (filtered) */
-export async function getOrders(query?: OrderQuery): Promise<PaginatedOrders> {
-  const params = new URLSearchParams();
-  if (query?.status) params.set('status', query.status);
-  if (query?.page) params.set('page', String(query.page));
-  if (query?.limit) params.set('limit', String(query.limit));
-  if (query?.fromDate) params.set('fromDate', query.fromDate);
-  if (query?.toDate) params.set('toDate', query.toDate);
+const ORDER_SELECT = '*, profiles(email, first_name), order_menus(*)';
 
-  const queryString = params.toString();
-  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(
-    `/api/orders${queryString ? `?${queryString}` : ''}`,
-  );
-  return resp.data;
+/** Get all orders (admin / staff) */
+export async function getOrders(query?: OrderQuery): Promise<PaginatedOrders> {
+  const page = query?.page ?? 1;
+  const limit = query?.limit ?? 20;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let q = supabase
+    .from('orders')
+    .select(ORDER_SELECT, { count: 'exact' })
+    .range(from, to)
+    .order('created_at', { ascending: false });
+
+  if (query?.status) q = q.eq('status', query.status);
+  if (query?.fromDate) q = q.gte('delivery_date', query.fromDate);
+  if (query?.toDate) q = q.lte('delivery_date', query.toDate);
+
+  const { data, error, count } = await q;
+  if (error) throw new Error(error.message);
+
+  const total = count ?? 0;
+  return {
+    items: data as Order[],
+    meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
 }
 
-/** Get my orders */
+/** Get my orders (current user) */
 export async function getMyOrders(query?: OrderQuery): Promise<PaginatedOrders> {
-  const params = new URLSearchParams();
-  if (query?.page) params.set('page', String(query.page));
-  if (query?.limit) params.set('limit', String(query.limit));
-  const queryString = params.toString();
-  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(
-    `/api/orders/my${queryString ? `?${queryString}` : ''}`,
-  );
-  return resp.data;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const page = query?.page ?? 1;
+  const limit = query?.limit ?? 20;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await supabase
+    .from('orders')
+    .select(ORDER_SELECT, { count: 'exact' })
+    .eq('user_id', user.id)
+    .range(from, to)
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  const total = count ?? 0;
+  return {
+    items: data as Order[],
+    meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 /** Get single order */
-export async function getOrder(id: number): Promise<Order> {
-  const resp = await apiRequest<ApiWrapper<Order>>(`/api/orders/${id}`);
-  return resp.data;
+export async function getOrder(id: string): Promise<Order> {
+  const { data, error } = await supabase
+    .from('orders')
+    .select(ORDER_SELECT)
+    .eq('id', id)
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as Order;
 }
 
 /** Create new order */
-export async function createOrder(data: CreateOrderData): Promise<Order> {
-  const resp = await apiRequest<ApiWrapper<Order>>('/api/orders', { method: 'POST', body: data });
-  return resp.data;
+export async function createOrder(input: CreateOrderData): Promise<Order> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('orders')
+    .insert({
+      user_id: user.id,
+      delivery_date: input.delivery_date,
+      delivery_hour: input.delivery_hour,
+      delivery_address: input.delivery_address,
+      person_number: input.person_number,
+      menu_price: input.menu_price,
+      total_price: input.total_price,
+      special_instructions: input.special_instructions,
+      status: 'pending',
+    })
+    .select(ORDER_SELECT)
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  // Link menu if provided
+  if (input.menu_id && data) {
+    await supabase.from('order_menus').insert({
+      order_id: data.id,
+      menu_id: input.menu_id,
+      quantity: 1,
+    });
+  }
+
+  return data as Order;
 }
 
 /** Update order */
 export async function updateOrder(
-  id: number,
-  data: Partial<Pick<CreateOrderData, 'deliveryAddress' | 'deliveryHour' | 'specialInstructions'>>,
+  id: string,
+  updates: Partial<Pick<CreateOrderData, 'delivery_address' | 'delivery_hour' | 'special_instructions'>>,
 ): Promise<Order> {
-  const resp = await apiRequest<ApiWrapper<Order>>(`/api/orders/${id}`, {
-    method: 'PATCH',
-    body: data,
-  });
-  return resp.data;
+  const { data, error } = await supabase
+    .from('orders')
+    .update(updates)
+    .eq('id', id)
+    .select(ORDER_SELECT)
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as Order;
 }
 
 /** Cancel order */
-export async function cancelOrder(id: number, reason: string): Promise<void> {
-  await apiRequest(`/api/orders/${id}/cancel`, { method: 'PATCH', body: { reason } });
+export async function cancelOrder(id: string, _reason: string): Promise<void> {
+  const { error } = await supabase
+    .from('orders')
+    .update({ status: 'cancelled' })
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
 }
 
 /** Get status display info */
@@ -145,3 +210,4 @@ export function getStatusInfo(status: OrderStatus | null): { label: string; colo
   };
   return statusMap[status ?? 'pending'];
 }
+

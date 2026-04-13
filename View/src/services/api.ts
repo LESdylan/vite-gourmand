@@ -1,19 +1,15 @@
 /**
  * API Base Service
- * Centralized fetch wrapper with auth handling
+ * Re-exports the Supabase client plus a backward-compatible apiRequest()
+ * for components that still call custom /api/* endpoints (AI, loyalty, etc.).
+ * Auth tokens are managed automatically by supabase-js.
  */
 
-// Use empty string to let Vite proxy handle /api routes
-// In production, VITE_API_URL should be set to the backend URL
-const API_BASE = import.meta.env.VITE_API_URL || '';
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from '../lib/supabase';
 
-interface ApiOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  body?: unknown;
-  headers?: Record<string, string>;
-}
+export { supabase };
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
 
   constructor(status: number, message: string) {
@@ -23,58 +19,51 @@ class ApiError extends Error {
   }
 }
 
-/** Get stored auth token */
-function getToken(): string | null {
-  return localStorage.getItem('accessToken');
-}
-
-/** Store auth tokens */
-export function setTokens(access: string, refresh?: string): void {
-  localStorage.setItem('accessToken', access);
-  if (refresh) localStorage.setItem('refreshToken', refresh);
-}
-
-/** Clear auth tokens */
-export function clearTokens(): void {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-}
-
-/** Check if user is authenticated */
+/** Synchronous auth check (reads supabase session from localStorage) */
 export function isAuthenticated(): boolean {
-  return !!getToken();
+  const keys = Object.keys(localStorage);
+  return keys.some((k) => k.startsWith('sb-') && k.endsWith('-auth-token'));
 }
 
-/** Make API request with auth handling */
-export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
-  const { method = 'GET', body, headers = {} } = options;
+/** Async auth check (verifies session with Supabase) */
+export async function isAuthenticatedAsync(): Promise<boolean> {
+  const { data } = await supabase.auth.getSession();
+  return !!data.session;
+}
 
-  const token = getToken();
-  const requestHeaders: Record<string, string> = {
+/**
+ * Generic fetch wrapper for endpoints that go through Kong gateway.
+ * Adds apikey + JWT headers automatically.
+ * Routes /api/* calls through the Vite dev proxy.
+ */
+export async function apiRequest<T>(
+  url: string,
+  options?: { method?: string; body?: unknown },
+): Promise<T> {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...headers,
+    apikey: SUPABASE_ANON_KEY,
   };
 
-  if (token) {
-    requestHeaders['Authorization'] = `Bearer ${token}`;
+  // Attach JWT token if available
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    method,
-    headers: requestHeaders,
-    body: body ? JSON.stringify(body) : undefined,
+  // Build absolute URL for Kong routes, keep relative for /api/* (Vite proxy)
+  const fullUrl = url.startsWith('/api') ? url : `${SUPABASE_URL}${url}`;
+
+  const res = await fetch(fullUrl, {
+    method: options?.method ?? 'GET',
+    headers,
+    body: options?.body ? JSON.stringify(options.body) : undefined,
   });
 
-  if (!response.ok) {
-    // 401 = token expired or invalid → clear stale credentials
-    if (response.status === 401) {
-      clearTokens();
-    }
-    const error = await response.json().catch(() => ({ message: response.statusText }));
-    throw new ApiError(response.status, error.message || 'Request failed');
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new ApiError(res.status, text);
   }
 
-  return response.json();
+  return res.json() as Promise<T>;
 }
-
-export { ApiError };

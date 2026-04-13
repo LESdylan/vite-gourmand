@@ -1,15 +1,15 @@
 /**
  * Notification Service
- * API calls for the notification system — requires authentication.
+ * CRUD operations against the notifications table via PostgREST / Supabase client.
  */
 
-import { apiRequest } from './api';
+import { supabase } from '../lib/supabase';
 
-// ── Types matching backend schema ──
+// ── Types matching database schema ──
 
 export interface Notification {
-  id: number;
-  user_id: number;
+  id: string;
+  user_id: string;
   type: string; // 'order_update' | 'review' | 'system' | 'promo'
   title: string | null;
   body: string | null;
@@ -19,51 +19,72 @@ export interface Notification {
   read_at: string | null;
 }
 
-export interface UnreadCount {
-  count: number;
-}
-
-// Backend wraps every response in this envelope
-interface ApiEnvelope<T> {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: T;
-  path: string;
-  timestamp: string;
-}
-
 // ── API calls ──
 
 /** Fetch current user's notifications (most recent first) */
 export async function getNotifications(limit = 20, unreadOnly = false): Promise<Notification[]> {
-  const params = new URLSearchParams();
-  params.set('limit', limit.toString());
-  if (unreadOnly) params.set('unreadOnly', 'true');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
 
-  const res = await apiRequest<ApiEnvelope<Notification[]>>(`/api/notifications?${params}`);
-  return res.data;
+  let q = supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (unreadOnly) q = q.eq('is_read', false);
+
+  const { data, error } = await q;
+  if (error) throw new Error(error.message);
+  return data as Notification[];
 }
 
 /** Get unread notification count */
 export async function getUnreadCount(): Promise<number> {
-  const res = await apiRequest<ApiEnvelope<UnreadCount>>('/api/notifications/unread-count');
-  return res.data.count;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('is_read', false);
+
+  if (error) throw new Error(error.message);
+  return count ?? 0;
 }
 
 /** Mark a single notification as read */
-export async function markAsRead(id: number): Promise<void> {
-  await apiRequest<ApiEnvelope<Notification>>(`/api/notifications/${id}/read`, { method: 'PATCH' });
+export async function markAsRead(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true, read_at: new Date().toISOString() })
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
 }
 
 /** Mark all notifications as read */
 export async function markAllAsRead(): Promise<void> {
-  await apiRequest<ApiEnvelope<{ count: number }>>('/api/notifications/read-all', {
-    method: 'PATCH',
-  });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true, read_at: new Date().toISOString() })
+    .eq('user_id', user.id)
+    .eq('is_read', false);
+
+  if (error) throw new Error(error.message);
 }
 
 /** Delete a single notification */
-export async function deleteNotification(id: number): Promise<void> {
-  await apiRequest<ApiEnvelope<Notification>>(`/api/notifications/${id}`, { method: 'DELETE' });
+export async function deleteNotification(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('notifications')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw new Error(error.message);
 }

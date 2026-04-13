@@ -1,55 +1,60 @@
 /**
  * Menu Service
- * API calls for menu operations - fetches from backend/Supabase
+ * Fetches menus, dishes, themes, diets from PostgREST via Supabase client.
  */
 
-import { apiRequest } from './api';
+import { supabase } from '../lib/supabase';
 
-// Types matching backend schema
+// ── Types matching UUID-based PostgREST schema ──────────────────
+
 export interface Diet {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   icon_url: string | null;
 }
 
 export interface Theme {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   icon_url: string | null;
 }
 
 export interface MenuImage {
-  id: number;
-  menu_id: number;
+  id: string;
+  menu_id: string;
   image_url: string;
   alt_text: string | null;
   display_order: number;
   is_primary: boolean;
 }
 
+export interface Allergen {
+  id: string;
+  name: string;
+  icon_url: string | null;
+}
+
 export interface DishAllergen {
-  dish_id: number;
-  allergen_id: number;
-  Allergen: {
-    id: number;
-    name: string;
-    icon_url: string | null;
-  };
+  allergens: Allergen;
 }
 
 export interface Dish {
-  id: number;
+  id: string;
   title: string;
   description: string | null;
   photo_url: string | null;
-  course_type: 'entrée' | 'plat' | 'dessert';
-  DishAllergen?: DishAllergen[];
+  course_type: 'entree' | 'plat' | 'dessert';
+  dish_allergens?: DishAllergen[];
+}
+
+export interface MenuDish {
+  dishes: Dish;
 }
 
 export interface MenuFromAPI {
-  id: number;
+  id: string;
   title: string;
   description: string | null;
   conditions: string | null;
@@ -57,25 +62,24 @@ export interface MenuFromAPI {
   price_per_person: number;
   remaining_qty: number;
   status: 'published' | 'draft';
-  diet_id: number | null;
-  theme_id: number | null;
+  diet_id: string | null;
+  theme_id: string | null;
   is_seasonal: boolean;
   available_from: string | null;
   available_until: string | null;
   created_at: string;
-  Diet: Diet | null;
-  Theme: Theme | null;
-  MenuImage: MenuImage[];
-  Dish: Dish[];
+  diets: Diet | null;
+  themes: Theme | null;
+  menu_images: MenuImage[];
+  menu_dishes: MenuDish[];
 }
 
 // Frontend-friendly format
 export interface Menu {
   id: string;
-  numericId: number;
   name: string;
   theme: string;
-  themeId: number | null;
+  themeId: string | null;
   description: string;
   dietary: string[];
   minPersons: number;
@@ -97,8 +101,8 @@ export interface MenuFilters {
   page?: number;
   limit?: number;
   status?: string;
-  dietId?: number;
-  themeId?: number;
+  dietId?: string;
+  themeId?: string;
 }
 
 export interface PaginationMeta {
@@ -110,21 +114,6 @@ export interface PaginationMeta {
   hasPrev: boolean;
 }
 
-interface MenuListResponse {
-  items: MenuFromAPI[];
-  meta: PaginationMeta;
-}
-
-// API wrapper response structure (backend wraps all responses)
-interface ApiWrapperResponse<T> {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: T;
-  path: string;
-  timestamp: string;
-}
-
 // Default fallback image
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
@@ -133,131 +122,149 @@ const FALLBACK_IMAGE =
  * Transform API menu to frontend format
  */
 function transformMenu(apiMenu: MenuFromAPI): Menu {
-  // Get primary image or first image or fallback
-  const primaryImage = apiMenu.MenuImage?.find((img) => img.is_primary);
-  const firstImage = apiMenu.MenuImage?.[0];
+  const primaryImage = apiMenu.menu_images?.find((img) => img.is_primary);
+  const firstImage = apiMenu.menu_images?.[0];
   const imageUrl = primaryImage?.image_url || firstImage?.image_url || FALLBACK_IMAGE;
 
-  // All images sorted by display_order
-  const images = [...(apiMenu.MenuImage || [])].sort((a, b) => a.display_order - b.display_order);
+  const images = [...(apiMenu.menu_images || [])].sort(
+    (a, b) => a.display_order - b.display_order,
+  );
 
-  // Group dishes by course type
-  const entrees = apiMenu.Dish?.filter((d) => d.course_type === 'entrée') || [];
-  const mains = apiMenu.Dish?.filter((d) => d.course_type === 'plat') || [];
-  const desserts = apiMenu.Dish?.filter((d) => d.course_type === 'dessert') || [];
+  // Extract dishes from the join table
+  const allDishes = (apiMenu.menu_dishes || []).map((md) => md.dishes).filter(Boolean);
+  const entrees = allDishes.filter((d) => d.course_type === 'entree');
+  const mains = allDishes.filter((d) => d.course_type === 'plat');
+  const desserts = allDishes.filter((d) => d.course_type === 'dessert');
 
-  // Get dietary info from Diet relation
   const dietary: string[] = [];
-  if (apiMenu.Diet?.name) {
-    dietary.push(apiMenu.Diet.name.toLowerCase());
+  if (apiMenu.diets?.name) {
+    dietary.push(apiMenu.diets.name.toLowerCase());
   }
 
   // Extract allergens from all dishes (deduplicated)
   const allergenSet = new Set<string>();
-  for (const dish of apiMenu.Dish || []) {
-    if (dish.DishAllergen) {
-      for (const da of dish.DishAllergen) {
-        if (da.Allergen?.name) {
-          allergenSet.add(da.Allergen.name);
+  for (const dish of allDishes) {
+    if (dish.dish_allergens) {
+      for (const da of dish.dish_allergens) {
+        if (da.allergens?.name) {
+          allergenSet.add(da.allergens.name);
         }
       }
     }
   }
 
   return {
-    id: `m${apiMenu.id.toString().padStart(3, '0')}`,
-    numericId: apiMenu.id,
+    id: apiMenu.id,
     name: apiMenu.title,
-    theme: apiMenu.Theme?.name || 'Non défini',
+    theme: apiMenu.themes?.name || 'Non défini',
     themeId: apiMenu.theme_id,
     description: apiMenu.description || '',
     dietary: dietary.length > 0 ? dietary : ['classique'],
     minPersons: apiMenu.person_min,
-    maxPersons: apiMenu.person_min * 5, // Estimate max based on min
+    maxPersons: apiMenu.person_min * 5,
     pricePerPerson: Number(apiMenu.price_per_person),
     image: imageUrl,
     images,
     allergens: [...allergenSet].sort(),
     deliveryNotes: apiMenu.conditions || undefined,
     stockQuantity: apiMenu.remaining_qty,
-    dishes: {
-      entrees,
-      mains,
-      desserts,
+    dishes: { entrees, mains, desserts },
+  };
+}
+
+// PostgREST select that deeply joins images, dishes, allergens
+const MENU_SELECT = `
+  *,
+  diets (*),
+  themes (*),
+  menu_images (*),
+  menu_dishes (
+    dishes (
+      *,
+      dish_allergens (
+        allergens (*)
+      )
+    )
+  )
+`.replace(/\s+/g, '');
+
+/**
+ * Fetch published menus with pagination
+ */
+export async function getMenus(
+  filters: MenuFilters = {},
+): Promise<{ menus: Menu[]; meta: PaginationMeta }> {
+  const page = filters.page ?? 1;
+  const limit = filters.limit ?? 20;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let query = supabase
+    .from('menus')
+    .select(MENU_SELECT, { count: 'exact' })
+    .eq('status', filters.status ?? 'published')
+    .range(from, to)
+    .order('created_at', { ascending: false });
+
+  if (filters.dietId) query = query.eq('diet_id', filters.dietId);
+  if (filters.themeId) query = query.eq('theme_id', filters.themeId);
+
+  const { data, error, count } = await query;
+  if (error) throw new Error(error.message);
+
+  const total = count ?? 0;
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    menus: (data as unknown as MenuFromAPI[]).map(transformMenu),
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
     },
   };
 }
 
 /**
- * Fetch all published menus from API
+ * Fetch single menu by UUID
  */
-export async function getMenus(
-  filters: MenuFilters = {},
-): Promise<{ menus: Menu[]; meta: PaginationMeta }> {
-  const params = new URLSearchParams();
-  if (filters.page) params.set('page', filters.page.toString());
-  if (filters.limit) params.set('limit', filters.limit.toString());
-  if (filters.status) params.set('status', filters.status);
-  if (filters.dietId) params.set('dietId', filters.dietId.toString());
-  if (filters.themeId) params.set('themeId', filters.themeId.toString());
+export async function getMenuById(id: string): Promise<Menu> {
+  const { data, error } = await supabase
+    .from('menus')
+    .select(MENU_SELECT)
+    .eq('id', id)
+    .single();
 
-  const queryString = params.toString();
-  const endpoint = `/api/menus${queryString ? `?${queryString}` : ''}`;
-
-  // API returns wrapped response: { success, data: { items, meta } }
-  const response = await apiRequest<ApiWrapperResponse<MenuListResponse>>(endpoint);
-
-  // Extract data from wrapper
-  const data = response.data;
-
-  return {
-    menus: data.items.map(transformMenu),
-    meta: data.meta,
-  };
+  if (error) throw new Error(error.message);
+  return transformMenu(data as unknown as MenuFromAPI);
 }
 
 /**
- * Fetch single menu by ID
- */
-export async function getMenuById(id: number): Promise<Menu> {
-  const response = await apiRequest<ApiWrapperResponse<MenuFromAPI>>(`/api/menus/${id}`);
-  return transformMenu(response.data);
-}
-
-/**
- * Get all available themes
+ * Get all themes
  */
 export async function getThemes(): Promise<Theme[]> {
-  try {
-    const response = await apiRequest<ApiWrapperResponse<Theme[]>>('/api/themes');
-    return response.data;
-  } catch {
-    // Fallback: extract themes from menus
-    const { menus } = await getMenus({ limit: 100 });
-    const themeNames = [...new Set(menus.map((m) => m.theme))];
-    return themeNames.map((name, idx) => ({
-      id: idx + 1,
-      name,
-      description: null,
-      icon_url: null,
-    }));
-  }
+  const { data, error } = await supabase
+    .from('themes')
+    .select('*')
+    .order('name');
+
+  if (error) throw new Error(error.message);
+  return data as Theme[];
 }
 
 /**
- * Get all available diets
+ * Get all diets
  */
 export async function getDiets(): Promise<Diet[]> {
-  try {
-    const response = await apiRequest<ApiWrapperResponse<Diet[]>>('/api/diets');
-    return response.data;
-  } catch {
-    // Fallback: return common diets
-    return [
-      { id: 1, name: 'classique', description: null, icon_url: null },
-      { id: 2, name: 'végétarien', description: null, icon_url: null },
-      { id: 3, name: 'vegan', description: null, icon_url: null },
-      { id: 4, name: 'sans-gluten', description: null, icon_url: null },
-    ];
-  }
+  const { data, error } = await supabase
+    .from('diets')
+    .select('*')
+    .order('name');
+
+  if (error) throw new Error(error.message);
+  return data as Diet[];
 }
+

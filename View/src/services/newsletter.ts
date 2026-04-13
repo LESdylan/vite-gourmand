@@ -1,13 +1,12 @@
 /**
  * Newsletter Service
- * API calls for newsletter subscription management
+ * Talks to the newsletter-service NestJS microservice through Kong gateway
+ * (route: /newsletter/v1/*)
  */
-import { apiRequest } from './api';
 
-interface ApiWrapper<T> {
-  success: boolean;
-  data: T;
-}
+import { SUPABASE_URL, SUPABASE_ANON_KEY, supabase } from '../lib/supabase';
+
+const BASE = `${SUPABASE_URL}/newsletter/v1`;
 
 interface NewsletterResponse {
   message: string;
@@ -19,6 +18,36 @@ interface NewsletterStats {
   confirmed: number;
 }
 
+/** Internal helper — sends requests through Kong with apikey + optional JWT */
+async function newsletterRequest<T>(
+  path: string,
+  options?: { method?: string; body?: unknown },
+): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    apikey: SUPABASE_ANON_KEY,
+  };
+
+  // Attach JWT if user is logged in
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
+  const res = await fetch(`${BASE}${path}`, {
+    method: options?.method ?? 'GET',
+    headers,
+    body: options?.body ? JSON.stringify(options.body) : undefined,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`Newsletter API error ${res.status}: ${text}`);
+  }
+
+  return res.json() as Promise<T>;
+}
+
 /**
  * Subscribe to the newsletter (public — no auth needed)
  */
@@ -26,37 +55,29 @@ export async function subscribeNewsletter(
   email: string,
   firstName?: string,
 ): Promise<NewsletterResponse> {
-  const wrapper = await apiRequest<ApiWrapper<NewsletterResponse>>('/api/newsletter/subscribe', {
+  return newsletterRequest<NewsletterResponse>('/subscribe', {
     method: 'POST',
     body: { email, firstName },
   });
-  return wrapper.data;
 }
 
 /**
  * Confirm newsletter subscription via token
  */
 export async function confirmNewsletter(token: string): Promise<NewsletterResponse> {
-  const wrapper = await apiRequest<ApiWrapper<NewsletterResponse>>(
-    `/api/newsletter/confirm/${token}`,
-  );
-  return wrapper.data;
+  return newsletterRequest<NewsletterResponse>(`/confirm/${token}`);
 }
 
 /**
  * Unsubscribe from the newsletter via token
  */
 export async function unsubscribeNewsletter(token: string): Promise<NewsletterResponse> {
-  const wrapper = await apiRequest<ApiWrapper<NewsletterResponse>>(
-    `/api/newsletter/unsubscribe/${token}`,
-  );
-  return wrapper.data;
+  return newsletterRequest<NewsletterResponse>(`/unsubscribe/${token}`);
 }
 
 /**
  * Get newsletter stats (admin only)
  */
 export async function getNewsletterStats(): Promise<NewsletterStats> {
-  const wrapper = await apiRequest<ApiWrapper<NewsletterStats>>('/api/newsletter/stats');
-  return wrapper.data;
+  return newsletterRequest<NewsletterStats>('/stats');
 }

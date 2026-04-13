@@ -51,8 +51,8 @@ import type { Page } from './Home';
 /* ── Props ── */
 type MenusPageProps = {
   setCurrentPage: (page: Page) => void;
-  /** Called when user clicks "Commander" with auth — carries menu numeric ID */
-  onOrderMenu?: (menuNumericId: number) => void;
+  /** Called when user clicks "Commander" with auth — carries menu UUID */
+  onOrderMenu?: (menuId: string) => void;
 };
 
 /* ── Dietary badge colors ── */
@@ -865,7 +865,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
   const handleOrder = (menu: Menu) => {
     setSelectedMenu(null);
     if (onOrderMenu) {
-      onOrderMenu(menu.numericId);
+      onOrderMenu(menu.id);
     } else {
       addToast('Redirection vers la page de commande...', 'info');
       setCurrentPage('order');

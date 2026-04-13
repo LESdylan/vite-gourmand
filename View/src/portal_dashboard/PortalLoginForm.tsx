@@ -164,7 +164,7 @@ export function PortalLoginForm() {
   const onGoogleCredential = useCallback(
     async (response: { credential: string }) => {
       try {
-        await loginWithGoogle(response.credential);
+        await loginWithGoogle();
       } catch {
         // Error handled by context
       }

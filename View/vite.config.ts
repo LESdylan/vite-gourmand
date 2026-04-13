@@ -9,12 +9,34 @@ export default defineConfig({
     strictPort: true,
     host: true,
     proxy: {
-      '/auth': {
-        target: 'http://localhost:3000',
+      // Kong gateway routes (GoTrue, PostgREST, Storage, Realtime, Microservices)
+      '/auth/v1': {
+        target: 'http://localhost:8000',
         changeOrigin: true,
       },
-      '/api': {
-        target: 'http://localhost:3000',
+      '/rest/v1': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/storage/v1': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/realtime/v1': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        ws: true,
+      },
+      '/newsletter/v1': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/gdpr/v1': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+      '/mongo/v1': {
+        target: 'http://localhost:8000',
         changeOrigin: true,
       },
     },

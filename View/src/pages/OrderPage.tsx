@@ -58,8 +58,8 @@ const STEPS = [
 /* ── Props ── */
 interface OrderPageProps {
   setCurrentPage: (page: Page) => void;
-  /** Pre-selected menu numeric ID from Menus page */
-  preSelectedMenuId?: number | null;
+  /** Pre-selected menu UUID from Menus page */
+  preSelectedMenuId?: string | null;
 }
 
 /* ── Helpers ── */
@@ -227,7 +227,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
       .then(({ menus }) => {
         setAllMenus(menus);
         if (preSelectedMenuId) {
-          const found = menus.find((m) => m.numericId === preSelectedMenuId);
+          const found = menus.find((m) => m.id === preSelectedMenuId);
           if (found) {
             setSelectedMenu(found);
             setPersonCount(found.minPersons);
@@ -302,27 +302,27 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
       if (isCustomRequest) {
         // For custom requests, create an order with special instructions
         const data: CreateOrderData = {
-          deliveryDate,
-          deliveryHour,
-          deliveryAddress: `${deliveryAddress}, ${deliveryCity}`,
-          personNumber: personCount,
-          menuPrice: 0,
-          totalPrice: 0,
-          specialInstructions:
+          delivery_date: deliveryDate,
+          delivery_hour: deliveryHour,
+          delivery_address: `${deliveryAddress}, ${deliveryCity}`,
+          person_number: personCount,
+          menu_price: 0,
+          total_price: 0,
+          special_instructions:
             `[DEMANDE PERSONNALISÉE]\n${customMenuDescription}\n\n${specialInstructions.trim() ? `Instructions: ${specialInstructions}` : ''}`.trim(),
         };
         const order = await createOrder(data);
         setOrderSuccess(order.order_number);
       } else if (selectedMenu) {
         const data: CreateOrderData = {
-          menuId: selectedMenu.numericId,
-          deliveryDate,
-          deliveryHour,
-          deliveryAddress: `${deliveryAddress}, ${deliveryCity}`,
-          personNumber: personCount,
-          menuPrice: selectedMenu.pricePerPerson,
-          totalPrice: Math.round(priceInfo.total * 100) / 100,
-          specialInstructions: specialInstructions.trim() || undefined,
+          menu_id: selectedMenu.id,
+          delivery_date: deliveryDate,
+          delivery_hour: deliveryHour,
+          delivery_address: `${deliveryAddress}, ${deliveryCity}`,
+          person_number: personCount,
+          menu_price: selectedMenu.pricePerPerson,
+          total_price: Math.round(priceInfo.total * 100) / 100,
+          special_instructions: specialInstructions.trim() || undefined,
         };
         const order = await createOrder(data);
         setOrderSuccess(order.order_number);
@@ -877,7 +877,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                             sessionStorage.setItem(
                               'vg_pending_order',
                               JSON.stringify({
-                                selectedMenuId: selectedMenu?.numericId,
+                                selectedMenuId: selectedMenu?.id,
                                 isCustomRequest,
                                 customMenuDescription,
                                 deliveryAddress,
@@ -899,7 +899,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                             sessionStorage.setItem(
                               'vg_pending_order',
                               JSON.stringify({
-                                selectedMenuId: selectedMenu?.numericId,
+                                selectedMenuId: selectedMenu?.id,
                                 isCustomRequest,
                                 customMenuDescription,
                                 deliveryAddress,

@@ -9,7 +9,7 @@ export type UserRole = 'superadmin' | 'admin' | 'employee' | 'customer';
 export type BotId = 'bot_admin' | 'bot_employee' | 'bot_user';
 
 export interface DashboardUser {
-  id: number;
+  id: string;
   email: string;
   name: string;
   role: UserRole;
@@ -33,16 +33,16 @@ export interface PortalAuthState {
 
 /** Bot users for debugging (superadmin only) */
 export const DEBUG_BOTS: Record<BotId, DashboardUser> = {
-  bot_admin: { id: -1, email: 'bot_admin@debug', name: 'Bot Admin', role: 'admin', isBot: true },
+  bot_admin: { id: 'bot-admin-0000', email: 'bot_admin@debug', name: 'Bot Admin', role: 'admin', isBot: true },
   bot_employee: {
-    id: -2,
+    id: 'bot-employee-0000',
     email: 'bot_employee@debug',
     name: 'Bot Employee',
     role: 'employee',
     isBot: true,
   },
   bot_user: {
-    id: -3,
+    id: 'bot-user-0000',
     email: 'bot_user@debug',
     name: 'Bot Customer',
     role: 'customer',
