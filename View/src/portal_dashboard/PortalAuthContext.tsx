@@ -7,6 +7,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import * as authService from '../services/auth';
+import { fetchAppRole } from '../services/auth';
 import type { RegisterData } from '../services/auth';
 import { getRememberMe, saveRememberMe, clearRememberMe } from './rememberMe';
 import type { PortalAuthState, UserRole } from './types';
@@ -40,10 +41,10 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     if (remembered) setRememberMeData({ email: remembered.email, name: remembered.name });
 
     // Get the initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const meta = session.user.user_metadata ?? {};
-        const role = mapRole(meta.role ?? session.user.role ?? 'customer');
+        const role = mapRole(await fetchAppRole(session.user.id));
         setState({
           user: {
             id: session.user.id,
@@ -63,10 +64,10 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     // Listen for future changes (login, logout, token refresh)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         const meta = session.user.user_metadata ?? {};
-        const role = mapRole(meta.role ?? session.user.role ?? 'customer');
+        const role = mapRole(await fetchAppRole(session.user.id));
         setState({
           user: {
             id: session.user.id,
@@ -182,7 +183,7 @@ export function usePortalAuth() {
   return ctx;
 }
 
-/** Map API role to dashboard role */
+/** Map API/DB role to dashboard role */
 function mapRole(apiRole: string): UserRole {
   const normalizedRole = apiRole?.toLowerCase() || '';
   if (normalizedRole === 'superadmin') return 'superadmin';

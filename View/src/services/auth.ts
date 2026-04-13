@@ -35,15 +35,45 @@ export interface LoginData {
   password: string;
 }
 
-// ── Helpers ──────────────────────────────────────────────────────
+// ── Role mapping ─────────────────────────────────────────────────
+// The database of truth for a user's application role is
+// public.profiles.app_role (superadmin | admin | employee | utilisateur).
+// GoTrue's user.role is always 'authenticated' (the PG role), so we
+// must query the profiles table after login.
 
-function mapUser(u: SupabaseUser): AuthUserMapped {
+const DB_TO_UI_ROLE: Record<string, string> = {
+  superadmin: 'superadmin',
+  admin: 'admin',
+  employee: 'employee',
+  utilisateur: 'customer',
+};
+
+/**
+ * Fetch the user's app_role from public.profiles.
+ * Falls back to 'customer' if the profile doesn't exist yet.
+ */
+export async function fetchAppRole(userId: string): Promise<string> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('app_role')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.warn('[auth] Could not fetch profile role:', error.message);
+  }
+  return DB_TO_UI_ROLE[data?.app_role ?? 'utilisateur'] ?? 'customer';
+}
+
+/** Build the mapped user object — requires an async profile fetch. */
+async function mapUser(u: SupabaseUser): Promise<AuthUserMapped> {
   const meta = u.user_metadata ?? {};
+  const role = await fetchAppRole(u.id);
   return {
     id: u.id,
     email: u.email ?? '',
     name: meta.first_name ?? meta.name ?? u.email?.split('@')[0] ?? '',
-    role: meta.role ?? u.role ?? 'customer',
+    role,
   };
 }
 
@@ -69,7 +99,7 @@ export async function register(data: RegisterData): Promise<AuthResponse> {
   if (error) throw new Error(error.message);
   if (!result.user) throw new Error('Registration failed — no user returned');
 
-  return { user: mapUser(result.user) };
+  return { user: await mapUser(result.user) };
 }
 
 /** Login with email and password */
@@ -82,7 +112,7 @@ export async function login(data: LoginData): Promise<AuthResponse> {
   if (error) throw new Error(error.message);
   if (!result.user) throw new Error('Login failed');
 
-  return { user: mapUser(result.user) };
+  return { user: await mapUser(result.user) };
 }
 
 /** Google OAuth login */
@@ -98,7 +128,7 @@ export async function googleLogin(_credential?: string): Promise<AuthResponse> {
   // Return a placeholder; auth context will update on redirect return
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Google login: session not established yet');
-  return { user: mapUser(user) };
+  return { user: await mapUser(user) };
 }
 
 /** Request password reset email */
