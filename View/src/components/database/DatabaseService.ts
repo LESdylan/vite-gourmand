@@ -70,6 +70,11 @@ const HIDDEN_TABLES = new Set([
   '/',
 ]);
 
+/** Return true for paths that are NOT tables (rpc functions, root). */
+function isNonTablePath(path: string): boolean {
+  return HIDDEN_TABLES.has(path) || path.startsWith('/rpc/');
+}
+
 /** Map a PostgREST (OpenAPI) type+format to a short human label. */
 function mapType(type?: string, format?: string): string {
   if (!format) return type ?? 'unknown';
@@ -104,7 +109,7 @@ export class DatabaseService {
   /** Discover every public table + columns from the PostgREST OpenAPI spec. */
   static async getTables(): Promise<TableMeta[]> {
     const spec = await fetchOpenApiSpec();
-    const tableNames = Object.keys(spec.paths).filter((p) => !HIDDEN_TABLES.has(p));
+    const tableNames = Object.keys(spec.paths).filter((p) => !isNonTablePath(p));
 
     // Build table metadata from the definitions section
     const tables: TableMeta[] = tableNames.map((path) => {
