@@ -2,7 +2,7 @@
  * MongoDB Initialization Script
  * =============================
  * Creates collections and indexes for analytics.
- * Run via: npx tsx src/Model/nosql/scripts/init-mongodb.ts
+ * Run via: npx tsx database/nosql/scripts/init-mongodb.ts
  */
 
 import { IndexDescription, IndexSpecification } from 'mongodb';

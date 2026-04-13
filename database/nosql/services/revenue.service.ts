@@ -18,7 +18,7 @@ async function getCollection() {
  * Record revenue for a menu
  */
 export async function recordRevenue(
-  menuId: number,
+  menuId: string,
   menuTitle: string,
   orderValue: number,
   personCount: number,
@@ -52,7 +52,7 @@ export async function recordRevenue(
  * Update average order value for a menu
  */
 async function updateAverageOrderValue(
-  menuId: number,
+  menuId: string,
   period: string,
 ): Promise<void> {
   const collection = await getCollection();
@@ -79,7 +79,7 @@ export async function getRevenueByMenu(
   endPeriod: string,
 ): Promise<
   Array<{
-    menuId: number;
+    menuId: string;
     menuTitle: string;
     totalRevenue: number;
     orderCount: number;
@@ -90,7 +90,7 @@ export async function getRevenueByMenu(
 
   const result = await collection
     .aggregate<{
-      menuId: number;
+      menuId: string;
       menuTitle: string;
       totalRevenue: number;
       orderCount: number;
@@ -130,7 +130,7 @@ export async function getRevenueByMenu(
  * Get revenue trend for a specific menu
  */
 export async function getMenuRevenueTrend(
-  menuId: number,
+  menuId: string,
   limit = 12,
 ): Promise<
   Array<{ period: string; totalRevenue: number; orderCount: number }>

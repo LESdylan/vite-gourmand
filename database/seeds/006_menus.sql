@@ -71,3 +71,49 @@ INSERT INTO public.menu_dishes (menu_id, dish_id) VALUES
   ('mn000000-0000-0000-0000-00000000000b', 'ds000000-0000-0000-0000-000000000009'),
   ('mn000000-0000-0000-0000-00000000000b', 'ds000000-0000-0000-0000-000000000011')
 ON CONFLICT DO NOTHING;
+
+-- ─── MENU IMAGES ─────────────────────────────────────────────────
+INSERT INTO public.menu_images (id, menu_id, image_url, alt_text, display_order, is_primary)
+VALUES
+  -- Découverte
+  ('mi000000-0000-0000-0000-000000000001', 'mn000000-0000-0000-0000-000000000001',
+   '/images/menus/decouverte-hero.webp', 'Menu Découverte – présentation', 0, true),
+  -- Gastronomique
+  ('mi000000-0000-0000-0000-000000000002', 'mn000000-0000-0000-0000-000000000002',
+   '/images/menus/gastronomique-hero.webp', 'Menu Gastronomique – vue d''ensemble', 0, true),
+  -- Végétarien
+  ('mi000000-0000-0000-0000-000000000003', 'mn000000-0000-0000-0000-000000000003',
+   '/images/menus/vegetarien-hero.webp', 'Menu Végétarien – légumes de saison', 0, true),
+  -- Terre & Mer
+  ('mi000000-0000-0000-0000-000000000004', 'mn000000-0000-0000-0000-000000000004',
+   '/images/menus/terre-mer-hero.webp', 'Menu Terre & Mer – homard et bœuf', 0, true),
+  -- Noël
+  ('mi000000-0000-0000-0000-000000000005', 'mn000000-0000-0000-0000-000000000008',
+   '/images/menus/noel-hero.webp', 'Menu de Noël – table festive', 0, true),
+  -- Terroir Bordelais
+  ('mi000000-0000-0000-0000-000000000006', 'mn000000-0000-0000-0000-00000000000b',
+   '/images/menus/terroir-bordelais-hero.webp', 'Menu Terroir Bordelais – spécialités', 0, true)
+ON CONFLICT DO NOTHING;
+
+-- ─── MENU INGREDIENTS (aggregate per person) ─────────────────────
+INSERT INTO public.menu_ingredients (menu_id, ingredient_id, quantity_per_person)
+VALUES
+  -- Découverte (Velouté + Risotto + Crème Brûlée)
+  ('mn000000-0000-0000-0000-000000000001', 'ig000000-0000-0000-0000-000000000003', 0.450),  -- Champignons
+  ('mn000000-0000-0000-0000-000000000001', 'ig000000-0000-0000-0000-00000000000a', 0.300),  -- Crème Fraîche
+  ('mn000000-0000-0000-0000-000000000001', 'ig000000-0000-0000-0000-000000000009', 0.200),  -- Riz Arborio
+  ('mn000000-0000-0000-0000-000000000001', 'ig000000-0000-0000-0000-000000000006', 0.060),  -- Beurre
+  ('mn000000-0000-0000-0000-000000000001', 'ig000000-0000-0000-0000-000000000004', 4.000),  -- Œufs
+  -- Gastronomique (Foie Gras + Bœuf Rossini + Fondant)
+  ('mn000000-0000-0000-0000-000000000002', 'ig000000-0000-0000-0000-000000000001', 0.280),  -- Foie Gras
+  ('mn000000-0000-0000-0000-000000000002', 'ig000000-0000-0000-0000-000000000002', 0.250),  -- Filet de Bœuf
+  ('mn000000-0000-0000-0000-000000000002', 'ig000000-0000-0000-0000-00000000000b', 0.200),  -- Chocolat noir
+  ('mn000000-0000-0000-0000-000000000002', 'ig000000-0000-0000-0000-000000000006', 0.200),  -- Beurre
+  ('mn000000-0000-0000-0000-000000000002', 'ig000000-0000-0000-0000-000000000004', 3.000),  -- Œufs
+  -- Terre & Mer (Carpaccio + Homard + Ratatouille + Pavlova)
+  ('mn000000-0000-0000-0000-000000000004', 'ig000000-0000-0000-0000-000000000008', 0.180),  -- Saumon
+  ('mn000000-0000-0000-0000-000000000004', 'ig000000-0000-0000-0000-000000000007', 0.500),  -- Homard
+  ('mn000000-0000-0000-0000-000000000004', 'ig000000-0000-0000-0000-00000000000d', 0.200),  -- Tomates
+  ('mn000000-0000-0000-0000-000000000004', 'ig000000-0000-0000-0000-00000000000e', 0.200),  -- Courgettes
+  ('mn000000-0000-0000-0000-000000000004', 'ig000000-0000-0000-0000-00000000000c', 0.200)   -- Framboises
+ON CONFLICT DO NOTHING;

@@ -28,26 +28,27 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 
 CREATE TABLE IF NOT EXISTS public.contact_messages (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title       TEXT NOT NULL,
-  description TEXT,
+  name        TEXT,
   email       TEXT NOT NULL,
+  subject     TEXT NOT NULL,
+  message     TEXT,
+  user_id     UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at  TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS public.support_tickets (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  ticket_number TEXT UNIQUE NOT NULL,
-  created_by    UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-  assigned_to   UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-  category      TEXT,
-  priority      TEXT DEFAULT 'normal',
-  status        TEXT DEFAULT 'open',
-  subject       TEXT NOT NULL,
-  description   TEXT,
-  created_at    TIMESTAMPTZ DEFAULT now(),
-  updated_at    TIMESTAMPTZ DEFAULT now(),
-  resolved_at   TIMESTAMPTZ,
-  closed_at     TIMESTAMPTZ
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ticket_number      TEXT UNIQUE NOT NULL,
+  contact_message_id UUID REFERENCES public.contact_messages(id) ON DELETE SET NULL,
+  user_id            UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  subject            TEXT NOT NULL,
+  status             TEXT DEFAULT 'open',
+  priority           TEXT DEFAULT 'normal',
+  assigned_to        UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at         TIMESTAMPTZ DEFAULT now(),
+  updated_at         TIMESTAMPTZ DEFAULT now(),
+  resolved_at        TIMESTAMPTZ,
+  closed_at          TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS public.ticket_messages (

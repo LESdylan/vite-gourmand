@@ -2,7 +2,7 @@
  * MongoDB Cleanup Script
  * ======================
  * Runs storage cleanup based on retention policy.
- * Run via: npx tsx src/Model/nosql/scripts/cleanup-mongodb.ts [--emergency]
+ * Run via: npx tsx database/nosql/scripts/cleanup-mongodb.ts [--emergency]
  */
 
 import { MongoAnalytics } from '../client/mongo-analytics.client';

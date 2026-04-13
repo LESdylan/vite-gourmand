@@ -18,9 +18,9 @@ async function getCollection() {
  * Create order snapshot from PostgreSQL order
  */
 export async function createSnapshot(order: {
-  id: number;
+  id: string;
   orderNumber: string;
-  user: { id: number; email: string; firstName: string; city?: string };
+  user: { id: string; email: string; firstName: string; city?: string };
   orderDate: Date;
   deliveryDate: Date;
   deliveryHour: string;
@@ -31,7 +31,7 @@ export async function createSnapshot(order: {
   discountAmount: number;
   totalPrice: number;
   menus: Array<{
-    id: number;
+    id: string;
     title: string;
     price: number;
     diet?: string;
@@ -72,7 +72,7 @@ export async function createSnapshot(order: {
  * Update order status in snapshot
  */
 export async function updateStatus(
-  orderId: number,
+  orderId: string,
   status: string,
 ): Promise<void> {
   const collection = await getCollection();
@@ -83,7 +83,7 @@ export async function updateStatus(
  * Get snapshot by order ID
  */
 export async function getByOrderId(
-  orderId: number,
+  orderId: string,
 ): Promise<OrderSnapshot | null> {
   const collection = await getCollection();
   return collection.findOne({ orderId });
@@ -93,7 +93,7 @@ export async function getByOrderId(
  * Get snapshots by user ID
  */
 export async function getByUserId(
-  userId: number,
+  userId: string,
   limit = 50,
 ): Promise<OrderSnapshot[]> {
   const collection = await getCollection();

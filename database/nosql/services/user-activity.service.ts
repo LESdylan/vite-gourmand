@@ -21,12 +21,12 @@ async function getCollection() {
  * Log a user action
  */
 export async function logActivity(
-  userId: number,
+  userId: string,
   sessionId: string,
   action: ActionType,
   targetType: TargetType,
   options?: {
-    targetId?: number;
+    targetId?: string;
     targetName?: string;
     searchContext?: { query: string; filters: Record<string, unknown> };
     ipAddress?: string;
@@ -53,9 +53,9 @@ export async function logActivity(
  * Log menu view
  */
 export async function logMenuView(
-  userId: number,
+  userId: string,
   sessionId: string,
-  menuId: number,
+  menuId: string,
   menuTitle: string,
 ): Promise<void> {
   await logActivity(userId, sessionId, 'view_menu', 'menu', {
@@ -68,7 +68,7 @@ export async function logMenuView(
  * Log search action
  */
 export async function logSearch(
-  userId: number,
+  userId: string,
   sessionId: string,
   query: string,
   filters: Record<string, unknown>,
@@ -82,9 +82,9 @@ export async function logSearch(
  * Log order placement
  */
 export async function logOrderPlaced(
-  userId: number,
+  userId: string,
   sessionId: string,
-  orderId: number,
+  orderId: string,
   orderNumber: string,
 ): Promise<void> {
   await logActivity(userId, sessionId, 'place_order', 'order', {
@@ -97,7 +97,7 @@ export async function logOrderPlaced(
  * Get user activity history
  */
 export async function getUserActivity(
-  userId: number,
+  userId: string,
   limit = 50,
 ): Promise<UserActivityLog[]> {
   const collection = await getCollection();

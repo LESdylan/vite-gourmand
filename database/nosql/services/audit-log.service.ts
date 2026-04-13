@@ -23,10 +23,10 @@ export async function log(
   action: AuditAction,
   entityType: string,
   options?: {
-    userId?: number;
+    userId?: string;
     userEmail?: string;
     userRole?: string;
-    entityId?: number;
+    entityId?: string;
     previousState?: Record<string, unknown>;
     newState?: Record<string, unknown>;
     changedFields?: string[];
@@ -57,9 +57,9 @@ export async function log(
  */
 export async function logCreate(
   entityType: string,
-  entityId: number,
+  entityId: string,
   newState: Record<string, unknown>,
-  user?: { id: number; email: string; role: string },
+  user?: { id: string; email: string; role: string },
 ): Promise<void> {
   await log('create', entityType, {
     entityId,
@@ -75,10 +75,10 @@ export async function logCreate(
  */
 export async function logUpdate(
   entityType: string,
-  entityId: number,
+  entityId: string,
   previousState: Record<string, unknown>,
   newState: Record<string, unknown>,
-  user?: { id: number; email: string; role: string },
+  user?: { id: string; email: string; role: string },
 ): Promise<void> {
   const changedFields = computeChangedFields(previousState, newState);
 
@@ -98,9 +98,9 @@ export async function logUpdate(
  */
 export async function logDelete(
   entityType: string,
-  entityId: number,
+  entityId: string,
   previousState: Record<string, unknown>,
-  user?: { id: number; email: string; role: string },
+  user?: { id: string; email: string; role: string },
 ): Promise<void> {
   await log('delete', entityType, {
     entityId,
@@ -115,7 +115,7 @@ export async function logDelete(
  * Log user login
  */
 export async function logLogin(
-  userId: number,
+  userId: string,
   email: string,
   ipAddress?: string,
   userAgent?: string,
@@ -133,7 +133,7 @@ export async function logLogin(
  */
 export async function getEntityLogs(
   entityType: string,
-  entityId: number,
+  entityId: string,
 ): Promise<AuditLog[]> {
   const collection = await getCollection();
   return collection
@@ -146,7 +146,7 @@ export async function getEntityLogs(
  * Get audit logs for a user
  */
 export async function getUserLogs(
-  userId: number,
+  userId: string,
   limit = 100,
 ): Promise<AuditLog[]> {
   const collection = await getCollection();

@@ -2,7 +2,7 @@
 -- Events, delivery assignments, time-off requests, GDPR, user addresses, sessions
 
 -- Delivery assignments (for orders in delivering/delivered/completed states)
-INSERT INTO public.delivery_assignments (id, order_id, driver_id, status, assigned_at, picked_up_at, delivered_at, delivery_rating, delivery_notes) VALUES
+INSERT INTO public.delivery_assignments (id, order_id, delivery_person_id, status, assigned_at, picked_up_at, delivered_at, client_rating, delivery_notes) VALUES
   ('da000000-0000-0000-0000-000000000001', 'or000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000005', 'delivered', '2026-01-15 09:00:00+00', '2026-01-15 10:00:00+00', '2026-01-15 12:30:00+00', 5, 'Livraison mariage sans accroc'),
   ('da000000-0000-0000-0000-000000000002', 'or000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000005', 'delivered', '2026-02-01 17:00:00+00', '2026-02-01 17:30:00+00', '2026-02-01 19:00:00+00', 4, NULL),
   ('da000000-0000-0000-0000-000000000003', 'or000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000005', 'delivered', '2026-04-20 10:00:00+00', '2026-04-20 10:30:00+00', '2026-04-20 12:00:00+00', NULL, NULL),
@@ -30,32 +30,32 @@ INSERT INTO public.events (id, title, description, start_date, end_date, all_day
 ON CONFLICT (id) DO NOTHING;
 
 -- Time-off requests
-INSERT INTO public.time_off_requests (id, user_id, start_date, end_date, reason, status, approved_by, created_at) VALUES
-  ('to000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000004', '2026-06-15', '2026-06-20', 'Vacances programmées', 'approved', 'a0000000-0000-0000-0000-000000000002', '2026-04-01 10:00:00+00'),
-  ('to000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000005', '2026-07-01', '2026-07-15', 'Congés d''été', 'approved', 'a0000000-0000-0000-0000-000000000002', '2026-04-10 09:00:00+00'),
-  ('to000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003', '2026-08-01', '2026-08-15', 'Fermeture annuelle', 'approved', 'a0000000-0000-0000-0000-000000000002', '2026-04-15 10:00:00+00'),
-  ('to000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000004', '2026-09-10', '2026-09-12', 'Rendez-vous médical', 'pending', NULL, '2026-04-28 14:00:00+00'),
-  ('to000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000005', '2026-05-20', '2026-05-20', 'Raison personnelle', 'rejected', 'a0000000-0000-0000-0000-000000000002', '2026-04-25 11:00:00+00'),
-  ('to000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000004', '2026-12-23', '2026-12-26', 'Congé Noël', 'pending', NULL, '2026-04-30 09:00:00+00')
+INSERT INTO public.time_off_requests (id, user_id, start_date, end_date, type, reason, status, decided_by, requested_at) VALUES
+  ('to000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000004', '2026-06-15', '2026-06-20', 'vacation', 'Vacances programmées', 'approved', 'a0000000-0000-0000-0000-000000000002', '2026-04-01 10:00:00+00'),
+  ('to000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000005', '2026-07-01', '2026-07-15', 'vacation', 'Congés d''été', 'approved', 'a0000000-0000-0000-0000-000000000002', '2026-04-10 09:00:00+00'),
+  ('to000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003', '2026-08-01', '2026-08-15', 'vacation', 'Fermeture annuelle', 'approved', 'a0000000-0000-0000-0000-000000000002', '2026-04-15 10:00:00+00'),
+  ('to000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000004', '2026-09-10', '2026-09-12', 'personal', 'Rendez-vous médical', 'pending', NULL, '2026-04-28 14:00:00+00'),
+  ('to000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000005', '2026-05-20', '2026-05-20', 'personal', 'Raison personnelle', 'rejected', 'a0000000-0000-0000-0000-000000000002', '2026-04-25 11:00:00+00'),
+  ('to000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000004', '2026-12-23', '2026-12-26', 'vacation', 'Congé Noël', 'pending', NULL, '2026-04-30 09:00:00+00')
 ON CONFLICT (id) DO NOTHING;
 
 -- User addresses
-INSERT INTO public.user_addresses (id, user_id, label, address_line1, address_line2, city, zip_code, country, is_default) VALUES
-  ('ua000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000007', 'Domicile', '10 rue de la Paix', NULL, 'Paris', '75001', 'France', true),
-  ('ua000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000008', 'Bureau', '5 avenue des Champs-Élysées', '3ème étage', 'Paris', '75008', 'France', true),
-  ('ua000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000009', 'Maison', '3 place Bellecour', NULL, 'Lyon', '69002', 'France', true),
-  ('ua000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000010', 'Domicile', '12 rue Sainte-Catherine', NULL, 'Bordeaux', '33000', 'France', true),
-  ('ua000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000007', 'Bureau', '25 boulevard Haussmann', '5ème étage', 'Paris', '75009', 'France', false)
+INSERT INTO public.user_addresses (id, user_id, label, street_address, city, postal_code, country, is_default) VALUES
+  ('ua000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000007', 'Domicile', '10 rue de la Paix', 'Paris', '75001', 'France', true),
+  ('ua000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000008', 'Bureau', '5 avenue des Champs-Élysées', 'Paris', '75008', 'France', true),
+  ('ua000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000009', 'Maison', '3 place Bellecour', 'Lyon', '69002', 'France', true),
+  ('ua000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000010', 'Domicile', '12 rue Sainte-Catherine', 'Bordeaux', '33000', 'France', true),
+  ('ua000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000007', 'Bureau', '25 boulevard Haussmann', 'Paris', '75009', 'France', false)
 ON CONFLICT (id) DO NOTHING;
 
 -- User sessions (recent)
-INSERT INTO public.user_sessions (id, user_id, token, ip_address, user_agent, expires_at) VALUES
+INSERT INTO public.user_sessions (id, user_id, session_token, ip_address, user_agent, expires_at) VALUES
   ('us000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', 'session-admin-token-001', '192.168.1.1', 'Mozilla/5.0 Chrome/125', now() + interval '7 days'),
   ('us000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000007', 'session-alice-token-001', '83.150.12.45', 'Mozilla/5.0 Firefox/128', now() + interval '7 days')
 ON CONFLICT (id) DO NOTHING;
 
 -- User consents (GDPR)
-INSERT INTO public.user_consents (id, user_id, consent_type, consented, ip_address) VALUES
+INSERT INTO public.user_consents (id, user_id, consent_type, is_granted, ip_address) VALUES
   ('uc000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000007', 'cookies_analytics', true,  '83.150.12.45'),
   ('uc000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000007', 'newsletter',        true,  '83.150.12.45'),
   ('uc000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000008', 'cookies_analytics', true,  '90.120.5.78'),

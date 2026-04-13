@@ -2,7 +2,7 @@
  * MongoDB Stats Script
  * ====================
  * Displays storage and collection statistics.
- * Run via: npx tsx src/Model/nosql/scripts/stats-mongodb.ts
+ * Run via: npx tsx database/nosql/scripts/stats-mongodb.ts
  */
 
 import { MongoAnalytics } from '../client/mongo-analytics.client';

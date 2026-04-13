@@ -15,7 +15,7 @@ export interface BaseDocument {
 
 // Menu Analytics
 export interface MenuAnalytics extends BaseDocument {
-  menuId: number;
+  menuId: string;
   menuTitle: string;
   period: string; // "2026-02-01"
   periodType: 'daily' | 'weekly' | 'monthly';
@@ -31,7 +31,7 @@ export interface MenuAnalytics extends BaseDocument {
 
 // Revenue by Menu
 export interface RevenueByMenu extends BaseDocument {
-  menuId: number;
+  menuId: string;
   menuTitle: string;
   period: string;
   periodType: 'daily' | 'weekly' | 'monthly';
@@ -56,7 +56,7 @@ export interface DashboardStats extends BaseDocument {
   newUsers: number;
   activeUsers: number;
   returningUsers: number;
-  topMenus: Array<{ id: number; title: string; count: number }>;
+  topMenus: Array<{ id: string; title: string; count: number }>;
   dietDistribution: Record<string, number>;
   ordersByHour: Record<string, number>;
   ordersByDayOfWeek: Record<string, number>;
@@ -68,13 +68,13 @@ export interface SearchAnalytics extends BaseDocument {
   query: string;
   normalizedQuery: string;
   resultsCount: number;
-  clickedResults: number[];
+  clickedResults: string[];
   filters: {
     diet?: string;
     theme?: string;
     priceRange?: { min: number; max: number };
   };
-  userId?: number;
+  userId?: string;
   sessionId: string;
   convertedToOrder: boolean;
   timestamp: Date;
@@ -82,11 +82,11 @@ export interface SearchAnalytics extends BaseDocument {
 
 // User Activity Log
 export interface UserActivityLog extends BaseDocument {
-  userId: number;
+  userId: string;
   sessionId: string;
   action: 'view_menu' | 'place_order' | 'search' | 'login' | 'logout';
   targetType: 'menu' | 'dish' | 'order' | 'category' | 'page';
-  targetId?: number;
+  targetId?: string;
   targetName?: string;
   searchContext?: { query: string; filters: Record<string, unknown> };
   ipAddress?: string;
@@ -96,12 +96,12 @@ export interface UserActivityLog extends BaseDocument {
 
 // Audit Log
 export interface AuditLog extends BaseDocument {
-  userId?: number;
+  userId?: string;
   userEmail?: string;
   userRole?: string;
   action: 'create' | 'update' | 'delete' | 'login' | 'logout';
   entityType: string;
-  entityId?: number;
+  entityId?: string;
   previousState?: Record<string, unknown>;
   newState?: Record<string, unknown>;
   changedFields?: string[];
@@ -112,10 +112,10 @@ export interface AuditLog extends BaseDocument {
 
 // Order Snapshot (denormalized)
 export interface OrderSnapshot extends BaseDocument {
-  orderId: number;
+  orderId: string;
   orderNumber: string;
   user: {
-    id: number;
+    id: string;
     email: string;
     firstName: string;
     city?: string;
@@ -130,7 +130,7 @@ export interface OrderSnapshot extends BaseDocument {
   discountAmount: number;
   totalPrice: number;
   menus: Array<{
-    id: number;
+    id: string;
     title: string;
     price: number;
     diet?: string;

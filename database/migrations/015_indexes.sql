@@ -17,8 +17,8 @@ CREATE INDEX IF NOT EXISTS idx_dish_course ON public.dishes (course_type);
 CREATE INDEX IF NOT EXISTS idx_dish_allergen_allergen ON public.dish_allergens (allergen_id);
 
 -- Events
-CREATE INDEX IF NOT EXISTS idx_event_company ON public.events (company_id);
-CREATE INDEX IF NOT EXISTS idx_event_date ON public.events (event_date DESC);
+CREATE INDEX IF NOT EXISTS idx_event_creator ON public.events (created_by);
+CREATE INDEX IF NOT EXISTS idx_event_date ON public.events (start_date DESC);
 
 -- Loyalty
 CREATE INDEX IF NOT EXISTS idx_loyalty_user ON public.loyalty_accounts (user_id);
@@ -71,7 +71,7 @@ CREATE INDEX IF NOT EXISTS idx_delivery_person ON public.delivery_assignments (d
 
 -- Support tickets
 CREATE INDEX IF NOT EXISTS idx_ticket_status ON public.support_tickets (status);
-CREATE INDEX IF NOT EXISTS idx_ticket_created_by ON public.support_tickets (created_by);
+CREATE INDEX IF NOT EXISTS idx_ticket_user ON public.support_tickets (user_id);
 
 -- Notifications
 CREATE INDEX IF NOT EXISTS idx_notification_user ON public.notifications (user_id);

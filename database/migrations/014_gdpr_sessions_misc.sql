@@ -57,14 +57,15 @@ CREATE TABLE IF NOT EXISTS public.password_reset_tokens (
 
 CREATE TABLE IF NOT EXISTS public.events (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  company_id  UUID REFERENCES public.companies(id) ON DELETE CASCADE,
-  name        TEXT NOT NULL,
+  title       TEXT NOT NULL,
   description TEXT,
+  start_date  TIMESTAMPTZ NOT NULL,
+  end_date    TIMESTAMPTZ,
+  all_day     BOOLEAN DEFAULT false,
   event_type  TEXT,
-  guest_count INTEGER,
-  event_date  DATE,
-  location    TEXT,
-  is_public   BOOLEAN DEFAULT true,
+  user_id     UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  order_id    UUID REFERENCES public.orders(id) ON DELETE SET NULL,
+  created_by  UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at  TIMESTAMPTZ DEFAULT now()
 );
 

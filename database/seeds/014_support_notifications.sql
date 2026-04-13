@@ -13,16 +13,16 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Support tickets
 INSERT INTO public.support_tickets (id, ticket_number, contact_message_id, user_id, subject, status, priority, assigned_to, created_at) VALUES
-  ('st000000-0000-0000-0000-000000000001', 'TK202601-ABC001', 'cm000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000007', 'Demande de devis mariage',       'resolved', 'medium', 'a0000000-0000-0000-0000-000000000003', '2026-01-10 10:05:00+00'),
-  ('st000000-0000-0000-0000-000000000002', 'TK202602-DEF002', 'cm000000-0000-0000-0000-000000000002', NULL,                                    'Question allergènes',             'resolved', 'low',    'a0000000-0000-0000-0000-000000000004', '2026-02-15 14:05:00+00'),
-  ('st000000-0000-0000-0000-000000000003', 'TK202603-GHI003', 'cm000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000008', 'Réclamation livraison',           'in_progress', 'high', 'a0000000-0000-0000-0000-000000000005', '2026-03-20 09:05:00+00'),
-  ('st000000-0000-0000-0000-000000000004', 'TK202604-JKL004', 'cm000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000009', 'Partenariat',                     'open',     'medium', NULL, '2026-04-01 11:05:00+00'),
-  ('st000000-0000-0000-0000-000000000005', 'TK202604-MNO005', 'cm000000-0000-0000-0000-000000000005', NULL,                                    'Demande événement entreprise',   'open',     'high',   'a0000000-0000-0000-0000-000000000002', '2026-04-10 16:05:00+00'),
-  ('st000000-0000-0000-0000-000000000006', 'TK202604-PQR006', 'cm000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000010', 'Problème facturation',            'open',     'high',   'a0000000-0000-0000-0000-000000000002', '2026-04-25 08:05:00+00')
+  ('st000000-0000-0000-0000-000000000001', 'TK202601-ABC001', 'cm000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000007', 'Demande de devis mariage',     'resolved',    'medium', 'a0000000-0000-0000-0000-000000000003', '2026-01-10 10:05:00+00'),
+  ('st000000-0000-0000-0000-000000000002', 'TK202602-DEF002', 'cm000000-0000-0000-0000-000000000002', NULL,                                  'Question allergènes',           'resolved',    'low',    'a0000000-0000-0000-0000-000000000004', '2026-02-15 14:05:00+00'),
+  ('st000000-0000-0000-0000-000000000003', 'TK202603-GHI003', 'cm000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000008', 'Réclamation livraison',         'in_progress', 'high',   'a0000000-0000-0000-0000-000000000005', '2026-03-20 09:05:00+00'),
+  ('st000000-0000-0000-0000-000000000004', 'TK202604-JKL004', 'cm000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000009', 'Partenariat',                   'open',        'medium', NULL, '2026-04-01 11:05:00+00'),
+  ('st000000-0000-0000-0000-000000000005', 'TK202604-MNO005', 'cm000000-0000-0000-0000-000000000005', NULL,                                  'Demande événement entreprise', 'open',        'high',   'a0000000-0000-0000-0000-000000000002', '2026-04-10 16:05:00+00'),
+  ('st000000-0000-0000-0000-000000000006', 'TK202604-PQR006', 'cm000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000010', 'Problème facturation',          'open',        'high',   'a0000000-0000-0000-0000-000000000002', '2026-04-25 08:05:00+00')
 ON CONFLICT (id) DO NOTHING;
 
 -- Ticket replies
-INSERT INTO public.ticket_messages (id, ticket_id, sender_id, message, created_at) VALUES
+INSERT INTO public.ticket_messages (id, ticket_id, user_id, body, created_at) VALUES
   ('tm000000-0000-0000-0000-000000000001', 'st000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003', 'Bonjour Alice, nous vous préparons un devis personnalisé. Votre budget indicatif ?', '2026-01-10 14:00:00+00'),
   ('tm000000-0000-0000-0000-000000000002', 'st000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000007', 'Autour de 8000€ pour 80 personnes.', '2026-01-11 09:00:00+00'),
   ('tm000000-0000-0000-0000-000000000003', 'st000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003', 'Parfait, devis envoyé par email. N''hésitez pas si vous avez des questions !', '2026-01-11 15:00:00+00'),
@@ -31,7 +31,7 @@ INSERT INTO public.ticket_messages (id, ticket_id, sender_id, message, created_a
 ON CONFLICT (id) DO NOTHING;
 
 -- Notifications
-INSERT INTO public.notifications (id, user_id, type, title, message, is_read, link, created_at) VALUES
+INSERT INTO public.notifications (id, user_id, type, title, body, is_read, link_url, created_at) VALUES
   ('nt000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000007', 'order', 'Commande confirmée', 'Votre commande VG-20260101-ABC001 a été acceptée.', true, '/orders/or000000-0000-0000-0000-000000000001', '2026-01-05 14:00:00+00'),
   ('nt000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000007', 'order', 'Commande prête', 'Votre commande est prête pour la livraison.', true, '/orders/or000000-0000-0000-0000-000000000001', '2026-01-14 16:00:00+00'),
   ('nt000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000007', 'loyalty', 'Points fidélité crédités', '4275 points ont été ajoutés à votre compte.', true, '/loyalty', '2026-01-16 10:00:00+00'),
@@ -45,7 +45,7 @@ INSERT INTO public.notifications (id, user_id, type, title, message, is_read, li
 ON CONFLICT (id) DO NOTHING;
 
 -- User-to-user / admin messages
-INSERT INTO public.messages (id, sender_id, receiver_id, content, is_read, created_at) VALUES
+INSERT INTO public.messages (id, sender_id, recipient_id, body, is_read, sent_at) VALUES
   ('mg000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000007', 'Bonjour Alice, votre commande spéciale a été validée !', true,  '2026-01-06 10:00:00+00'),
   ('mg000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000007', 'a0000000-0000-0000-0000-000000000002', 'Merci José ! Nous avons hâte.', true,  '2026-01-06 14:00:00+00'),
   ('mg000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000008', 'Bonjour Bob, des nouvelles du matériel en attente ?', true,  '2026-03-21 10:00:00+00'),

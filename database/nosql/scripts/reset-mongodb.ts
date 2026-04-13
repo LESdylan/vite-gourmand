@@ -3,7 +3,7 @@
  * ====================
  * Drops all collections and reinitializes.
  * ⚠️ DESTRUCTIVE - Use with caution!
- * Run via: npx tsx src/Model/nosql/scripts/reset-mongodb.ts
+ * Run via: npx tsx database/nosql/scripts/reset-mongodb.ts
  */
 
 import { IndexDescription, IndexSpecification } from 'mongodb';

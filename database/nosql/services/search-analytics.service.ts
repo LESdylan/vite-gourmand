@@ -22,7 +22,7 @@ export async function logSearch(
   resultsCount: number,
   sessionId: string,
   options?: {
-    userId?: number;
+    userId?: string;
     filters?: {
       diet?: string;
       theme?: string;
@@ -54,7 +54,7 @@ export async function logSearch(
 export async function trackClick(
   sessionId: string,
   query: string,
-  menuId: number,
+  menuId: string,
 ): Promise<void> {
   const collection = await getCollection();
   const normalized = normalizeQuery(query);

@@ -381,7 +381,7 @@ CREATE POLICY contact_admin ON public.contact_messages
 -- ─── SUPPORT TICKETS (creator + assigned + admin) ────────────────
 DROP POLICY IF EXISTS tickets_select ON public.support_tickets;
 CREATE POLICY tickets_select ON public.support_tickets
-  FOR SELECT USING (created_by = auth.uid() OR assigned_to = auth.uid() OR public.is_staff());
+  FOR SELECT USING (user_id = auth.uid() OR assigned_to = auth.uid() OR public.is_staff());
 
 DROP POLICY IF EXISTS tickets_staff ON public.support_tickets;
 CREATE POLICY tickets_staff ON public.support_tickets
@@ -394,7 +394,7 @@ CREATE POLICY ticket_msg_select ON public.ticket_messages
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM public.support_tickets
-      WHERE id = ticket_id AND (created_by = auth.uid() OR assigned_to = auth.uid() OR public.is_staff())
+      WHERE id = ticket_id AND (user_id = auth.uid() OR assigned_to = auth.uid() OR public.is_staff())
     )
   );
 
@@ -502,10 +502,10 @@ CREATE POLICY prt_admin ON public.password_reset_tokens
   FOR ALL USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
--- ─── EVENTS (public read, admin write) ───────────────────────────
+-- ─── EVENTS (owner + creator + staff read, admin write) ──────────
 DROP POLICY IF EXISTS events_select ON public.events;
 CREATE POLICY events_select ON public.events
-  FOR SELECT USING (is_public OR public.is_admin());
+  FOR SELECT USING (user_id = auth.uid() OR created_by = auth.uid() OR public.is_staff());
 
 DROP POLICY IF EXISTS events_admin ON public.events;
 CREATE POLICY events_admin ON public.events

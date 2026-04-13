@@ -20,7 +20,7 @@ async function getCollection() {
  * Increment view count for a menu
  */
 export async function incrementViewCount(
-  menuId: number,
+  menuId: string,
   menuTitle: string,
   periodType: 'daily' | 'weekly' | 'monthly' = 'daily',
 ): Promise<void> {
@@ -42,7 +42,7 @@ export async function incrementViewCount(
  * Increment order count and revenue
  */
 export async function recordOrder(
-  menuId: number,
+  menuId: string,
   menuTitle: string,
   revenue: number,
   diet?: string,
@@ -70,7 +70,7 @@ export async function recordOrder(
  * Update average rating for a menu
  */
 export async function updateRating(
-  menuId: number,
+  menuId: string,
   rating: number,
 ): Promise<void> {
   const collection = await getCollection();
