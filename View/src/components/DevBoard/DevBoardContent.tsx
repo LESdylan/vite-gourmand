@@ -109,7 +109,6 @@ export function DevBoardContent({
   const { tests } = useMockData(activeCategory);
   const { autoTests, suites, metrics, isRunning, runAll, runSuite, runType, rawOutput, error } =
     testRunner;
-  const { logs, connected, clear } = useRealLogs();
 
   const labels = getLabels(roleView);
 
@@ -191,9 +190,6 @@ export function DevBoardContent({
             tests,
             autoTests,
             suites,
-            logs,
-            connected,
-            clear,
             metrics,
             isRunning,
             runSuite,
@@ -213,9 +209,6 @@ function renderContent(
   tests: ReturnType<typeof useMockData>['tests'],
   autoTests: ReturnType<typeof useTestRunner>['autoTests'],
   suites: ReturnType<typeof useTestRunner>['suites'],
-  logs: ReturnType<typeof useRealLogs>['logs'],
-  connected: boolean,
-  clear: () => void,
   metrics: ReturnType<typeof useTestRunner>['metrics'],
   isRunning: boolean,
   runSuite: ReturnType<typeof useTestRunner>['runSuite'],
@@ -235,9 +228,6 @@ function renderContent(
         tests,
         autoTests,
         suites,
-        logs,
-        connected,
-        clear,
         metrics,
         isRunning,
         runSuite,
@@ -246,14 +236,17 @@ function renderContent(
   }
 }
 
+/** Dedicated wrapper so the realtime hook only runs when logs are visible */
+function DevLogsPanel() {
+  const { logs, connected, clear } = useRealLogs();
+  return <LogViewer logs={logs} connected={connected} onClear={clear} />;
+}
+
 function renderDevContent(
   category: TestCategory,
   tests: ReturnType<typeof useMockData>['tests'],
   _autoTests: ReturnType<typeof useTestRunner>['autoTests'],
   suites: ReturnType<typeof useTestRunner>['suites'],
-  logs: ReturnType<typeof useRealLogs>['logs'],
-  connected: boolean,
-  clear: () => void,
   metrics: ReturnType<typeof useTestRunner>['metrics'],
   isRunning: boolean,
   runSuite: ReturnType<typeof useTestRunner>['runSuite'],
@@ -267,7 +260,7 @@ function renderDevContent(
     case 'database':
       return <DatabaseViewer />;
     case 'logs':
-      return <LogViewer logs={logs} connected={connected} onClear={clear} />;
+      return <DevLogsPanel />;
     case 'activity':
       return <Activity />;
     default:

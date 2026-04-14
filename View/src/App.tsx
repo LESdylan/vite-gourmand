@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { PortalAuthProvider, ProtectedRoute, Unauthorized } from './portal_dashboard';
 import { ResetPasswordPage } from './portal_dashboard/ResetPasswordPage';
 import { ToastProvider } from './contexts/ToastContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './App.css';
 
 // Lazy load components
@@ -48,6 +49,7 @@ function App() {
     <BrowserRouter>
       <ToastProvider>
         <PortalAuthProvider>
+          <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               {/* Public SPA - Landing page with internal navigation */}
@@ -81,6 +83,7 @@ function App() {
               <Route path="/scenario/auth" element={<AuthScenario />} />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
         </PortalAuthProvider>
       </ToastProvider>
     </BrowserRouter>
