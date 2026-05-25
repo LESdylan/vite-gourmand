@@ -32,7 +32,7 @@
 
 .unauthorized-card h1 {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0 0 var(--space-2);
 }
@@ -40,7 +40,7 @@
 .unauthorized-card p {
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-4);
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
 }
 
 .unauthorized-role {
@@ -49,7 +49,7 @@
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   color: var(--color-primary-600);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .unauthorized-role strong {
@@ -71,8 +71,8 @@
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-weight: 500;
+  transition: all var(--transition-fast);
+  font-weight: var(--font-weight-medium);
 }
 
 .unauthorized-actions .btn-secondary:hover {
@@ -87,8 +87,8 @@
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-weight: 500;
+  transition: all var(--transition-fast);
+  font-weight: var(--font-weight-medium);
   box-shadow: var(--shadow-glow-primary);
 }
 

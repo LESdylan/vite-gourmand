@@ -1,61 +1,23 @@
 /**
  * Log Controller - REST endpoint for DevBoard log streaming
  */
-import {
-  Controller,
-  Get,
-  Delete,
-  Query,
-  UseGuards,
-  Res,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Controller, Get, Delete, Query, UseGuards, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { Public } from '../common/decorators/public.decorator';
 import { LogService, StructuredLog } from './log.service';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { JwtPayload } from '../common/types/request.types';
-
-type LogTokenPayload = Pick<JwtPayload, 'role'>;
 
 @Controller('logs')
 export class LogController {
-  constructor(
-    private readonly logService: LogService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-  ) {}
-
-  /**
-   * Validate JWT token from query parameter (for SSE which doesn't support headers)
-   */
-  private validateTokenFromQuery(token: string): boolean {
-    if (!token) return false;
-
-    try {
-      const secret = this.configService.get<string>('JWT_SECRET') || 'secret';
-      const payload = this.jwtService.verify<LogTokenPayload>(token, {
-        secret,
-      });
-
-      // Check if user has admin or employe role
-      const role = payload.role;
-      return role === 'admin' || role === 'employe' || role === 'superadmin';
-    } catch {
-      return false;
-    }
-  }
+  constructor(private readonly logService: LogService) {}
 
   /**
    * GET /api/logs
    * Fetch recent logs with optional filtering
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'employe', 'superadmin')
+  @Roles('admin', 'employe', 'employee', 'superadmin')
   @Get()
   getLogs(
     @Query('limit') limit?: string,
@@ -74,16 +36,11 @@ export class LogController {
   /**
    * GET /api/logs/stream
    * SSE endpoint for live log streaming
-   * Accepts token via query parameter since EventSource doesn't support headers
    */
-  @Public()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'employe', 'employee', 'superadmin')
   @Get('stream')
-  streamLogs(@Query('token') token: string, @Res() res: Response): void {
-    // Validate token from query parameter
-    if (!this.validateTokenFromQuery(token)) {
-      throw new UnauthorizedException('Invalid or missing token');
-    }
-
+  streamLogs(@Res() res: Response): void {
     // Set SSE headers
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -126,7 +83,7 @@ export class LogController {
    * Clear all logs
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'employe', 'superadmin')
+  @Roles('admin', 'employe', 'employee', 'superadmin')
   @Delete()
   clearLogs(): { message: string } {
     this.logService.clear();
@@ -138,7 +95,7 @@ export class LogController {
    * Get total log count
    */
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin', 'employe', 'superadmin')
+  @Roles('admin', 'employe', 'employee', 'superadmin')
   @Get('count')
   getLogCount(): { count: number } {
     return { count: this.logService.getCount() };

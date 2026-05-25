@@ -4,29 +4,29 @@
 
 /* === ROW === */
 .atr {
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-gray-200);
   transition: background 0.15s;
 }
 .atr--alt {
-  background: #f9fafb;
+  background: var(--color-gray-50);
 }
 .atr--clickable {
   cursor: pointer;
 }
 .atr--clickable:hover {
-  background: #f3e8ff;
+  background: var(--color-primary-100);
 }
 .atr--detail {
-  background: #faf5ff;
+  background: var(--color-primary-50);
 }
 
 /* === CELLS === */
 .atr__cell {
   padding: 12px 16px;
   vertical-align: middle;
-  font-size: 13px;
-  color: #374151;
+  font-size: var(--font-size-sm-alt);
+  color: var(--color-gray-700);
 }
 .atr__cell--name {
   display: flex;
@@ -43,8 +43,8 @@
 .atr__cell--duration {
   text-align: right;
   font-family: monospace;
-  font-size: 12px;
-  color: #6b7280;
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
   white-space: nowrap;
 }
 
@@ -52,14 +52,14 @@
 .atr__dot {
   width: 10px;
   height: 10px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
-  background: #9ca3af;
+  background: var(--color-gray-400);
 }
-.atr__dot--passed { background: #22c55e; }
-.atr__dot--failed { background: #ef4444; }
-.atr__dot--running { background: #8b5cf6; animation: pulse 1.5s infinite; }
-.atr__dot--idle { background: #9ca3af; }
+.atr__dot--passed { background: var(--color-green-500); }
+.atr__dot--failed { background: var(--color-red-500); }
+.atr__dot--running { background: var(--color-violet-500); animation: pulse 1.5s infinite; }
+.atr__dot--idle { background: var(--color-gray-400); }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -68,20 +68,20 @@
 
 /* === CHEVRON === */
 .atr__chevron {
-  font-size: 10px;
-  color: #9ca3af;
+  font-size: var(--font-size-xs2);
+  color: var(--color-gray-400);
   flex-shrink: 0;
-  transition: transform 0.2s;
+  transition: transform var(--transition-normal);
 }
 .atr__chevron--open {
   transform: rotate(90deg);
-  color: #8b5cf6;
+  color: var(--color-violet-500);
 }
 
 /* === NAME === */
 .atr__name {
-  font-weight: 500;
-  color: #1f2937;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-800);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -89,19 +89,19 @@
   flex: 1;
 }
 .atr--clickable:hover .atr__name {
-  color: #7c3aed;
+  color: var(--color-primary-700);
 }
 
 /* === BADGE === */
 .atr__badge {
   display: inline-block;
   padding: 3px 8px;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #4b5563;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-xs0);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-600);
   font-family: monospace;
   text-transform: uppercase;
 }
@@ -109,32 +109,32 @@
 /* === DETAIL CELL === */
 .atr__detail-cell {
   padding: 0 !important;
-  background: #faf5ff;
+  background: var(--color-primary-50);
 }
 .atr__output {
   padding: 16px 20px;
-  border-top: 1px dashed #ddd6fe;
+  border-top: 1px dashed var(--color-editor-accent);
 }
 .atr__output--error .atr__output-content {
-  border-left: 3px solid #ef4444;
-  background: #1e1e1e;
+  border-left: 3px solid var(--color-red-500);
+  background: var(--color-editor-bg);
 }
 .atr__output-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #6b7280;
+  font-size: var(--font-size-xs0);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-500);
   text-transform: uppercase;
   margin-bottom: 8px;
 }
 .atr__output-content {
   margin: 0;
   padding: 12px 16px;
-  background: #1a1a2e;
-  border-radius: 6px;
-  color: #d1d5db;
+  background: var(--color-wine-900);
+  border-radius: var(--radius-md);
+  color: var(--color-gray-300);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;

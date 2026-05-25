@@ -12,17 +12,17 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  background: rgba(31, 27, 25, 0.3);
-  border: 2px dashed rgba(61, 55, 51, 0.4);
-  border-radius: 12px;
+  background: var(--color-near-black-warm-30);
+  border: 2px dashed var(--color-warm-overlay-40);
+  border-radius: var(--radius-xl);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all var(--transition-slow);
   flex-shrink: 0;
 }
 
 .add-column-placeholder:hover {
-  background: rgba(114, 47, 55, 0.15);
-  border-color: rgba(114, 47, 55, 0.5);
+  background: var(--color-wine-overlay-15);
+  border-color: var(--color-wine-overlay-50);
 }
 
 .add-column-icon {
@@ -31,38 +31,38 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(114, 47, 55, 0.2);
-  border: 2px dashed rgba(114, 47, 55, 0.4);
-  border-radius: 50%;
-  color: #ed6b84;
-  font-size: 1.75rem;
-  font-weight: 300;
-  transition: all 0.3s;
+  background: var(--color-wine-overlay-20);
+  border: 2px dashed var(--color-wine-overlay-40);
+  border-radius: var(--radius-full);
+  color: var(--color-wine-300);
+  font-size: var(--font-size-2xl-lg);
+  font-weight: var(--font-weight-light);
+  transition: all var(--transition-slow);
 }
 
 .add-column-placeholder:hover .add-column-icon {
-  background: rgba(114, 47, 55, 0.3);
+  background: var(--color-wine-overlay-30);
   border-style: solid;
   transform: scale(1.1);
 }
 
 .add-column-text {
-  color: #5a534d;
-  font-size: 0.85rem;
+  color: var(--color-warm-500);
+  font-size: var(--font-size-sm-near);
   transition: color 0.3s;
 }
 
 .add-column-placeholder:hover .add-column-text {
-  color: #ed6b84;
+  color: var(--color-wine-300);
 }
 
 /* Form */
 .add-column-form {
   min-width: 280px;
-  background: rgba(31, 27, 25, 0.8);
+  background: var(--color-near-black-warm-80);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(114, 47, 55, 0.4);
-  border-radius: 12px;
+  border: 1px solid var(--color-wine-overlay-40);
+  border-radius: var(--radius-xl);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
@@ -72,23 +72,23 @@
 
 .add-column-form-title {
   margin: 0;
-  font-size: 0.95rem;
-  color: #c9a227;
+  font-size: var(--font-size-base-sm);
+  color: var(--color-gold-400);
 }
 
 .add-column-input {
   width: 100%;
   padding: 0.75rem;
-  background: rgba(13, 10, 9, 0.8);
-  border: 1px solid rgba(61, 55, 51, 0.5);
-  border-radius: 8px;
-  color: #f5f2ef;
-  font-size: 0.9rem;
+  background: var(--color-near-black-overlay);
+  border: 1px solid var(--color-warm-overlay-50);
+  border-radius: var(--radius-lg);
+  color: var(--color-warm-100);
+  font-size: var(--font-size-sm-plus);
 }
 
 .add-column-input:focus {
   outline: none;
-  border-color: #722f37;
+  border-color: var(--color-wine-700);
 }
 
 .add-column-colors {
@@ -101,9 +101,9 @@
   width: 28px;
   height: 28px;
   border: 2px solid transparent;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .color-btn:hover {
@@ -112,7 +112,7 @@
 
 .color-btn.selected {
   border-color: white;
-  box-shadow: 0 0 0 2px rgba(114, 47, 55, 0.6);
+  box-shadow: 0 0 0 2px var(--color-wine-overlay-60);
 }
 
 .add-column-actions {
@@ -125,21 +125,21 @@
   flex: 1;
   padding: 0.625rem;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm-near);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .btn-add-col {
-  background: linear-gradient(135deg, #722f37, #800020);
+  background: linear-gradient(135deg, var(--color-wine-700), var(--color-wine-400));
   color: white;
 }
 
 .btn-add-col:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(114, 47, 55, 0.4);
+  box-shadow: 0 4px 12px var(--color-wine-overlay-40);
 }
 
 .btn-add-col:disabled {
@@ -148,10 +148,10 @@
 }
 
 .btn-cancel-col {
-  background: rgba(61, 55, 51, 0.5);
-  color: #b8b0a8;
+  background: var(--color-warm-overlay-50);
+  color: var(--color-warm-300);
 }
 
 .btn-cancel-col:hover {
-  background: rgba(61, 55, 51, 0.7);
+  background: var(--color-warm-overlay-70);
 }

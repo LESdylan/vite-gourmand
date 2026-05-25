@@ -3,13 +3,13 @@
 .record-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--color-bg-overlay-strong);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.15s ease-out;
+  z-index: var(--z-above);
+  animation: fadeIn var(--transition-fast)-out;
 }
 
 @keyframes fadeIn {
@@ -23,16 +23,16 @@
 }
 
 .record-modal {
-  background: var(--color-surface, #fff);
-  border-radius: var(--radius-xl, 16px);
+  background: var(--color-surface, var(--color-bg-secondary));
+  border-radius: var(--radius-xl);
   width: 90%;
   max-width: 560px;
   max-height: 85vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: slideUp 0.2s ease-out;
+  box-shadow: 0 25px 50px -12px var(--color-black-25);
+  animation: slideUp var(--transition-normal)-out;
 }
 
 .record-modal-header {
@@ -40,14 +40,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
-  background: linear-gradient(135deg, var(--color-primary, #7e3af2) 0%, #6366f1 100%);
+  background: linear-gradient(135deg, var(--color-primary, var(--color-primary-700)) 0%, var(--color-secondary-500) 100%);
   color: white;
 }
 
 .record-modal-header h3 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: var(--font-size-base-lg);
+  font-weight: var(--font-weight-semibold);
 }
 
 .close-btn {
@@ -56,17 +56,17 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--color-white-15);
   border: none;
-  border-radius: 50%;
-  font-size: 1.25rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xl);
   color: white;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--color-white-25);
 }
 
 .record-modal form {
@@ -105,7 +105,7 @@
   order: 1;
   width: 20px;
   height: 20px;
-  accent-color: var(--color-primary, #7e3af2);
+  accent-color: var(--color-primary, var(--color-primary-700));
   cursor: pointer;
 }
 
@@ -113,45 +113,45 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--color-text, #1a1a2e);
+  font-size: var(--font-size-sm);
+  color: var(--color-text, var(--color-wine-900));
 }
 
 .field-name {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .field-type {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   padding: 0.125rem 0.5rem;
-  background: var(--color-surface-alt, #f1f5f9);
-  color: var(--color-text-muted, #64748b);
-  border-radius: var(--radius-full, 9999px);
+  background: var(--color-surface-alt, var(--color-neutral-100));
+  color: var(--color-text-muted, var(--color-neutral-500));
+  border-radius: var(--radius-full);
 }
 
 .required {
-  color: var(--color-danger, #ef4444);
-  font-weight: bold;
+  color: var(--color-danger, var(--color-red-500));
+  font-weight: var(--font-weight-bold);
 }
 
 .record-field input:not([type="checkbox"]) {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid var(--color-border, #e2e8f0);
-  border-radius: var(--radius-md, 8px);
-  font-size: 0.95rem;
+  border: 2px solid var(--color-border, var(--color-neutral-200));
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base-sm);
   transition: border-color 0.15s, box-shadow 0.15s;
-  background: var(--color-surface, #fff);
+  background: var(--color-surface, var(--color-bg-secondary));
 }
 
 .record-field input:not([type="checkbox"]):focus {
   outline: none;
-  border-color: var(--color-primary, #7e3af2);
-  box-shadow: 0 0 0 3px rgba(126, 58, 242, 0.1);
+  border-color: var(--color-primary, var(--color-primary-700));
+  box-shadow: var(--shadow-focus-primary-alt);
 }
 
 .record-field input:not([type="checkbox"])::placeholder {
-  color: var(--color-text-muted, #94a3b8);
+  color: var(--color-text-muted, var(--color-neutral-400));
 }
 
 .record-field input[type="datetime-local"],
@@ -165,32 +165,32 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background: var(--color-surface-alt, #f8fafc);
-  border-top: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-surface-alt, var(--color-neutral-50));
+  border-top: 1px solid var(--color-border, var(--color-neutral-200));
 }
 
 .btn-cancel,
 .btn-save {
   padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md, 8px);
-  font-size: 0.9rem;
-  font-weight: 500;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
 }
 
 .btn-cancel {
-  background: var(--color-surface, #fff);
-  border: 2px solid var(--color-border, #e2e8f0);
-  color: var(--color-text, #1a1a2e);
+  background: var(--color-surface, var(--color-bg-secondary));
+  border: 2px solid var(--color-border, var(--color-neutral-200));
+  color: var(--color-text, var(--color-wine-900));
 }
 
 .btn-cancel:hover {
-  background: var(--color-surface-alt, #f1f5f9);
+  background: var(--color-surface-alt, var(--color-neutral-100));
 }
 
 .btn-save {
-  background: linear-gradient(135deg, var(--color-primary, #7e3af2) 0%, #6366f1 100%);
+  background: linear-gradient(135deg, var(--color-primary, var(--color-primary-700)) 0%, var(--color-secondary-500) 100%);
   border: none;
   color: white;
 }

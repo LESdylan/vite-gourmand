@@ -4,7 +4,7 @@
  */
 
 .activity {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--color-white-02);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
 }
@@ -17,8 +17,8 @@
 }
 
 .activity__title {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
 }
@@ -29,17 +29,17 @@
   gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-white-10);
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 }
 
 .activity__refresh:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--color-white-05);
+  border-color: var(--color-white-20);
 }
 
 .activity__refresh:disabled {

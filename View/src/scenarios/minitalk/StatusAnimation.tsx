@@ -75,12 +75,6 @@ export function StatusAnimation({
     <div style={containerStyle}>
       <div style={circleStyle}>{config.emoji}</div>
       <span style={labelStyle}>{config.label}</span>
-      <style
-        dangerouslySetInnerHTML={{
-          __html:
-            '@keyframes statusPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }',
-        }}
-      />
     </div>
   );
 }

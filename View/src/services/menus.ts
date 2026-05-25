@@ -127,7 +127,38 @@ interface ApiWrapperResponse<T> {
 
 // Default fallback image
 const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=640&q=70&auto=format&fit=crop';
+
+function isSafeImageUrl(url: string): boolean {
+  if (url.startsWith('/')) return true;
+
+  try {
+    const parsedUrl = new URL(url);
+    return (
+      (parsedUrl.protocol === 'https:' || parsedUrl.protocol === 'http:') &&
+      parsedUrl.username === '' &&
+      parsedUrl.password === ''
+    );
+  } catch {
+    return false;
+  }
+}
+
+function optimizeMenuImageUrl(url: string): string {
+  if (!isSafeImageUrl(url)) return FALLBACK_IMAGE;
+  if (!url.includes('images.unsplash.com')) return url;
+
+  try {
+    const optimizedUrl = new URL(url);
+    optimizedUrl.searchParams.set('auto', 'format');
+    optimizedUrl.searchParams.set('fit', 'crop');
+    optimizedUrl.searchParams.set('q', '70');
+    optimizedUrl.searchParams.set('w', '640');
+    return optimizedUrl.toString();
+  } catch {
+    return url;
+  }
+}
 
 /**
  * Transform API menu to frontend format
@@ -136,10 +167,14 @@ function transformMenu(apiMenu: MenuFromAPI): Menu {
   // Get primary image or first image or fallback
   const primaryImage = apiMenu.MenuImage?.find((img) => img.is_primary);
   const firstImage = apiMenu.MenuImage?.[0];
-  const imageUrl = primaryImage?.image_url || firstImage?.image_url || FALLBACK_IMAGE;
+  const imageUrl = optimizeMenuImageUrl(
+    primaryImage?.image_url || firstImage?.image_url || FALLBACK_IMAGE,
+  );
 
   // All images sorted by display_order
-  const images = [...(apiMenu.MenuImage || [])].sort((a, b) => a.display_order - b.display_order);
+  const images = [...(apiMenu.MenuImage || [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .map((image) => ({ ...image, image_url: optimizeMenuImageUrl(image.image_url) }));
 
   // Group dishes by course type
   const entrees = apiMenu.Dish?.filter((d) => d.course_type === 'entrée') || [];

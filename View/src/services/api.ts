@@ -3,9 +3,15 @@
  * Centralized fetch wrapper with auth handling
  */
 
-// Use empty string to let Vite proxy handle /api routes
-// In production, VITE_API_URL should be set to the backend URL
+// Use empty string to let Vite proxy handle /api routes.
+// In production, VITE_API_URL should be set to the backend URL.
 const API_BASE = import.meta.env.VITE_API_URL || '';
+const LEGACY_ACCESS_TOKEN_KEY = 'accessToken';
+const LEGACY_REFRESH_TOKEN_KEY = 'refreshToken';
+const CSRF_COOKIE_KEY = 'vg_csrf_token';
+const CSRF_HEADER_KEY = 'X-CSRF-Token';
+
+let authenticatedSession = false;
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -23,46 +29,82 @@ class ApiError extends Error {
   }
 }
 
-/** Get stored auth token */
-function getToken(): string | null {
-  return localStorage.getItem('accessToken');
+function clearLegacyTokenStorage(): void {
+  try {
+    localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
+    localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY);
+  } catch {
+    // Storage can be unavailable in private/locked-down contexts.
+  }
 }
 
-/** Store auth tokens */
-export function setTokens(access: string, refresh?: string): void {
-  localStorage.setItem('accessToken', access);
-  if (refresh) localStorage.setItem('refreshToken', refresh);
+function readCookie(name: string): string | null {
+  try {
+    const cookies = document.cookie.split(';');
+    for (const cookie of cookies) {
+      const [rawName, ...rawValueParts] = cookie.trim().split('=');
+      if (rawName !== name) continue;
+      return decodeURIComponent(rawValueParts.join('='));
+    }
+  } catch {
+    // document.cookie can be unavailable in some locked-down contexts.
+  }
+  return null;
 }
 
-/** Clear auth tokens */
+function clearReadableCookie(name: string): void {
+  try {
+    document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+  } catch {
+    // document.cookie can be unavailable in some locked-down contexts.
+  }
+}
+
+function shouldAttachCsrfToken(method: string): boolean {
+  return !['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase());
+}
+
+clearLegacyTokenStorage();
+
+/** Mark that the browser has a cookie-backed authenticated session. */
+export function setTokens(_access?: string, _refresh?: string): void {
+  clearLegacyTokenStorage();
+  authenticatedSession = true;
+}
+
+/** Clear auth session markers and legacy browser-readable tokens. */
 export function clearTokens(): void {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
+  authenticatedSession = false;
+  clearLegacyTokenStorage();
+  clearReadableCookie(CSRF_COOKIE_KEY);
 }
 
 /** Check if user is authenticated */
 export function isAuthenticated(): boolean {
-  return !!getToken();
+  return authenticatedSession;
 }
 
 /** Make API request with auth handling */
 export async function apiRequest<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const { method = 'GET', body, headers = {} } = options;
 
-  const token = getToken();
   const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
     ...headers,
   };
 
-  if (token) {
-    requestHeaders['Authorization'] = `Bearer ${token}`;
+  if (shouldAttachCsrfToken(method) && !requestHeaders[CSRF_HEADER_KEY]) {
+    const csrfToken = readCookie(CSRF_COOKIE_KEY);
+    if (csrfToken) {
+      requestHeaders[CSRF_HEADER_KEY] = csrfToken;
+    }
   }
 
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method,
     headers: requestHeaders,
     body: body ? JSON.stringify(body) : undefined,
+    credentials: 'include',
   });
 
   if (!response.ok) {

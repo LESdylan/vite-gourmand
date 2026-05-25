@@ -5,10 +5,10 @@
 .mobile-menu-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-black-50);
   backdrop-filter: blur(4px);
   z-index: var(--z-modal-backdrop);
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn var(--transition-normal);
 }
 
 @keyframes fadeIn {
@@ -23,7 +23,7 @@
   bottom: 0;
   width: min(280px, 85vw);
   background: var(--color-bg-primary);
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 4px 0 24px var(--color-black-15);
   overflow-y: auto;
   animation: slideIn 0.25s ease;
   padding: var(--space-4) 0;
@@ -40,7 +40,7 @@
 
 .mobile-menu-title {
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-tertiary);
@@ -59,9 +59,9 @@
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
   text-align: left;
 }
 
@@ -94,7 +94,7 @@
   background: var(--color-neutral-100);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-tertiary);
 }
 

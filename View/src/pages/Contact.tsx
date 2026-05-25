@@ -356,7 +356,7 @@ ${formData.message}
               </span>
             </h1>
 
-            <p className="text-white/40 max-w-xl mx-auto text-sm sm:text-base leading-relaxed mb-8">
+            <p className="text-white/75 max-w-xl mx-auto text-sm sm:text-base leading-relaxed mb-8">
               Un événement à organiser, une question sur nos menus ou simplement envie d'échanger ?
               <br className="hidden sm:block" />
               Notre équipe vous répond sous 24 h.
@@ -406,7 +406,7 @@ ${formData.message}
               <h2 className="font-bold text-[#1A1A1A] text-sm">
                 🪄 Assistant IA — Quel est votre événement ?
               </h2>
-              <p className="text-[#1A1A1A]/40 text-[10px]">
+              <p className="text-[#1A1A1A]/65 text-[10px]">
                 Cliquez pour démarrer une conversation guidée avec notre IA
               </p>
             </div>
@@ -436,7 +436,7 @@ ${formData.message}
                   <span className="font-bold text-[#1A1A1A] text-xs leading-tight">
                     {scenario.emoji} {scenario.title}
                   </span>
-                  <span className="text-[9px] text-[#1A1A1A]/40 leading-tight hidden sm:block">
+                  <span className="text-[9px] text-[#1A1A1A]/65 leading-tight hidden sm:block">
                     {scenario.subtitle}
                   </span>
                   {isActive && (
@@ -452,7 +452,7 @@ ${formData.message}
           {/* Active scenario suggestions */}
           {activeScenario && (
             <div className="mt-3 flex flex-wrap items-center gap-1.5 animate-in slide-in-from-top-2 duration-200">
-              <span className="text-[10px] text-[#1A1A1A]/30 font-medium mr-1">Populaire :</span>
+              <span className="text-[10px] text-[#1A1A1A]/65 font-medium mr-1">Populaire :</span>
               {AI_SCENARIOS.find((s) => s.title === activeScenario)?.suggestions.map((sug) => (
                 <span
                   key={sug}
@@ -485,13 +485,13 @@ ${formData.message}
                       <h2 className="font-bold text-[#1A1A1A] text-base">
                         Envoyez-nous un message
                       </h2>
-                      <p className="text-[#1A1A1A]/40 text-xs">
+                      <p className="text-[#1A1A1A]/65 text-xs">
                         Tous les champs marqués * sont obligatoires
                       </p>
                     </div>
                   </div>
                   <div className="hidden sm:flex items-center gap-2">
-                    <span className="text-[10px] text-[#1A1A1A]/30 font-medium uppercase tracking-wide">
+                    <span className="text-[10px] text-[#1A1A1A]/65 font-medium uppercase tracking-wide">
                       {filledFields}/4
                     </span>
                     <div className="w-20 h-1.5 rounded-full bg-[#1A1A1A]/5 overflow-hidden">
@@ -516,7 +516,7 @@ ${formData.message}
                         <p className="font-bold text-[#1A1A1A] text-sm">
                           Message envoyé avec succès !
                         </p>
-                        <p className="text-[#1A1A1A]/50 text-xs mt-0.5">
+                        <p className="text-[#1A1A1A]/65 text-xs mt-0.5">
                           Un email de confirmation vous a été envoyé.
                         </p>
                       </div>
@@ -527,7 +527,7 @@ ${formData.message}
                           <Ticket className="h-5 w-5 text-[#D4AF37]" />
                         </div>
                         <div>
-                          <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider font-semibold">
+                          <p className="text-[10px] text-[#1A1A1A]/65 uppercase tracking-wider font-semibold">
                             Votre numéro de ticket
                           </p>
                           <p className="font-black text-lg text-[#1A1A1A] tracking-wide">
@@ -536,7 +536,7 @@ ${formData.message}
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-[#1A1A1A]/40 mt-3">
+                    <p className="text-xs text-[#1A1A1A]/65 mt-3">
                       Conservez ce numéro pour suivre votre demande. Nous vous répondrons sous 24 –
                       48 h.
                     </p>
@@ -626,7 +626,7 @@ ${formData.message}
                     >
                       <Phone className="h-3.5 w-3.5 text-[#556B2F]" />
                       Téléphone{' '}
-                      <span className="text-[#1A1A1A]/30 text-xs font-normal">(optionnel)</span>
+                      <span className="text-[#1A1A1A]/65 text-xs font-normal">(optionnel)</span>
                     </Label>
                     <Input
                       id="phone"
@@ -722,7 +722,7 @@ ${formData.message}
                       placeholder="Décrivez votre projet, le nombre d'invités, vos préférences alimentaires, votre budget…"
                       required
                       rows={6}
-                      className="flex w-full rounded-xl border border-[#1A1A1A]/8 bg-[#FFF8F0]/50 px-4 py-3 text-sm placeholder:text-[#1A1A1A]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#722F37] focus-visible:ring-offset-2 resize-none hover:border-[#722F37]/30 transition-colors"
+                      className="flex w-full rounded-xl border border-[#1A1A1A]/8 bg-[#FFF8F0]/50 px-4 py-3 text-sm placeholder:text-[#1A1A1A]/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#722F37] focus-visible:ring-offset-2 resize-none hover:border-[#722F37]/30 transition-colors"
                     />
 
                     {/* AI Smart Tips */}
@@ -736,10 +736,10 @@ ${formData.message}
                     )}
 
                     <div className="flex items-center justify-between mt-1.5">
-                      <p className="text-[10px] text-[#1A1A1A]/25">
+                      <p className="text-[10px] text-[#1A1A1A]/65">
                         💡 Soyez aussi précis que possible pour un devis plus rapide
                       </p>
-                      <p className="text-[10px] text-[#1A1A1A]/25">
+                      <p className="text-[10px] text-[#1A1A1A]/65">
                         {formData.message.length} car.
                       </p>
                     </div>
@@ -766,7 +766,7 @@ ${formData.message}
                         </>
                       )}
                     </Button>
-                    <p className="text-center text-[10px] text-[#1A1A1A]/25 mt-3">
+                    <p className="text-center text-[10px] text-[#1A1A1A]/65 mt-3">
                       Vos données sont utilisées uniquement pour répondre à votre demande.
                     </p>
                   </div>
@@ -784,7 +784,7 @@ ${formData.message}
                   <Sparkles className="h-4 w-4 text-[#D4AF37]" />
                   Coordonnées
                 </h2>
-                <p className="text-white/50 text-xs mt-0.5">Contactez-nous directement</p>
+                <p className="text-white/75 text-xs mt-0.5">Contactez-nous directement</p>
               </div>
 
               <div className="p-5 space-y-1">
@@ -799,7 +799,7 @@ ${formData.message}
                     <p className="font-bold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors">
                       {siteInfo?.phone || '05 56 00 00 00'}
                     </p>
-                    <p className="text-[#1A1A1A]/40 text-xs">Lun – Ven, 9 h – 18 h</p>
+                    <p className="text-[#1A1A1A]/65 text-xs">Lun – Ven, 9 h – 18 h</p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-[#1A1A1A]/15 group-hover:text-[#722F37]/50 transition-colors shrink-0" />
                 </a>
@@ -815,7 +815,7 @@ ${formData.message}
                     <p className="font-bold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors truncate">
                       {siteInfo?.email || 'contact@vite-gourmand.fr'}
                     </p>
-                    <p className="text-[#1A1A1A]/40 text-xs">Réponse sous 24 – 48 h</p>
+                    <p className="text-[#1A1A1A]/65 text-xs">Réponse sous 24 – 48 h</p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-[#1A1A1A]/15 group-hover:text-[#D4AF37]/50 transition-colors shrink-0" />
                 </a>
@@ -833,7 +833,7 @@ ${formData.message}
                     <p className="font-bold text-[#1A1A1A] text-sm group-hover:text-[#722F37] transition-colors">
                       {siteInfo?.address || '15 Rue Sainte-Catherine'}
                     </p>
-                    <p className="text-[#1A1A1A]/40 text-xs flex items-center gap-1">
+                    <p className="text-[#1A1A1A]/65 text-xs flex items-center gap-1">
                       Voir sur Google Maps <ExternalLink className="h-2.5 w-2.5" />
                     </p>
                   </div>
@@ -850,7 +850,7 @@ ${formData.message}
                 </div>
                 <div>
                   <h2 className="font-bold text-[#1A1A1A] text-sm">Horaires d'ouverture</h2>
-                  <p className="text-[#1A1A1A]/35 text-xs">Service traiteur & accueil</p>
+                  <p className="text-[#1A1A1A]/65 text-xs">Service traiteur & accueil</p>
                 </div>
               </div>
               <div className="px-5 pb-5">
@@ -861,16 +861,16 @@ ${formData.message}
                         return (
                           <div
                             key={row.day}
-                            className={`flex justify-between items-center py-2.5 px-3 rounded-lg transition-colors ${isClosed ? 'opacity-40' : 'hover:bg-white/60'}`}
+                            className={`flex justify-between items-center py-2.5 px-3 rounded-lg transition-colors ${isClosed ? 'bg-red-50/70' : 'hover:bg-white/60'}`}
                           >
                             <div className="flex items-center gap-2">
                               <div
                                 className={`w-2 h-2 rounded-full ${isClosed ? 'bg-red-400' : 'bg-[#556B2F]'}`}
                               />
-                              <span className="text-[#1A1A1A]/70 text-sm">{row.day}</span>
+                              <span className="text-[#1A1A1A]/80 text-sm">{row.day}</span>
                             </div>
                             <span
-                              className={`font-semibold text-sm ${isClosed ? 'text-red-500' : 'text-[#1A1A1A]'}`}
+                              className={`font-semibold text-sm ${isClosed ? 'text-red-700' : 'text-[#1A1A1A]'}`}
                             >
                               {isClosed ? 'Fermé' : `${row.opening} – ${row.closing}`}
                             </span>
@@ -884,16 +884,16 @@ ${formData.message}
                       ].map((row) => (
                         <div
                           key={row.day}
-                          className={`flex justify-between items-center py-2.5 px-3 rounded-lg transition-colors ${!row.open ? 'opacity-40' : 'hover:bg-white/60'}`}
+                          className={`flex justify-between items-center py-2.5 px-3 rounded-lg transition-colors ${!row.open ? 'bg-red-50/70' : 'hover:bg-white/60'}`}
                         >
                           <div className="flex items-center gap-2">
                             <div
                               className={`w-2 h-2 rounded-full ${row.open ? 'bg-[#556B2F]' : 'bg-red-400'}`}
                             />
-                            <span className="text-[#1A1A1A]/70 text-sm">{row.day}</span>
+                            <span className="text-[#1A1A1A]/80 text-sm">{row.day}</span>
                           </div>
                           <span
-                            className={`font-semibold text-sm ${row.open ? 'text-[#1A1A1A]' : 'text-red-500'}`}
+                            className={`font-semibold text-sm ${row.open ? 'text-[#1A1A1A]' : 'text-red-700'}`}
                           >
                             {row.time}
                           </span>
@@ -921,7 +921,7 @@ ${formData.message}
                     </div>
                     <div>
                       <h3 className="font-bold text-sm">🪄 Concierge Événementiel IA</h3>
-                      <p className="text-white/50 text-[11px] mt-0.5">
+                      <p className="text-white/75 text-[11px] mt-0.5">
                         Planifiez • Inspirez-vous • Demandez un devis
                       </p>
                     </div>
@@ -959,7 +959,7 @@ ${formData.message}
                         <p className="font-semibold text-[#1A1A1A] text-xs mb-1">
                           Comment puis-je vous aider ?
                         </p>
-                        <p className="text-[10px] text-[#1A1A1A]/40 leading-relaxed max-w-[240px] mx-auto mb-4">
+                        <p className="text-[10px] text-[#1A1A1A]/65 leading-relaxed max-w-[240px] mx-auto mb-4">
                           Je vous aide à planifier votre événement, choisir le menu idéal et
                           préparer votre demande de devis.
                         </p>
@@ -1039,7 +1039,7 @@ ${formData.message}
                                   block: 'start',
                                 });
                               }}
-                              className="mt-1 text-[10px] text-[#722F37]/60 hover:text-[#722F37] flex items-center gap-1 ml-1 transition-colors"
+                              className="mt-1 text-[10px] text-[#722F37] hover:text-[#5f2630] flex items-center gap-1 ml-1 transition-colors"
                             >
                               <ArrowRight className="h-2.5 w-2.5 rotate-[-90deg]" />
                               Copier dans le formulaire
@@ -1101,7 +1101,7 @@ ${formData.message}
                       </button>
                     </div>
                     {aiMessages.length > 0 && (
-                      <p className="text-[9px] text-[#1A1A1A]/25 text-center mt-1.5">
+                      <p className="text-[9px] text-[#1A1A1A]/65 text-center mt-1.5">
                         Les réponses IA sont un copier-coller direct vers le formulaire ↗
                       </p>
                     )}
@@ -1114,19 +1114,19 @@ ${formData.message}
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white rounded-2xl border border-[#1A1A1A]/5 p-4 text-center shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-2xl font-black text-[#722F37] mb-0.5">24h</p>
-                <p className="text-[9px] text-[#1A1A1A]/40 uppercase tracking-wider font-semibold">
+                <p className="text-[9px] text-[#1A1A1A]/65 uppercase tracking-wider font-semibold">
                   Réponse max.
                 </p>
               </div>
               <div className="bg-white rounded-2xl border border-[#1A1A1A]/5 p-4 text-center shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-2xl font-black text-[#D4AF37] mb-0.5">🤖</p>
-                <p className="text-[9px] text-[#1A1A1A]/40 uppercase tracking-wider font-semibold">
+                <p className="text-[9px] text-[#1A1A1A]/65 uppercase tracking-wider font-semibold">
                   IA Concierge
                 </p>
               </div>
               <div className="bg-white rounded-2xl border border-[#1A1A1A]/5 p-4 text-center shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-2xl font-black text-[#556B2F] mb-0.5">5★</p>
-                <p className="text-[9px] text-[#1A1A1A]/40 uppercase tracking-wider font-semibold">
+                <p className="text-[9px] text-[#1A1A1A]/65 uppercase tracking-wider font-semibold">
                   Service
                 </p>
               </div>
@@ -1140,7 +1140,7 @@ ${formData.message}
                 </div>
                 <div>
                   <p className="font-bold text-[#1A1A1A] text-xs mb-1">L'IA à votre service</p>
-                  <ul className="space-y-1 text-[10px] text-[#1A1A1A]/50 leading-relaxed">
+                  <ul className="space-y-1 text-[10px] text-[#1A1A1A]/65 leading-relaxed">
                     <li className="flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
                       Cliquez un type d'événement ci-dessus

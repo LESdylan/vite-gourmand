@@ -3,8 +3,16 @@
  * API service to run and fetch backend test results
  */
 
-// Use empty string to let Vite proxy handle /api routes
-const API_BASE = import.meta.env.VITE_API_URL || '';
+import { apiRequest } from './api';
+
+type ApiWrapper<T> = T | { data: T };
+
+function unwrapApiData<T>(response: ApiWrapper<T>): T {
+  if (typeof response === 'object' && response !== null && 'data' in response) {
+    return response.data;
+  }
+  return response;
+}
 
 export interface TestResult {
   id: string;
@@ -93,20 +101,11 @@ export async function runTests(
   options: TestRunOptions = {},
 ): Promise<RunTestsResponse> {
   try {
-    const response = await fetch(`${API_BASE}/api/tests/run`, {
+    const response = await apiRequest<ApiWrapper<RunTestsResponse>>('/api/tests/run', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ testId, verbose: options.verbose }),
+      body: { testId, verbose: options.verbose },
     });
-
-    if (!response.ok) {
-      throw new Error(`Test run failed: ${response.statusText}`);
-    }
-
-    const json = await response.json();
-    return json.data || json; // Backend wraps response in data property
+    return unwrapApiData(response); // Backend wraps response in data property
   } catch (error) {
     console.error('Failed to run tests:', error);
     throw error;
@@ -118,20 +117,11 @@ export async function runTests(
  */
 export async function runAllTests(options: TestRunOptions = {}): Promise<RunTestsResponse> {
   try {
-    const response = await fetch(`${API_BASE}/api/tests/run-all`, {
+    const response = await apiRequest<ApiWrapper<RunTestsResponse>>('/api/tests/run-all', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ verbose: options.verbose }),
+      body: { verbose: options.verbose },
     });
-
-    if (!response.ok) {
-      throw new Error(`Test run failed: ${response.statusText}`);
-    }
-
-    const json = await response.json();
-    return json.data || json; // Backend wraps response in data property
+    return unwrapApiData(response); // Backend wraps response in data property
   } catch (error) {
     console.error('Failed to run all tests:', error);
     throw error;
@@ -144,14 +134,8 @@ export async function runAllTests(options: TestRunOptions = {}): Promise<RunTest
  */
 export async function getTestResults(): Promise<RunTestsResponse | null> {
   try {
-    const response = await fetch(`${API_BASE}/api/tests/results`);
-
-    if (!response.ok) {
-      return null; // No cached results or endpoint not available
-    }
-
-    const json = await response.json();
-    return json.data || json; // Backend wraps response in data property
+    const response = await apiRequest<ApiWrapper<RunTestsResponse>>('/api/tests/results');
+    return unwrapApiData(response); // Backend wraps response in data property
   } catch {
     // Silent fail - API might not be available
     return null;
@@ -163,14 +147,9 @@ export async function getTestResults(): Promise<RunTestsResponse | null> {
  */
 export async function getTestStatus(): Promise<{ running: boolean; currentTest?: string }> {
   try {
-    const response = await fetch(`${API_BASE}/api/tests/status`);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch status: ${response.statusText}`);
-    }
-
-    const json = await response.json();
-    return json.data || json; // Backend wraps response in data property
+    const response =
+      await apiRequest<ApiWrapper<{ running: boolean; currentTest?: string }>>('/api/tests/status');
+    return unwrapApiData(response); // Backend wraps response in data property
   } catch (error) {
     console.error('Failed to fetch test status:', error);
     return { running: false };

@@ -7,10 +7,6 @@ interface LogsResponse {
   data?: DevLogEntry[];
 }
 
-function readAccessToken(): string | null {
-  return globalThis.localStorage?.getItem('accessToken') ?? null;
-}
-
 export function useRealLogs() {
   const [logs, setLogs] = useState<DevLogEntry[]>([]);
   const [connected, setConnected] = useState(false);
@@ -30,14 +26,7 @@ export function useRealLogs() {
       })
       .catch(() => undefined);
 
-    const token = readAccessToken();
-    if (!token) {
-      return () => {
-        closed = true;
-      };
-    }
-
-    const events = new EventSource(`/api/logs/stream?token=${encodeURIComponent(token)}`);
+    const events = new EventSource('/api/logs/stream', { withCredentials: true });
     events.onopen = () => setConnected(true);
     events.onerror = () => setConnected(false);
     events.onmessage = (event) => {

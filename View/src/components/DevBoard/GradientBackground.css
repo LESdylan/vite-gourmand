@@ -10,22 +10,22 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 0;
+  z-index: var(--z-base);
   overflow: hidden;
   background: linear-gradient(
     135deg,
     #f0f4ff 0%,
-    #faf5ff 25%,
+    var(--color-primary-50) 25%,
     #f5f3ff 50%,
     #f0fdfa 75%,
-    #f0f9ff 100%
+    var(--color-sky-50) 100%
   );
 }
 
 /* Gradient orbs - vivid and beautiful */
 .gradient-orb {
   position: absolute;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   filter: blur(60px);
   opacity: 0.6;
   mix-blend-mode: multiply;
@@ -38,8 +38,8 @@
   height: 700px;
   background: radial-gradient(
     circle,
-    rgba(139, 92, 246, 0.5) 0%,
-    rgba(168, 85, 247, 0.3) 40%,
+    var(--color-violet-overlay-50) 0%,
+    var(--color-purple-overlay-30) 40%,
     rgba(139, 92, 246, 0) 70%
   );
   top: -250px;
@@ -68,7 +68,7 @@
   height: 500px;
   background: radial-gradient(
     circle,
-    rgba(16, 185, 129, 0.35) 0%,
+    var(--color-success-overlay-35) 0%,
     rgba(52, 211, 153, 0.2) 40%,
     rgba(16, 185, 129, 0) 70%
   );
@@ -100,12 +100,12 @@
   height: 400px;
   background: radial-gradient(
     circle,
-    rgba(99, 102, 241, 0.3) 0%,
+    var(--color-secondary-overlay-30) 0%,
     rgba(99, 102, 241, 0) 70%
   );
   bottom: 15%;
   right: 10%;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   filter: blur(50px);
   animation: floatSecondary 28s ease-in-out infinite reverse;
 }

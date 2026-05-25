@@ -9,7 +9,7 @@
   justify-content: space-between;
   height: var(--header-height);
   padding: 0 var(--space-4);
-  background: #fff;
+  background: var(--color-bg-secondary);
   border-bottom: 1px solid var(--color-border-primary);
   flex-shrink: 0;
   position: sticky;
@@ -50,7 +50,7 @@
 
 .header-title {
   font-size: var(--text-base);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
@@ -72,9 +72,9 @@
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 }
 
 .header-nav-item:hover {
@@ -129,7 +129,7 @@
   border: none;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 }
 
 .header-action-btn svg {

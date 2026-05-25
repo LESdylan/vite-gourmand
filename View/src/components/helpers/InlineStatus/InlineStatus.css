@@ -20,15 +20,15 @@
   justify-content: center;
   width: 1rem;
   height: 1rem;
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs1);
   border-radius: var(--radius-full);
 }
 
 /* Status variants - Bordeaux palette */
 .inline-status-success {
   color: var(--color-success-500);
-  background: rgba(107, 142, 35, 0.2);
-  border: 1px solid rgba(107, 142, 35, 0.4);
+  background: var(--color-olive-overlay-20);
+  border: 1px solid var(--color-olive-overlay-40);
 }
 
 .inline-status-success .inline-status-icon {
@@ -38,8 +38,8 @@
 
 .inline-status-error {
   color: var(--color-danger-500);
-  background: rgba(169, 30, 44, 0.2);
-  border: 1px solid rgba(169, 30, 44, 0.4);
+  background: var(--color-wine-overlay-red-20);
+  border: 1px solid var(--color-wine-red-40);
 }
 
 .inline-status-error .inline-status-icon {
@@ -60,8 +60,8 @@
 
 .inline-status-info {
   color: var(--color-primary-300);
-  background: rgba(114, 47, 55, 0.2);
-  border: 1px solid rgba(114, 47, 55, 0.4);
+  background: var(--color-wine-overlay-20);
+  border: 1px solid var(--color-wine-overlay-40);
 }
 
 .inline-status-info .inline-status-icon {
@@ -90,12 +90,12 @@
 @media (max-width: 640px) {
   .inline-status {
     padding: var(--space-1) var(--space-2);
-    font-size: 0.65rem;
+    font-size: var(--font-size-xs1);
   }
 
   .inline-status-icon {
     width: 0.875rem;
     height: 0.875rem;
-    font-size: 0.5rem;
+    font-size: var(--font-size-2xs);
   }
 }

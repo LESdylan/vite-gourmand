@@ -16,9 +16,9 @@
 /* Header */
 .kanban-header {
   position: relative;
-  z-index: 10;
+  z-index: var(--z-1)0;
   padding: var(--space-4) var(--space-5);
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--color-white-85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border-primary);
   position: sticky;
@@ -38,7 +38,7 @@
   padding: var(--space-2) var(--space-3);
   background: var(--color-bg-tertiary);
   border-radius: var(--radius-md);
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .back-link:hover {
@@ -53,9 +53,9 @@
 
 .kanban-header h1 {
   margin: 0 0 0.25rem;
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   color: var(--color-text-primary);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .header-description {
@@ -80,8 +80,8 @@
 }
 
 .stat-value {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-primary-700);
 }
 
@@ -95,13 +95,13 @@
 /* Kanban Board */
 .kanban-board-wrapper {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-1);
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
   padding: var(--space-4);
   -webkit-overflow-scrolling: touch;
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--color-white-40);
   backdrop-filter: blur(4px);
 }
 
@@ -111,12 +111,12 @@
 
 .kanban-board-wrapper::-webkit-scrollbar-track {
   background: var(--color-bg-tertiary);
-  border-radius: 5px;
+  border-radius: var(--radius-md);
 }
 
 .kanban-board-wrapper::-webkit-scrollbar-thumb {
   background: var(--color-primary-300);
-  border-radius: 5px;
+  border-radius: var(--radius-md);
 }
 
 .kanban-board-wrapper::-webkit-scrollbar-thumb:hover {
@@ -133,9 +133,9 @@
 /* Footer / Legend */
 .kanban-footer {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-1);
   padding: var(--space-3) var(--space-5);
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--color-white-85);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border-primary);
   display: flex;
@@ -161,7 +161,7 @@
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .legend-item.priority-urgent {
@@ -188,7 +188,7 @@
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Responsive */
@@ -205,11 +205,11 @@
 
 @media (max-width: 768px) {
   .kanban-header h1 {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 
   .back-link {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     padding: 0.375rem 0.625rem;
   }
 
@@ -228,7 +228,7 @@
   }
 
   .legend h4 {
-    font-size: 0.7rem;
+    font-size: var(--font-size-xs0);
   }
 }
 
@@ -243,6 +243,6 @@
   }
 
   .stat-value {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 }

@@ -12,16 +12,28 @@ interface LazyImageProps {
   alt: string;
   className?: string;
   fallback?: string;
+  srcSet?: string;
+  sizes?: string;
+  width?: number;
+  height?: number;
+  loading?: 'eager' | 'lazy';
+  fetchPriority?: 'high' | 'low' | 'auto';
 }
 
 const DEFAULT_FALLBACK =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=480&q=60&auto=format&fit=crop';
 
 export default function LazyImage({
   src,
   alt,
   className = '',
   fallback = DEFAULT_FALLBACK,
+  srcSet,
+  sizes,
+  width,
+  height,
+  loading = 'lazy',
+  fetchPriority = 'auto',
 }: LazyImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -36,37 +48,28 @@ export default function LazyImage({
     <div className={`relative overflow-hidden ${className}`}>
       {/* Skeleton placeholder — visible while loading */}
       {!loaded && (
-        <div className="absolute inset-0 bg-[#1A1A1A]/5 animate-pulse">
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
-              backgroundSize: '200% 100%',
-              animation: 'lazyImageShimmer 1.5s ease-in-out infinite',
-            }}
-          />
+        <div className="absolute inset-0 bg-[#1A1A1A]/5">
+          <div className="absolute inset-0 lazy-image-shimmer" />
         </div>
       )}
 
       {/* Actual image */}
       <img
         src={error ? fallback : src}
+        srcSet={error ? undefined : srcSet}
+        sizes={sizes}
         alt={alt}
-        loading="lazy"
+        width={width}
+        height={height}
+        loading={loading}
+        fetchPriority={fetchPriority}
+        decoding="async"
         onLoad={handleLoad}
         onError={handleError}
         className={`w-full h-full object-cover transition-opacity duration-300 ${
           loaded ? 'opacity-100' : 'opacity-0'
         }`}
       />
-
-      <style>{`
-        @keyframes lazyImageShimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-      `}</style>
     </div>
   );
 }

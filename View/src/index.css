@@ -1,5 +1,5 @@
 /* Tailwind CSS v4 */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Import design system variables */
 @import './styles/graphical_chart.css';
@@ -13,7 +13,8 @@
     box-sizing: border-box;
   }
 
-  html, body {
+  html,
+  body {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -71,12 +72,41 @@ a:hover {
   text-decoration: none;
 }
 
+a:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 3px;
+}
+
+.lazy-image-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-white-40) 50%,
+    transparent 100%
+  ); /* shimmer mid-stop has no exact token — intentionally left inline */
+  background-size: 200% 100%;
+  animation: lazyImageShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes lazyImageShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 /* Scale up on large displays for readability */
 @media (min-width: 1920px) {
-  html { font-size: 17px; }
+  html {
+    font-size: 17px;
+  }
 }
 @media (min-width: 2560px) {
-  html { font-size: 18px; }
+  html {
+    font-size: 18px;
+  }
 }
 
 /* Smooth scrolling */
@@ -97,16 +127,43 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.15);
-  border-radius: 3px;
+  background: var(--color-black-15);
+  border-radius: var(--radius-xs);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0,0,0,0.25);
+  background: var(--color-black-25);
 }
 
 /* Toast slide-in animation */
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(100%); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
 }

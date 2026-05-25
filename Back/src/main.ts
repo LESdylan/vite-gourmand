@@ -8,30 +8,156 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { Request, Response, NextFunction } from 'express';
 import { AppModule } from './app.module';
+import {
+  AUTH_COOKIE_NAME,
+  AUTH_CSRF_COOKIE_NAME,
+} from './auth/auth-cookie.constants';
+
+const CSRF_SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const CSRF_EXEMPT_PATHS = new Set([
+  '/api/auth/register',
+  '/api/auth/login',
+  '/api/auth/logout',
+  '/api/auth/google/token',
+  '/api/auth/forgot-password',
+  '/api/auth/verify-reset-token',
+  '/api/auth/reset-password',
+]);
+
+function parseCookies(cookieHeader?: string): Record<string, string> {
+  if (!cookieHeader) return {};
+
+  return cookieHeader
+    .split(';')
+    .reduce<Record<string, string>>((cookies, cookie) => {
+      const [rawName, ...rawValueParts] = cookie.trim().split('=');
+      if (!rawName) return cookies;
+
+      const rawValue = rawValueParts.join('=');
+      try {
+        cookies[rawName] = decodeURIComponent(rawValue);
+      } catch {
+        cookies[rawName] = rawValue;
+      }
+      return cookies;
+    }, {});
+}
+
+function readSingleHeader(
+  header: string | string[] | undefined,
+): string | null {
+  if (!header || Array.isArray(header)) return null;
+  return header;
+}
+
+function csrfProtection(req: Request, res: Response, next: NextFunction): void {
+  if (CSRF_SAFE_METHODS.has(req.method.toUpperCase())) {
+    next();
+    return;
+  }
+
+  if (!req.path.startsWith('/api') || CSRF_EXEMPT_PATHS.has(req.path)) {
+    next();
+    return;
+  }
+
+  const cookies = parseCookies(req.headers.cookie);
+  if (!cookies[AUTH_COOKIE_NAME]) {
+    next();
+    return;
+  }
+
+  const csrfCookie = cookies[AUTH_CSRF_COOKIE_NAME];
+  const csrfHeader = readSingleHeader(req.headers['x-csrf-token']);
+
+  if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
+    res.status(403).json({
+      statusCode: 403,
+      message: 'Invalid CSRF token',
+      error: 'Forbidden',
+    });
+    return;
+  }
+
+  next();
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = new Logger('Bootstrap');
+
+  // Security headers with Helmet
+  // Configured to allow Google Identity Services (popup-based OAuth)
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          'default-src': ["'self'"],
+          'base-uri': ["'self'"],
+          'object-src': ["'none'"],
+          'form-action': ["'self'"],
+          'frame-ancestors': ["'none'"],
+          'script-src': [
+            "'self'",
+            "'unsafe-inline'",
+            'https://accounts.google.com',
+          ],
+          'style-src': ["'self'", "'unsafe-inline'"],
+          'font-src': ["'self'", 'data:'],
+          'img-src': [
+            "'self'",
+            'data:',
+            'blob:',
+            'https://images.unsplash.com',
+          ],
+          'connect-src': [
+            "'self'",
+            process.env.FRONTEND_URL || 'http://localhost:5173',
+          ],
+          'frame-src': ["'self'", 'https://accounts.google.com'],
+          ...(process.env.NODE_ENV === 'production'
+            ? { 'upgrade-insecure-requests': [] }
+            : {}),
+        },
+      },
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow Google OAuth popup
+      crossOriginEmbedderPolicy: false, // Disable for Google scripts
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    }),
+  );
+
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader(
+      'Permissions-Policy',
+      'camera=(), microphone=(), geolocation=()',
+    );
+    next();
+  });
+
+  // Response compression for better performance
+  app.use(compression());
 
   // Serve static frontend files in production
   // In production: __dirname = /app/dist/src, so we go up 2 levels to /app
   if (process.env.NODE_ENV === 'production') {
     const publicPath = join(__dirname, '..', '..', 'public');
     logger.log(`📁 Static assets path: ${publicPath}`);
-    app.useStaticAssets(publicPath);
+    app.useStaticAssets(publicPath, {
+      setHeaders: (res, filePath) => {
+        const normalizedPath = filePath.replace(/\\/g, '/');
+        if (normalizedPath.includes('/assets/')) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          return;
+        }
+        if (normalizedPath.endsWith('/index.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          return;
+        }
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+      },
+    });
   }
-
-  // Security headers with Helmet
-  // Configured to allow Google Identity Services (popup-based OAuth)
-  app.use(
-    helmet({
-      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow Google OAuth popup
-      crossOriginEmbedderPolicy: false, // Disable for Google scripts
-    }),
-  );
-
-  // Response compression for better performance
-  app.use(compression());
 
   // Enable CORS for frontend
   app.enableCors({
@@ -40,7 +166,10 @@ async function bootstrap() {
       'http://localhost:5174',
     ],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   });
+
+  app.use(csrfProtection);
 
   // Global prefix for API routes
   app.setGlobalPrefix('api');
@@ -74,6 +203,7 @@ async function bootstrap() {
           return next();
         }
         // Serve index.html for SPA client-side routing
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.sendFile(indexPath);
       });
     } else {

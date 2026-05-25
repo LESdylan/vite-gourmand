@@ -22,7 +22,7 @@ export interface AuthUserMapped {
 
 export interface AuthResponse {
   user: AuthUserMapped;
-  accessToken: string;
+  accessToken?: string;
   refreshToken?: string;
 }
 
@@ -34,7 +34,7 @@ interface ApiWrapper<T> {
 
 interface RawAuthResponse {
   user: AuthUser;
-  accessToken: string;
+  accessToken?: string;
   refreshToken?: string;
 }
 
@@ -74,7 +74,6 @@ export async function register(data: RegisterData): Promise<AuthResponse> {
   return { ...response, user: mapUser(response.user) };
 }
 
-/** Login with email and password */
 export async function login(data: LoginData): Promise<AuthResponse> {
   const wrapper = await apiRequest<ApiWrapper<RawAuthResponse>>('/api/auth/login', {
     method: 'POST',
@@ -110,7 +109,11 @@ export async function verifyResetToken(
   token: string,
 ): Promise<{ valid: boolean; message: string }> {
   const wrapper = await apiRequest<ApiWrapper<{ valid: boolean; message: string }>>(
-    `/api/auth/verify-reset-token?token=${encodeURIComponent(token)}`,
+    '/api/auth/verify-reset-token',
+    {
+      method: 'POST',
+      body: { token },
+    },
   );
   return wrapper.data;
 }
@@ -126,6 +129,7 @@ export async function resetPassword(token: string, password: string): Promise<{ 
 
 /** Logout user */
 export function logout(): void {
+  void apiRequest('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
   clearTokens();
 }
 
@@ -144,5 +148,6 @@ export async function getGoogleConfig(): Promise<{ clientId: string | null }> {
 /** Get current user profile */
 export async function getProfile(): Promise<AuthUserMapped> {
   const wrapper = await apiRequest<ApiWrapper<AuthUser>>('/api/auth/me');
+  setTokens();
   return mapUser(wrapper.data);
 }

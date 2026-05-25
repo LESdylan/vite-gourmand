@@ -23,7 +23,27 @@ const MODEL_TO_ENDPOINT: Record<string, string> = {
 };
 
 /** Fields that contain sensitive data — shown masked in the table */
-export const SENSITIVE_FIELDS = new Set(['password', 'password_hash']);
+export const SENSITIVE_FIELDS = new Set([
+  'password',
+  'password_hash',
+  'access_token',
+  'refresh_token',
+  'token',
+  'secret',
+  'api_key',
+]);
+
+function logDatabaseDebug(message: string, ...args: unknown[]): void {
+  if (import.meta.env.DEV) {
+    console.debug(message, ...args);
+  }
+}
+
+function logDatabaseWarning(message: string, error?: unknown): void {
+  if (import.meta.env.DEV) {
+    console.warn(message, error);
+  }
+}
 
 /** Schema column from backend */
 interface SchemaColumn {
@@ -45,22 +65,22 @@ export class DatabaseService {
   /** Fetch database schema from backend (Prisma DMMF) */
   static async getSchema(): Promise<SchemaModel[]> {
     try {
-      console.log('[DatabaseService] Fetching schema from', `${BASE}/schema`);
+      logDatabaseDebug('[DatabaseService] Fetching schema from', `${BASE}/schema`);
       const response = (await apiRequest(`${BASE}/schema`)) as
         | { data?: SchemaModel[] }
         | SchemaModel[];
-      console.log('[DatabaseService] Raw schema response:', response);
+      logDatabaseDebug('[DatabaseService] Raw schema response:', response);
 
       // Handle wrapped response { success, data } or direct array
       if (Array.isArray(response)) {
-        console.log('[DatabaseService] Response is array with', response.length, 'items');
+        logDatabaseDebug('[DatabaseService] Response is array with', response.length, 'items');
         return response;
       }
       const data = response.data || [];
-      console.log('[DatabaseService] Extracted data with', data.length, 'items');
+      logDatabaseDebug('[DatabaseService] Extracted data with', data.length, 'items');
       return data;
     } catch (error) {
-      console.error('[DatabaseService] Failed to fetch schema:', error);
+      logDatabaseWarning('[DatabaseService] Failed to fetch schema:', error);
       return [];
     }
   }
@@ -68,11 +88,11 @@ export class DatabaseService {
   /** Fetch row counts for all tables */
   static async getCounts(): Promise<Record<string, number>> {
     try {
-      console.log('[DatabaseService] Fetching counts from', `${BASE}/counts`);
+      logDatabaseDebug('[DatabaseService] Fetching counts from', `${BASE}/counts`);
       const response = (await apiRequest(`${BASE}/counts`)) as
         | { data?: Record<string, number> }
         | Record<string, number>;
-      console.log('[DatabaseService] Raw counts response:', response);
+      logDatabaseDebug('[DatabaseService] Raw counts response:', response);
 
       // Handle wrapped response { success, data } or direct object
       if (response && typeof response === 'object' && 'data' in response) {
@@ -80,7 +100,7 @@ export class DatabaseService {
       }
       return response as Record<string, number>;
     } catch (error) {
-      console.error('[DatabaseService] Failed to fetch counts:', error);
+      logDatabaseWarning('[DatabaseService] Failed to fetch counts:', error);
       return {};
     }
   }
@@ -89,8 +109,8 @@ export class DatabaseService {
   static async getTables(): Promise<TableMeta[]> {
     // Fetch schema and counts in parallel
     const [schema, counts] = await Promise.all([this.getSchema(), this.getCounts()]);
-    console.log('[DatabaseService] Schema loaded:', schema.length, 'tables');
-    console.log('[DatabaseService] Counts loaded:', counts);
+    logDatabaseDebug('[DatabaseService] Schema loaded:', schema.length, 'tables');
+    logDatabaseDebug('[DatabaseService] Counts loaded:', counts);
 
     const tables = schema
       .filter((model) => MODEL_TO_ENDPOINT[model.name]) // Only include models with endpoints
@@ -107,7 +127,7 @@ export class DatabaseService {
         rowCount: counts[model.name] || 0,
       }));
 
-    console.log(
+    logDatabaseDebug(
       '[DatabaseService] Tables with endpoints:',
       tables.map((t) => `${t.name}(${t.rowCount})`),
     );
@@ -122,7 +142,7 @@ export class DatabaseService {
   ): Promise<{ data: TableRecord[]; total: number }> {
     const endpoint = MODEL_TO_ENDPOINT[table];
     if (!endpoint) {
-      console.warn(`No endpoint for table: ${table}`);
+      logDatabaseWarning(`No endpoint for table: ${table}`);
       return { data: [], total: 0 };
     }
 
@@ -131,7 +151,7 @@ export class DatabaseService {
 
     try {
       const response = (await apiRequest(url)) as unknown;
-      console.log(`[DatabaseService] Response for ${table}:`, response);
+      logDatabaseDebug(`[DatabaseService] Response for ${table}:`, response);
 
       // Handle various response formats:
       // 1. Wrapped: { success, data: { data: [], total } }
@@ -160,7 +180,7 @@ export class DatabaseService {
 
       return { data: [], total: 0 };
     } catch (error) {
-      console.error(`Error fetching ${table}:`, error);
+      logDatabaseWarning(`Error fetching ${table}:`, error);
       return { data: [], total: 0 };
     }
   }
@@ -227,15 +247,15 @@ export class DatabaseService {
     }>,
   ): Promise<{ success: boolean; message: string }> {
     try {
-      console.log('[DatabaseService] Creating table:', tableName, columns);
+      logDatabaseDebug('[DatabaseService] Creating table:', tableName, columns);
       const response = (await apiRequest(`${BASE}/schema/table`, {
         method: 'POST',
         body: { tableName, columns },
       })) as { success: boolean; message: string };
-      console.log('[DatabaseService] Create table response:', response);
+      logDatabaseDebug('[DatabaseService] Create table response:', response);
       return response;
     } catch (error) {
-      console.error('[DatabaseService] Failed to create table:', error);
+      logDatabaseWarning('[DatabaseService] Failed to create table:', error);
       throw error;
     }
   }
@@ -253,15 +273,15 @@ export class DatabaseService {
     },
   ): Promise<{ success: boolean; message: string }> {
     try {
-      console.log('[DatabaseService] Adding column to', tableName, ':', column);
+      logDatabaseDebug('[DatabaseService] Adding column to', tableName, ':', column);
       const response = (await apiRequest(`${BASE}/schema/column`, {
         method: 'POST',
         body: { tableName, column },
       })) as { success: boolean; message: string };
-      console.log('[DatabaseService] Add column response:', response);
+      logDatabaseDebug('[DatabaseService] Add column response:', response);
       return response;
     } catch (error) {
-      console.error('[DatabaseService] Failed to add column:', error);
+      logDatabaseWarning('[DatabaseService] Failed to add column:', error);
       throw error;
     }
   }
@@ -275,7 +295,7 @@ export class DatabaseService {
       }
       return response.data || [];
     } catch (error) {
-      console.error('[DatabaseService] Failed to get all tables:', error);
+      logDatabaseWarning('[DatabaseService] Failed to get all tables:', error);
       return [];
     }
   }
@@ -310,7 +330,7 @@ export class DatabaseService {
       }
       return (response as { data?: FullSchemaResult }).data || [];
     } catch (error) {
-      console.error('[DatabaseService] Failed to get full schema:', error);
+      logDatabaseWarning('[DatabaseService] Failed to get full schema:', error);
       return [];
     }
   }
@@ -337,7 +357,7 @@ export class DatabaseService {
       }
       return (response as { data?: ForeignKeyResult }).data || [];
     } catch (error) {
-      console.error('[DatabaseService] Failed to get foreign keys:', error);
+      logDatabaseWarning('[DatabaseService] Failed to get foreign keys:', error);
       return [];
     }
   }

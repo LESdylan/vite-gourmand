@@ -4,13 +4,13 @@
 
 /* === CONTAINER with 3D shadow === */
 .atl {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-gray-200);
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -2px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.02);
+    0 4px 6px -1px var(--color-black-10),
+    0 2px 4px -2px var(--color-black-10),
+    0 0 0 1px var(--color-black-02);
   overflow: hidden;
 }
 
@@ -28,17 +28,17 @@
 
 /* === HEADER === */
 .atl__head {
-  background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
-  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(to bottom, var(--color-gray-50), var(--color-bg-tertiary));
+  border-bottom: 1px solid var(--color-gray-200);
 }
 .atl__th {
   padding: 12px 16px;
   text-align: left;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-size-xs0);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #6b7280;
+  color: var(--color-gray-500);
   white-space: nowrap;
 }
 .atl__th--name {
@@ -65,5 +65,5 @@
   .atl__th--name { width: 70%; }
 }
 @media (max-width: 500px) {
-  .atl__th { padding: 10px 12px; font-size: 10px; }
+  .atl__th { padding: 10px 12px; font-size: var(--font-size-xs2); }
 }

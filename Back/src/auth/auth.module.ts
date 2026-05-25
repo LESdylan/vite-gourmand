@@ -23,7 +23,7 @@ import { NewsletterModule } from '../newsletter';
         secret:
           config.get<string>('JWT_SECRET') ||
           'fallback-secret-change-in-production',
-        signOptions: { expiresIn: '7d' as const },
+        signOptions: { expiresIn: '15m' as const },
       }),
       inject: [ConfigService],
     }),

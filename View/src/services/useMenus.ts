@@ -25,7 +25,13 @@ export interface UseMenusActions {
 
 export interface UseMenusResult extends UseMenusState, UseMenusActions {}
 
-export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
+function logMenuWarning(message: string, error: unknown) {
+  if (import.meta.env.DEV) {
+    console.warn(message, error);
+  }
+}
+
+export function useMenus(initialFilters: MenuFilters = {}, initialDelayMs = 0): UseMenusResult {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [themes, setThemes] = useState<Theme[]>([]);
@@ -50,7 +56,7 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
       setMeta(result.meta);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to fetch menus');
-      console.error('Error fetching menus:', e);
+      logMenuWarning('Error fetching menus:', e);
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +67,7 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
       const result = await menuService.getThemes();
       setThemes(result);
     } catch (e) {
-      console.error('Error fetching themes:', e);
+      logMenuWarning('Error fetching themes:', e);
     }
   }, []);
 
@@ -70,7 +76,7 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
       const result = await menuService.getDiets();
       setDiets(result);
     } catch (e) {
-      console.error('Error fetching diets:', e);
+      logMenuWarning('Error fetching diets:', e);
     }
   }, []);
 
@@ -78,23 +84,25 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
     setIsLoading(true);
     setError(null);
     try {
-      // Fetch all in parallel, but ensure isLoading reflects menu fetch state
-      const [menuResult] = await Promise.all([
-        menuService.getMenus(filtersRef.current),
-        menuService
-          .getThemes()
-          .then(setThemes)
-          .catch((e) => console.error('Error fetching themes:', e)),
-        menuService
-          .getDiets()
-          .then(setDiets)
-          .catch((e) => console.error('Error fetching diets:', e)),
-      ]);
+      const menuResult = await menuService.getMenus(filtersRef.current);
       setMenus(menuResult.menus);
       setMeta(menuResult.meta);
+
+      window.setTimeout(() => {
+        void Promise.all([
+          menuService
+            .getThemes()
+            .then(setThemes)
+            .catch((e) => logMenuWarning('Error fetching themes:', e)),
+          menuService
+            .getDiets()
+            .then(setDiets)
+            .catch((e) => logMenuWarning('Error fetching diets:', e)),
+        ]);
+      }, 2500);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to fetch menus');
-      console.error('Error fetching menus:', e);
+      logMenuWarning('Error fetching menus:', e);
     } finally {
       setIsLoading(false);
     }
@@ -102,8 +110,9 @@ export function useMenus(initialFilters: MenuFilters = {}): UseMenusResult {
 
   // Initial fetch — stable refetch reference, no re-runs
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    const timer = window.setTimeout(refetch, initialDelayMs);
+    return () => window.clearTimeout(timer);
+  }, [initialDelayMs, refetch]);
 
   return {
     menus,

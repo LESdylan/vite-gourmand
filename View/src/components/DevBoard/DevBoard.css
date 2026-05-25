@@ -19,7 +19,7 @@ body:has(.devboard) {
   padding: 0;
   background: transparent; /* Let gradient show through */
   color: var(--color-text-primary);
-  z-index: 1; /* Above the fixed gradient background */
+  z-index: var(--z-1); /* Above the fixed gradient background */
 }
 
 .devboard-body {

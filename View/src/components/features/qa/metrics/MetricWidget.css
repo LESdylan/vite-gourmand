@@ -4,7 +4,7 @@
  */
 
 .metric-widget {
-  background: #ffffff;
+  background: var(--color-bg-secondary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
@@ -13,18 +13,18 @@
   gap: var(--space-1);
   position: relative;
   overflow: hidden;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all var(--transition-fast);
+  box-shadow: 0 1px 3px var(--color-black-04);
 }
 
 .metric-widget:hover {
   border-color: var(--color-primary-300);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--color-black-06);
 }
 
 .metric-widget-label {
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs1);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -38,22 +38,22 @@
 
 .metric-widget-value {
   font-size: clamp(1.1rem, 2.5vw, 1.35rem);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   font-family: var(--font-mono);
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: var(--line-height-1-1);
 }
 
 .metric-widget-unit {
-  font-size: 0.7rem;
+  font-size: var(--font-size-xs0);
   color: var(--color-text-tertiary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .metric-widget-trend {
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs1);
+  font-weight: var(--font-weight-semibold);
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -65,12 +65,12 @@
 
 .metric-widget-trend--up {
   color: var(--color-danger-600);
-  background: rgba(244, 63, 94, 0.1);
+  background: var(--color-danger-overlay-10);
 }
 
 .metric-widget-trend--down {
   color: var(--color-success-600);
-  background: rgba(16, 185, 129, 0.1);
+  background: var(--color-success-overlay-10);
 }
 
 .metric-widget-trend--stable {
@@ -102,7 +102,7 @@
   .metric-widget-label {
     order: 1;
     flex: 1;
-    font-size: 0.6rem;
+    font-size: var(--font-size-xs1);
   }
 
   .metric-widget-value-row {
@@ -113,17 +113,17 @@
   }
 
   .metric-widget-value {
-    font-size: 1.1rem;
+    font-size: var(--font-size-base-lg);
   }
 
   .metric-widget-unit {
-    font-size: 0.6rem;
+    font-size: var(--font-size-xs1);
   }
 
   .metric-widget-trend {
     order: 3;
     padding: 2px 4px;
-    font-size: 0.6rem;
+    font-size: var(--font-size-xs1);
     margin-top: 0;
   }
 }
@@ -136,15 +136,15 @@
   }
 
   .metric-widget-label {
-    font-size: 0.55rem;
+    font-size: var(--font-size-2xs);
   }
 
   .metric-widget-value {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   .metric-widget-unit {
-    font-size: 0.55rem;
+    font-size: var(--font-size-2xs);
   }
 }
 
@@ -158,7 +158,7 @@
   }
 
   .metric-widget-label {
-    font-size: 0.5rem;
+    font-size: var(--font-size-2xs);
     order: unset;
   }
 
@@ -169,16 +169,16 @@
   }
 
   .metric-widget-value {
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm-plus);
   }
 
   .metric-widget-unit {
-    font-size: 0.5rem;
+    font-size: var(--font-size-2xs);
   }
 
   .metric-widget-trend {
     order: unset;
-    font-size: 0.5rem;
+    font-size: var(--font-size-2xs);
     padding: 1px 3px;
   }
 }

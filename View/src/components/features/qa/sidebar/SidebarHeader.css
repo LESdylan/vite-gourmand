@@ -9,7 +9,7 @@
   justify-content: space-between;
   padding: var(--space-5) var(--space-4);
   border-bottom: 1px solid var(--color-border-primary);
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--color-white-60);
 }
 
 .sidebar-logo {
@@ -19,7 +19,7 @@
 }
 
 .sidebar-logo-icon {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   width: 36px;
   height: 36px;
   display: flex;
@@ -28,12 +28,12 @@
   background: linear-gradient(135deg, var(--color-primary-500), var(--color-accent-500));
   border-radius: var(--radius-lg);
   color: white;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+  box-shadow: var(--shadow-primary-sm);
 }
 
 .sidebar-logo-text {
   font-size: var(--font-size-lg);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
@@ -51,14 +51,14 @@
   color: var(--color-neutral-400);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
   opacity: 0.6;
 }
 
 .sidebar-collapse-toggle svg {
   width: 16px;
   height: 16px;
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-normal);
 }
 
 .sidebar-collapse-toggle:hover {
@@ -81,7 +81,7 @@
   .sidebar-logo-icon {
     width: 32px;
     height: 32px;
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 
   .sidebar-logo-text {

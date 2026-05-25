@@ -39,7 +39,13 @@ export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const token = searchParams.get('token');
+  const [token] = useState(() => searchParams.get('token'));
+
+  useEffect(() => {
+    if (searchParams.has('token')) {
+      navigate('/reset-password', { replace: true });
+    }
+  }, [navigate, searchParams]);
 
   // Token verification state
   const [verifying, setVerifying] = useState(true);

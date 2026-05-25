@@ -35,7 +35,7 @@
 .text-input:focus {
   outline: none;
   border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: var(--shadow-focus-ring);
 }
 
 .text-input:disabled {
@@ -58,7 +58,7 @@
 }
 
 .text-input-error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  box-shadow: var(--shadow-focus-danger);
 }
 
 .input-error {

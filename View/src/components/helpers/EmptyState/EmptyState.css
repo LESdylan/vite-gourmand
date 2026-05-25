@@ -14,7 +14,7 @@
 }
 
 .empty-state-icon {
-  font-size: 3rem;
+  font-size: var(--font-size-6xl);
   color: var(--color-text-tertiary);
 }
 

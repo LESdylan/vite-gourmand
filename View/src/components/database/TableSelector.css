@@ -7,9 +7,9 @@
 }
 
 .table-selector label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text, #1a1a2e);
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text, var(--color-wine-900));
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -17,19 +17,19 @@
 
 .table-selector label::before {
   content: '🗄️';
-  font-size: 1.1rem;
+  font-size: var(--font-size-base-lg);
 }
 
 .table-selector select {
   padding: 0.75rem 2.5rem 0.75rem 1rem;
-  border: 2px solid var(--color-border, #e2e8f0);
-  border-radius: var(--radius-md, 8px);
-  background: var(--color-surface, #fff);
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--color-text, #1a1a2e);
+  border: 2px solid var(--color-border, var(--color-neutral-200));
+  border-radius: var(--radius-md);
+  background: var(--color-surface, var(--color-bg-secondary));
+  font-size: var(--font-size-base-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text, var(--color-wine-900));
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all var(--transition-fast);
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -38,16 +38,16 @@
 }
 
 .table-selector select:hover {
-  border-color: var(--color-primary-light, #a78bfa);
+  border-color: var(--color-primary-light, var(--color-violet-400));
 }
 
 .table-selector select:focus {
   outline: none;
-  border-color: var(--color-primary, #7e3af2);
-  box-shadow: 0 0 0 3px rgba(126, 58, 242, 0.1);
+  border-color: var(--color-primary, var(--color-primary-700));
+  box-shadow: var(--shadow-focus-primary-alt);
 }
 
 .table-selector select option {
   padding: 0.5rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }

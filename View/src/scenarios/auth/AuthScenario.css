@@ -13,12 +13,12 @@
 
 .auth-header {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-1);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4) var(--space-6);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--color-white-80);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border-primary);
 }
@@ -30,7 +30,7 @@
   padding: var(--space-2) var(--space-3);
   background: var(--color-bg-tertiary);
   border-radius: var(--radius-md);
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .auth-back-link:hover {
@@ -45,12 +45,12 @@
 }
 
 .auth-logo-icon {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
 }
 
 .auth-logo-text {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-400));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -59,7 +59,7 @@
 
 .auth-content {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-1);
   flex: 1;
   display: flex;
   align-items: center;
@@ -68,7 +68,7 @@
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-white-90);
   backdrop-filter: blur(16px);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
@@ -78,12 +78,12 @@
 
 .auth-footer {
   position: relative;
-  z-index: 1;
+  z-index: var(--z-1);
   padding: var(--space-4) var(--space-6);
   text-align: center;
   color: var(--color-text-tertiary);
   font-size: var(--text-sm);
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--color-white-60);
   backdrop-filter: blur(8px);
 }
 

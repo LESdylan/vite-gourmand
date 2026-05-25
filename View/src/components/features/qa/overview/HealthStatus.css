@@ -34,7 +34,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   flex-shrink: 0;
 }
 
@@ -51,8 +51,8 @@
 }
 
 .health-status-icon {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
 }
 
 .health-status--healthy .health-status-icon {
@@ -70,7 +70,7 @@
 .health-status-pulse {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   border: 2px solid currentColor;
   animation: healthPulse 2s ease-in-out infinite;
 }
@@ -87,8 +87,8 @@
 
 .health-status-title {
   margin: 0 0 var(--space-1) 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
@@ -106,9 +106,9 @@
 }
 
 .health-status-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  line-height: 1;
+  font-size: var(--font-size-2xl-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-none);
 }
 
 .health-status--healthy .health-status-value {
@@ -144,7 +144,7 @@
   }
 
   .health-status-icon {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 
   .health-status-metric {
@@ -157,7 +157,7 @@
   }
 
   .health-status-value {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
   }
 }
 
@@ -173,14 +173,14 @@
   }
 
   .health-status-icon {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   .health-status-title {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
   }
 
   .health-status-value {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 }

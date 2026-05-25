@@ -422,8 +422,6 @@ function FormattedContent({ content, isUser }: Readonly<{ content: string; isUse
     <>
       {lines.map((line, i) => {
         const key = `line-${i}`;
-        // Bold: **text**
-        const formatted = line.replaceAll(/\*\*(.+?)\*\*/g, '<b>$1</b>');
 
         // Headers / decorative lines
         if (line.startsWith('═') || line.startsWith('───')) {
@@ -454,7 +452,7 @@ function FormattedContent({ content, isUser }: Readonly<{ content: string; isUse
                 fontStyle: 'italic',
               }}
             >
-              <span dangerouslySetInnerHTML={{ __html: formatted.substring(2) }} />
+              {renderInlineFormatting(line.substring(2))}
             </div>
           );
         }
@@ -463,7 +461,7 @@ function FormattedContent({ content, isUser }: Readonly<{ content: string; isUse
         if (/^\d+\.\s/.test(line)) {
           return (
             <div key={key} style={{ paddingLeft: 8, margin: '3px 0' }}>
-              <span dangerouslySetInnerHTML={{ __html: formatted }} />
+              {renderInlineFormatting(line)}
             </div>
           );
         }
@@ -475,19 +473,28 @@ function FormattedContent({ content, isUser }: Readonly<{ content: string; isUse
         ) {
           return (
             <div key={key} style={{ paddingLeft: 4, margin: '3px 0' }}>
-              <span dangerouslySetInnerHTML={{ __html: formatted }} />
+              {renderInlineFormatting(line)}
             </div>
           );
         }
 
         return (
           <div key={key} style={{ margin: '2px 0' }}>
-            <span dangerouslySetInnerHTML={{ __html: formatted }} />
+            {renderInlineFormatting(line)}
           </div>
         );
       })}
     </>
   );
+}
+
+function renderInlineFormatting(text: string) {
+  return text.split(/(\*\*.+?\*\*)/g).map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <b key={`${part}-${index}`}>{part.slice(2, -2)}</b>;
+    }
+    return <span key={`${part}-${index}`}>{part}</span>;
+  });
 }
 
 function QuickParam({

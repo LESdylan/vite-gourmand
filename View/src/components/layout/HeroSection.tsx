@@ -3,6 +3,13 @@ import { ArrowRight, Phone, Star, Award, Users, Calendar, Sparkles } from 'lucid
 import { Button } from '../ui/button';
 import type { ReviewStats, SiteInfo } from '../../services/public';
 
+const HERO_IMAGE_BASE =
+  'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&crop=entropy&q=80';
+const HERO_IMAGE_SRC = `${HERO_IMAGE_BASE}&w=1280`;
+const HERO_IMAGE_SRCSET = [960, 1280, 1920]
+  .map((width) => `${HERO_IMAGE_BASE}&w=${width} ${width}w`)
+  .join(', ');
+
 interface HeroSectionProps {
   onExploreMenus: () => void;
   onContact: () => void;
@@ -41,13 +48,20 @@ export default function HeroSection({
 
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden bg-[#1A1A1A]">
-      {/* Background Image with parallax effect */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1555244162-803834f70033?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXRlcmluZyUyMGVsZWdhbnQlMjBmb29kfGVufDF8fHx8MTc3MDExMzI3Nnww&ixlib=rb-4.1.0&q=80&w=1920')`,
-        }}
-      >
+      {/* Background image is rendered as an img so the browser can prioritize the LCP asset. */}
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={HERO_IMAGE_SRC}
+          srcSet={HERO_IMAGE_SRCSET}
+          sizes="100vw"
+          alt="Buffet traiteur gastronomique prepare pour une reception"
+          width={1920}
+          height={1280}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-center"
+        />
         {/* Multi-layer overlay for depth */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A] via-[#1A1A1A]/85 to-[#1A1A1A]/50" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-[#1A1A1A]/40" />

@@ -11,7 +11,10 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
+import { randomBytes } from 'crypto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -21,6 +24,16 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/password.dto';
 import { ChangePasswordDto } from './dto/password.dto';
+import {
+  AUTH_COOKIE_MAX_AGE_MS,
+  AUTH_COOKIE_NAME,
+  AUTH_CSRF_COOKIE_NAME,
+} from './auth-cookie.constants';
+
+interface AuthResult {
+  accessToken: string;
+  user: unknown;
+}
 
 @ApiTags('auth')
 @Controller('auth')
@@ -33,16 +46,33 @@ export class AuthController {
   @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const authResult = await this.authService.register(dto);
+    return this.completeBrowserSession(res, authResult);
   }
 
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const authResult = await this.authService.login(dto);
+    return this.completeBrowserSession(res, authResult);
+  }
+
+  @Public()
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Clear browser authentication cookie' })
+  logout(@Res({ passthrough: true }) res: Response) {
+    this.clearAuthCookie(res);
+    return { message: 'Logged out' };
   }
 
   @Get('me')
@@ -61,11 +91,26 @@ export class AuthController {
   }
 
   @Public()
-  @Get('verify-reset-token')
+  @Post('verify-reset-token')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Verify if a password reset token is valid (without consuming it)',
   })
-  async verifyResetToken(@Req() req: { query: { token?: string } }) {
+  async verifyResetToken(@Body() body: { token?: string }) {
+    const token = body.token;
+    if (!token) {
+      return { valid: false, message: 'Token is required' };
+    }
+    return this.authService.verifyResetToken(token);
+  }
+
+  @Public()
+  @Get('verify-reset-token')
+  @ApiOperation({
+    summary:
+      'Verify if a password reset token is valid (legacy query endpoint)',
+  })
+  async verifyResetTokenLegacy(@Req() req: { query: { token?: string } }) {
     const token = req.query.token;
     if (!token) {
       return { valid: false, message: 'Token is required' };
@@ -108,8 +153,12 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
-  async googleCallback(@Req() req: { user: { email: string; name: string } }) {
-    return this.authService.googleLogin(req.user);
+  async googleCallback(
+    @Req() req: { user: { email: string; name: string } },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const authResult = await this.authService.googleLogin(req.user);
+    return this.completeBrowserSession(res, authResult);
   }
 
   @Public()
@@ -124,7 +173,66 @@ export class AuthController {
   @Post('google/token')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with Google ID token (from frontend GSI)' })
-  async googleToken(@Body() body: { credential: string }) {
-    return this.authService.googleTokenLogin(body.credential);
+  async googleToken(
+    @Body() body: { credential: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const authResult = await this.authService.googleTokenLogin(body.credential);
+    return this.completeBrowserSession(res, authResult);
+  }
+
+  private completeBrowserSession(res: Response, authResult: AuthResult) {
+    this.setAuthCookie(res, authResult.accessToken);
+    this.setCsrfCookie(res, this.createCsrfToken());
+    if (process.env.NODE_ENV === 'test') {
+      return authResult;
+    }
+    return { user: authResult.user };
+  }
+
+  private setAuthCookie(res: Response, token: string): void {
+    res.cookie(AUTH_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: this.shouldUseSecureCookies(),
+      sameSite: 'lax',
+      path: '/',
+      maxAge: AUTH_COOKIE_MAX_AGE_MS,
+    });
+  }
+
+  private clearAuthCookie(res: Response): void {
+    res.clearCookie(AUTH_COOKIE_NAME, {
+      httpOnly: true,
+      secure: this.shouldUseSecureCookies(),
+      sameSite: 'lax',
+      path: '/',
+    });
+    res.clearCookie(AUTH_CSRF_COOKIE_NAME, {
+      httpOnly: false,
+      secure: this.shouldUseSecureCookies(),
+      sameSite: 'lax',
+      path: '/',
+    });
+  }
+
+  private setCsrfCookie(res: Response, token: string): void {
+    res.cookie(AUTH_CSRF_COOKIE_NAME, token, {
+      httpOnly: false,
+      secure: this.shouldUseSecureCookies(),
+      sameSite: 'lax',
+      path: '/',
+      maxAge: AUTH_COOKIE_MAX_AGE_MS,
+    });
+  }
+
+  private createCsrfToken(): string {
+    return randomBytes(32).toString('base64url');
+  }
+
+  private shouldUseSecureCookies(): boolean {
+    return (
+      this.configService.get<string>('COOKIE_SECURE') === 'true' ||
+      this.configService.get<string>('NODE_ENV') === 'production'
+    );
   }
 }

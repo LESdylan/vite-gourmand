@@ -13,7 +13,7 @@
   background: transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
 }
 
 .burger-icon:hover {
@@ -29,7 +29,7 @@
 /* Animated lines */
 .burger-line {
   transform-origin: center;
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
   stroke-linecap: round;
 }
 

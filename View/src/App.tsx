@@ -1,14 +1,22 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { PortalAuthProvider, ProtectedRoute, Unauthorized } from './portal_dashboard';
-import { ResetPasswordPage } from './portal_dashboard/ResetPasswordPage';
 import { ToastProvider } from './contexts/ToastContext';
 import './App.css';
 
 // Lazy load components
-const DevBoard = lazy(() => import('./components/DevBoard').then((m) => ({ default: m.DevBoard })));
-const Portal = lazy(() => import('./portal_dashboard').then((m) => ({ default: m.Portal })));
 const PublicSPA = lazy(() => import('./pages/PublicSPA'));
+const PortalRoute = lazy(() =>
+  import('./portal_dashboard/PortalRoutes').then((m) => ({ default: m.PortalRoute })),
+);
+const ResetPasswordRoute = lazy(() =>
+  import('./portal_dashboard/PortalRoutes').then((m) => ({ default: m.ResetPasswordRoute })),
+);
+const UnauthorizedRoute = lazy(() =>
+  import('./portal_dashboard/PortalRoutes').then((m) => ({ default: m.UnauthorizedRoute })),
+);
+const DashboardRoute = lazy(() =>
+  import('./portal_dashboard/PortalRoutes').then((m) => ({ default: m.DashboardRoute })),
+);
 
 // Lazy load scenario pages
 // const FormTestPage = lazy(() => import('./tests/form').then(m => ({ default: m.FormTestPage })));
@@ -47,41 +55,39 @@ function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <PortalAuthProvider>
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              {/* Public SPA - Landing page with internal navigation */}
-              <Route path="/" element={<PublicSPA />} />
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* Public SPA - crawlable public routes with preserved in-app navigation */}
+            <Route path="/" element={<PublicSPA />} />
+            <Route path="/menus" element={<PublicSPA />} />
+            <Route path="/menu" element={<Navigate to="/menus" replace />} />
+            <Route path="/commande" element={<PublicSPA />} />
+            <Route path="/order" element={<Navigate to="/commande" replace />} />
+            <Route path="/contact" element={<PublicSPA />} />
+            <Route path="/mentions-legales" element={<PublicSPA />} />
+            <Route path="/cgv" element={<PublicSPA />} />
 
-              {/* Portal & Auth */}
-              <Route path="/portal" element={<Portal />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/unauthorized" element={<Unauthorized />} />
+            {/* Portal & Auth */}
+            <Route path="/portal" element={<PortalRoute />} />
+            <Route path="/reset-password" element={<ResetPasswordRoute />} />
+            <Route path="/unauthorized" element={<UnauthorizedRoute />} />
 
-              {/* Unified Dashboard - SPA with role switching */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={['superadmin', 'admin', 'employee', 'customer']}>
-                    <DevBoard />
-                  </ProtectedRoute>
-                }
-              />
+            {/* Unified Dashboard - SPA with role switching */}
+            <Route path="/dashboard" element={<DashboardRoute />} />
 
-              {/* Legacy routes - redirect to dashboard */}
-              <Route path="/dev" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/employee" element={<Navigate to="/dashboard" replace />} />
+            {/* Legacy routes - redirect to dashboard */}
+            <Route path="/dev" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/employee" element={<Navigate to="/dashboard" replace />} />
 
-              {/* Scenario pages (dev tools) */}
-              {/* <Route path="/scenario/form" element={<FormTestPage />} /> */}
-              <Route path="/scenario/foodcard" element={<FoodCardScenario />} />
-              <Route path="/scenario/kanban" element={<KanbanScenario />} />
-              <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
-              <Route path="/scenario/auth" element={<AuthScenario />} />
-            </Routes>
-          </Suspense>
-        </PortalAuthProvider>
+            {/* Scenario pages (dev tools) */}
+            {/* <Route path="/scenario/form" element={<FormTestPage />} /> */}
+            <Route path="/scenario/foodcard" element={<FoodCardScenario />} />
+            <Route path="/scenario/kanban" element={<KanbanScenario />} />
+            <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
+            <Route path="/scenario/auth" element={<AuthScenario />} />
+          </Routes>
+        </Suspense>
       </ToastProvider>
     </BrowserRouter>
   );

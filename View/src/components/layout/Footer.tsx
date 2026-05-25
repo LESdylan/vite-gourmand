@@ -52,8 +52,8 @@ export default function Footer({ setCurrentPage }: FooterProps) {
     }
   };
 
-  const linkStyle = { color: 'rgba(255,255,255,0.6)' };
-  const mutedStyle = { color: 'rgba(255,255,255,0.35)' };
+  const linkStyle = { color: 'rgba(255,255,255,0.82)' };
+  const mutedStyle = { color: 'rgba(255,255,255,0.68)' };
 
   return (
     <footer className="bg-[#1A1A1A]">
@@ -82,14 +82,14 @@ export default function Footer({ setCurrentPage }: FooterProps) {
               <a
                 href={`tel:${siteInfo?.phone || '+33556000000'}`}
                 style={linkStyle}
-                className="hover:!text-white transition-colors"
+                className="min-h-6 flex items-center hover:!text-white transition-colors"
               >
                 📞 {siteInfo?.phone || '05 56 00 00 00'}
               </a>
               <a
                 href={`mailto:${siteInfo?.email || 'contact@vite-gourmand.fr'}`}
                 style={linkStyle}
-                className="hover:!text-white transition-colors"
+                className="min-h-6 flex items-center hover:!text-white transition-colors"
               >
                 ✉️ {siteInfo?.email || 'contact@vite-gourmand.fr'}
               </a>
@@ -131,7 +131,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                   <button
                     onClick={() => handleNavClick(page)}
                     style={linkStyle}
-                    className="hover:!text-white transition-colors py-2 sm:py-0"
+                    className="hover:!text-white transition-colors min-h-6 py-2 sm:py-0"
                   >
                     {label}
                   </button>
@@ -143,14 +143,14 @@ export default function Footer({ setCurrentPage }: FooterProps) {
               <button
                 onClick={() => handleNavClick('legal-mentions')}
                 style={linkStyle}
-                className="hover:!text-white transition-colors block py-2 sm:py-0"
+                className="hover:!text-white transition-colors block min-h-6 py-2 sm:py-0"
               >
                 Mentions légales
               </button>
               <button
                 onClick={() => handleNavClick('legal-cgv')}
                 style={linkStyle}
-                className="hover:!text-white transition-colors block py-2 sm:py-0"
+                className="hover:!text-white transition-colors block min-h-6 py-2 sm:py-0"
               >
                 Conditions générales de vente
               </button>

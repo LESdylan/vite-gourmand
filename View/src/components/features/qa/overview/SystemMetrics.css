@@ -3,21 +3,21 @@
  */
 
 .system-metrics {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
   padding: 20px;
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -2px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.02);
+    0 4px 6px -1px var(--color-black-10),
+    0 2px 4px -2px var(--color-black-10),
+    0 0 0 1px var(--color-black-02);
 }
 
 .system-metrics-title {
   margin: 0 0 16px 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-800);
 }
 
 .system-metrics-grid {
@@ -31,15 +31,15 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border-radius: 8px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: var(--radius-lg);
+  background: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .system-metric-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--color-black-10);
 }
 
 .system-metric-card--good {
@@ -47,7 +47,7 @@
 }
 
 .system-metric-card--warning {
-  border-color: #fde047;
+  border-color: var(--color-yellow-300);
 }
 
 .system-metric-card--critical {
@@ -55,7 +55,7 @@
 }
 
 .system-metric-icon {
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   flex-shrink: 0;
 }
 
@@ -67,8 +67,8 @@
 }
 
 .system-metric-label {
-  font-size: 11px;
-  color: #9ca3af;
+  font-size: var(--font-size-xs0);
+  color: var(--color-gray-400);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -80,8 +80,8 @@
 }
 
 .system-metric-value {
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
 
@@ -126,11 +126,11 @@
   }
 
   .system-metric-icon {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
   }
 
   .system-metric-value {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 }
 
@@ -141,7 +141,7 @@
   }
 
   .system-metrics-title {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     margin-bottom: var(--space-3);
   }
 
@@ -155,10 +155,10 @@
   }
 
   .system-metric-icon {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   .system-metric-value {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
   }
 }

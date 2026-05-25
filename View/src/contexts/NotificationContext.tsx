@@ -15,7 +15,6 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { isAuthenticated } from '../services/api';
 import {
   getNotifications,
   getUnreadCount,
@@ -105,7 +104,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   // ── Fetch from backend ──
   const refresh = useCallback(async () => {
-    if (stoppedRef.current || !isAuthenticated()) return;
+    if (stoppedRef.current) return;
     try {
       const [notifs, count] = await Promise.all([getNotifications(30), getUnreadCount()]);
       setNotifications(notifs);
@@ -126,7 +125,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   // ── Polling ──
   useEffect(() => {
-    if (!isAuthenticated()) return;
     stoppedRef.current = false;
 
     // Initial fetch

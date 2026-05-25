@@ -9,13 +9,13 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--color-white-03);
   border-left: 3px solid transparent;
-  transition: background 0.15s ease;
+  transition: background var(--transition-fast);
 }
 
 .activity-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-white-06);
 }
 
 /* Severity variants */
@@ -36,8 +36,8 @@
 }
 
 .activity-item__icon {
-  font-size: 1.25rem;
-  line-height: 1;
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-none);
   flex-shrink: 0;
 }
 
@@ -50,18 +50,18 @@
 }
 
 .activity-item__title {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
 
 .activity-item__desc {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
 .activity-item__time {
-  font-size: 0.7rem;
+  font-size: var(--font-size-xs0);
   color: var(--color-text-muted);
   white-space: nowrap;
   flex-shrink: 0;

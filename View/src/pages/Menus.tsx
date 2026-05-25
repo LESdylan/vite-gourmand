@@ -23,7 +23,6 @@ import {
   ShoppingCart,
   ArrowRight,
   Filter,
-  Loader2,
   ChevronLeft,
   ChevronRight,
   ImageIcon,
@@ -57,8 +56,8 @@ type MenusPageProps = {
 
 /* ── Dietary badge colors ── */
 const DIETARY_COLORS: Record<string, string> = {
-  vegan: 'bg-green-700 text-white',
-  végétarien: 'bg-emerald-600 text-white',
+  vegan: 'bg-green-900 text-white',
+  végétarien: 'bg-emerald-900 text-white',
   'sans-gluten': 'bg-amber-600 text-white',
   'sans-lactose': 'bg-purple-600 text-white',
   halal: 'bg-[#722F37] text-white',
@@ -80,12 +79,51 @@ const THEME_ICONS: Record<string, string> = {
 };
 
 const FALLBACK_IMG =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=480&q=60&auto=format&fit=crop';
+
+function optimizeCardImageUrl(url: string, width: number) {
+  try {
+    const imageUrl = new URL(url);
+    if (!imageUrl.hostname.includes('images.unsplash.com')) return url;
+
+    imageUrl.searchParams.set('w', String(width));
+    imageUrl.searchParams.set('q', '60');
+    imageUrl.searchParams.set('auto', 'format');
+    imageUrl.searchParams.set('fit', 'crop');
+    return imageUrl.toString();
+  } catch {
+    return url;
+  }
+}
+
+function useDesktopMenuImages() {
+  const [showImages, setShowImages] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia('(min-width: 640px)').matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 640px)');
+    const update = () => setShowImages(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  return showImages;
+}
 
 /* ══════════════════════════════════════════════════════════
    Inline Image Gallery (mini carousel inside card)
    ══════════════════════════════════════════════════════════ */
-function InlineGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
+function InlineGallery({
+  images,
+  alt,
+  priority = false,
+}: {
+  images: MenuImage[];
+  alt: string;
+  priority?: boolean;
+}) {
   const [idx, setIdx] = useState(0);
   const srcs =
     images.length > 0
@@ -101,18 +139,25 @@ function InlineGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
           },
         ];
   const count = srcs.length;
+  const activeSrc = srcs[idx]?.image_url || FALLBACK_IMG;
 
   return (
     <div className="relative h-44 sm:h-48 overflow-hidden group/gallery">
       <LazyImage
-        src={srcs[idx]?.image_url || FALLBACK_IMG}
+        src={optimizeCardImageUrl(activeSrc, priority ? 520 : 360)}
+        srcSet={`${optimizeCardImageUrl(activeSrc, 320)} 320w, ${optimizeCardImageUrl(activeSrc, 480)} 480w, ${optimizeCardImageUrl(activeSrc, 640)} 640w`}
+        sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
         alt={srcs[idx]?.alt_text || alt}
         className="w-full h-full"
+        width={640}
+        height={384}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'low'}
       />
       {count > 1 && (
         <>
           {/* dots */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
             {srcs.map((_, i) => (
               <button
                 key={i}
@@ -120,9 +165,13 @@ function InlineGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
                   e.stopPropagation();
                   setIdx(i);
                 }}
-                className={`w-2 h-2 sm:w-1.5 sm:h-1.5 rounded-full transition-all ${i === idx ? 'bg-white w-4 sm:w-3' : 'bg-white/50'}`}
+                className="w-6 h-6 rounded-full flex items-center justify-center transition-all"
                 aria-label={`Image ${i + 1}`}
-              />
+              >
+                <span
+                  className={`h-2 rounded-full transition-all ${i === idx ? 'w-4 bg-white' : 'w-2 bg-white/60'}`}
+                />
+              </button>
             ))}
           </div>
           {/* prev/next */}
@@ -244,7 +293,7 @@ function DishItem({ dish, accentColor }: { dish: Dish; accentColor: string }) {
           <p className="text-sm font-semibold text-[#1A1A1A] leading-tight">{dish.title}</p>
         </div>
         {dish.description && (
-          <p className="text-xs text-[#1A1A1A]/50 leading-relaxed mt-1.5 ml-4">
+          <p className="text-xs text-[#1A1A1A]/65 leading-relaxed mt-1.5 ml-4">
             {dish.description}
           </p>
         )}
@@ -333,7 +382,7 @@ function MenuDetailModal({
             </div>
             <div className="min-w-0">
               <h2 className="text-white font-bold text-sm sm:text-base truncate">{menu.name}</h2>
-              <p className="text-white/40 text-[10px] sm:text-xs">
+              <p className="text-white/75 text-[10px] sm:text-xs">
                 {menu.theme} · {totalDishes} plat{totalDishes > 1 ? 's' : ''}
               </p>
             </div>
@@ -342,7 +391,7 @@ function MenuDetailModal({
             {!isFullscreen && (
               <button
                 onClick={() => setIsFullscreen(!isFullscreen)}
-                className="hidden sm:flex items-center gap-1 text-white/40 hover:text-white text-xs px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="hidden sm:flex items-center gap-1 text-white/75 hover:text-white text-xs px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
                 aria-label="Plein écran"
               >
                 <Expand className="h-3.5 w-3.5" />
@@ -351,7 +400,7 @@ function MenuDetailModal({
             {isFullscreen && (
               <button
                 onClick={() => setIsFullscreen(false)}
-                className="flex items-center gap-1 text-white/40 hover:text-white text-xs px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="flex items-center gap-1 text-white/75 hover:text-white text-xs px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
                 aria-label="Réduire"
               >
                 <Shrink className="h-3.5 w-3.5" />
@@ -379,7 +428,7 @@ function MenuDetailModal({
             {/* Floating price tag */}
             <div className="absolute top-4 right-4 z-10">
               <div className="bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-2.5 shadow-xl border border-[#D4AF37]/20">
-                <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-widest font-semibold text-center">
+                <p className="text-[10px] text-[#1A1A1A]/65 uppercase tracking-widest font-semibold text-center">
                   Par personne
                 </p>
                 <p className="text-2xl font-black text-[#722F37] text-center leading-none mt-0.5">
@@ -439,7 +488,7 @@ function MenuDetailModal({
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#722F37]/10 mx-auto mb-2.5 flex items-center justify-center group-hover/stat:scale-110 transition-transform">
                   <Users className="h-5 w-5 sm:h-6 sm:w-6 text-[#722F37]" />
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-[#1A1A1A]/40 uppercase tracking-widest font-semibold">
+                <p className="text-[9px] sm:text-[10px] text-[#1A1A1A]/65 uppercase tracking-widest font-semibold">
                   Min. convives
                 </p>
                 <p className="font-black text-xl sm:text-2xl text-[#1A1A1A] mt-0.5">
@@ -450,7 +499,7 @@ function MenuDetailModal({
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#556B2F]/10 mx-auto mb-2.5 flex items-center justify-center group-hover/stat:scale-110 transition-transform">
                   <Euro className="h-5 w-5 sm:h-6 sm:w-6 text-[#556B2F]" />
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-[#1A1A1A]/40 uppercase tracking-widest font-semibold">
+                <p className="text-[9px] sm:text-[10px] text-[#1A1A1A]/65 uppercase tracking-widest font-semibold">
                   Prix / pers.
                 </p>
                 <p className="font-black text-xl sm:text-2xl text-[#1A1A1A] mt-0.5">
@@ -461,7 +510,7 @@ function MenuDetailModal({
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#D4AF37]/10 mx-auto mb-2.5 flex items-center justify-center group-hover/stat:scale-110 transition-transform">
                   <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 text-[#D4AF37]" />
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-[#1A1A1A]/40 uppercase tracking-widest font-semibold">
+                <p className="text-[9px] sm:text-[10px] text-[#1A1A1A]/65 uppercase tracking-widest font-semibold">
                   Min. total
                 </p>
                 <p className="font-black text-xl sm:text-2xl text-[#1A1A1A] mt-0.5">
@@ -472,7 +521,7 @@ function MenuDetailModal({
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#722F37]/10 mx-auto mb-2.5 flex items-center justify-center group-hover/stat:scale-110 transition-transform">
                   <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-[#722F37]" />
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-[#1A1A1A]/40 uppercase tracking-widest font-semibold">
+                <p className="text-[9px] sm:text-[10px] text-[#1A1A1A]/65 uppercase tracking-widest font-semibold">
                   Disponibilité
                 </p>
                 <p
@@ -494,7 +543,7 @@ function MenuDetailModal({
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[#1A1A1A]">Composition du menu</h3>
-                  <p className="text-xs text-[#1A1A1A]/40">
+                  <p className="text-xs text-[#1A1A1A]/65">
                     {totalDishes} plat{totalDishes > 1 ? 's' : ''} soigneusement préparés
                   </p>
                 </div>
@@ -510,7 +559,7 @@ function MenuDetailModal({
                       <h4 className="text-sm font-bold text-[#556B2F] uppercase tracking-wider">
                         Entrées
                       </h4>
-                      <span className="text-[10px] text-[#1A1A1A]/30 font-medium">
+                      <span className="text-[10px] text-[#1A1A1A]/65 font-medium">
                         {menu.dishes.entrees.length} choix
                       </span>
                       <div className="flex-1 h-px bg-[#556B2F]/10" />
@@ -531,7 +580,7 @@ function MenuDetailModal({
                       <h4 className="text-sm font-bold text-[#722F37] uppercase tracking-wider">
                         Plats
                       </h4>
-                      <span className="text-[10px] text-[#1A1A1A]/30 font-medium">
+                      <span className="text-[10px] text-[#1A1A1A]/65 font-medium">
                         {menu.dishes.mains.length} choix
                       </span>
                       <div className="flex-1 h-px bg-[#722F37]/10" />
@@ -552,7 +601,7 @@ function MenuDetailModal({
                       <h4 className="text-sm font-bold text-[#D4AF37] uppercase tracking-wider">
                         Desserts
                       </h4>
-                      <span className="text-[10px] text-[#1A1A1A]/30 font-medium">
+                      <span className="text-[10px] text-[#1A1A1A]/65 font-medium">
                         {menu.dishes.desserts.length} choix
                       </span>
                       <div className="flex-1 h-px bg-[#D4AF37]/10" />
@@ -627,7 +676,17 @@ function MenuDetailModal({
 /* ══════════════════════════════════════════════════════════
    Menu Card — Uber Eats style with inline gallery
    ══════════════════════════════════════════════════════════ */
-function MenuCard({ menu, onDetailClick }: { menu: Menu; onDetailClick: (m: Menu) => void }) {
+function MenuCard({
+  menu,
+  onDetailClick,
+  priority = false,
+  showImage = true,
+}: {
+  menu: Menu;
+  onDetailClick: (m: Menu) => void;
+  priority?: boolean;
+  showImage?: boolean;
+}) {
   const isLowStock = menu.stockQuantity > 0 && menu.stockQuantity <= 5;
   const isSoldOut = menu.stockQuantity === 0;
 
@@ -636,33 +695,47 @@ function MenuCard({ menu, onDetailClick }: { menu: Menu; onDetailClick: (m: Menu
       className="group bg-white rounded-2xl border border-[#1A1A1A]/5 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-[#722F37]/8 hover:-translate-y-0.5 cursor-pointer"
       onClick={() => onDetailClick(menu)}
     >
-      {/* Inline Image Gallery */}
-      <div className="relative">
-        <InlineGallery images={menu.images} alt={menu.name} />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      {showImage && (
+        <div className="relative">
+          <InlineGallery images={menu.images} alt={menu.name} priority={priority} />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-        {/* Theme badge top-left */}
-        <div className="absolute top-3 left-3 z-[1]">
-          <Badge className="bg-white/90 text-[#1A1A1A] border-0 text-xs backdrop-blur-sm shadow-sm">
-            {THEME_ICONS[menu.theme] || '🍽️'} {menu.theme}
-          </Badge>
-        </div>
-
-        {/* Stock warnings */}
-        {isLowStock && (
-          <Badge className="absolute top-3 right-3 bg-red-600 text-white border-0 text-[10px] shadow z-[1]">
-            Plus que {menu.stockQuantity} !
-          </Badge>
-        )}
-        {isSoldOut && (
-          <div className="absolute inset-0 bg-[#1A1A1A]/70 flex items-center justify-center z-[1]">
-            <span className="text-white font-bold text-lg tracking-wide">Épuisé</span>
+          <div className="absolute top-3 left-3 z-[1]">
+            <Badge className="bg-white/90 text-[#1A1A1A] border-0 text-xs backdrop-blur-sm shadow-sm">
+              {THEME_ICONS[menu.theme] || '🍽️'} {menu.theme}
+            </Badge>
           </div>
-        )}
-      </div>
+
+          {isLowStock && (
+            <Badge className="absolute top-3 right-3 bg-red-600 text-white border-0 text-[10px] shadow z-[1]">
+              Plus que {menu.stockQuantity} !
+            </Badge>
+          )}
+          {isSoldOut && (
+            <div className="absolute inset-0 bg-[#1A1A1A]/70 flex items-center justify-center z-[1]">
+              <span className="text-white font-bold text-lg tracking-wide">Épuisé</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Body */}
       <div className="p-4 sm:p-5">
+        {!showImage && (
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <Badge className="bg-[#722F37] text-white border-0 text-xs shadow-sm">
+              {THEME_ICONS[menu.theme] || '🍽️'} {menu.theme}
+            </Badge>
+            {isLowStock && (
+              <Badge className="bg-red-700 text-white border-0 text-[10px]">
+                Plus que {menu.stockQuantity} !
+              </Badge>
+            )}
+            {isSoldOut && (
+              <Badge className="bg-[#1A1A1A] text-white border-0 text-[10px]">Épuisé</Badge>
+            )}
+          </div>
+        )}
         <h3 className="font-bold text-[#1A1A1A] text-lg mb-2 line-clamp-1">{menu.name}</h3>
 
         <div className="flex flex-wrap gap-1 mb-3">
@@ -681,13 +754,13 @@ function MenuCard({ menu, onDetailClick }: { menu: Menu; onDetailClick: (m: Menu
           )}
         </div>
 
-        <p className="text-[#1A1A1A]/55 text-sm leading-relaxed line-clamp-2 mb-4">
+        <p className="text-[#1A1A1A]/70 text-sm leading-relaxed line-clamp-2 mb-4">
           {menu.description}
         </p>
 
         {/* Key metrics */}
         <div className="flex items-center justify-between mb-4 text-sm">
-          <div className="flex items-center gap-1.5 text-[#1A1A1A]/50">
+          <div className="flex items-center gap-1.5 text-[#1A1A1A]/65">
             <Users className="h-4 w-4 text-[#722F37]" />
             <span>Min. {menu.minPersons} pers.</span>
           </div>
@@ -695,7 +768,7 @@ function MenuCard({ menu, onDetailClick }: { menu: Menu; onDetailClick: (m: Menu
             <span className="text-xl font-bold text-[#722F37]">
               {menu.pricePerPerson.toFixed(0)}
             </span>
-            <span className="text-sm text-[#1A1A1A]/50">€/pers.</span>
+            <span className="text-sm text-[#1A1A1A]/65">€/pers.</span>
           </div>
         </div>
 
@@ -770,7 +843,7 @@ function CategoryNav({
           className="absolute left-0 top-0 bottom-0 z-10 w-8 bg-gradient-to-r from-[#FFF8F0] to-transparent flex items-center justify-start"
           aria-label="Défiler à gauche"
         >
-          <ChevronLeft className="h-4 w-4 text-[#1A1A1A]/40" />
+          <ChevronLeft className="h-4 w-4 text-[#1A1A1A]/65" />
         </button>
       )}
       {canScrollRight && (
@@ -779,7 +852,7 @@ function CategoryNav({
           className="absolute right-0 top-0 bottom-0 z-10 w-8 bg-gradient-to-l from-[#FFF8F0] to-transparent flex items-center justify-end"
           aria-label="Défiler à droite"
         >
-          <ChevronRight className="h-4 w-4 text-[#1A1A1A]/40" />
+          <ChevronRight className="h-4 w-4 text-[#1A1A1A]/65" />
         </button>
       )}
 
@@ -815,8 +888,9 @@ function CategoryNav({
    Main Menus Page
    ══════════════════════════════════════════════════════════ */
 export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProps) {
-  const { menus, themes, diets, isLoading, error, refetch } = useMenus({ limit: 50 });
+  const { menus, themes, diets, isLoading, error, refetch } = useMenus({ limit: 6 });
   const { addToast } = useToast();
+  const showMenuImages = useDesktopMenuImages();
 
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
@@ -876,14 +950,6 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
     <div className="min-h-screen bg-[#FFF8F0]">
       {/* Page Header — Premium elegant design */}
       <header className="relative bg-[#1A1A1A] pt-10 pb-14 sm:pt-14 sm:pb-18 overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#722F37]/10 rounded-full blur-3xl -translate-y-1/2" />
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-[#D4AF37]/8 rounded-full blur-3xl translate-y-1/2" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-white/[0.02] rounded-full" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-white/[0.03] rounded-full" />
-        </div>
-
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
           {/* Decorative top line */}
           <div className="flex items-center justify-center gap-4 mb-6">
@@ -904,7 +970,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
             </span>
           </h1>
 
-          <p className="text-white/40 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+          <p className="text-white/75 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
             Des créations culinaires d'exception, pensées pour sublimer chacun de vos événements.
             <br className="hidden sm:block" />
             Filtrez par thème, régime alimentaire ou budget.
@@ -927,7 +993,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
         <div className="bg-white rounded-2xl shadow-lg shadow-[#1A1A1A]/5 border border-[#1A1A1A]/5 p-4 sm:p-5 mb-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1A1A1A]/30" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#1A1A1A]/65" />
               <Input
                 type="text"
                 placeholder="Rechercher un menu, un thème..."
@@ -1035,17 +1101,31 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
         </div>
 
         {/* Horizontal scrollable category nav — Uber Eats style */}
-        {!isLoading && themes.length > 0 && (
-          <div className="mb-5">
+        <div className="mb-5 min-h-10">
+          {!isLoading && themes.length > 0 && (
             <CategoryNav themes={themes} selected={selectedTheme} onSelect={setSelectedTheme} />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Loading state */}
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-10 w-10 text-[#722F37] animate-spin mb-4" />
-            <p className="text-[#1A1A1A]/60">Chargement des menus...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 py-6">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className={`${showMenuImages ? 'h-[360px]' : 'min-h-[224px]'} rounded-2xl bg-white border border-[#1A1A1A]/5 shadow-sm overflow-hidden`}
+              >
+                {showMenuImages && <div className="h-44 sm:h-48 bg-[#1A1A1A]/5" />}
+                <div className="p-4 sm:p-5 space-y-3">
+                  {!showMenuImages && <div className="h-5 w-24 rounded bg-[#722F37]/10" />}
+                  <div className="h-5 w-2/3 rounded bg-[#1A1A1A]/10" />
+                  <div className="h-3 w-full rounded bg-[#1A1A1A]/10" />
+                  <div className="h-3 w-4/5 rounded bg-[#1A1A1A]/10" />
+                  <div className="h-10 w-full rounded-lg bg-[#722F37]/10" />
+                </div>
+              </div>
+            ))}
+            <span className="sr-only">Chargement des menus...</span>
           </div>
         )}
 
@@ -1065,7 +1145,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
         {!isLoading && !error && (
           <>
             <div className="flex items-center justify-between mb-5 px-1">
-              <p className="text-sm text-[#1A1A1A]/60">
+              <p className="text-sm text-[#1A1A1A]/70">
                 <span className="font-bold text-[#1A1A1A]">{filteredMenus.length}</span> menu
                 {filteredMenus.length !== 1 ? 's' : ''} disponible
                 {filteredMenus.length !== 1 ? 's' : ''}
@@ -1081,8 +1161,14 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
             {/* Grid */}
             {filteredMenus.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-                {filteredMenus.map((menu) => (
-                  <MenuCard key={menu.id} menu={menu} onDetailClick={setSelectedMenu} />
+                {filteredMenus.map((menu, index) => (
+                  <MenuCard
+                    key={menu.id}
+                    menu={menu}
+                    onDetailClick={setSelectedMenu}
+                    priority={index === 0}
+                    showImage={showMenuImages}
+                  />
                 ))}
               </div>
             ) : (
@@ -1091,7 +1177,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
                   <Search className="h-7 w-7 text-[#1A1A1A]/20" />
                 </div>
                 <h3 className="font-bold text-[#1A1A1A] text-lg mb-2">Aucun menu trouvé</h3>
-                <p className="text-[#1A1A1A]/50 text-sm mb-4">
+                <p className="text-[#1A1A1A]/65 text-sm mb-4">
                   {menus.length === 0
                     ? 'Les menus seront bientôt disponibles.'
                     : 'Essayez de modifier vos critères de recherche'}
@@ -1111,7 +1197,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
             Besoin d'un menu personnalisé ?
           </h2>
-          <p className="text-white/50 mb-6 max-w-md mx-auto text-sm">
+          <p className="text-white/75 mb-6 max-w-md mx-auto text-sm">
             Notre équipe crée des menus sur mesure adaptés à vos besoins et votre budget.
           </p>
           <Button onClick={() => setCurrentPage('contact')} variant="champagne" size="lg">

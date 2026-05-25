@@ -11,7 +11,7 @@
  * No payment required — the user sends a request message with the
  * desired menu (or a custom one). The restaurant contacts them back.
  */
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { lazy, Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -44,8 +44,9 @@ import { getProfile, type AuthUserMapped } from '../services/auth';
 import { getMenus, type Menu } from '../services/menus';
 import { createOrder, type CreateOrderData } from '../services/orders';
 import LazyImage from '../components/ui/LazyImage';
-import AiMenuComposer from '../components/AiMenuComposer';
 import type { Page } from './Home';
+
+const AiMenuComposer = lazy(() => import('../components/AiMenuComposer'));
 
 /* ── Constants ── */
 const STEPS = [
@@ -65,6 +66,22 @@ interface OrderPageProps {
 /* ── Helpers ── */
 function formatDate(d: Date): string {
   return d.toISOString().split('T')[0];
+}
+
+function useDesktopMenuImages() {
+  const [showImages, setShowImages] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia('(min-width: 640px)').matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 640px)');
+    const update = () => setShowImages(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  return showImages;
 }
 
 function getMinDate(): string {
@@ -99,14 +116,14 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                       ? 'bg-[#556B2F] text-white'
                       : isActive
                         ? 'bg-[#722F37] text-white shadow-lg shadow-[#722F37]/30'
-                        : 'bg-[#1A1A1A]/5 text-[#1A1A1A]/30'
+                        : 'bg-[#1A1A1A]/8 text-[#1A1A1A]/65'
                   }`}
               >
                 {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
               </div>
               <span
                 className={`text-[10px] sm:text-xs font-medium transition-colors
-                  ${isActive ? 'text-[#722F37]' : isCompleted ? 'text-[#556B2F]' : 'text-[#1A1A1A]/30'}`}
+                  ${isActive ? 'text-[#F2D47A]' : isCompleted ? 'text-[#B8D17C]' : 'text-white/75'}`}
               >
                 {step.label}
               </span>
@@ -132,10 +149,12 @@ function MiniMenuCard({
   menu,
   selected,
   onSelect,
+  showImage,
 }: {
   menu: Menu;
   selected: boolean;
   onSelect: (m: Menu) => void;
+  showImage: boolean;
 }) {
   return (
     <button
@@ -149,18 +168,20 @@ function MiniMenuCard({
         }`}
     >
       <div className="flex gap-3 p-3">
-        <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-[#1A1A1A]/5">
-          <LazyImage src={menu.image} alt={menu.name} className="w-full h-full" />
-        </div>
+        {showImage && (
+          <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-[#1A1A1A]/5">
+            <LazyImage src={menu.image} alt={menu.name} className="w-full h-full" />
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <h4 className="font-bold text-[#1A1A1A] text-sm line-clamp-1">{menu.name}</h4>
-          <p className="text-xs text-[#1A1A1A]/50 mt-0.5">
+          <p className="text-xs text-[#1A1A1A]/65 mt-0.5">
             {menu.theme} · Min. {menu.minPersons} pers.
           </p>
           <div className="flex items-center justify-between mt-2">
             <span className="text-lg font-bold text-[#722F37]">
               {menu.pricePerPerson.toFixed(0)} €
-              <span className="text-xs font-normal text-[#1A1A1A]/50">/pers.</span>
+              <span className="text-xs font-normal text-[#1A1A1A]/65">/pers.</span>
             </span>
             {selected && (
               <Badge className="bg-[#722F37] text-white border-0 text-[10px]">
@@ -179,6 +200,7 @@ function MiniMenuCard({
    ══════════════════════════════════════════════════════════ */
 export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPageProps) {
   const { addToast } = useToast();
+  const showMenuImages = useDesktopMenuImages();
 
   /* ── Auth & profile (optional — user can browse without being logged in) ── */
   const [profile, setProfile] = useState<AuthUserMapped | null>(null);
@@ -215,15 +237,18 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
   useEffect(() => {
     if (isAuthenticated()) {
       setLoggedIn(true);
-      getProfile()
-        .then(setProfile)
-        .catch(() => {});
     }
+    getProfile()
+      .then((loadedProfile) => {
+        setProfile(loadedProfile);
+        setLoggedIn(true);
+      })
+      .catch(() => undefined);
   }, []);
 
   /* ── Load menus ── */
   useEffect(() => {
-    getMenus({ limit: 100, status: 'published' })
+    getMenus({ limit: 6, status: 'published' })
       .then(({ menus }) => {
         setAllMenus(menus);
         if (preSelectedMenuId) {
@@ -410,7 +435,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6">
           <button
             onClick={() => setCurrentPage('menu')}
-            className="flex items-center gap-2 text-white/40 hover:text-white text-sm mb-4 transition-colors"
+            className="flex items-center gap-2 text-white/75 hover:text-white text-sm mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" /> Retour aux menus
           </button>
@@ -420,7 +445,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-white">Votre demande</h1>
-              <p className="text-white/30 text-xs sm:text-sm mt-0.5">
+              <p className="text-white/75 text-xs sm:text-sm mt-0.5">
                 {profile
                   ? `${profile.name} · ${profile.email}`
                   : 'Pas de paiement en ligne — nous vous recontactons'}
@@ -441,7 +466,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 flex items-center gap-2">
                   <Utensils className="h-5 w-5 text-[#722F37]" /> Choisissez votre menu
                 </h2>
-                <p className="text-sm text-[#1A1A1A]/50 mb-5">
+                <p className="text-sm text-[#1A1A1A]/65 mb-5">
                   Sélectionnez un menu existant ou décrivez votre demande personnalisée.
                 </p>
 
@@ -457,7 +482,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       ${
                         !isCustomRequest
                           ? 'bg-white text-[#722F37] shadow-sm'
-                          : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/60'
+                          : 'text-[#1A1A1A]/65 hover:text-[#1A1A1A]/60'
                       }`}
                   >
                     <Utensils className="h-4 w-4 inline mr-1.5" />
@@ -473,7 +498,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       ${
                         isCustomRequest
                           ? 'bg-white text-[#722F37] shadow-sm'
-                          : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/60'
+                          : 'text-[#1A1A1A]/65 hover:text-[#1A1A1A]/60'
                       }`}
                   >
                     <Sparkles className="h-4 w-4 inline mr-1.5" />
@@ -484,13 +509,28 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 {!isCustomRequest ? (
                   <>
                     {menusLoading ? (
-                      <div className="flex items-center justify-center py-12">
-                        <Loader2 className="h-8 w-8 text-[#722F37] animate-spin" />
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {Array.from({ length: 6 }).map((_, index) => (
+                          <div
+                            key={index}
+                            className={`${showMenuImages ? 'h-[106px]' : 'h-[92px]'} rounded-xl border-2 border-[#1A1A1A]/10 bg-white p-3 flex gap-3`}
+                          >
+                            {showMenuImages && (
+                              <div className="w-20 h-20 rounded-lg bg-[#1A1A1A]/5 shrink-0" />
+                            )}
+                            <div className="flex-1 space-y-3 py-1">
+                              <div className="h-4 w-3/4 rounded bg-[#1A1A1A]/10" />
+                              <div className="h-3 w-1/2 rounded bg-[#1A1A1A]/10" />
+                              <div className="h-5 w-2/3 rounded bg-[#722F37]/10" />
+                            </div>
+                          </div>
+                        ))}
+                        <span className="sr-only">Chargement des menus...</span>
                       </div>
                     ) : allMenus.length === 0 ? (
                       <div className="text-center py-12">
                         <ChefHat className="h-10 w-10 text-[#1A1A1A]/20 mx-auto mb-3" />
-                        <p className="text-[#1A1A1A]/50">Aucun menu disponible pour le moment.</p>
+                        <p className="text-[#1A1A1A]/65">Aucun menu disponible pour le moment.</p>
                       </div>
                     ) : (
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -502,6 +542,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                               menu={menu}
                               selected={selectedMenu?.id === menu.id}
                               onSelect={handleMenuSelect}
+                              showImage={showMenuImages}
                             />
                           ))}
                       </div>
@@ -512,7 +553,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         <h3 className="font-bold text-[#1A1A1A] text-sm mb-1">
                           {selectedMenu.name}
                         </h3>
-                        <p className="text-xs text-[#1A1A1A]/50 line-clamp-2">
+                        <p className="text-xs text-[#1A1A1A]/65 line-clamp-2">
                           {selectedMenu.description}
                         </p>
                         <div className="flex flex-wrap gap-4 mt-3 text-xs text-[#1A1A1A]/60">
@@ -536,11 +577,17 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                   </>
                 ) : (
                   /* AI-powered custom menu composer */
-                  <AiMenuComposer
-                    onBriefReady={(brief) => {
-                      setCustomMenuDescription(brief);
-                    }}
-                  />
+                  <Suspense
+                    fallback={
+                      <div className="h-[360px] rounded-xl border border-[#1A1A1A]/10 bg-white p-5" />
+                    }
+                  >
+                    <AiMenuComposer
+                      onBriefReady={(brief) => {
+                        setCustomMenuDescription(brief);
+                      }}
+                    />
+                  </Suspense>
                 )}
               </div>
             )}
@@ -551,7 +598,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-[#722F37]" /> Informations de livraison
                 </h2>
-                <p className="text-sm text-[#1A1A1A]/50 mb-5">
+                <p className="text-sm text-[#1A1A1A]/65 mb-5">
                   Indiquez où et quand vous souhaitez être livré.
                 </p>
 
@@ -605,7 +652,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         onChange={(e) => setDeliveryDate(e.target.value)}
                         className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
                       />
-                      <p className="text-[10px] text-[#1A1A1A]/40 mt-1">Minimum 48h à l'avance</p>
+                      <p className="text-[10px] text-[#1A1A1A]/65 mt-1">Minimum 48h à l'avance</p>
                     </div>
                     <div>
                       <Label
@@ -623,7 +670,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         onChange={(e) => setDeliveryHour(e.target.value)}
                         className="h-11 border-[#1A1A1A]/10 focus-visible:ring-[#722F37]"
                       />
-                      <p className="text-[10px] text-[#1A1A1A]/40 mt-1">Entre 08h00 et 22h00</p>
+                      <p className="text-[10px] text-[#1A1A1A]/65 mt-1">Entre 08h00 et 22h00</p>
                     </div>
                   </div>
                 </div>
@@ -636,7 +683,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 flex items-center gap-2">
                   <Users className="h-5 w-5 text-[#722F37]" /> Nombre de convives
                 </h2>
-                <p className="text-sm text-[#1A1A1A]/50 mb-5">
+                <p className="text-sm text-[#1A1A1A]/65 mb-5">
                   {selectedMenu ? (
                     <>
                       Le menu <strong>{selectedMenu.name}</strong> requiert un minimum de{' '}
@@ -666,7 +713,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       </button>
                       <div className="text-center">
                         <span className="text-3xl font-bold text-[#722F37]">{personCount}</span>
-                        <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wide">
+                        <p className="text-[10px] text-[#1A1A1A]/65 uppercase tracking-wide">
                           personne{personCount > 1 ? 's' : ''}
                         </p>
                       </div>
@@ -683,7 +730,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                   {/* Price indication (informational) */}
                   {selectedMenu && (
                     <div className="bg-white rounded-xl border border-[#1A1A1A]/10 p-4">
-                      <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">
+                      <h3 className="text-xs font-bold text-[#1A1A1A]/65 uppercase tracking-wide mb-2">
                         Estimation indicative
                       </h3>
                       <div className="flex justify-between text-sm text-[#1A1A1A]/60 mb-1">
@@ -694,7 +741,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                           {priceInfo.total.toFixed(2)} €
                         </span>
                       </div>
-                      <p className="text-[10px] text-[#1A1A1A]/30 mt-2 italic">
+                      <p className="text-[10px] text-[#1A1A1A]/65 mt-2 italic">
                         * Prix indicatif. Le montant final sera confirmé par notre équipe. Aucun
                         paiement en ligne.
                       </p>
@@ -729,14 +776,14 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                 <h2 className="text-lg font-bold text-[#1A1A1A] mb-1 flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-[#556B2F]" /> Récapitulatif de votre demande
                 </h2>
-                <p className="text-sm text-[#1A1A1A]/50 mb-5">
+                <p className="text-sm text-[#1A1A1A]/65 mb-5">
                   Vérifiez les détails avant d'envoyer votre demande.
                 </p>
 
                 <div className="space-y-4">
                   {/* Menu recap */}
                   <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#1A1A1A]/5">
-                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">
+                    <h3 className="text-xs font-bold text-[#1A1A1A]/65 uppercase tracking-wide mb-2">
                       {isCustomRequest ? 'Menu personnalisé' : 'Menu sélectionné'}
                     </h3>
                     {isCustomRequest ? (
@@ -758,7 +805,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                           </div>
                           <div>
                             <h4 className="font-bold text-[#1A1A1A]">{selectedMenu.name}</h4>
-                            <p className="text-xs text-[#1A1A1A]/50">
+                            <p className="text-xs text-[#1A1A1A]/65">
                               {selectedMenu.theme} · {selectedMenu.dietary.join(', ')}
                             </p>
                             <p className="text-sm font-bold text-[#722F37] mt-1">
@@ -772,18 +819,18 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
                   {/* Delivery recap */}
                   <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#1A1A1A]/5">
-                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">
+                    <h3 className="text-xs font-bold text-[#1A1A1A]/65 uppercase tracking-wide mb-2">
                       Livraison
                     </h3>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-[#1A1A1A]/50 text-xs">Adresse</p>
+                        <p className="text-[#1A1A1A]/65 text-xs">Adresse</p>
                         <p className="font-medium text-[#1A1A1A]">
                           {deliveryAddress}, {deliveryCity}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[#1A1A1A]/50 text-xs">Date & heure</p>
+                        <p className="text-[#1A1A1A]/65 text-xs">Date & heure</p>
                         <p className="font-medium text-[#1A1A1A]">
                           {new Date(deliveryDate + 'T00:00:00').toLocaleDateString('fr-FR', {
                             weekday: 'long',
@@ -799,17 +846,17 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
                   {/* Details recap */}
                   <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#1A1A1A]/5">
-                    <h3 className="text-xs font-bold text-[#1A1A1A]/40 uppercase tracking-wide mb-2">
+                    <h3 className="text-xs font-bold text-[#1A1A1A]/65 uppercase tracking-wide mb-2">
                       Détails
                     </h3>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-[#1A1A1A]/50 text-xs">Nombre de personnes</p>
+                        <p className="text-[#1A1A1A]/65 text-xs">Nombre de personnes</p>
                         <p className="font-medium text-[#1A1A1A]">{personCount}</p>
                       </div>
                       {selectedMenu && (
                         <div>
-                          <p className="text-[#1A1A1A]/50 text-xs">Estimation</p>
+                          <p className="text-[#1A1A1A]/65 text-xs">Estimation</p>
                           <p className="font-medium text-[#722F37]">
                             ≈ {priceInfo.total.toFixed(2)} €
                           </p>
@@ -817,7 +864,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       )}
                       {specialInstructions && (
                         <div className="col-span-2">
-                          <p className="text-[#1A1A1A]/50 text-xs">Message</p>
+                          <p className="text-[#1A1A1A]/65 text-xs">Message</p>
                           <p className="font-medium text-[#1A1A1A] text-xs">
                             {specialInstructions}
                           </p>
@@ -836,7 +883,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         <h3 className="text-sm font-bold text-[#556B2F] mb-1">
                           Aucun paiement requis
                         </h3>
-                        <p className="text-xs text-[#1A1A1A]/50 leading-relaxed">
+                        <p className="text-xs text-[#1A1A1A]/65 leading-relaxed">
                           En envoyant cette demande, vous ne payez rien. Notre équipe vous
                           contactera pour confirmer les détails, le prix final et les modalités de
                           livraison. Le règlement se fait à la livraison.
@@ -865,7 +912,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">
                           Créez un compte pour envoyer
                         </h3>
-                        <p className="text-sm text-[#1A1A1A]/50 max-w-sm mx-auto">
+                        <p className="text-sm text-[#1A1A1A]/65 max-w-sm mx-auto">
                           Pour conserver votre demande et que nous puissions vous recontacter,
                           connectez-vous ou créez un compte gratuit.
                         </p>
@@ -920,7 +967,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       </div>
                       <button
                         onClick={() => setShowAuthPrompt(false)}
-                        className="w-full mt-3 text-xs text-[#1A1A1A]/30 hover:text-[#1A1A1A]/50 transition-colors"
+                        className="w-full mt-3 text-xs text-[#1A1A1A]/65 hover:text-[#1A1A1A]/65 transition-colors"
                       >
                         Annuler
                       </button>
@@ -974,7 +1021,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
         </div>
 
         {/* Info note */}
-        <p className="text-center text-xs text-[#1A1A1A]/30 mt-6 mb-8">
+        <p className="text-center text-xs text-[#1A1A1A]/65 mt-6 mb-8">
           Aucun paiement en ligne. Notre équipe vous recontacte pour confirmer votre commande.
           Annulation possible jusqu'à 48h avant la livraison.
         </p>

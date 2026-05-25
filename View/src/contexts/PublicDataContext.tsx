@@ -36,7 +36,7 @@ const defaultValue: PublicData = {
   workingHours: [],
   reviews: [],
   reviewStats: null,
-  loading: true,
+  loading: false,
 };
 
 /* ------------------------------------------------------------------ */
@@ -56,19 +56,39 @@ export function usePublicData(): PublicData {
 
 const DAY_ORDER = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 
+function logPublicDataWarning(message: string, err: unknown) {
+  if (import.meta.env.DEV) {
+    console.warn(message, err);
+  }
+}
+
 export function PublicDataProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<PublicData>(defaultValue);
 
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
+    const loadHeroData = async () => {
       try {
-        const [info, hours, rawReviews, stats] = await Promise.all([
-          fetchSiteInfo(),
+        const [info, stats] = await Promise.all([fetchSiteInfo(), fetchReviewStats()]);
+
+        if (cancelled) return;
+
+        setData((prev) => ({
+          ...prev,
+          siteInfo: info,
+          reviewStats: stats,
+        }));
+      } catch (err) {
+        logPublicDataWarning('[PublicDataProvider] Failed to fetch hero public data:', err);
+      }
+    };
+
+    const loadDeferredData = async () => {
+      try {
+        const [hours, rawReviews] = await Promise.all([
           fetchWorkingHours(),
           fetchApprovedReviews(1, 20),
-          fetchReviewStats(),
         ]);
 
         if (cancelled) return;
@@ -76,23 +96,27 @@ export function PublicDataProvider({ children }: { children: ReactNode }) {
         // Sort hours by weekday
         hours.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
 
-        setData({
-          siteInfo: info,
+        setData((prev) => ({
+          ...prev,
           workingHours: hours,
           reviews: rawReviews,
-          reviewStats: stats,
           loading: false,
-        });
+        }));
       } catch (err) {
-        console.error('[PublicDataProvider] Failed to fetch public data:', err);
+        logPublicDataWarning('[PublicDataProvider] Failed to fetch deferred public data:', err);
         if (!cancelled) {
           setData((prev) => ({ ...prev, loading: false }));
         }
       }
-    })();
+    };
+
+    const heroTimer = window.setTimeout(loadHeroData, 5000);
+    const deferredTimer = window.setTimeout(loadDeferredData, 8000);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(heroTimer);
+      window.clearTimeout(deferredTimer);
     };
   }, []); // fetch once on mount
 

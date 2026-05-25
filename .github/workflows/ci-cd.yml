@@ -147,12 +147,53 @@ jobs:
             Back/test-results-custom-raw.json
 
   # ────────────────────────────────────────────────────────────────────────────
-  # 3 · BUILD
+  # 3 · FRONTEND SECURITY
+  # ────────────────────────────────────────────────────────────────────────────
+  frontend-security:
+    name: "3 · Frontend security"
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install frontend deps
+        working-directory: View
+        run: npm ci
+
+      - name: Audit frontend dependencies
+        working-directory: View
+        run: npm audit --audit-level=moderate --json > frontend-npm-audit.json
+
+      - name: Check forbidden frontend security patterns
+        run: |
+          set -euo pipefail
+          if grep -RInE "dangerouslySetInnerHTML|\.innerHTML\s*=|eval\(|new Function\(|javascript:" View/src; then
+            echo "Forbidden XSS-prone frontend pattern found"
+            exit 1
+          fi
+          if grep -RInE "localStorage\.setItem\(['\"](accessToken|refreshToken)['\"]|EventSource\([^)]*token=" View/src; then
+            echo "Forbidden browser-readable JWT persistence or URL token stream found"
+            exit 1
+          fi
+
+      - name: Upload frontend security audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-security-audit
+          path: View/frontend-npm-audit.json
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 4 · BUILD
   # ────────────────────────────────────────────────────────────────────────────
   build:
-    name: "3 · Build (NestJS + Vite)"
+    name: "4 · Build (NestJS + Vite)"
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, frontend-security]
     steps:
       - uses: actions/checkout@v4
 

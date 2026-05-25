@@ -227,7 +227,7 @@ export function PortalLoginForm() {
     const google = (window as any).google;
     if (!google?.accounts) return;
 
-    googleBtnRef.current.innerHTML = '';
+    googleBtnRef.current.replaceChildren();
     google.accounts.id.renderButton(googleBtnRef.current, {
       type: 'standard',
       theme: 'outline',

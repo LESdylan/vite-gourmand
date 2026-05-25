@@ -9,6 +9,10 @@
      ══════════════════════════════════════════════════════════════════════════ */
   
   --z-base: 0;
+  --z-1: 1;
+  --z-2: 2;
+  --z-10: 10;
+  --z-50: 50;
   --z-dropdown: 100;
   --z-sticky: 200;
   --z-fixed: 300;
@@ -17,6 +21,7 @@
   --z-popover: 600;
   --z-tooltip: 700;
   --z-toast: 800;
+  --z-above: 1000;
 
   /* ══════════════════════════════════════════════════════════════════════════
      TRANSITIONS
@@ -140,12 +145,16 @@
   --font-bold: var(--font-weight-bold);
 
   /* Font sizes */
+  --text-2xs: var(--font-size-2xs);
   --text-xs: var(--font-size-xs);
   --text-sm: var(--font-size-sm);
+  --text-md: var(--font-size-base);
   --text-base: var(--font-size-base);
   --text-lg: var(--font-size-lg);
   --text-xl: var(--font-size-xl);
   --text-2xl: var(--font-size-2xl);
+  --text-3xl: var(--font-size-3xl);
+  --text-4xl: var(--font-size-4xl);
 
   /* Line heights */
   --leading-tight: var(--line-height-tight);

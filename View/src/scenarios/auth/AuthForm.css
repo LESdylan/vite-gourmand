@@ -12,8 +12,8 @@
 
 .auth-form__title {
   margin: 0 0 var(--space-2);
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: var(--font-size-2xl-lg);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   text-align: center;
 }
@@ -44,14 +44,14 @@
   border-radius: var(--radius-md);
   color: white;
   font-size: var(--text-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .auth-form__submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  box-shadow: var(--shadow-violet-sm);
 }
 
 .auth-form__submit:disabled {
@@ -87,9 +87,9 @@
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
   font-size: var(--text-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .auth-form__google:hover:not(:disabled) {
@@ -116,7 +116,7 @@
   color: var(--color-primary-600);
   font-size: var(--text-sm);
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--transition-normal);
 }
 
 .auth-form__links button:hover {

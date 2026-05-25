@@ -37,7 +37,7 @@ export function DataTable({ columns, records, onEdit, onDelete }: Props) {
               {columns.map((c) => {
                 const cellClass = getCellClass(c, r[c.name]);
                 return (
-                  <td key={c.name} className={cellClass} title={String(r[c.name] ?? '')}>
+                  <td key={c.name} className={cellClass} title={formatCellTitle(r[c.name], c)}>
                     {formatCell(r[c.name], c)}
                   </td>
                 );
@@ -71,8 +71,7 @@ function getCellClass(col: TableColumn, value: unknown): string {
 function formatCell(value: unknown, col: TableColumn): string {
   if (value === null || value === undefined) return '—';
 
-  // Mask password/hash columns — never show the raw value
-  if (col.name === 'password' || col.name.includes('password') || col.name.includes('hash')) {
+  if (isSensitiveColumn(col.name)) {
     return '••••••••';
   }
 
@@ -105,4 +104,24 @@ function formatCell(value: unknown, col: TableColumn): string {
   // Default - truncate long strings
   const str = String(value);
   return str.length > 50 ? str.slice(0, 47) + '…' : str;
+}
+
+function formatCellTitle(value: unknown, col: TableColumn): string {
+  if (value === null || value === undefined || isSensitiveColumn(col.name)) return '';
+  return String(value);
+}
+
+function isSensitiveColumn(name: string): boolean {
+  const normalized = name.toLowerCase();
+  return (
+    normalized === 'password' ||
+    normalized.includes('password') ||
+    normalized.includes('hash') ||
+    normalized.includes('token') ||
+    normalized.includes('secret') ||
+    normalized.includes('api_key') ||
+    normalized.includes('apikey') ||
+    normalized.includes('authorization') ||
+    normalized.includes('credential')
+  );
 }

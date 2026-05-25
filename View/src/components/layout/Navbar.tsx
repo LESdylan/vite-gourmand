@@ -86,6 +86,7 @@ export default function Navbar({
   return (
     <>
       <nav
+        aria-label="Navigation principale"
         className={`fixed left-0 right-0 z-50 transition-all duration-200 ${
           solid ? 'bg-white shadow-sm' : 'bg-black/20 backdrop-blur-sm'
         }`}
@@ -97,6 +98,7 @@ export default function Navbar({
             <button
               onClick={() => handleNavClick('home')}
               className="flex items-center gap-2 group"
+              aria-label="Retourner a l'accueil"
             >
               <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#722F37] rounded-lg flex items-center justify-center">
                 <ChefHat className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
@@ -117,6 +119,7 @@ export default function Navbar({
                 <button
                   key={item.page}
                   onClick={() => handleNavClick(item.page)}
+                  aria-current={currentPage === item.page ? 'page' : undefined}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                     currentPage === item.page
                       ? solid
@@ -144,6 +147,7 @@ export default function Navbar({
                     <button
                       onClick={() => (window.location.href = '/dashboard')}
                       className={`text-xs px-2 py-1 rounded ${solid ? 'text-[#722F37] hover:bg-[#722F37]/10' : 'text-white hover:bg-white/10'}`}
+                      aria-label="Ouvrir le dashboard"
                     >
                       Dashboard
                     </button>
@@ -171,6 +175,7 @@ export default function Navbar({
                     className={`w-9 h-9 sm:w-7 sm:h-7 rounded-full flex items-center justify-center ${
                       solid ? 'bg-[#FFF8F0] text-[#722F37]' : 'bg-white/20 text-white'
                     }`}
+                    aria-label="Ouvrir mon profil"
                   >
                     <UserIcon className="h-3.5 w-3.5" />
                   </button>
@@ -178,6 +183,7 @@ export default function Navbar({
                     <button
                       onClick={onLogout}
                       className={`p-2.5 sm:p-1.5 rounded ${solid ? 'text-[#1A1A1A]/40 hover:text-red-600' : 'text-white/60 hover:text-white'}`}
+                      aria-label="Se deconnecter"
                     >
                       <LogOut className="h-4 w-4" />
                     </button>
@@ -198,7 +204,9 @@ export default function Navbar({
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`sm:hidden p-2 rounded-lg ${solid ? 'text-[#1A1A1A]' : 'text-white'}`}
-              aria-label="Menu"
+              aria-label="Ouvrir le menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -208,7 +216,7 @@ export default function Navbar({
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden fixed inset-0 z-50 bg-white flex flex-col">
+        <div id="mobile-navigation" className="sm:hidden fixed inset-0 z-50 bg-white flex flex-col">
           <div className="flex items-center justify-between px-4 h-14 border-b flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center">
@@ -216,7 +224,11 @@ export default function Navbar({
               </div>
               <span className="font-bold text-[#1A1A1A]">Vite & Gourmand</span>
             </div>
-            <button onClick={() => setMobileMenuOpen(false)} className="p-2">
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2"
+              aria-label="Fermer le menu"
+            >
               <X className="h-5 w-5 text-[#1A1A1A]" />
             </button>
           </div>
@@ -226,6 +238,7 @@ export default function Navbar({
               <button
                 key={item.page}
                 onClick={() => handleNavClick(item.page)}
+                aria-current={currentPage === item.page ? 'page' : undefined}
                 className={`w-full text-left px-4 py-3 rounded-lg font-medium ${
                   currentPage === item.page
                     ? 'bg-[#722F37] text-white'

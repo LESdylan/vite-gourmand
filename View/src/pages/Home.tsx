@@ -207,6 +207,10 @@ function AboutSection({
                 src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800"
                 alt="Julie et José - Notre équipe"
                 className="rounded-2xl sm:rounded-3xl shadow-2xl w-full h-[280px] sm:h-[350px] lg:h-[450px] object-cover"
+                loading="lazy"
+                decoding="async"
+                width={800}
+                height={450}
               />
               {/* Floating card */}
               <div className="absolute bottom-2 right-2 sm:bottom-6 sm:right-6 bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-5 max-w-[160px] sm:max-w-[180px]">
@@ -344,7 +348,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
           <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-white mb-4 sm:mb-5">
             Un service adapté à <span className="text-[#D4AF37]">chaque occasion</span>
           </h2>
-          <p className="text-[clamp(0.875rem,1.5vw,1rem)] text-white/50">
+          <p className="text-[clamp(0.875rem,1.5vw,1rem)] text-white/75">
             Quel que soit votre événement, nous avons la solution pour vous régaler.
           </p>
         </div>
@@ -352,13 +356,15 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
         {/* Services grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-[2vw]">
           {services.map((service, index) => (
-            <div
+            <button
+              type="button"
               key={index}
-              className={`group relative overflow-hidden rounded-2xl sm:rounded-3xl cursor-pointer transition-all duration-700 ${
+              className={`group relative overflow-hidden rounded-2xl sm:rounded-3xl cursor-pointer transition-all duration-700 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D4AF37] ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
               style={{ transitionDelay: `${index * 150}ms` }}
               onClick={() => setCurrentPage('menu')}
+              aria-label={`Voir les menus pour ${service.title}`}
             >
               <div className="aspect-[4/5] sm:aspect-[3/4] relative">
                 <img
@@ -366,6 +372,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
                   alt={service.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-[#1A1A1A]/50 to-transparent" />
 
@@ -385,7 +392,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -407,12 +414,15 @@ function TestimonialsSection({
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const isPausedRef = useRef(false);
+  const carouselVisibleRef = useRef(false);
+  const pageHiddenRef = useRef(false);
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
+        carouselVisibleRef.current = entry.isIntersecting;
         if (entry.isIntersecting) setIsVisible(true);
       },
       { threshold: 0.1 },
@@ -424,15 +434,22 @@ function TestimonialsSection({
   // Infinite scroll via requestAnimationFrame — runs once, reads isPausedRef
   useEffect(() => {
     if (!trackRef.current || reviews.length === 0) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (reducedMotion.matches) return;
 
     let offset = 0;
     let animId: number;
     const speed = 0.4; // px per frame (~24px/s at 60fps)
 
+    const handleVisibilityChange = () => {
+      pageHiddenRef.current = document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     const animate = () => {
       if (!trackRef.current) return;
 
-      if (!isPausedRef.current) {
+      if (!isPausedRef.current && !pageHiddenRef.current && carouselVisibleRef.current) {
         offset += speed;
         // Each "set" of reviews is half the scrollWidth (we duplicate once)
         const halfWidth = trackRef.current.scrollWidth / 2;
@@ -444,7 +461,10 @@ function TestimonialsSection({
     };
 
     animId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [reviews.length]);
 
   // Duplicate reviews once for seamless loop
@@ -486,7 +506,7 @@ function TestimonialsSection({
                   <span className="text-4xl sm:text-5xl font-black text-[#1A1A1A] tabular-nums">
                     {avgRating > 0 ? avgRating.toFixed(1) : '–'}
                   </span>
-                  <span className="text-xl sm:text-2xl text-[#1A1A1A]/30 font-medium">/5</span>
+                  <span className="text-xl sm:text-2xl text-[#1A1A1A]/65 font-medium">/5</span>
                 </div>
                 <div className="flex items-center gap-0.5 mb-1">
                   {[1, 2, 3, 4, 5].map((i) => (
@@ -502,7 +522,7 @@ function TestimonialsSection({
                     />
                   ))}
                 </div>
-                <span className="text-sm text-[#1A1A1A]/50">Note moyenne</span>
+                <span className="text-sm text-[#1A1A1A]/65">Note moyenne</span>
               </div>
 
               {/* Vertical divider */}
@@ -513,7 +533,7 @@ function TestimonialsSection({
                 <span className="text-4xl sm:text-5xl font-black text-[#722F37] tabular-nums">
                   {reviewCount}
                 </span>
-                <span className="text-sm text-[#1A1A1A]/50 mt-1">Avis vérifiés</span>
+                <span className="text-sm text-[#1A1A1A]/65 mt-1">Avis vérifiés</span>
               </div>
 
               {/* Vertical divider */}
@@ -524,7 +544,7 @@ function TestimonialsSection({
                 <span className="text-4xl sm:text-5xl font-black text-[#556B2F] tabular-nums">
                   {satisfaction}%
                 </span>
-                <span className="text-sm text-[#1A1A1A]/50 mt-1">Clients satisfaits</span>
+                <span className="text-sm text-[#1A1A1A]/65 mt-1">Clients satisfaits</span>
               </div>
             </div>
           </div>
@@ -606,7 +626,7 @@ function TestimonialsSection({
                       <span className="font-semibold text-[#1A1A1A] text-sm block">
                         {review.userName}
                       </span>
-                      <span className="text-[11px] text-[#1A1A1A]/40">Client vérifié</span>
+                      <span className="text-[11px] text-[#1A1A1A]/65">Client vérifié</span>
                     </div>
                   </div>
                 </div>
@@ -616,7 +636,7 @@ function TestimonialsSection({
         </div>
       ) : (
         <div className="text-center py-12">
-          <p className="text-[#1A1A1A]/50 text-sm">Aucun avis pour le moment.</p>
+          <p className="text-[#1A1A1A]/65 text-sm">Aucun avis pour le moment.</p>
         </div>
       )}
     </section>
@@ -727,6 +747,9 @@ function ValuesSection() {
               alt="Produits frais et locaux"
               className="rounded-2xl sm:rounded-3xl shadow-xl w-full h-[280px] sm:h-[350px] lg:h-[400px] object-cover"
               loading="lazy"
+              decoding="async"
+              width={600}
+              height={400}
             />
             <div className="absolute bottom-2 left-2 sm:-bottom-5 sm:-left-5 bg-[#556B2F] text-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-xl">
               <div className="text-2xl sm:text-3xl font-bold mb-0.5">100%</div>

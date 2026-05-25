@@ -3,21 +3,21 @@
  */
 
 .pass-rate-chart {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
   padding: 20px;
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -2px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.02);
+    0 4px 6px -1px var(--color-black-10),
+    0 2px 4px -2px var(--color-black-10),
+    0 0 0 1px var(--color-black-02);
 }
 
 .pass-rate-chart-title {
   margin: 0 0 16px 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-gray-800);
 }
 
 .pass-rate-chart-container {
@@ -43,13 +43,13 @@
 }
 
 .pass-rate-donut-value {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   fill: var(--color-text-primary);
 }
 
 .pass-rate-donut-label {
-  font-size: 8px;
+  font-size: var(--font-size-xs2);
   fill: var(--color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -90,7 +90,7 @@
 }
 
 .pass-rate-legend-value {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: var(--text-sm);
   color: var(--color-text-primary);
 }
@@ -101,7 +101,7 @@
 }
 
 .pass-rate-legend-item--total .pass-rate-legend-label {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
@@ -141,7 +141,7 @@
   }
 
   .pass-rate-chart-title {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     margin-bottom: var(--space-3);
   }
 
@@ -151,6 +151,6 @@
   }
 
   .pass-rate-donut-value {
-    font-size: 16px;
+    font-size: var(--font-size-base);
   }
 }

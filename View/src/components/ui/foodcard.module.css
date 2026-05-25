@@ -1,9 +1,9 @@
 .card {
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--color-bg-secondary);
   border-radius: 1rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 16px var(--color-black-08), 0 1.5px 4px rgba(0,0,0,0.04);
   overflow: hidden;
   min-width: 160px;
   max-width: 320px;
@@ -11,7 +11,7 @@
   transition: box-shadow 0.2s;
 }
 .card:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.16), 0 3px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.16), 0 3px 8px var(--color-black-08);
 }
 .imageWrapper {
   width: 100%;
@@ -32,18 +32,18 @@
   gap: 0.5rem;
 }
 .name {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: var(--font-size-base-lg);
+  font-weight: var(--font-weight-semibold);
   margin: 0;
 }
 .description {
-  font-size: 0.95rem;
-  color: #666;
+  font-size: var(--font-size-base-sm);
+  color: var(--color-gray-666);
   margin: 0;
 }
 .price {
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   color: #1a8917;
   margin-top: 0.5rem;
 }
