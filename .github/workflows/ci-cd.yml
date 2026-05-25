@@ -42,9 +42,17 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install & lint backend
+      - name: Install backend deps
         working-directory: Back
-        run: npm install && npm run lint
+        run: npm install
+
+      - name: Generate Prisma client for lint
+        working-directory: Back
+        run: npx prisma generate --schema=src/Model/prisma/schema.prisma
+
+      - name: Lint backend
+        working-directory: Back
+        run: npm run lint:check
 
       - name: Install & lint frontend
         working-directory: View
@@ -54,7 +62,7 @@ jobs:
   # 2 · TEST
   # ────────────────────────────────────────────────────────────────────────────
   test:
-    name: "2 · Test (unit + e2e)"
+    name: "2 · Test (unit + e2e + custom)"
     runs-on: ubuntu-latest
     needs: lint
     services:
@@ -117,6 +125,16 @@ jobs:
         working-directory: Back
         run: npm run test:e2e -- --passWithNoTests --json --outputFile=test-results-e2e.json
 
+      # ── Custom validation test classes (non-Jest runner) ────────────────
+      - name: Run custom validation tests
+        working-directory: Back
+        run: npm run test:custom
+
+      - name: Summarize backend test total
+        if: always()
+        working-directory: Back
+        run: npm run test:summary
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -125,6 +143,8 @@ jobs:
           path: |
             Back/test-results-unit.json
             Back/test-results-e2e.json
+            Back/test-results-custom.json
+            Back/test-results-custom-raw.json
 
   # ────────────────────────────────────────────────────────────────────────────
   # 3 · BUILD

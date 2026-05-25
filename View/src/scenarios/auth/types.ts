@@ -10,6 +10,7 @@ export interface FormState {
   confirmPassword: string;
   name: string;
   phone: string;
+  gdprConsent: boolean;
 }
 
 export interface FormErrors {
@@ -18,6 +19,7 @@ export interface FormErrors {
   confirmPassword?: string;
   name?: string;
   phone?: string;
+  gdprConsent?: string;
   general?: string;
 }
 
@@ -27,4 +29,5 @@ export const initialFormState: FormState = {
   confirmPassword: '',
   name: '',
   phone: '',
+  gdprConsent: false,
 };

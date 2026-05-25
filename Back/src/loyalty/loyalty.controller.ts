@@ -46,7 +46,7 @@ export class LoyaltyController {
 
   @Get('value/:points')
   @ApiOperation({ summary: 'Get euro value of points' })
-  async getPointsValue(@Param('points', SafeParseIntPipe) points: number) {
+  getPointsValue(@Param('points', SafeParseIntPipe) points: number) {
     return this.loyaltyService.getPointsValue(points);
   }
 

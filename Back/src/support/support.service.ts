@@ -3,6 +3,7 @@
  */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma';
+import type { Prisma } from '../../generated/prisma/client.js';
 import {
   CreateSupportTicketDto,
   UpdateSupportTicketDto,
@@ -28,7 +29,7 @@ export class SupportService {
     limit?: number;
     offset?: number;
   }) {
-    const where: any = {};
+    const where: Prisma.SupportTicketWhereInput = {};
     if (options?.status) where.status = options.status;
     if (options?.assignedTo) where.assigned_to = options.assignedTo;
     if (options?.createdBy) where.created_by = options.createdBy;
@@ -118,7 +119,7 @@ export class SupportService {
   async update(id: number, dto: UpdateSupportTicketDto) {
     await this.findById(id);
 
-    const data: any = {};
+    const data: Prisma.SupportTicketUncheckedUpdateInput = {};
     if (dto.status !== undefined) data.status = dto.status;
     if (dto.priority !== undefined) data.priority = dto.priority;
     if (dto.assignedTo !== undefined) data.assigned_to = dto.assignedTo;

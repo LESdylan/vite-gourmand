@@ -157,7 +157,7 @@ export class LoyaltyService {
     });
   }
 
-  async getPointsValue(points: number) {
+  getPointsValue(points: number) {
     return {
       points,
       euroValue: points / this.POINTS_TO_EURO,

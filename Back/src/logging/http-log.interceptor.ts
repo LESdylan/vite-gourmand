@@ -22,7 +22,7 @@ export class HttpLogInterceptor implements NestInterceptor {
     @Optional() @Inject(LogService) private readonly logService?: LogService,
   ) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
@@ -43,16 +43,27 @@ export class HttpLogInterceptor implements NestInterceptor {
             clientIp,
             userAgent,
           ),
-        error: (error) =>
-          this.logError(
+        error: (error: unknown) => {
+          const statusCode =
+            typeof error === 'object' &&
+            error !== null &&
+            'status' in error &&
+            typeof error.status === 'number'
+              ? error.status
+              : 500;
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+
+          return this.logError(
             method,
             url,
-            error.status || 500,
+            statusCode,
             startTime,
             clientIp,
             userAgent,
-            error.message,
-          ),
+            errorMessage,
+          );
+        },
       }),
     );
   }

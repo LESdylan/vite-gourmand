@@ -207,7 +207,13 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
                         autoComplete={inputType === 'password' ? 'new-password' : undefined}
                       />
                       {inputType === 'password' && isEdit && (
-                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted, #94a3b8)', marginTop: '2px' }}>
+                        <span
+                          style={{
+                            fontSize: '0.7rem',
+                            color: 'var(--color-text-muted, #94a3b8)',
+                            marginTop: '2px',
+                          }}
+                        >
                           Laisser vide pour ne pas modifier le mot de passe
                         </span>
                       )}

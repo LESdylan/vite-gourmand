@@ -118,9 +118,9 @@ export class PromotionService {
     if (promo.is_active && promo.is_public) {
       this.newsletterService
         .sendPromotionNewsletter(promo.id, createdBy)
-        .catch((err) =>
+        .catch((error: unknown) =>
           this.logger.error(
-            `Newsletter auto-send failed for promo #${promo.id}: ${err.message}`,
+            `Newsletter auto-send failed for promo #${promo.id}: ${this.getErrorMessage(error)}`,
           ),
         );
     }
@@ -144,9 +144,9 @@ export class PromotionService {
     if (dto.is_active === true && promo.is_public) {
       this.newsletterService
         .sendPromotionNewsletter(promo.id, updatedBy)
-        .catch((err) =>
+        .catch((error: unknown) =>
           this.logger.error(
-            `Newsletter auto-send on update failed for promo #${promo.id}: ${err.message}`,
+            `Newsletter auto-send on update failed for promo #${promo.id}: ${this.getErrorMessage(error)}`,
           ),
         );
     }
@@ -228,5 +228,9 @@ export class PromotionService {
     const promo = await this.prisma.promotion.findUnique({ where: { id } });
     if (!promo) throw new NotFoundException('Promotion not found');
     return promo;
+  }
+
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
   }
 }

@@ -158,9 +158,23 @@ const SCHEMA_MODELS: SchemaModel[] = [
  * Map of string fields per model for search functionality
  */
 const MODEL_STRING_FIELDS: Record<string, string[]> = {
-  user: ['email', 'first_name', 'last_name', 'phone_number', 'city', 'country', 'postal_code'],
+  user: [
+    'email',
+    'first_name',
+    'last_name',
+    'phone_number',
+    'city',
+    'country',
+    'postal_code',
+  ],
   role: ['name', 'description'],
-  order: ['order_number', 'status', 'delivery_address', 'delivery_city', 'special_instructions'],
+  order: [
+    'order_number',
+    'status',
+    'delivery_address',
+    'delivery_city',
+    'special_instructions',
+  ],
   menu: ['title', 'description', 'conditions'],
   dish: ['title', 'description', 'course_type'],
   diet: ['name', 'description'],
@@ -198,7 +212,7 @@ export class CrudController {
    * Returns Prisma schema information for all models
    */
   @Get('schema')
-  async getSchema(): Promise<SchemaModel[]> {
+  getSchema(): SchemaModel[] {
     return SCHEMA_MODELS;
   }
 

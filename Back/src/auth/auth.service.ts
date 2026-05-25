@@ -43,8 +43,10 @@ export class AuthService {
     const user = await this.createUser(dto);
 
     // Send welcome email (non-blocking)
-    this.sendWelcomeEmail(user.email, user.first_name).catch((err) =>
-      this.logger.error(`Failed to send welcome email: ${err.message}`),
+    this.sendWelcomeEmail(user.email, user.first_name).catch((error: unknown) =>
+      this.logger.error(
+        `Failed to send welcome email: ${this.getErrorMessage(error)}`,
+      ),
     );
 
     return this.generateAuthResponse(user);
@@ -68,8 +70,10 @@ export class AuthService {
       // Send password reset email (non-blocking)
       this.mailService
         .sendPasswordReset(user.email, token)
-        .catch((err) =>
-          this.logger.error(`Failed to send reset email: ${err.message}`),
+        .catch((error: unknown) =>
+          this.logger.error(
+            `Failed to send reset email: ${this.getErrorMessage(error)}`,
+          ),
         );
     }
     return { message: 'If email exists, reset link sent' };
@@ -177,9 +181,9 @@ export class AuthService {
     if (dto.newsletterConsent) {
       this.newsletterService
         .subscribe({ email: dto.email, firstName: dto.firstName }, user.id)
-        .catch((err) =>
+        .catch((error: unknown) =>
           this.logger.error(
-            `Newsletter auto-subscribe failed for ${dto.email}: ${err.message}`,
+            `Newsletter auto-subscribe failed for ${dto.email}: ${this.getErrorMessage(error)}`,
           ),
         );
     }
@@ -332,5 +336,9 @@ export class AuthService {
       lastName: user.last_name,
       role: user.Role?.name ?? 'client',
     };
+  }
+
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
   }
 }

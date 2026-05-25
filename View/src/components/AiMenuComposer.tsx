@@ -226,11 +226,11 @@ export default function AiMenuComposer({
         setLoading(false);
       }
     },
-    [input, loading, convId, autoExtractBrief],
+    [input, loading, convId],
   );
 
   /* ── Auto-extract brief fields from conversation ── */
-  const autoExtractBrief = useCallback((userMsg: string, aiMsg: string) => {
+  function autoExtractBrief(userMsg: string, aiMsg: string): void {
     const combined = (userMsg + ' ' + aiMsg).toLowerCase();
 
     setBrief((prev) => {
@@ -292,7 +292,7 @@ export default function AiMenuComposer({
 
       return next;
     });
-  }, []);
+  }
 
   /* ── Copy AI message to brief ── */
   const copyToProposal = useCallback((content: string) => {

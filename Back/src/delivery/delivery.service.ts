@@ -7,6 +7,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma';
+import type { Prisma } from '../../generated/prisma/client.js';
 import {
   CreateDeliveryAssignmentDto,
   UpdateDeliveryAssignmentDto,
@@ -19,7 +20,7 @@ export class DeliveryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(options?: { status?: string; deliveryPersonId?: number }) {
-    const where: any = {};
+    const where: Prisma.DeliveryAssignmentWhereInput = {};
     if (options?.status) where.status = options.status;
     if (options?.deliveryPersonId)
       where.delivery_person_id = options.deliveryPersonId;
@@ -120,7 +121,7 @@ export class DeliveryService {
   async update(id: number, dto: UpdateDeliveryAssignmentDto) {
     await this.findById(id);
 
-    const data: any = {};
+    const data: Prisma.DeliveryAssignmentUncheckedUpdateInput = {};
     if (dto.deliveryPersonId !== undefined)
       data.delivery_person_id = dto.deliveryPersonId;
     if (dto.vehicleType !== undefined) data.vehicle_type = dto.vehicleType;

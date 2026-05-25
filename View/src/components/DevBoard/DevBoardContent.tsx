@@ -189,7 +189,6 @@ export function DevBoardContent({
             roleView,
             activeCategory,
             tests,
-            autoTests,
             suites,
             logs,
             connected,
@@ -211,7 +210,6 @@ function renderContent(
   roleView: RoleView,
   category: TestCategory,
   tests: ReturnType<typeof useMockData>['tests'],
-  autoTests: ReturnType<typeof useTestRunner>['autoTests'],
   suites: ReturnType<typeof useTestRunner>['suites'],
   logs: ReturnType<typeof useRealLogs>['logs'],
   connected: boolean,
@@ -233,7 +231,6 @@ function renderContent(
       return renderDevContent(
         category,
         tests,
-        autoTests,
         suites,
         logs,
         connected,
@@ -249,7 +246,6 @@ function renderContent(
 function renderDevContent(
   category: TestCategory,
   tests: ReturnType<typeof useMockData>['tests'],
-  autoTests: ReturnType<typeof useTestRunner>['autoTests'],
   suites: ReturnType<typeof useTestRunner>['suites'],
   logs: ReturnType<typeof useRealLogs>['logs'],
   connected: boolean,

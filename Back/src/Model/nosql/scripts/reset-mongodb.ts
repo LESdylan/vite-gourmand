@@ -6,7 +6,7 @@
  * Run via: npx tsx src/Model/nosql/scripts/reset-mongodb.ts
  */
 
-import { IndexDescription, IndexSpecification } from 'mongodb';
+import { IndexDescription } from 'mongodb';
 import { MongoAnalytics, getDb } from '../client/mongo-analytics.client';
 import { COLLECTIONS } from '../collections';
 import { INDEX_DEFINITIONS } from '../collections/indexes';
@@ -79,10 +79,7 @@ async function createIndexes(
       options.expireAfterSeconds = index.expireAfterSeconds;
     }
 
-    const name = await collection.createIndex(
-      index.key as IndexSpecification,
-      options,
-    );
+    const name = await collection.createIndex(index.key, options);
     console.log(`  ✅ ${collectionName}: ${name}`);
   }
 }

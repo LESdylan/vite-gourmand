@@ -21,6 +21,7 @@ export function AutoTestRow({ test, isEven }: AutoTestRowProps) {
     running: 'info',
     passed: 'success',
     failed: 'error',
+    skipped: 'neutral',
   } as const;
 
   const hasDetails = test.output || test.error;

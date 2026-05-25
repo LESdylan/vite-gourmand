@@ -11,6 +11,8 @@ import {
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
+type ValidationMetatype = new (...args: unknown[]) => object;
+
 interface ValidationError {
   field: string;
   errors: string[];
@@ -42,11 +44,10 @@ export class CustomValidationPipe implements PipeTransform {
       });
     }
 
-    const object = plainToInstance(metatype, value);
+    const object = plainToInstance(metatype as ValidationMetatype, value);
     const errors = await validate(object, {
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true,
     });
 
     if (errors.length > 0) {

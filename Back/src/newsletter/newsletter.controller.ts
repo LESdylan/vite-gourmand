@@ -18,7 +18,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { NewsletterService } from './newsletter.service';
 import { SubscribeNewsletterDto } from './dto/newsletter.dto';
-import { Public, Roles } from '../common';
+import { OptionalAuthRequest, Public, Roles } from '../common';
 
 @ApiTags('Newsletter')
 @Controller('newsletter')
@@ -33,8 +33,11 @@ export class NewsletterController {
   @Post('subscribe')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Subscribe to newsletter (anonymous or logged-in)' })
-  async subscribe(@Body() dto: SubscribeNewsletterDto, @Req() req: any) {
-    const userId = req.user?.sub || req.user?.id;
+  async subscribe(
+    @Body() dto: SubscribeNewsletterDto,
+    @Req() req: OptionalAuthRequest,
+  ) {
+    const userId = req.user?.sub;
     return this.newsletterService.subscribe(dto, userId);
   }
 
@@ -78,9 +81,9 @@ export class NewsletterController {
   @ApiOperation({ summary: 'Send a promotion to all subscribers (admin)' })
   async sendNewsletter(
     @Param('promotionId', ParseIntPipe) promotionId: number,
-    @Req() req: any,
+    @Req() req: OptionalAuthRequest,
   ) {
-    const sentBy = req.user?.sub || req.user?.id;
+    const sentBy = req.user?.sub;
     return this.newsletterService.sendPromotionNewsletter(promotionId, sentBy);
   }
 

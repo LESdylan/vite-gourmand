@@ -13,21 +13,38 @@ interface MailOptions {
   text?: string;
 }
 
+interface MailSendInfo {
+  messageId?: string;
+  response?: string;
+  accepted?: unknown[];
+  rejected?: unknown[];
+}
+
 @Injectable()
 export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private transporter!: nodemailer.Transporter;
   private readonly fromEmail: string;
+  private readonly isTestEnvironment: boolean;
 
   constructor(private readonly config: ConfigService) {
+    this.isTestEnvironment =
+      process.env.NODE_ENV === 'test' || this.config.get('NODE_ENV') === 'test';
     this.fromEmail = this.config.get<string>(
       'TITAN_EMAIL',
       'devfast@archicode.codes',
     );
-    this.initTransporter();
+    if (!this.isTestEnvironment) {
+      this.initTransporter();
+    }
   }
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
+    if (this.isTestEnvironment) {
+      this.logger.log('SMTP transporter disabled in test environment');
+      return;
+    }
+
     try {
       await this.transporter.verify();
       this.logger.log('SMTP transporter verified — ready to send emails');
@@ -48,7 +65,7 @@ export class MailService implements OnModuleInit {
     const secure = port === 465;
 
     this.logger.log(
-      `Initializing mail transporter: ${host}:${port} (secure=${secure}) user=${user}`,
+      `Initializing mail transporter: ${host}:${port} (secure=${secure}) user=${user ? 'configured' : 'missing'}`,
     );
 
     this.transporter = nodemailer.createTransport({
@@ -83,9 +100,14 @@ export class MailService implements OnModuleInit {
   }
 
   async send(options: MailOptions): Promise<boolean> {
+    if (this.isTestEnvironment) {
+      this.logger.debug('Email send skipped in test environment');
+      return true;
+    }
+
     const plainText = options.text || this.htmlToText(options.html);
     try {
-      const info = await this.transporter.sendMail({
+      const info = (await this.transporter.sendMail({
         from: `"Vite et Gourmand" <${this.fromEmail}>`,
         to: options.to,
         subject: options.subject,
@@ -98,7 +120,7 @@ export class MailService implements OnModuleInit {
           'List-Unsubscribe': `<mailto:${this.fromEmail}?subject=unsubscribe>`,
           'MIME-Version': '1.0',
         },
-      });
+      })) as MailSendInfo;
       this.logger.log(
         `Email sent to ${options.to} — id=${info.messageId} response="${info.response}" accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)}`,
       );

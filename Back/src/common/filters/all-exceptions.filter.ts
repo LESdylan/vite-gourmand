@@ -58,7 +58,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const isDev = process.env.NODE_ENV !== 'production';
     return {
       status: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: isDev && exception instanceof Error ? exception.message : 'Internal server error',
+      message:
+        isDev && exception instanceof Error
+          ? exception.message
+          : 'Internal server error',
       error: 'InternalServerError',
     };
   }

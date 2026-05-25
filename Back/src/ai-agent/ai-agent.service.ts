@@ -70,7 +70,7 @@ export class AiAgentService implements OnModuleInit {
     private readonly config: ConfigService,
   ) {}
 
-  async onModuleInit() {
+  onModuleInit(): void {
     const apiKey = this.config.get<string>('GROQ_API_KEY');
     if (apiKey) {
       this.openai = new OpenAI({

@@ -7,6 +7,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma';
+import type { Prisma } from '../../generated/prisma/client.js';
 import { CreateMessageDto, ReplyMessageDto } from './dto/message.dto';
 
 @Injectable()
@@ -17,7 +18,7 @@ export class MessageService {
     userId: number,
     options?: { unreadOnly?: boolean; limit?: number; offset?: number },
   ) {
-    const where: any = { recipient_id: userId };
+    const where: Prisma.MessageWhereInput = { recipient_id: userId };
     if (options?.unreadOnly) where.is_read = false;
 
     return this.prisma.message.findMany({

@@ -18,7 +18,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const updateField = useCallback((field: keyof FormState, value: string) => {
+  const updateField = useCallback(<K extends keyof FormState>(field: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined, general: undefined }));
   }, []);
@@ -42,6 +42,9 @@ export function useAuth() {
       }
       if (form.password !== form.confirmPassword) {
         newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
+      }
+      if (!form.gdprConsent) {
+        newErrors.gdprConsent = 'Consentement RGPD requis';
       }
     }
 
@@ -69,6 +72,7 @@ export function useAuth() {
             password: form.password,
             firstName: form.name,
             telephoneNumber: form.phone || undefined,
+            gdprConsent: form.gdprConsent,
           });
           addToast('Inscription réussie ! Bienvenue sur Vite Gourmand.', 'success');
           navigate('/');

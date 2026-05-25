@@ -12,6 +12,11 @@ export interface AnalyticsEvent {
   data: Record<string, any>;
 }
 
+interface EventStatAggregate {
+  _id: string;
+  count: number;
+}
+
 @Injectable()
 export class AnalyticsService implements OnModuleInit {
   private readonly logger = new Logger(AnalyticsService.name);
@@ -80,7 +85,7 @@ export class AnalyticsService implements OnModuleInit {
     since.setDate(since.getDate() - days);
 
     const result = await collection
-      .aggregate([
+      .aggregate<EventStatAggregate>([
         { $match: { timestamp: { $gte: since } } },
         { $group: { _id: '$eventType', count: { $sum: 1 } } },
       ])
@@ -88,7 +93,7 @@ export class AnalyticsService implements OnModuleInit {
 
     return result.reduce(
       (acc, r) => {
-        acc[r._id as string] = r.count;
+        acc[r._id] = r.count;
         return acc;
       },
       {} as Record<string, number>,

@@ -95,4 +95,4 @@ async function bootstrap() {
     logger.log(`🌐 Frontend: Serving static files from /public`);
   }
 }
-bootstrap();
+void bootstrap();

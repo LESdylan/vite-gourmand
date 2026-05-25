@@ -12,7 +12,7 @@ interface AuthFormProps {
   errors: FormErrors;
   loading: boolean;
   success: string | null;
-  onFieldChange: (field: keyof FormState, value: string) => void;
+  onFieldChange: <K extends keyof FormState>(field: K, value: FormState[K]) => void;
   onSubmit: () => void;
   onModeSwitch: (mode: AuthMode) => void;
   onGoogleLogin?: () => void;
@@ -124,6 +124,20 @@ export function AuthForm({
             onChange={(v) => onFieldChange('phone', v)}
             placeholder="06 12 34 56 78"
           />
+          <label className="auth-form__consent">
+            <input
+              type="checkbox"
+              checked={form.gdprConsent}
+              onChange={(event) => onFieldChange('gdprConsent', event.target.checked)}
+              required
+            />
+            <span>J'accepte le traitement de mes données personnelles.</span>
+          </label>
+          {errors.gdprConsent && (
+            <div className="auth-form__error" role="alert">
+              {errors.gdprConsent}
+            </div>
+          )}
         </>
       )}
 

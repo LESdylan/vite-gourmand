@@ -27,7 +27,8 @@ export class LoggingInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap({
         next: () => this.logSuccess(method, url, ip, response, startTime),
-        error: (err) => this.logError(method, url, ip, err, startTime),
+        error: (error: unknown) =>
+          this.logError(method, url, ip, error, startTime),
       }),
     );
   }
@@ -49,12 +50,13 @@ export class LoggingInterceptor implements NestInterceptor {
     method: string,
     url: string,
     ip: string | undefined,
-    error: Error,
+    error: unknown,
     startTime: number,
   ): void {
     const duration = Date.now() - startTime;
+    const message = error instanceof Error ? error.message : String(error);
     this.logger.error(
-      `${method} ${url} FAILED - ${duration}ms [${ip}]: ${error.message}`,
+      `${method} ${url} FAILED - ${duration}ms [${ip}]: ${message}`,
     );
   }
 }

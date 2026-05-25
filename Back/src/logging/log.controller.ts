@@ -18,6 +18,9 @@ import { Public } from '../common/decorators/public.decorator';
 import { LogService, StructuredLog } from './log.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtPayload } from '../common/types/request.types';
+
+type LogTokenPayload = Pick<JwtPayload, 'role'>;
 
 @Controller('logs')
 export class LogController {
@@ -35,7 +38,9 @@ export class LogController {
 
     try {
       const secret = this.configService.get<string>('JWT_SECRET') || 'secret';
-      const payload = this.jwtService.verify(token, { secret });
+      const payload = this.jwtService.verify<LogTokenPayload>(token, {
+        secret,
+      });
 
       // Check if user has admin or employe role
       const role = payload.role;
@@ -73,10 +78,7 @@ export class LogController {
    */
   @Public()
   @Get('stream')
-  async streamLogs(
-    @Query('token') token: string,
-    @Res() res: Response,
-  ): Promise<void> {
+  streamLogs(@Query('token') token: string, @Res() res: Response): void {
     // Validate token from query parameter
     if (!this.validateTokenFromQuery(token)) {
       throw new UnauthorizedException('Invalid or missing token');
