@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -13,8 +13,8 @@ on:
 #   • JWT secret → any string works for signing/verifying in tests
 #   • GROQ / Unsplash → code falls back to demo mode when key is empty
 #   • SMTP → tests don't actually send email
-# Only FLY_API_TOKEN is a real secret (used in the deploy job only).
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   NODE_ENV: test
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
   MONGODB_URI: mongodb://localhost:27017/vite_gourmand
@@ -178,23 +178,3 @@ jobs:
           path: |
             Back/dist/
             View/dist/
-
-  # ────────────────────────────────────────────────────────────────────────────
-  # 4 · DEPLOY  (main branch only — never on PRs)
-  # ────────────────────────────────────────────────────────────────────────────
-  deploy:
-    name: "4 · Deploy (Fly.io)"
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    environment: production
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Fly CLI
-        uses: superfly/flyctl-actions/setup-flyctl@master
-
-      - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
