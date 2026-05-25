@@ -1,178 +1,330 @@
-# Vite & Gourmand - A Modern Education Restaurant Webpage (DRAFT)
+# Vite & Gourmand
 
-*This project was created as part of the Studi curriculum by dylan lesieur*
+A restaurant ordering platform built as the final assessment (ECF) for the Studi full-stack web developer curriculum by Dylan Lesieur.
 
-> A from scratch web page designed to be hackable, observable and pleasant to use.
+> Designed to be hackable, observable, and pleasant to use — from a blank slate to a production-ready app.
+
+**Live:** https://vite-gourmand-withered-glitter-7902.fly.dev &nbsp;·&nbsp; **Region:** Paris (cdg) &nbsp;·&nbsp; **Docs:** [`/api/docs`](https://vite-gourmand-withered-glitter-7902.fly.dev/api/docs)
 
 ---
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Environment Variables](#environment-variables)
+- [Project Context](#project-context)
+- [Architecture](#architecture)
+- [Make Commands Reference](#make-commands-reference)
+- [Demo Accounts](#demo-accounts)
+- [Deployment](#deployment)
+- [References](#references)
+
+---
+
 ## Quick Start
 
-### 🐳 Option 1: Containerized Development (Recommended for School/Restricted Systems)
+Three ways to run the project. Docker is the safest for a fresh machine.
 
-**Only Docker required on your host machine!** No Node.js, npm, or other dependencies needed.
+### Option 1 — Docker (recommended, no Node.js required)
+
+Only Docker needs to be installed on the host.
 
 ```bash
-# Clone the repository
 git clone <repository-url>
 cd vite-gourmand
 
-# Full containerized development (everything runs in Docker)
-make docker-dev
+# If you use Bitwarden to manage the .env:
+export BW_SESSION=$(bw unlock --raw)
+make                          # fetches .env, installs deps, starts everything
 ```
 
-This will:
-1. Build a development container with Node.js 22
-2. Fetch `.env` from Bitwarden vault (interactive)
-3. Install all dependencies inside the container
-4. Compile TypeScript and generate Prisma client
-5. Start dev servers (accessible at localhost:3000 and localhost:5173)
+If you already have a `Back/.env` file:
 
-**Useful Docker commands:**
 ```bash
-make docker-shell    # Open interactive shell inside container
-make docker-dev-logs # View server logs
-make docker-stop     # Stop the dev container
-make docker-fclean   # Full cleanup (remove containers & volumes)
-make docker-restart  # Restart servers inside container
+make docker-bootstrap         # skips Bitwarden, uses existing .env
 ```
 
-### 💻 Option 2: Local Development (Host Node.js)
+Servers come up at:
 
-If you have Node.js 20+ installed on your machine:
+| Service        | URL                         |
+|----------------|-----------------------------|
+| Frontend       | http://localhost:5173        |
+| Backend API    | http://localhost:3000/api    |
+| Swagger UI     | http://localhost:3000/api/docs |
+| Prisma Studio  | http://localhost:5555        |
+
+---
+
+### Option 2 — Local Node.js (Node 20+ required)
 
 ```bash
-# Clone the repository
 git clone <repository-url>
 cd vite-gourmand
 
-# Full automatic setup
-make
+# Copy and fill in the environment file first (see Environment Variables below)
+cp Back/.env.example Back/.env   # or create Back/.env manually
+
+make local                        # installs deps, migrates DB, starts servers
 ```
 
-### 🔧 VS Code Dev Container (Best IDE Experience)
+Stop with `make turn-off`. Restart with `make turn-on`.
 
-For full IDE support inside Docker:
-1. Install the "Dev Containers" VS Code extension
-2. Open the project folder
-3. Click "Reopen in Container" when prompted (or F1 → "Dev Containers: Reopen in Container")
-4. VS Code will build the container and open your workspace inside it
+---
 
-### Available Make Commands
+### Option 3 — VS Code Dev Container
+
+Full IDE support (extensions, debugger, terminal) running inside the same Docker environment.
+
+1. Install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
+2. Open the project folder.
+3. When prompted, click **Reopen in Container** (or `F1` → *Dev Containers: Reopen in Container*).
+4. The container builds once; subsequent opens are instant.
+
+---
+
+## Environment Variables
+
+Create `Back/.env`. The required variables are:
+
+```dotenv
+# ── Database ──────────────────────────────────────────────
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/vite_gourmand
+MONGODB_URI=mongodb://root:example@localhost:27017/vite_gourmand?authSource=admin
+
+# ── Auth ──────────────────────────────────────────────────
+JWT_SECRET=change-me-to-a-long-random-string
+
+# ── App ───────────────────────────────────────────────────
+PORT=3000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
+
+# ── Google OAuth (optional — leave blank to disable) ──────
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# ── Email / SMTP (Titan, optional) ────────────────────────
+TITAN_EMAIL=
+TITAN_PASSWORD=
+TITAN_SMTP_HOST=smtp.titan.email
+TITAN_SMTP_PORT=465
+
+# ── External APIs (optional — app falls back to demo data) ─
+GROQ_API_KEY=
+API_UNSPLASH_PKEY=
+```
+
+The Docker setup (`make docker-bootstrap`) can fetch these from a Bitwarden vault item named `vite-gourmand-env`. To use a different item name:
+
 ```bash
-make help                  # Show all available commands
-make                       # Full bootstrap (local Node.js)
-make docker-dev            # Full bootstrap (containerized)
-make turn-on / turn-off    # Start/stop servers
-make logs                  # View server logs
-make fclean                # Full cleanup
+BW_ITEM_NAME=my-vault-item make
 ```
 
 ---
-## What Is This Project ?
-Vite & Gourmand is a company constituted of two people Julie and José. To overcome the stream flow of client and new opportuntities both of them had the idea to create a webpage that make their webpage more visible.
-They chose to hire a tenary company that would provide the service of building this webpage for them.
 
-`FastDev` is the name of the company and chosen to lead teh project as soon as possible. 
-Delivering a quick and efficient prototype but also appealing enouh and accessile are rules that make this task harder..
+## Project Context
 
-From this `30/01/2026`. I've got around two weeks to come with a solution and make it both operational, and practical.
+**Vite & Gourmand** is a fictional Parisian restaurant run by Julie and José. Faced with growing demand and new opportunities, they hired *FastDev* — a small dev shop — to build them a web presence.
 
-The main purpose of this webpage is to show the menus and give the possibility to the user to order their dishes..
+The app lets customers browse the menu and place orders online. Staff and administrators get a back-office to manage dishes, track orders, handle staff scheduling, and monitor analytics.
 
-[clik here to access the requirements](docs/requirements.md)
+This is my ECF (Évaluation en Cours de Formation) project for the *Titre Professionnel Développeur Web et Web Mobile* at Studi, started January 30 2026. The requirements brief is in [`docs/requirements.md`](docs/requirements.md).
 
-## Architecture of this webpage
+---
 
-### Database
-The firs things we're very sure about is how the datas has to be treated as the school gave us how to implement them throught a diagram UML.
+## Architecture
 
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Browser                                                         │
+│  React 19 + TypeScript · Vite 6 · Tailwind CSS v4 · Radix UI    │
+│  TanStack Query · React Router · Recharts                        │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │ HTTPS / REST + Cookie Auth
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  NestJS 11 + TypeScript                                          │
+│  ├── Guards (JWT, RBAC: user / employee / admin)                 │
+│  ├── Interceptors (logging, response transform)                  │
+│  ├── Controllers → Services → PrismaService                      │
+│  ├── WebSockets (real-time orders & chat)                        │
+│  ├── Swagger (OpenAPI 3.0)                                       │
+│  └── CSRF protection · Helmet · compression                      │
+└──────────────┬────────────────────────────┬────────────────────-┘
+               │ Prisma ORM                 │ Mongoose
+               ▼                            ▼
+┌──────────────────────┐      ┌─────────────────────────┐
+│  PostgreSQL 15       │      │  MongoDB 7               │
+│  Core domain data    │      │  Analytics, logs,        │
+│  (orders, menus,     │      │  activity streams        │
+│   users, staff…)     │      │                          │
+└──────────────────────┘      └─────────────────────────┘
+```
 
+### Stack at a glance
 
-## Why This Project ?
-This project is my ECF alias continual formation assesment from my other school studi that I applied to pass the title of webd eveloper full stack.
+| Layer        | Technology                                  |
+|--------------|---------------------------------------------|
+| Frontend     | React 19, TypeScript, Vite 6                |
+| Styling      | Tailwind CSS v4, Radix UI, CSS design tokens |
+| Backend      | NestJS 11, TypeScript, Node.js 22           |
+| ORM          | Prisma 7 (PostgreSQL)                       |
+| NoSQL        | MongoDB 7 via Mongoose                      |
+| Auth         | JWT (access + refresh), bcrypt, CSRF cookies |
+| Realtime     | WebSockets (`@nestjs/websockets`)           |
+| API docs     | Swagger / OpenAPI (`@nestjs/swagger`)       |
+| Testing      | Jest (unit + e2e), Postman collections      |
+| CI           | GitHub Actions (lint → test → security)     |
+| Deployment   | Fly.io (Paris cdg, 1 vCPU / 1 GB RAM)      |
 
-The project gives a certain amount of freedoms and requirements that I need follow along the way I'm doing the webpage.
+### Database models
 
-## Current State of the project
+The PostgreSQL schema covers 46 models including: `User`, `Role`, `Permission`, `Company`, `Menu`, `Dish`, `Order`, `OrderMenu`, `Allergen`, `Ingredient`, `KanbanColumn`, `LoyaltyAccount`, `Promotion`, `Discount`, `SupportTicket`, `NewsletterSubscriber`, `Event`, and more. See [`docs/data-model.md`](docs/data-model.md) and the Prisma schema at `Back/src/Model/prisma/schema.prisma`.
 
+### Diagrams
 
+- [NestJS module map & request flow](docs/diagrams/nestjs-modules.md) — Fig. 7
+- [Database ERD](docs/database-erd.md)
+- [Use-case diagram](docs/use-case-diagram.md)
+- [Sequence diagram](docs/sequence-diagram.md)
 
-## References & Documentations
-- [RGAA](https://accessibilite.numerique.gouv.fr/)
-- [Glossay](docs/glossary.md)
-- [Uml](https://www.geeksforgeeks.org/system-design/unified-modeling-language-uml-introduction/)
-- [Github project](https://github.com/users/LESdylan/projects/3)
-- [convert md to pdf with dillinger.io](https://dillinger.io/) || [convert md to pdf with markdowntopdf](https://markdowntopdf.com/)
-- [Git workflow](https://danielkummer.github.io/git-flow-cheatsheet/index.es_ES.html)
-- [docker Docs](https://docs.docker.com/compose/gettingstarted)
-- [opinion about using TS on both side back and front](https://www.reddit.com/r/typescript/comments/uqzkuh/how_popular_is_typescript_in_backend_development/)
-- [Zod 4](https://ts-rest.com/)
-- [Powershell docs](https://learn.microsoft.com/en-us/powershell/)
-- [lear how to use prisma with nestjs](https://docs.nestjs.com/recipes/prisma)
-- [manage OAuth app breanding ](https://support.google.com/cloud/answer/15549049?hl=fr&visit_id=639056608802274595-2425559031&rd=1#publishing-status)
-- [typescript docs](https://www.typescriptlang.org/docs/handbook/intro.html)
-- [Unsplash API](https://unsplash.com/documentation#public-authentication)
-- [RGPD](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/individual-rights/the-right-to-be-informed/checklists/)
-- [RGAA](https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/#2)
-- [CS50 SQL Notes](https://cs50.harvard.edu/sql)
+---
 
-## Use Of AI
-**Documentation & Research** - Used to clarify ambiguities in edge cases where conventions differ and to research complex topics not detailed in standard textbooks, ensuring realistic solutinos within the project's scope.
+## Make Commands Reference
 
-**Concept explanation** - Served as a study aid to solidify the understanding of abstract functionalities and architectural requirements necessary for building a 
-webpage
+Run `make help` for the full grouped list. Key commands:
 
-**Code Generation** - Not used for logic implementation; limited to clarifcation stufy
+```
+Bootstrap
+  make                    Full Docker bootstrap (default)
+  make docker-bootstrap   Same as above, explicit
+  make local              Bootstrap with host Node.js
+  make secrets            Fetch Back/.env from Bitwarden
 
+Servers
+  make turn-on            Start backend + frontend (host Node.js)
+  make turn-off           Stop all local dev servers
+  make docker-shell       Open shell inside the dev container
+  make docker-restart     Restart servers inside the container
 
-## ❤️ Why I Loved Working On It
-- It's a genuine, real-world project I could reason about
-- it rewards careful thought about APIs, ownership, and semantics
-- It's fun to see it get closer and closer to real project that we could use daily
+Database
+  make db-migrate         Run pending Prisma migrations
+  make db-seed            Seed with demo data
+  make db-studio          Open Prisma Studio (http://localhost:5555)
+  make db-reset           Drop and re-migrate the database
+  make db-connect         psql session into the running database
 
+Tests
+  make test               Run unit tests
+  make test-e2e           Run end-to-end tests
+  make test-all           Unit + e2e + custom flows
+  make coverage           Generate coverage report
 
-🚨 VOS DATES D’EXAMEN - RAPPEL DEADLINES ECF & DOSSIER PROFESSIONNEL 
-Promotion JUIN / JUILLET 2026 - Session ÉTÉ 2026 
- 
-Cette publication s’adresse aux apprenants positionnés sur la session Été 2026 et ayant complété le formulaire d’inscription à l’examen. 
- 
-Vous trouverez ci-dessous les deadlines obligatoires liées au passage de votre examen : 
- 
-◼ 🚨 ECF finale - Session Été 2026 
-👉 Jeudi 19 février 2026 à 23h59 (heure de Paris) 
- 
-◼ Dossier professionnel / Dossier projet 
-👉 Vendredi 1er mai 2026 à 23h59 (heure de Paris) 
- 
-⚠️ Tout dépôt hors délai ne pourra pas être pris en compte. 
- 
-Avant de déposer votre ECF finale, votre Dossier professionnel ou votre Dossier projet, merci de respecter les bons réflexes suivants : 
- 
-→ Utiliser le modèle de copie s’il est mis à disposition dans l’onglet « Évaluations » 
- 
-→ Relire attentivement votre travail et vérifier le respect des consignes (exemple : captures d’écran demandées, lisibilité, etc.) 
- 
-→ Déposer un fichier unique au format PDF, comprenant l’ensemble des pages attendues 
- 
-→ Vérifier que vous déposez la bonne copie au bon endroit dans l’onglet « Évaluations » 
- 
-💡 Je vous invite à visionner le replay des lives examens animés par votre formateur référent Christian Lohez.  
- 
-💬 En cas de question, rendez-vous dans votre onglet 
-Forum > Questions sur vos parcours. 
-Pour une question générale, pensez également à consulter la FAQ. 
+Security
+  make security-all       Full security audit (deps + headers + secrets)
 
-https://faq.studi.fr/article-categories/evaluation_examens/
+Deploy
+  make deploy             Deploy to Fly.io (requires flyctl)
+  make deploy-status      Show current deployment status
 
-# How to use a fresh machine
+Cleanup
+  make clean              Remove build artifacts
+  make fclean             Remove containers, volumes, build artifacts
+```
 
-# 1. Clone & cd into repo
-git clone <repo-url> && cd vite-gourmand
+---
 
-# 2. Login to Bitwarden once (stores session)
-export BW_SESSION=$(bw login --raw)
-# — or if already logged in —
-export BW_SESSION=$(bw unlock --raw)
+## Demo Accounts
 
-# 3. One command does everything
-make
+After seeding the database (`make db-seed`), these accounts are available:
+
+| Role          | Email                | Password     |
+|---------------|----------------------|--------------|
+| Admin         | admin@demo.app       | Admin123!@#  |
+| Employee      | employee@demo.app    | Employee123! |
+| Customer      | client@demo.app      | Client123!   |
+
+The admin account has full access to the back-office: menu management, order tracking, staff management, analytics, and system logs.
+
+---
+
+## Deployment
+
+The app is deployed to **Fly.io** as a single container (NestJS serves the compiled React build as static files from `/public`).
+
+```bash
+# Prerequisites: flyctl installed and authenticated
+make deploy           # builds Docker image and deploys
+make deploy-status    # shows machine and service health
+make deploy-logs      # tail production logs
+```
+
+Production config: [`fly.toml`](fly.toml) — Paris region, 1 vCPU, 1 GB RAM, auto-stop when idle.
+
+The CI pipeline runs on every push to `main`: lint → unit tests + e2e → security scan (OWASP-style header check, dependency audit). The deploy step is manual to avoid accidental production pushes.
+
+---
+
+## Project Structure
+
+```
+vite-gourmand/
+├── Back/                   NestJS backend
+│   ├── src/
+│   │   ├── app.module.ts
+│   │   ├── main.ts         Bootstrap, CORS, Helmet, body parser
+│   │   ├── auth/           JWT auth, CSRF, Google OAuth
+│   │   ├── users/
+│   │   ├── menus/
+│   │   ├── orders/
+│   │   ├── admin/
+│   │   ├── Model/
+│   │   │   └── prisma/     schema.prisma (46 models)
+│   │   └── ...
+│   └── test/               Jest unit + e2e specs
+│
+├── View/                   React + Vite frontend
+│   └── src/
+│       ├── components/     UI components (layout, features, helpers)
+│       ├── scenarios/      Route-level views (auth, kanban, orders)
+│       ├── portal_dashboard/ Staff / admin portal
+│       └── styles/         CSS design tokens (graphical_chart*.css)
+│
+├── docs/                   Architecture docs, diagrams, guides
+├── scripts/                Setup and utility scripts
+├── mk_extensions/          Makefile targets split by domain
+├── docker-compose.yml      PostgreSQL + MongoDB + dev container
+├── Dockerfile              Production image (NestJS + static build)
+├── Dockerfile.dev          Development image (hot reload)
+└── fly.toml                Fly.io configuration
+```
+
+---
+
+## References
+
+| Topic | Link |
+|-------|------|
+| Requirements brief | [docs/requirements.md](docs/requirements.md) |
+| API documentation | [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) |
+| Security guide | [docs/security-guide.md](docs/security-guide.md) |
+| RGPD compliance | [docs/rgpd.md](docs/rgpd.md) |
+| RGAA accessibility | [docs/rgaa.md](docs/rgaa.md) |
+| Glossary | [docs/glossary.md](docs/glossary.md) |
+| GitHub project board | https://github.com/users/LESdylan/projects/3 |
+| NestJS docs | https://docs.nestjs.com |
+| Prisma docs | https://www.prisma.io/docs |
+| Tailwind CSS v4 | https://tailwindcss.com/docs |
+| Fly.io docs | https://fly.io/docs |
+| RGAA | https://accessibilite.numerique.gouv.fr |
+| Unsplash API | https://unsplash.com/documentation |
+
+---
+
+## Use of AI
+
+Used as a study aid for clarifying architectural trade-offs, researching library APIs, and understanding edge cases in standards (RGAA, RGPD, JWT security). Logic design and implementation decisions are my own.
+
+## License
+
+[MIT](LICENSE) — Dylan Lesieur, 2026
