@@ -4,8 +4,10 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
+import { json, urlencoded } from 'express';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { ServerResponse } from 'http';
 import { Request, Response, NextFunction } from 'express';
 import { AppModule } from './app.module';
 import {
@@ -83,8 +85,14 @@ function csrfProtection(req: Request, res: Response, next: NextFunction): void {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false, // configured manually below with explicit size limits
+  });
   const logger = new Logger('Bootstrap');
+
+  // Body parsers with explicit size limits (must come before other middleware)
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
 
   // Security headers with Helmet
   // Configured to allow Google Identity Services (popup-based OAuth)
@@ -144,7 +152,7 @@ async function bootstrap() {
     const publicPath = join(__dirname, '..', '..', 'public');
     logger.log(`📁 Static assets path: ${publicPath}`);
     app.useStaticAssets(publicPath, {
-      setHeaders: (res, filePath) => {
+      setHeaders: (res: ServerResponse, filePath: string) => {
         const normalizedPath = filePath.replace(/\\/g, '/');
         if (normalizedPath.includes('/assets/')) {
           res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
