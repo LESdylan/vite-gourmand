@@ -6,6 +6,9 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
   "testTimeout": 30000,
   "setupFilesAfterEnv": ["<rootDir>/../setup.ts"],
   "forceExit": true,

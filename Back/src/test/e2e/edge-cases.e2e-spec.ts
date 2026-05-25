@@ -13,7 +13,7 @@ describe('Edge Cases and Boundaries (e2e)', () => {
     const email = testUtils.uniqueEmail('edge');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'Edge' });
+      .send({ email, password: 'Test123!', firstName: 'Edge', gdprConsent: true });
 
     await request(app.getHttpServer())
       .post('/api/auth/login')
@@ -70,7 +70,7 @@ describe('Edge Cases and Boundaries (e2e)', () => {
     it('handles empty string fields', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({ email: '', password: '', firstName: '' });
+        .send({ email: '', password: '', firstName: '', gdprConsent: true });
       expect(response.status).toBe(400);
     });
   });
@@ -103,7 +103,7 @@ describe('Edge Cases and Boundaries (e2e)', () => {
       const email = testUtils.uniqueEmail('case');
       await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({ email, password: 'Test123!', firstName: 'Case' });
+        .send({ email, password: 'Test123!', firstName: 'Case', gdprConsent: true });
 
       const response = await request(app.getHttpServer())
         .post('/api/auth/login')
@@ -141,11 +141,11 @@ describe('Edge Cases and Boundaries (e2e)', () => {
       const email = testUtils.uniqueEmail('dup');
       await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({ email, password: 'Test123!', firstName: 'Dup' });
+        .send({ email, password: 'Test123!', firstName: 'Dup', gdprConsent: true });
 
       const response = await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({ email, password: 'Test123!', firstName: 'Dup' });
+        .send({ email, password: 'Test123!', firstName: 'Dup', gdprConsent: true });
 
       expect([400, 409]).toContain(response.status);
     });

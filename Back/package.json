@@ -116,6 +116,9 @@
       "<rootDir>/src/test/fuzzy/",
       "<rootDir>/src/test/validators/"
     ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
     "testEnvironment": "node",
     "testEnvironmentOptions": {
       "customExportConditions": [

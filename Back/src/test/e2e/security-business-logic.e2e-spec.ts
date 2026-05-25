@@ -14,7 +14,7 @@ describe('Business Logic Security (e2e)', () => {
     const email = testUtils.uniqueEmail('bizlogic');
     await request(app.getHttpServer())
       .post('/api/auth/register')
-      .send({ email, password: 'Test123!', firstName: 'Biz' });
+      .send({ email, password: 'Test123!', firstName: 'Biz', gdprConsent: true });
 
     const login = await request(app.getHttpServer())
       .post('/api/auth/login')

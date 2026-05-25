@@ -23,6 +23,7 @@ describe('Response Format (e2e)', () => {
         email: testUtils.uniqueEmail('response'),
         password: 'SecurePassword123!',
         firstName: 'ResponseTest',
+        gdprConsent: true,
       });
 
     expect(response.status).toBe(201);

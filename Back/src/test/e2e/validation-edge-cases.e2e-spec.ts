@@ -37,7 +37,7 @@ describe('Input Validation Edge Cases (e2e)', () => {
       it(`rejects invalid email format #${i + 1}: ${email.slice(0, 20)}`, async () => {
         const response = await request(app.getHttpServer())
           .post('/api/auth/register')
-          .send({ email, password: 'Test123!', firstName: 'Test' });
+          .send({ email, password: 'Test123!', firstName: 'Test', gdprConsent: true });
 
         expect(response.status).toBe(400);
       });
@@ -45,78 +45,46 @@ describe('Input Validation Edge Cases (e2e)', () => {
   });
 
   describe('Password Validation', () => {
-    // Core weak passwords that should definitely be rejected
-    const weakPasswords = [
-      '123', // too short
-      'abc', // too short
-    ];
+    const weakPasswords = ['123', 'abc'];
 
     weakPasswords.forEach((password, i) => {
       it(`rejects weak password #${i + 1}`, async () => {
         const response = await request(app.getHttpServer())
           .post('/api/auth/register')
-          .send({
-            email: testUtils.uniqueEmail(`weak${i}`),
-            password,
-            firstName: 'Test',
-          });
+          .send({ email: testUtils.uniqueEmail(`weak${i}`), password, firstName: 'Test', gdprConsent: true });
 
         expect(response.status).toBe(400);
       });
     });
-
-    // Note: Whitespace-only and common passwords may be accepted depending on policy
-    // 'password', 'noNumbers!', 'nonumber', 'NOLOWERCASE123!', '        '
-    // These could be weak but may meet minimum requirements (length >= 6)
   });
 
   describe('Numeric Input Validation', () => {
-    // IDs that should be rejected or return not found
-    const invalidNumbers = [
-      'abc',
-      '1.2.3',
-      'NaN',
-      'Infinity',
-      '-Infinity',
-      '1e999',
-      '1n',
-    ];
+    const invalidNumbers = ['abc', '1.2.3', 'NaN', 'Infinity', '-Infinity', '1e999', '1n'];
 
     invalidNumbers.forEach((num, i) => {
       it(`rejects invalid numeric ID #${i + 1}: ${num}`, async () => {
-        const response = await request(app.getHttpServer()).get(
-          `/api/menus/${num}`,
-        );
-
+        const response = await request(app.getHttpServer()).get(`/api/menus/${num}`);
         expect([400, 404]).toContain(response.status);
       });
     });
 
-    // Note: 0x1 is sometimes parsed as hex (=1) which may return 200/404
     it('handles hex notation ID', async () => {
       const response = await request(app.getHttpServer()).get('/api/menus/0x1');
-      // May be parsed as 1 (valid) or rejected as invalid format
       expect([200, 400, 404]).toContain(response.status);
     });
 
     it('rejects negative ID', async () => {
       const response = await request(app.getHttpServer()).get('/api/menus/-1');
-
       expect([400, 404]).toContain(response.status);
     });
 
     it('rejects zero ID', async () => {
       const response = await request(app.getHttpServer()).get('/api/menus/0');
-
       expect([400, 404]).toContain(response.status);
     });
 
     it('rejects very large ID', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/api/menus/99999999999999999999',
-      );
-
-      // 400 = validation, 404 = not found, 500 = Prisma overflow (known issue)
+      const response = await request(app.getHttpServer()).get('/api/menus/99999999999999999999');
       expect([400, 404, 500]).toContain(response.status);
     });
   });
@@ -125,24 +93,15 @@ describe('Input Validation Edge Cases (e2e)', () => {
     it('rejects extremely long firstName', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({
-          email: testUtils.uniqueEmail('long'),
-          password: 'Test123!',
-          firstName: 'a'.repeat(10000),
-        });
+        .send({ email: testUtils.uniqueEmail('long'), password: 'Test123!', firstName: 'a'.repeat(10000) });
 
-      // 400 = validation rejects, 500 = Prisma column overflow (known issue - should add MaxLength)
       expect([400, 500]).toContain(response.status);
     });
 
     it('rejects empty firstName', async () => {
       const response = await request(app.getHttpServer())
         .post('/api/auth/register')
-        .send({
-          email: testUtils.uniqueEmail('empty'),
-          password: 'Test123!',
-          firstName: '',
-        });
+        .send({ email: testUtils.uniqueEmail('empty'), password: 'Test123!', firstName: '', gdprConsent: true });
 
       expect(response.status).toBe(400);
     });
