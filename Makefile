@@ -11,7 +11,7 @@
 
 # Force bash as the shell (required — default shell may not support & or pipes)
 SHELL := /usr/bin/bash
-.SHELLFLAGS := -ec
+.SHELLFLAGS := -eo pipefail -c
 
 .PHONY: help
 .DEFAULT_GOAL := all
@@ -617,7 +617,22 @@ docker-build-dev:  ## 🐳 Build the development Docker image
 	@echo "║  🐳 Building Development Container                           ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@$(DOCKER_COMPOSE) --profile dev build dev 2>&1 | grep -v "DEPRECATED\|Install the buildx\|https://docs.docker.com/go/buildx"
+	@if ! docker info >/dev/null 2>&1; then \
+		echo "❌ Cannot connect to Docker daemon."; \
+		echo ""; \
+		echo "   Docker is running but your user lacks permission."; \
+		echo "   Fix it (one-time, then open a new terminal):"; \
+		echo "     sudo usermod -aG docker $$USER && newgrp docker"; \
+		echo ""; \
+		echo "   Or if Docker is not running:"; \
+		echo "     sudo systemctl start docker"; \
+		exit 1; \
+	fi
+	@tmpfile=$$(mktemp); \
+	 $(DOCKER_COMPOSE) --profile dev build dev >"$$tmpfile" 2>&1; BUILD_EXIT=$$?; \
+	 grep -v "DEPRECATED\|Install the buildx\|https://docs.docker.com/go/buildx\|attribute .version. is obsolete\|configured to build using Bake" "$$tmpfile" || true; \
+	 rm -f "$$tmpfile"; \
+	 test $$BUILD_EXIT -eq 0 || { echo "❌ Docker build failed (exit $$BUILD_EXIT). Check output above."; exit 1; }
 	@echo ""
 	@echo "✅ Development container image built"
 

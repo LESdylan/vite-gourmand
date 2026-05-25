@@ -1,0 +1,180 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+# ── Fake-but-valid values for CI — NOT production credentials ────────────────
+# Real credentials never needed for tests:
+#   • Databases  → ephemeral service containers started by this workflow
+#   • JWT secret → any string works for signing/verifying in tests
+#   • GROQ / Unsplash → code falls back to demo mode when key is empty
+#   • SMTP → tests don't actually send email
+# Only FLY_API_TOKEN is a real secret (used in the deploy job only).
+env:
+  NODE_ENV: test
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+  MONGODB_URI: mongodb://localhost:27017/vite_gourmand
+  JWT_SECRET: ci-test-secret-not-used-in-prod
+  FRONTEND_URL: http://localhost:3000
+  GROQ_API_KEY: ""
+  API_UNSPLASH_PKEY: ""
+  GOOGLE_CLIENT_ID: ci-fake-google-client-id
+  TITAN_EMAIL: ci@example.com
+  TITAN_PASSWORD: ci-fake-password
+  TITAN_SMTP_HOST: smtp.example.com
+  TITAN_SMTP_PORT: "465"
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # 1 · LINT
+  # ────────────────────────────────────────────────────────────────────────────
+  lint:
+    name: "1 · Lint (ESLint)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install & lint backend
+        working-directory: Back
+        run: npm install && npm run lint
+
+      - name: Install & lint frontend
+        working-directory: View
+        run: npm install && npm run lint
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 2 · TEST
+  # ────────────────────────────────────────────────────────────────────────────
+  test:
+    name: "2 · Test (unit + e2e)"
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install backend deps
+        working-directory: Back
+        run: npm install
+
+      # prisma db push syncs the schema to the empty CI postgres (no migrations needed)
+      - name: Push Prisma schema to CI database
+        working-directory: Back
+        run: npx prisma db push --schema=src/Model/prisma/schema.prisma --accept-data-loss
+
+      # Generates the Prisma client used by the app and the seed
+      - name: Generate Prisma client
+        working-directory: Back
+        run: npx prisma generate --schema=src/Model/prisma/schema.prisma
+
+      # Seed the minimum data the e2e tests rely on (roles + 4 test users)
+      - name: Seed CI test data
+        working-directory: Back
+        run: npx tsx src/test/ci-seed.ts
+
+      # ── Unit tests (spec files) ──────────────────────────────────────────
+      - name: Run unit tests
+        working-directory: Back
+        run: npm run test -- --passWithNoTests --json --outputFile=test-results-unit.json
+
+      # ── E2E tests (e2e-spec files, full app + real DB) ───────────────────
+      - name: Run e2e tests
+        working-directory: Back
+        run: npm run test:e2e -- --passWithNoTests --json --outputFile=test-results-e2e.json
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            Back/test-results-unit.json
+            Back/test-results-e2e.json
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 3 · BUILD
+  # ────────────────────────────────────────────────────────────────────────────
+  build:
+    name: "3 · Build (NestJS + Vite)"
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install & build backend
+        working-directory: Back
+        run: |
+          npm install
+          npx prisma generate --schema=src/Model/prisma/schema.prisma
+          npm run build
+
+      - name: Install & build frontend
+        working-directory: View
+        run: npm install && npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            Back/dist/
+            View/dist/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 4 · DEPLOY  (main branch only — never on PRs)
+  # ────────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: "4 · Deploy (Fly.io)"
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Fly CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

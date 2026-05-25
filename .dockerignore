@@ -1,3 +1,6 @@
+# Dev container config — not needed in Docker build context
+.devcontainer/
+
 # flyctl launch added from .gitignore
 **/vite-gourmand/docs/Enoncé TP Développeur Web et Web Mobile-5.pdf
 **/server\vite-gourmand-api\node_modules
