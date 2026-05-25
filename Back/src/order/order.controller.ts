@@ -35,6 +35,15 @@ export class OrderController {
     return this.orderService.findByUser(user.sub, filters);
   }
 
+  @Get('my')
+  @ApiOperation({ summary: 'Get current user orders' })
+  async findMine(
+    @CurrentUser() user: JwtPayload,
+    @Query() filters: OrderFilterDto,
+  ) {
+    return this.orderService.findByUser(user.sub, filters);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get order by ID' })
   async findOne(

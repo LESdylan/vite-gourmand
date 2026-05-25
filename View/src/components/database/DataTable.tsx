@@ -71,6 +71,11 @@ function getCellClass(col: TableColumn, value: unknown): string {
 function formatCell(value: unknown, col: TableColumn): string {
   if (value === null || value === undefined) return '—';
 
+  // Mask password/hash columns — never show the raw value
+  if (col.name === 'password' || col.name.includes('password') || col.name.includes('hash')) {
+    return '••••••••';
+  }
+
   // Boolean values - handled via CSS
   if (typeof value === 'boolean' || col.type === 'boolean') return '';
 

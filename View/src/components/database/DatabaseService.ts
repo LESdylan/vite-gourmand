@@ -9,7 +9,7 @@ import type { TableRecord, TableMeta, FilterConfig, PaginationState } from './ty
 
 const BASE = '/api/crud';
 
-/** Map model names to API endpoints (only tables with CRUD routes) */
+/** Map model names to CRUD API endpoints */
 const MODEL_TO_ENDPOINT: Record<string, string> = {
   User: 'users',
   Role: 'roles',
@@ -21,6 +21,9 @@ const MODEL_TO_ENDPOINT: Record<string, string> = {
   Allergen: 'allergens',
   WorkingHours: 'working-hours',
 };
+
+/** Fields that contain sensitive data — shown masked in the table */
+export const SENSITIVE_FIELDS = new Set(['password', 'password_hash']);
 
 /** Schema column from backend */
 interface SchemaColumn {

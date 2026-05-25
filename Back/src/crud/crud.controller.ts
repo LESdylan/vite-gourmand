@@ -16,6 +16,7 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -48,13 +49,18 @@ const SCHEMA_MODELS: SchemaModel[] = [
     columns: [
       { name: 'id', type: 'integer', isId: true, isRequired: true },
       { name: 'email', type: 'string', isRequired: true },
-      { name: 'password_hash', type: 'string', isRequired: true },
+      { name: 'password', type: 'string', isRequired: true },
       { name: 'first_name', type: 'string', isRequired: true },
-      { name: 'last_name', type: 'string', isRequired: true },
-      { name: 'phone', type: 'string' },
-      { name: 'role_id', type: 'integer', isRequired: true },
-      { name: 'created_at', type: 'datetime', isRequired: true },
-      { name: 'updated_at', type: 'datetime', isRequired: true },
+      { name: 'last_name', type: 'string' },
+      { name: 'phone_number', type: 'string' },
+      { name: 'city', type: 'string' },
+      { name: 'country', type: 'string' },
+      { name: 'postal_code', type: 'string' },
+      { name: 'role_id', type: 'integer' },
+      { name: 'is_active', type: 'boolean' },
+      { name: 'is_email_verified', type: 'boolean' },
+      { name: 'created_at', type: 'datetime' },
+      { name: 'updated_at', type: 'datetime' },
     ],
   },
   {
@@ -63,40 +69,52 @@ const SCHEMA_MODELS: SchemaModel[] = [
       { name: 'id', type: 'integer', isId: true, isRequired: true },
       { name: 'name', type: 'string', isRequired: true },
       { name: 'description', type: 'string' },
+      { name: 'created_at', type: 'datetime' },
     ],
   },
   {
     name: 'Order',
     columns: [
       { name: 'id', type: 'integer', isId: true, isRequired: true },
+      { name: 'order_number', type: 'string', isRequired: true },
       { name: 'user_id', type: 'integer', isRequired: true },
-      { name: 'status', type: 'string', isRequired: true },
-      { name: 'total_amount', type: 'decimal', isRequired: true },
+      { name: 'order_date', type: 'datetime' },
+      { name: 'delivery_date', type: 'datetime', isRequired: true },
+      { name: 'delivery_hour', type: 'string' },
       { name: 'delivery_address', type: 'string' },
-      { name: 'notes', type: 'string' },
-      { name: 'created_at', type: 'datetime', isRequired: true },
-      { name: 'updated_at', type: 'datetime', isRequired: true },
+      { name: 'delivery_city', type: 'string' },
+      { name: 'person_number', type: 'integer', isRequired: true },
+      { name: 'menu_price', type: 'decimal', isRequired: true },
+      { name: 'delivery_price', type: 'decimal' },
+      { name: 'total_price', type: 'decimal', isRequired: true },
+      { name: 'status', type: 'string' },
+      { name: 'special_instructions', type: 'string' },
+      { name: 'created_at', type: 'datetime' },
+      { name: 'updated_at', type: 'datetime' },
     ],
   },
   {
     name: 'Menu',
     columns: [
       { name: 'id', type: 'integer', isId: true, isRequired: true },
-      { name: 'name', type: 'string', isRequired: true },
+      { name: 'title', type: 'string', isRequired: true },
       { name: 'description', type: 'string' },
-      { name: 'price', type: 'decimal', isRequired: true },
-      { name: 'is_active', type: 'boolean', isRequired: true },
+      { name: 'conditions', type: 'string' },
+      { name: 'person_min', type: 'integer', isRequired: true },
+      { name: 'price_per_person', type: 'decimal', isRequired: true },
+      { name: 'remaining_qty', type: 'integer' },
+      { name: 'status', type: 'string' },
     ],
   },
   {
     name: 'Dish',
     columns: [
       { name: 'id', type: 'integer', isId: true, isRequired: true },
-      { name: 'name', type: 'string', isRequired: true },
+      { name: 'title', type: 'string', isRequired: true },
       { name: 'description', type: 'string' },
-      { name: 'price', type: 'decimal', isRequired: true },
-      { name: 'category', type: 'string' },
-      { name: 'is_active', type: 'boolean', isRequired: true },
+      { name: 'photo_url', type: 'string' },
+      { name: 'course_type', type: 'string' },
+      { name: 'created_at', type: 'datetime' },
     ],
   },
   {
@@ -105,6 +123,7 @@ const SCHEMA_MODELS: SchemaModel[] = [
       { name: 'id', type: 'integer', isId: true, isRequired: true },
       { name: 'name', type: 'string', isRequired: true },
       { name: 'description', type: 'string' },
+      { name: 'icon_url', type: 'string' },
     ],
   },
   {
@@ -113,6 +132,7 @@ const SCHEMA_MODELS: SchemaModel[] = [
       { name: 'id', type: 'integer', isId: true, isRequired: true },
       { name: 'name', type: 'string', isRequired: true },
       { name: 'description', type: 'string' },
+      { name: 'icon_url', type: 'string' },
     ],
   },
   {
@@ -124,62 +144,12 @@ const SCHEMA_MODELS: SchemaModel[] = [
     ],
   },
   {
-    name: 'Ingredient',
-    columns: [
-      { name: 'id', type: 'integer', isId: true, isRequired: true },
-      { name: 'name', type: 'string', isRequired: true },
-      { name: 'description', type: 'string' },
-    ],
-  },
-  {
-    name: 'Review',
-    columns: [
-      { name: 'id', type: 'integer', isId: true, isRequired: true },
-      { name: 'user_id', type: 'integer', isRequired: true },
-      { name: 'rating', type: 'integer', isRequired: true },
-      { name: 'comment', type: 'string' },
-      { name: 'created_at', type: 'datetime', isRequired: true },
-    ],
-  },
-  {
-    name: 'Discount',
-    columns: [
-      { name: 'id', type: 'integer', isId: true, isRequired: true },
-      { name: 'code', type: 'string', isRequired: true },
-      { name: 'description', type: 'string' },
-      { name: 'percentage', type: 'decimal' },
-      { name: 'is_active', type: 'boolean', isRequired: true },
-    ],
-  },
-  {
-    name: 'Promotion',
-    columns: [
-      { name: 'id', type: 'integer', isId: true, isRequired: true },
-      { name: 'name', type: 'string', isRequired: true },
-      { name: 'description', type: 'string' },
-      { name: 'start_date', type: 'datetime' },
-      { name: 'end_date', type: 'datetime' },
-      { name: 'is_active', type: 'boolean', isRequired: true },
-      { name: 'is_public', type: 'boolean', isRequired: true },
-    ],
-  },
-  {
     name: 'WorkingHours',
     columns: [
       { name: 'id', type: 'integer', isId: true, isRequired: true },
-      { name: 'day_of_week', type: 'integer', isRequired: true },
-      { name: 'open_time', type: 'string', isRequired: true },
-      { name: 'close_time', type: 'string', isRequired: true },
-      { name: 'is_closed', type: 'boolean', isRequired: true },
-    ],
-  },
-  {
-    name: 'Session',
-    columns: [
-      { name: 'id', type: 'string', isId: true, isRequired: true },
-      { name: 'user_id', type: 'integer', isRequired: true },
-      { name: 'expires_at', type: 'datetime', isRequired: true },
-      { name: 'created_at', type: 'datetime', isRequired: true },
+      { name: 'day', type: 'string', isRequired: true },
+      { name: 'opening', type: 'string', isRequired: true },
+      { name: 'closing', type: 'string', isRequired: true },
     ],
   },
 ];
@@ -188,20 +158,15 @@ const SCHEMA_MODELS: SchemaModel[] = [
  * Map of string fields per model for search functionality
  */
 const MODEL_STRING_FIELDS: Record<string, string[]> = {
-  user: ['email', 'first_name', 'last_name', 'phone'],
+  user: ['email', 'first_name', 'last_name', 'phone_number', 'city', 'country', 'postal_code'],
   role: ['name', 'description'],
-  order: ['status', 'delivery_address', 'notes'],
-  menu: ['name', 'description'],
-  dish: ['name', 'description', 'category'],
+  order: ['order_number', 'status', 'delivery_address', 'delivery_city', 'special_instructions'],
+  menu: ['title', 'description', 'conditions'],
+  dish: ['title', 'description', 'course_type'],
   diet: ['name', 'description'],
   theme: ['name', 'description'],
   allergen: ['name'],
-  ingredient: ['name', 'description'],
-  review: ['comment'],
-  discount: ['code', 'description'],
-  promotion: ['name', 'description'],
-  workingHours: ['open_time', 'close_time'],
-  session: ['id'],
+  workingHours: ['day', 'opening', 'closing'],
 };
 
 /**
@@ -216,12 +181,7 @@ const MODEL_NAMES = [
   'diet',
   'theme',
   'allergen',
-  'ingredient',
-  'review',
-  'discount',
-  'promotion',
   'workingHours',
-  'session',
 ];
 
 @Controller('crud')
@@ -348,7 +308,8 @@ export class CrudController {
     if (!modelName) {
       throw new Error(`Unknown table: ${table}`);
     }
-    return this.crudService.create(modelName, data);
+    const processed = await this.processData(modelName, data);
+    return this.crudService.create(modelName, processed);
   }
 
   /**
@@ -365,7 +326,8 @@ export class CrudController {
     if (!modelName) {
       throw new Error(`Unknown table: ${table}`);
     }
-    return this.crudService.update(modelName, String(id), data);
+    const processed = await this.processData(modelName, data);
+    return this.crudService.update(modelName, String(id), processed);
   }
 
   /**
@@ -398,13 +360,21 @@ export class CrudController {
       dishes: 'dish',
       allergens: 'allergen',
       'working-hours': 'workingHours',
-      reviews: 'review',
-      discounts: 'discount',
-      ingredients: 'ingredient',
-      sessions: 'session',
-      promotions: 'promotion',
     };
     return tableToModel[table] || null;
+  }
+
+  /** Hash password if writing a User record with a password field */
+  private async processData(
+    modelName: string,
+    data: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    if (modelName !== 'user') return data;
+    const processed = { ...data };
+    if (typeof processed.password === 'string' && processed.password) {
+      processed.password = await bcrypt.hash(processed.password, 12);
+    }
+    return processed;
   }
 
   /**

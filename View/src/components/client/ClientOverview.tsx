@@ -36,7 +36,7 @@ export function ClientOverview() {
         const [loyaltyRes, ordersRes] = await Promise.all([
           apiRequest<{ data: LoyaltyData }>('/api/loyalty/me').catch(() => null),
           apiRequest<{ data: { items: OrderSummary[] } }>(
-            '/api/orders/my?limit=5&sort=created_at:desc',
+            '/api/orders/my?limit=5&sortBy=created_at&sortOrder=desc',
           ).catch(() => null),
         ]);
         if (loyaltyRes?.data) setLoyalty(loyaltyRes.data);

@@ -96,6 +96,12 @@ function formatValueForInput(value: unknown, inputType: string): string {
   return String(value);
 }
 
+function getPlaceholder(col: TableColumn, inputType: string, isEdit: boolean): string {
+  if (inputType === 'password' && isEdit) return 'Laisser vide pour conserver';
+  if (col.nullable) return '(optionnel)';
+  return `Entrez ${col.name}`;
+}
+
 /** Parse value from input based on type */
 function parseValueFromInput(value: string, inputType: string, checked?: boolean): unknown {
   if (inputType === 'checkbox') return checked;
@@ -112,7 +118,9 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
     if (record) {
       const data: Record<string, unknown> = {};
       columns.forEach((c) => {
-        data[c.name] = record[c.name];
+        const inputType = getInputType(c);
+        // Never pre-fill password fields — user must type a new value to change it
+        data[c.name] = inputType === 'password' ? '' : record[c.name];
       });
       setForm(data);
     } else {
@@ -130,13 +138,15 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Clean up the form data - remove empty strings, undefined, and id fields
     const cleanedData: Record<string, unknown> = {};
     Object.entries(form).forEach(([key, value]) => {
-      // Skip id and primary key fields - backend doesn't accept them in body
       if (key === 'id' || (key.endsWith('_id') && columns.find((c) => c.name === key)?.isPrimary)) {
         return;
       }
+      const col = columns.find((c) => c.name === key);
+      const inputType = col ? getInputType(col) : 'text';
+      // Skip password field when empty — blank means "keep existing"
+      if (inputType === 'password' && value === '') return;
       if (value !== '' && value !== undefined) {
         cleanedData[key] = value;
       }
@@ -186,14 +196,22 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
                       onChange={(e) => handleChange(col, '', e.target.checked)}
                     />
                   ) : (
-                    <input
-                      type={inputType}
-                      value={value}
-                      onChange={(e) => handleChange(col, e.target.value)}
-                      required={isRequired}
-                      placeholder={col.nullable ? '(optionnel)' : `Entrez ${col.name}`}
-                      step={inputType === 'number' ? 'any' : undefined}
-                    />
+                    <>
+                      <input
+                        type={inputType}
+                        value={value}
+                        onChange={(e) => handleChange(col, e.target.value)}
+                        required={isEdit ? false : isRequired}
+                        placeholder={getPlaceholder(col, inputType, isEdit)}
+                        step={inputType === 'number' ? 'any' : undefined}
+                        autoComplete={inputType === 'password' ? 'new-password' : undefined}
+                      />
+                      {inputType === 'password' && isEdit && (
+                        <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted, #94a3b8)', marginTop: '2px' }}>
+                          Laisser vide pour ne pas modifier le mot de passe
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
               );

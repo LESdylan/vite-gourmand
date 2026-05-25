@@ -92,6 +92,7 @@ export async function getOrders(query?: OrderQuery): Promise<PaginatedOrders> {
 /** Get my orders */
 export async function getMyOrders(query?: OrderQuery): Promise<PaginatedOrders> {
   const params = new URLSearchParams();
+  if (query?.status) params.set('status', query.status);
   if (query?.page) params.set('page', String(query.page));
   if (query?.limit) params.set('limit', String(query.limit));
   const queryString = params.toString();

@@ -34,7 +34,7 @@ export function ClientReviews() {
     async function fetchDelivered() {
       try {
         const res = await apiRequest<{ data: { items: DeliveredOrder[] } }>(
-          '/api/orders/my?status=delivered&limit=20&sort=created_at:desc',
+          '/api/orders/my?status=delivered&limit=20&sortBy=created_at&sortOrder=desc',
         );
         setDeliveredOrders(res.data.items || []);
       } catch {
