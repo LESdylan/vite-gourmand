@@ -330,9 +330,8 @@ export class TestRunnerService {
           ? 'test-results-unit.json'
           : 'test-results-e2e.json';
 
-      // Build full command as a string for shell execution
-      // The --localstorage-file flag is a custom Node.js option that requires shell interpretation
-      let command = `node --max-old-space-size=1024 --localstorage-file=/tmp/jest-localstorage node_modules/.bin/jest --runInBand --json --outputFile=${outputFile}`;
+      const heapSize = testType === 'e2e' ? 2048 : 384;
+      let command = `node --max-old-space-size=${heapSize} node_modules/.bin/jest --runInBand --json --outputFile=${outputFile}`;
 
       if (testType === 'e2e') {
         command += ' --config ./src/test/e2e/jest-e2e.json';
