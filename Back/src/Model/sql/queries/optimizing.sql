@@ -12,12 +12,6 @@ SELECT
 FROM pg_stat_user_indexes
 ORDER BY idx_scan DESC;
 
--- Find slow queries (if pg_stat_statements is enabled)
--- SELECT query, calls, mean_exec_time, total_exec_time
--- FROM pg_stat_statements
--- ORDER BY mean_exec_time DESC
--- LIMIT 10;
-
 -- Check table sizes
 SELECT
     relname AS "table",

@@ -22,7 +22,7 @@ async function getCollection() {
 export async function incrementViewCount(
   menuId: number,
   menuTitle: string,
-  periodType: 'daily' | 'weekly' | 'monthly' = 'daily',
+  periodType: MenuAnalytics['periodType'] = 'daily',
 ): Promise<void> {
   const collection = await getCollection();
   const period = getCurrentPeriod(periodType);
@@ -133,7 +133,7 @@ function getCurrentPeriod(type: 'daily' | 'weekly' | 'monthly'): string {
 }
 
 function getISOWeek(date: Date): number {
-  const d = new Date(date.getTime());
+  const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
   const week1 = new Date(d.getFullYear(), 0, 4);

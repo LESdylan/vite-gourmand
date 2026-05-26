@@ -5,7 +5,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 
 interface TokenPayload {
   sub: number;

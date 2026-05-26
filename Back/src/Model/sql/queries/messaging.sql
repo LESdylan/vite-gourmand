@@ -22,7 +22,7 @@ WHERE "id" = 1 AND "recipient_id" = 4;
 -- Unread notification count
 SELECT COUNT(*) AS "unread_count"
 FROM "Notification"
-WHERE "user_id" = 7 AND "is_read" = FALSE;
+WHERE "user_id" = 7 AND NOT "is_read";
 
 -- Get notifications
 SELECT "type", "title", "body", "link_url", "created_at"

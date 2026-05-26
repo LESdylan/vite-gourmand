@@ -42,7 +42,7 @@ export class PasswordService {
     if (!/[a-z]/.test(password)) {
       errors.push('Password must contain lowercase letter');
     }
-    if (!/[0-9]/.test(password)) {
+    if (!/\d/.test(password)) {
       errors.push('Password must contain a number');
     }
 

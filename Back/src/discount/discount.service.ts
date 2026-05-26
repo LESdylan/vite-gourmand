@@ -108,12 +108,8 @@ export class DiscountService {
     }
 
     // Check minimum order amount
-    if (discount.min_order_amount && dto.orderAmount) {
-      if (dto.orderAmount < Number(discount.min_order_amount)) {
-        errors.push(
-          `Minimum order amount is ${String(discount.min_order_amount)}€`,
-        );
-      }
+    if (this.isBelowMinimumOrderAmount(discount.min_order_amount, dto.orderAmount)) {
+      errors.push(`Minimum order amount is ${String(discount.min_order_amount)}€`);
     }
 
     if (errors.length > 0) {
@@ -121,14 +117,7 @@ export class DiscountService {
     }
 
     // Calculate discount amount
-    let discountAmount = 0;
-    if (dto.orderAmount) {
-      if (discount.type === 'percentage') {
-        discountAmount = (dto.orderAmount * Number(discount.value)) / 100;
-      } else {
-        discountAmount = Number(discount.value);
-      }
-    }
+    const discountAmount = this.calculateDiscountAmount(discount, dto.orderAmount);
 
     return {
       valid: true,
@@ -143,5 +132,15 @@ export class DiscountService {
       where: { id },
       data: { current_uses: { increment: 1 } },
     });
+  }
+
+  private isBelowMinimumOrderAmount(minOrderAmount: unknown, orderAmount?: number): boolean {
+    return Boolean(minOrderAmount && orderAmount && orderAmount < Number(minOrderAmount));
+  }
+
+  private calculateDiscountAmount(discount: { type: string; value: unknown }, orderAmount?: number): number {
+    if (!orderAmount) return 0;
+    if (discount.type === 'percentage') return (orderAmount * Number(discount.value)) / 100;
+    return Number(discount.value);
   }
 }

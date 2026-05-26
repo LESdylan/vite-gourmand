@@ -41,12 +41,12 @@ export class CreateOrderDto {
   @Min(1)
   personNumber!: number;
 
-  @ApiProperty({ example: 100.0 })
+  @ApiProperty({ example: 100 })
   @IsNumber()
   @Min(0)
   menuPrice!: number;
 
-  @ApiProperty({ example: 115.0 })
+  @ApiProperty({ example: 115 })
   @IsNumber()
   @Min(0)
   totalPrice!: number;

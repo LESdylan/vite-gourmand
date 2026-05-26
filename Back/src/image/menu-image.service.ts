@@ -7,7 +7,7 @@ import { CreateMenuImageDto, UpdateMenuImageDto } from './dto/image.dto';
 
 @Injectable()
 export class MenuImageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findByMenu(menuId: number) {
     return this.prisma.menuImage.findMany({

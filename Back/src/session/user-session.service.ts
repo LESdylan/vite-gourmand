@@ -11,7 +11,7 @@ import { CreateSessionDto } from './dto/session.dto';
 
 @Injectable()
 export class UserSessionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Create a new session */
   async create(userId: number, dto: CreateSessionDto) {

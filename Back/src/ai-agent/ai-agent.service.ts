@@ -357,18 +357,13 @@ ${dbContext}`;
 
   async chat(userId: number, dto: ChatMessageDto) {
     const convId = dto.conversationId || this.generateConversationId();
-    const isPublicAssistant = dto.context?.mode === 'public_assistant';
-    const isEventPlanner = dto.context?.mode === 'event_planner';
+    const assistantMode = dto.context?.mode;
 
     // Get or create conversation
     let conversation = this.conversations.get(convId);
     if (!conversation) {
       const dbContext = await this.gatherDatabaseContext();
-      const systemPrompt = isPublicAssistant
-        ? this.buildPublicAssistantPrompt(dbContext)
-        : isEventPlanner
-          ? this.buildEventPlannerPrompt(dbContext)
-          : this.buildSystemPrompt(dbContext);
+      const systemPrompt = this.buildModePrompt(assistantMode, dbContext);
 
       conversation = {
         messages: [{ role: 'system', content: systemPrompt }],
@@ -384,16 +379,7 @@ ${dbContext}`;
       this.conversations.set(convId, conversation);
 
       // Add initial context message if constraints were provided
-      const constraints: string[] = [];
-      if (dto.guestCount) constraints.push(`${dto.guestCount} convives`);
-      if (dto.budgetPerPerson)
-        constraints.push(`budget ${dto.budgetPerPerson}€/personne`);
-      if (dto.dietId) constraints.push(`régime alimentaire ID:${dto.dietId}`);
-      if (dto.themeId) constraints.push(`thème ID:${dto.themeId}`);
-      if (dto.excludeAllergens?.length)
-        constraints.push(
-          `allergènes à exclure IDs: ${dto.excludeAllergens.join(', ')}`,
-        );
+      const constraints = this.getConversationConstraints(dto);
 
       if (constraints.length > 0) {
         conversation.messages.push({
@@ -420,6 +406,24 @@ ${dbContext}`;
       messageCount: conversation.messages.filter((m) => m.role !== 'system')
         .length,
     };
+  }
+
+  private buildModePrompt(mode: string | undefined, dbContext: string): string {
+    if (mode === 'public_assistant') return this.buildPublicAssistantPrompt(dbContext);
+    if (mode === 'event_planner') return this.buildEventPlannerPrompt(dbContext);
+    return this.buildSystemPrompt(dbContext);
+  }
+
+  private getConversationConstraints(dto: ChatMessageDto): string[] {
+    const constraints: string[] = [];
+    if (dto.guestCount) constraints.push(`${dto.guestCount} convives`);
+    if (dto.budgetPerPerson) constraints.push(`budget ${dto.budgetPerPerson}€/personne`);
+    if (dto.dietId) constraints.push(`régime alimentaire ID:${dto.dietId}`);
+    if (dto.themeId) constraints.push(`thème ID:${dto.themeId}`);
+    if (dto.excludeAllergens?.length) {
+      constraints.push(`allergènes à exclure IDs: ${dto.excludeAllergens.join(', ')}`);
+    }
+    return constraints;
   }
 
   /* ═══════════════════════════════════════════════════════════

@@ -16,7 +16,7 @@ import { PrismaService } from '../prisma';
 import { MailService } from '../mail';
 import { ConfigService } from '@nestjs/config';
 import { SubscribeNewsletterDto } from './dto/newsletter.dto';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 
 @Injectable()
 export class NewsletterService {
@@ -225,12 +225,7 @@ export class NewsletterService {
         promotion_id: promotionId,
         recipients_count: sentCount,
         sent_by: sentBy,
-        status:
-          sentCount === subscribers.length
-            ? 'sent'
-            : sentCount > 0
-              ? 'partial'
-              : 'failed',
+        status: getNewsletterSendStatus(sentCount, subscribers.length),
       },
     });
 
@@ -414,4 +409,10 @@ export class NewsletterService {
 </body>
 </html>`;
   }
+}
+
+function getNewsletterSendStatus(sentCount: number, subscriberCount: number): 'sent' | 'partial' | 'failed' {
+  if (sentCount === subscriberCount) return 'sent';
+  if (sentCount > 0) return 'partial';
+  return 'failed';
 }

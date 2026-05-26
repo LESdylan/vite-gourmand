@@ -9,6 +9,10 @@
 -- PUBLIC: Approved reviews (homepage display)
 -- ============================================
 
+CREATE TEMP TABLE IF NOT EXISTS "review_status_constants" ("approved" TEXT);
+TRUNCATE "review_status_constants";
+INSERT INTO "review_status_constants" ("approved") VALUES ('approved');
+
 SELECT
     "p"."note",
     "p"."description",
@@ -16,7 +20,7 @@ SELECT
     "u"."first_name"
 FROM "Publish" AS "p"
 JOIN "User" AS "u" ON "p"."user_id" = "u"."id"
-WHERE "p"."status" = 'approved'
+WHERE "p"."status" = (SELECT "approved" FROM "review_status_constants")
 ORDER BY "p"."created_at" DESC
 LIMIT 10;
 
@@ -25,7 +29,7 @@ SELECT
     ROUND(AVG(CAST("note" AS INTEGER)), 2) AS "average_rating",
     COUNT(*) AS "total_reviews"
 FROM "Publish"
-WHERE "status" = 'approved';
+WHERE "status" = (SELECT "approved" FROM "review_status_constants");
 
 -- ============================================
 -- EMPLOYEE: Moderation queue
@@ -48,7 +52,7 @@ ORDER BY "p"."created_at" ASC;
 -- Approve a review
 UPDATE "Publish"
 SET
-    "status" = 'approved',
+    "status" = (SELECT "approved" FROM "review_status_constants"),
     "moderated_by" = 4,  -- $1: employee user_id
     "moderated_at" = CURRENT_TIMESTAMP,
     "updated_at" = CURRENT_TIMESTAMP
@@ -96,6 +100,6 @@ ORDER BY "count" DESC;
 -- Rating distribution
 SELECT "note", COUNT(*) AS "count"
 FROM "Publish"
-WHERE "status" = 'approved'
+WHERE "status" = (SELECT "approved" FROM "review_status_constants")
 GROUP BY "note"
 ORDER BY "note" DESC;

@@ -15,7 +15,7 @@ SELECT "id", "email", "first_name", "last_name",
        "gdpr_consent", "marketing_consent", "created_at"
 FROM "User"
 WHERE "id" = 7  -- $1: user_id
-  AND "is_deleted" = FALSE;
+  AND NOT "is_deleted";
 
 -- Export user orders
 SELECT "order_number", "order_date", "delivery_date",
@@ -91,4 +91,4 @@ WHERE "user_id" = 7 AND "consent_type" = 'marketing';
 SELECT "consent_type", "is_granted", "granted_at", "revoked_at"
 FROM "UserConsent"
 WHERE "user_id" = 7
-ORDER BY "consent_type";
+ORDER BY "consent_type" ASC;

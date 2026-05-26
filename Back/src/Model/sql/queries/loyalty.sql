@@ -30,7 +30,7 @@ WHERE "user_id" = 7;
 SELECT "id", "code", "type", "value", "min_order_amount"
 FROM "Discount"
 WHERE "code" = 'BIENVENUE10'
-  AND "is_active" = TRUE
+  AND "is_active"
   AND ("valid_from" IS NULL OR "valid_from" <= CURRENT_DATE)
   AND ("valid_until" IS NULL OR "valid_until" >= CURRENT_DATE)
   AND ("max_uses" IS NULL OR "current_uses" < "max_uses");

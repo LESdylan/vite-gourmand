@@ -46,12 +46,12 @@ export class AnalyticsService implements OnModuleInit {
     }
   }
 
-  private getCollection(name: string): Collection | null {
-    return this.db?.collection(name) || null;
+  private getCollection<T extends object>(name: string): Collection<T> | null {
+    return this.db?.collection<T>(name) || null;
   }
 
   async trackEvent(event: AnalyticsEvent): Promise<void> {
-    const collection = this.getCollection('events');
+    const collection = this.getCollection<AnalyticsEvent>('events');
     if (!collection) return;
 
     try {
@@ -65,7 +65,7 @@ export class AnalyticsService implements OnModuleInit {
     eventType: string,
     limit = 100,
   ): Promise<AnalyticsEvent[]> {
-    const collection = this.getCollection('events');
+    const collection = this.getCollection<AnalyticsEvent>('events');
     if (!collection) return [];
 
     const docs = await collection
@@ -74,7 +74,7 @@ export class AnalyticsService implements OnModuleInit {
       .limit(limit)
       .toArray();
 
-    return docs as unknown as AnalyticsEvent[];
+    return docs;
   }
 
   async getEventStats(days = 7): Promise<Record<string, number>> {
@@ -91,13 +91,10 @@ export class AnalyticsService implements OnModuleInit {
       ])
       .toArray();
 
-    return result.reduce(
-      (acc, r) => {
-        acc[r._id] = r.count;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
+    return result.reduce<Record<string, number>>((acc, r) => {
+      acc[r._id] = r.count;
+      return acc;
+    }, {});
   }
 
   async disconnect(): Promise<void> {

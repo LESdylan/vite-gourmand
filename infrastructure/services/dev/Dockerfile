@@ -24,7 +24,7 @@ ENV NPM_CONFIG_CACHE=/app/.npm-cache
 ENV NPM_CONFIG_FUND=false
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
-RUN npm install -g typescript @nestjs/cli prisma 2>/dev/null
+RUN npm install -g --ignore-scripts typescript@6.0.3 @nestjs/cli@11.0.21 prisma@7.8.0 2>/dev/null
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD node -v >/dev/null || exit 1

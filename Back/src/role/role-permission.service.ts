@@ -11,7 +11,7 @@ interface RolePermissionWithPermission extends RolePermission {
 
 @Injectable()
 export class RolePermissionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Assign permissions to role */
   async assignPermissions(roleId: number, permissionIds: number[]) {
@@ -22,10 +22,8 @@ export class RolePermissionService {
       select: { permission_id: true },
     });
 
-    const existingIds = existing.map(
-      (p: { permission_id: number }) => p.permission_id,
-    );
-    const newIds = permissionIds.filter((id) => !existingIds.includes(id));
+    const existingIds = new Set(existing.map((p: { permission_id: number }) => p.permission_id));
+    const newIds = permissionIds.filter((id) => !existingIds.has(id));
 
     if (newIds.length > 0) {
       await this.prisma.rolePermission.createMany({

@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma';
 
 @Injectable()
 export class AdminSessionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Get active sessions for user */
   async getActiveSessions(userId: number) {

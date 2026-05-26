@@ -16,7 +16,7 @@ import {
 
 @Injectable()
 export class DataDeletionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private readonly userSel = {
     id: true,

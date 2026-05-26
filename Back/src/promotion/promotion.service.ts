@@ -49,7 +49,7 @@ export class PromotionService {
    */
   async findAll(pagination: PaginationDto, activeOnly?: boolean) {
     const { page = 1, limit = 20 } = pagination;
-    const where = activeOnly !== undefined ? { is_active: activeOnly } : {};
+    const where = activeOnly === undefined ? {} : { is_active: activeOnly };
 
     const [items, total] = await Promise.all([
       this.prisma.promotion.findMany({

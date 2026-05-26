@@ -9,8 +9,8 @@ import { CreateSessionDto } from './dto/session.dto';
 @Injectable()
 export class SessionService {
   constructor(
-    private userSessionService: UserSessionService,
-    private adminSessionService: AdminSessionService,
+    private readonly userSessionService: UserSessionService,
+    private readonly adminSessionService: AdminSessionService,
   ) {}
 
   // User operations - delegate to UserSessionService

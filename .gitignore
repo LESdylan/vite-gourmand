@@ -37,3 +37,6 @@ vendor/vitegourmand/
 .backend.pid
 .frontend.pid
 /tmp/vg-*.log
+
+# Local SonarQube Cloud exports
+infrastructure/sonarcloud/results/*.json

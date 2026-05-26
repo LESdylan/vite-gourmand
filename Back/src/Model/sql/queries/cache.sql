@@ -3,16 +3,36 @@
 -- ============================================
 
 -- Quick dashboard stats from materialized view
-SELECT * FROM "mv_orders_by_status";
+SELECT "status", "count", "total_revenue" FROM "mv_orders_by_status";
 
 -- Monthly revenue trend
-SELECT * FROM "mv_monthly_revenue" LIMIT 12;
+SELECT "month", "order_count", "revenue", "avg_order_value" FROM "mv_monthly_revenue" LIMIT 12;
 
 -- Low stock alert
-SELECT * FROM "v_low_stock_ingredients";
+SELECT "id", "name", "unit", "current_stock", "min_stock_level" FROM "v_low_stock_ingredients";
 
 -- Active menus (cached view)
-SELECT * FROM "v_active_menus";
+SELECT
+  "id",
+  "title",
+  "description",
+  "conditions",
+  "person_min",
+  "price_per_person",
+  "remaining_qty",
+  "status",
+  "diet_id",
+  "theme_id",
+  "created_by",
+  "is_seasonal",
+  "available_from",
+  "available_until",
+  "created_at",
+  "updated_at",
+  "published_at",
+  "diet_name",
+  "theme_name"
+FROM "v_active_menus";
 
 -- Pending reviews count (quick badge)
 SELECT COUNT(*) AS "pending_reviews" FROM "v_pending_reviews";

@@ -7,10 +7,10 @@ FROM node:22-alpine AS backend-builder
 WORKDIR /build/Back
 
 COPY Back/package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 COPY Back/ ./
-RUN npx prisma generate --schema=src/Model/prisma/schema.prisma
+RUN npm exec --ignore-scripts -- prisma generate --schema=src/Model/prisma/schema.prisma
 RUN npm run build
 
 FROM node:22-alpine AS frontend-builder
@@ -18,7 +18,7 @@ FROM node:22-alpine AS frontend-builder
 WORKDIR /build/View
 
 COPY View/package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 COPY View/ ./
 RUN npm run build
@@ -27,9 +27,8 @@ FROM node:22-alpine AS production
 
 WORKDIR /app
 
-RUN apk add --no-cache curl dumb-init
-
-RUN addgroup -g 1001 -S nodejs \
+RUN apk add --no-cache curl dumb-init \
+  && addgroup -g 1001 -S nodejs \
     && adduser -S nestjs -u 1001 -G nodejs
 
 COPY --from=backend-builder /build/Back/dist ./dist

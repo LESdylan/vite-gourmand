@@ -65,12 +65,12 @@ export async function incrementUserCount(
   const collection = await getCollection();
   const date = getTodayString();
 
-  const field =
-    type === 'new'
-      ? 'newUsers'
-      : type === 'active'
-        ? 'activeUsers'
-        : 'returningUsers';
+  const fields = {
+    new: 'newUsers',
+    active: 'activeUsers',
+    returning: 'returningUsers',
+  } as const;
+  const field = fields[type];
 
   await collection.updateOne(
     { date, type: 'daily' },
@@ -183,7 +183,7 @@ function getWeekStart(): string {
 }
 
 function getISOWeek(date: Date): number {
-  const d = new Date(date.getTime());
+  const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
   const week1 = new Date(d.getFullYear(), 0, 4);

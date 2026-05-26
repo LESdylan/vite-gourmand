@@ -22,7 +22,7 @@ import { LoginDto } from './dto/login.dto';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private googleClient: OAuth2Client | null = null;
+  private readonly googleClient: OAuth2Client | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -139,7 +139,7 @@ export class AuthService {
       });
 
       const payload = ticket.getPayload();
-      if (!payload || !payload.email) {
+      if (!payload?.email) {
         throw new UnauthorizedException('Invalid Google token');
       }
 

@@ -4,11 +4,10 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
-import { json, urlencoded } from 'express';
-import { join } from 'path';
-import { existsSync } from 'fs';
-import { ServerResponse } from 'http';
-import { Request, Response, NextFunction } from 'express';
+import { json, urlencoded, type Request, type Response, type NextFunction } from 'express';
+import { join } from 'node:path';
+import { existsSync } from 'node:fs';
+import { ServerResponse } from 'node:http';
 import { AppModule } from './app.module';
 import {
   AUTH_COOKIE_NAME,
@@ -236,7 +235,9 @@ async function bootstrap() {
             "'unsafe-inline'",
             'https://accounts.google.com',
           ],
-          'style-src': ["'self'", "'unsafe-inline'"],
+          'style-src': ["'self'", "'unsafe-inline'", 'https://accounts.google.com'],
+          'style-src-elem': ["'self'", "'unsafe-inline'", 'https://accounts.google.com'],
+          'connect-src': ["'self'", ...getPublicOrigins(), 'https://accounts.google.com'],
           'font-src': ["'self'", 'data:'],
           'img-src': [
             "'self'",
@@ -244,7 +245,6 @@ async function bootstrap() {
             'blob:',
             'https://images.unsplash.com',
           ],
-          'connect-src': ["'self'", ...getPublicOrigins()],
           'frame-src': ["'self'", 'https://accounts.google.com'],
           ...(process.env.NODE_ENV === 'production'
             ? { 'upgrade-insecure-requests': [] }
@@ -282,7 +282,7 @@ async function bootstrap() {
     logger.log(`📁 Static assets path: ${publicPath}`);
     app.useStaticAssets(publicPath, {
       setHeaders: (res: ServerResponse, filePath: string) => {
-        const normalizedPath = filePath.replace(/\\/g, '/');
+        const normalizedPath = filePath.replaceAll('\\', '/');
         if (normalizedPath.includes('/assets/')) {
           res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
           return;

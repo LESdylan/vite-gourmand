@@ -6,6 +6,8 @@
 
 import { ObjectId } from 'mongodb';
 
+export type AnalyticsPeriodType = 'daily' | 'weekly' | 'monthly';
+
 // Base document with common fields
 export interface BaseDocument {
   _id?: ObjectId;
@@ -18,7 +20,7 @@ export interface MenuAnalytics extends BaseDocument {
   menuId: number;
   menuTitle: string;
   period: string; // "2026-02-01"
-  periodType: 'daily' | 'weekly' | 'monthly';
+  periodType: AnalyticsPeriodType;
   viewCount: number;
   orderCount: number;
   totalRevenue: number;

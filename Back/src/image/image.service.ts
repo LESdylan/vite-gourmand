@@ -13,8 +13,8 @@ import {
 @Injectable()
 export class ImageService {
   constructor(
-    private menuImageService: MenuImageService,
-    private reviewImageService: ReviewImageService,
+    private readonly menuImageService: MenuImageService,
+    private readonly reviewImageService: ReviewImageService,
   ) {}
 
   // Menu Images - delegate to MenuImageService

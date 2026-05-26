@@ -33,7 +33,7 @@ export class UnsplashService {
   private readonly apiUrl = 'https://api.unsplash.com';
   private readonly accessKey: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.accessKey = this.configService.get<string>('API_UNSPLASH_PKEY') || '';
     if (!this.accessKey) {
       this.logger.warn('Unsplash API key not configured');

@@ -83,8 +83,9 @@ export class PromotionController {
     @Query() pagination: PaginationDto,
     @Query('active') active?: string,
   ) {
-    const activeOnly =
-      active === 'true' ? true : active === 'false' ? false : undefined;
+    let activeOnly: boolean | undefined;
+    if (active === 'true') activeOnly = true;
+    if (active === 'false') activeOnly = false;
     return this.promotionService.findAll(pagination, activeOnly);
   }
 

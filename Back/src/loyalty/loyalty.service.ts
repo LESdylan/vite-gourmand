@@ -110,13 +110,14 @@ export class LoyaltyService {
     }
 
     // Create redemption transaction
+    const orderLabel = dto.orderId ? ` for order #${dto.orderId}` : '';
     const transaction = await this.prisma.loyaltyTransaction.create({
       data: {
         loyalty_account_id: account.id,
         points: -dto.points,
         type: 'redeem',
         order_id: dto.orderId,
-        description: `Points redeemed${dto.orderId ? ` for order #${dto.orderId}` : ''}`,
+        description: `Points redeemed${orderLabel}`,
       },
     });
 

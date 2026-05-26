@@ -56,8 +56,8 @@ export class SeedService {
   private readonly logger = new Logger(SeedService.name);
 
   constructor(
-    private prisma: PrismaService,
-    private unsplash: UnsplashService,
+    private readonly prisma: PrismaService,
+    private readonly unsplash: UnsplashService,
   ) {}
 
   /**

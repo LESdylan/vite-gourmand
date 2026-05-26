@@ -15,7 +15,7 @@ import {
 
 @Injectable()
 export class EmployeeTimeOffService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Create time off request */
   async create(dto: CreateTimeOffRequestDto, userId: number) {

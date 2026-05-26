@@ -5,7 +5,7 @@
 -- Get kanban columns (board layout)
 SELECT "id", "name", "mapped_status", "color", "position"
 FROM "KanbanColumn"
-WHERE "is_active" = TRUE
+WHERE "is_active"
 ORDER BY "position" ASC;
 
 -- Get orders for a specific kanban column

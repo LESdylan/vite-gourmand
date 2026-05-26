@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
-import { existsSync } from 'fs';
-import * as path from 'path';
+import { existsSync } from 'node:fs';
+import * as path from 'node:path';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -37,6 +37,7 @@ import { SupportModule } from './support';
 import { KanbanModule } from './kanban';
 import { TimeOffModule } from './timeoff';
 import { GdprModule } from './gdpr';
+import { ConsentModule } from './consent/consent.module';
 import { SessionModule } from './session';
 import { ImageModule } from './image';
 import { RoleModule } from './role';
@@ -147,6 +148,7 @@ function resolveI18nPath(): string {
     KanbanModule,
     TimeOffModule,
     GdprModule,
+    ConsentModule,
     SessionModule,
     ImageModule,
     RoleModule,

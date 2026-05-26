@@ -7,7 +7,7 @@ import { CreateUserConsentDto, UpdateUserConsentDto } from './dto/gdpr.dto';
 
 @Injectable()
 export class ConsentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Get all consents for user */
   async getUserConsents(userId: number) {

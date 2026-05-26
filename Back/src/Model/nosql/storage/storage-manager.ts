@@ -39,7 +39,7 @@ export async function getStorageStats(): Promise<StorageInfo> {
     totalSizeMB,
     maxStorageMB: MAX_STORAGE_MB,
     usedPercent: (totalSizeMB / MAX_STORAGE_MB) * 100,
-    collections: collections.sort((a, b) => b.sizeMB - a.sizeMB),
+    collections: collections.toSorted((a, b) => b.sizeMB - a.sizeMB),
   };
 }
 

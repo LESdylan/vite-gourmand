@@ -6,7 +6,6 @@ import {
   Get,
   Post,
   Delete,
-  Body,
   Param,
   Query,
   Headers,
@@ -72,7 +71,7 @@ export class SessionController {
   ) {
     return this.sessionService.getAllSessions({
       userId: userId ? Number.parseInt(userId, 10) : undefined,
-      active: active !== undefined ? active === 'true' : undefined,
+      active: active === undefined ? undefined : active === 'true',
     });
   }
 

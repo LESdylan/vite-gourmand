@@ -61,6 +61,16 @@ interface PaginationOptions {
   limit: number;
 }
 
+interface CrudListQuery {
+  page?: string;
+  limit?: string;
+  skip?: string;
+  take?: string;
+  search?: string;
+  orderBy?: string;
+  order?: string;
+}
+
 interface MenuDishRow {
   menu_id: number;
   dish_id: number;
@@ -451,14 +461,9 @@ export class CrudController {
   @Get(':table')
   async getRecords(
     @Param('table') table: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('skip') skip?: string,
-    @Query('take') take?: string,
-    @Query('search') search?: string,
-    @Query('orderBy') orderBy?: string,
-    @Query('order') order?: string,
+    @Query() query: CrudListQuery,
   ): Promise<PaginatedResult<Record<string, unknown>>> {
+    const { page, limit, skip, take, search, orderBy, order } = query;
     const policy = this.getPolicy(table);
     const pagination = this.normalizePagination({ page, limit, skip, take });
 
@@ -586,7 +591,7 @@ export class CrudController {
       this.parseOptionalPositiveInteger(input.limit) ?? take ?? 20,
       MAX_PAGE_SIZE,
     );
-    const pageFromSkip = skip !== undefined ? Math.floor(skip / limit) + 1 : undefined;
+    const pageFromSkip = skip === undefined ? undefined : Math.floor(skip / limit) + 1;
     const page = this.parseOptionalPositiveInteger(input.page) ?? pageFromSkip ?? 1;
 
     return { page, limit };
@@ -616,12 +621,12 @@ export class CrudController {
   }
 
   private assertCanWrite(policy: TablePolicy, action: 'create' | 'update' | 'delete'): void {
-    const allowed =
-      action === 'create'
-        ? policy.schema.canCreate
-        : action === 'update'
-          ? policy.schema.canUpdate
-          : policy.schema.canDelete;
+    const writePermissions = {
+      create: policy.schema.canCreate,
+      update: policy.schema.canUpdate,
+      delete: policy.schema.canDelete,
+    };
+    const allowed = writePermissions[action];
 
     if (!allowed) {
       throw new ForbiddenException(`${policy.schema.name} is read-only in DevBoard CRUD`);
@@ -671,14 +676,14 @@ export class CrudController {
       case 'datetime':
         return this.parseRequiredDate(rawValue, column.name);
       default:
-        return String(rawValue).trim();
+        return this.stringifyFieldValue(rawValue).trim();
     }
   }
 
   private validateUrlValue(field: string, value: unknown): unknown {
     if (value === null || value === undefined || !this.isUrlField(field)) return value;
 
-    const urlValue = String(value).trim();
+    const urlValue = this.stringifyFieldValue(value).trim();
     if (!urlValue) return value;
     if (urlValue.startsWith('/') && !urlValue.startsWith('//')) return urlValue;
 
@@ -699,6 +704,15 @@ export class CrudController {
     }
 
     return urlValue;
+  }
+
+  private stringifyFieldValue(value: unknown): string {
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+      return String(value);
+    }
+    if (value instanceof Date) return value.toISOString();
+    return JSON.stringify(value);
   }
 
   private isUrlField(field: string): boolean {

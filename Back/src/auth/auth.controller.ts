@@ -14,7 +14,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -22,8 +22,7 @@ import { Public, CurrentUser, JwtPayload } from '../common';
 import { AuthGuard } from '@nestjs/passport';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { ForgotPasswordDto, ResetPasswordDto } from './dto/password.dto';
-import { ChangePasswordDto } from './dto/password.dto';
+import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/password.dto';
 import {
   AUTH_COOKIE_MAX_AGE_MS,
   AUTH_COOKIE_NAME,

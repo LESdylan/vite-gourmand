@@ -13,8 +13,8 @@ import {
 @Injectable()
 export class TimeOffService {
   constructor(
-    private employeeService: EmployeeTimeOffService,
-    private adminService: AdminTimeOffService,
+    private readonly employeeService: EmployeeTimeOffService,
+    private readonly adminService: AdminTimeOffService,
   ) {}
 
   // Employee operations

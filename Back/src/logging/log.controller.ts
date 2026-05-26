@@ -26,7 +26,7 @@ export class LogController {
     @Query('since') since?: string,
   ): StructuredLog[] {
     return this.logService.getLogs({
-      limit: limit ? parseInt(limit, 10) : undefined,
+      limit: limit ? Number.parseInt(limit, 10) : undefined,
       level,
       source,
       since,

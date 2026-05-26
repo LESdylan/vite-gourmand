@@ -4,7 +4,7 @@
  */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 
 const SESSION_DURATION_DAYS = 30;
 

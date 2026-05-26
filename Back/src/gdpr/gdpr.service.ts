@@ -15,9 +15,9 @@ import {
 @Injectable()
 export class GdprService {
   constructor(
-    private prisma: PrismaService,
-    private consentService: ConsentService,
-    private dataDeletionService: DataDeletionService,
+    private readonly prisma: PrismaService,
+    private readonly consentService: ConsentService,
+    private readonly dataDeletionService: DataDeletionService,
   ) {}
 
   // Consent operations - delegate to ConsentService

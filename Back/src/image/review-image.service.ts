@@ -14,7 +14,7 @@ const MAX_IMAGES_PER_REVIEW = 5;
 
 @Injectable()
 export class ReviewImageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findByReview(reviewId: number) {
     return this.prisma.reviewImage.findMany({

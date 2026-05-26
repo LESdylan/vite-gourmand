@@ -11,7 +11,7 @@ import { DecideTimeOffRequestDto } from './dto/timeoff.dto';
 
 @Injectable()
 export class AdminTimeOffService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private readonly userSelect = {
     id: true,

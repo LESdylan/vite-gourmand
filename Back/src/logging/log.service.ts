@@ -40,19 +40,16 @@ export class LogService {
     ip: string,
     error?: string,
   ): void {
-    const level =
-      statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
-    const source = url.includes('/auth')
-      ? 'auth'
-      : url.includes('/api')
-        ? 'api'
-        : 'http';
+    const level = this.getHttpLogLevel(statusCode);
+    const source = this.getHttpLogSource(url);
+
+    const errorMessage = error ? `: ${error}` : '';
 
     this.addLog({
       timestamp: new Date().toISOString(),
       level,
       source,
-      message: `${method} ${url} ${statusCode} - ${duration}ms [${ip}]${error ? `: ${error}` : ''}`,
+      message: `${method} ${url} ${statusCode} - ${duration}ms [${ip}]${errorMessage}`,
       meta: {
         method,
         path: url,
@@ -62,6 +59,18 @@ export class LogService {
         error,
       },
     });
+  }
+
+  private getHttpLogLevel(statusCode: number): StructuredLog['level'] {
+    if (statusCode >= 500) return 'error';
+    if (statusCode >= 400) return 'warn';
+    return 'info';
+  }
+
+  private getHttpLogSource(url: string): StructuredLog['source'] {
+    if (url.includes('/auth')) return 'auth';
+    if (url.includes('/api')) return 'api';
+    return 'http';
   }
 
   /**

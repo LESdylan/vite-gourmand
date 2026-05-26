@@ -11,7 +11,7 @@ import { CreateRoleDto, UpdateRoleDto } from './dto/role.dto';
 
 @Injectable()
 export class RoleService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /** Get all roles with permissions count */
   async findAll() {
