@@ -1,9 +1,9 @@
 #!/bin/bash
 # ============================================
-# Deploy: Deploy to Fly.io
+# Deploy: Deploy to Fly.io through the Dockerized Fly service
 # Usage: make deploy-fly
 # ============================================
-set -e
+set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 
@@ -11,22 +11,17 @@ print_header "🚀 Deploying to Fly.io"
 
 cd "$PROJECT_ROOT"
 
-# Check if flyctl is installed
-if ! command -v flyctl &> /dev/null; then
-    print_error "flyctl not found! Install it from https://fly.io/docs/hands-on/install-flyctl/"
+FLY_CONFIG="infrastructure/services/fly/config/fly.toml"
+
+if [[ ! -f "$FLY_CONFIG" ]]; then
+    print_error "Fly config not found: $FLY_CONFIG"
     exit 1
 fi
 
-# Check if fly.toml exists
-if [ ! -f "fly.toml" ]; then
-    print_error "fly.toml not found in project root!"
-    exit 1
-fi
+log "Current Fly app configuration:"
+grep -E "^app\s*=" "$FLY_CONFIG" || true
 
-log "Current fly.toml app configuration:"
-grep -E "^app\s*=" fly.toml || true
-
-log "Deploying to Fly.io..."
-flyctl deploy
+log "Deploying through Docker Compose fly service..."
+docker_compose_with_production_env --profile tools run --rm fly infrastructure/services/fly/scripts/deploy.sh
 
 print_ok "Deployment to Fly.io completed!"

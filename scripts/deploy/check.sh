@@ -53,12 +53,13 @@ for var in "${REQUIRED_VARS[@]}"; do
     fi
 done
 
-# Check 5: fly.toml exists
+# Check 5: Fly config exists
 log "5. Deployment configuration..."
-if [ -f "fly.toml" ]; then
-    print_ok "fly.toml exists"
+FLY_CONFIG="infrastructure/services/fly/config/fly.toml"
+if [ -f "$FLY_CONFIG" ]; then
+    print_ok "$FLY_CONFIG exists"
 else
-    print_error "fly.toml not found!"
+    print_error "$FLY_CONFIG not found!"
     ERRORS=$((ERRORS + 1))
 fi
 

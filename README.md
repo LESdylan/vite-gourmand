@@ -255,13 +255,15 @@ The admin account has full access to the back-office: menu management, order tra
 The app is deployed to **Fly.io** as a single container (NestJS serves the compiled React build as static files from `/public`).
 
 ```bash
-# Prerequisites: flyctl installed and authenticated
+# Prerequisites: Docker. flyctl runs inside the Compose fly service.
+# Put FLY_API_TOKEN or FLY_ACCESS_TOKEN in .env.production for Fly API auth.
 make deploy           # builds Docker image and deploys
 make deploy-status    # shows machine and service health
 make deploy-logs      # tail production logs
+make deploy-certs     # inspect/request Fly managed certificates
 ```
 
-Production config: [`fly.toml`](fly.toml) — Paris region, 1 vCPU, 1 GB RAM, auto-stop when idle.
+Production config: [`infrastructure/services/fly/config/fly.toml`](infrastructure/services/fly/config/fly.toml) — Paris region, 1 vCPU, 1 GB RAM, auto-stop when idle.
 
 The CI pipeline runs on every push to `main`: lint → unit tests + e2e → security scan (OWASP-style header check, dependency audit). The deploy step is manual to avoid accidental production pushes.
 
@@ -293,12 +295,11 @@ vite-gourmand/
 │       └── styles/         CSS design tokens (graphical_chart*.css)
 │
 ├── docs/                   Architecture docs, diagrams, guides
+├── infrastructure/          Docker service definitions, contracts, deployment config
 ├── scripts/                Setup and utility scripts
 ├── mk_extensions/          Makefile targets split by domain
 ├── docker-compose.yml      PostgreSQL + MongoDB + dev container
-├── Dockerfile              Production image (NestJS + static build)
-├── Dockerfile.dev          Development image (hot reload)
-└── fly.toml                Fly.io configuration
+└── .env.production.example Production transport policy template
 ```
 
 ---

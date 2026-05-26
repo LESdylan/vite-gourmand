@@ -3,15 +3,27 @@
  * Centralized fetch wrapper with auth handling
  */
 
-// Use empty string to let Vite proxy handle /api routes.
-// In production, VITE_API_URL should be set to the backend URL.
-const API_BASE = import.meta.env.VITE_API_URL || '';
+// Use empty string to let Vite proxy or same-origin production hosting handle /api routes.
+const API_BASE = getSecureApiBase(import.meta.env.VITE_API_URL || '');
 const LEGACY_ACCESS_TOKEN_KEY = 'accessToken';
 const LEGACY_REFRESH_TOKEN_KEY = 'refreshToken';
 const CSRF_COOKIE_KEY = 'vg_csrf_token';
 const CSRF_HEADER_KEY = 'X-CSRF-Token';
 
 let authenticatedSession = false;
+
+function isLocalHttpUrl(url: URL): boolean {
+  return url.protocol === 'http:' && ['localhost', '127.0.0.1', '::1'].includes(url.hostname);
+}
+
+function getSecureApiBase(apiBase: string): string {
+  if (!apiBase || !import.meta.env.PROD) return apiBase;
+
+  const url = new URL(apiBase, 'https://vite-gourmand.invalid');
+  if (url.protocol === 'https:' || isLocalHttpUrl(url)) return apiBase;
+
+  throw new Error(`VITE_API_URL must use https:// in production. Received: ${apiBase}`);
+}
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';

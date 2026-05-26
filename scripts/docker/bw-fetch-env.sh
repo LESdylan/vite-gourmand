@@ -144,11 +144,11 @@ else
     fi
 
     # 2. Build the BW CLI image (filter deprecation warnings, show real errors)
-    log "No local bw found — building Docker image from Dockerfile.bw..."
+    log "No local bw found — building Docker image from infrastructure/services/secrets/Dockerfile..."
     (cd "$PROJECT_ROOT" && $DC --profile tools build secrets 2>&1 | grep -v "DEPRECATED\|Install the buildx\|https://docs.docker.com/go/buildx") || {
         print_error "Failed to build Bitwarden CLI Docker image"
         echo ""
-        echo "  Check that Dockerfile.bw and docker-compose.yml are valid."
+        echo "  Check that infrastructure/services/secrets/Dockerfile and docker-compose.yml are valid."
         echo "  Try manually: docker compose --profile tools build secrets"
         exit 1
     }

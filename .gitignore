@@ -1,6 +1,9 @@
 vite-gourmand/docs/Enoncé TP Développeur Web et Web Mobile-5.pdf
 server\vite-gourmand-api\node_modules
 .env
+.env.production
+.env.local
+.env.*.local
 server\vite-gourmand-api\dist
 .vscode/
 .idea/

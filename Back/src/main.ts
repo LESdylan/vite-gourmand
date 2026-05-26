@@ -15,6 +15,12 @@ import {
   AUTH_CSRF_COOKIE_NAME,
 } from './auth/auth-cookie.constants';
 
+const DEFAULT_PUBLIC_SITE_ORIGIN = 'https://vite-gourmand.fr';
+const LOCAL_DEVELOPMENT_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+
 const CSRF_SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const CSRF_EXEMPT_PATHS = new Set([
   '/api/auth/register',
@@ -25,6 +31,76 @@ const CSRF_EXEMPT_PATHS = new Set([
   '/api/auth/verify-reset-token',
   '/api/auth/reset-password',
 ]);
+
+function isProductionEnvironment(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+function parseOriginList(rawOrigins?: string): string[] {
+  if (!rawOrigins) return [];
+  return rawOrigins
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+function isLocalHttpOrigin(origin: URL): boolean {
+  return (
+    origin.protocol === 'http:' &&
+    ['localhost', '127.0.0.1', '::1'].includes(origin.hostname)
+  );
+}
+
+function assertHttpsOrigin(name: string, rawOrigin: string): void {
+  const origin = new URL(rawOrigin);
+  if (origin.protocol === 'https:') return;
+  if (!isProductionEnvironment() && isLocalHttpOrigin(origin)) return;
+
+  throw new Error(
+    `${name} must use https:// in production. Received: ${rawOrigin}`,
+  );
+}
+
+function getPublicOrigins(): string[] {
+  if (!isProductionEnvironment()) {
+    const configuredOrigins = parseOriginList(process.env.FRONTEND_URL);
+    return configuredOrigins.length > 0
+      ? configuredOrigins
+      : LOCAL_DEVELOPMENT_ORIGINS;
+  }
+
+  const productionOrigins = parseOriginList(
+    process.env.FRONTEND_URL || process.env.PUBLIC_SITE_URL,
+  );
+  return productionOrigins.length > 0
+    ? productionOrigins
+    : [DEFAULT_PUBLIC_SITE_ORIGIN];
+}
+
+function getPrimaryPublicOrigin(): string {
+  return getPublicOrigins()[0] ?? DEFAULT_PUBLIC_SITE_ORIGIN;
+}
+
+function validateTransportSecurityConfig(): void {
+  if (!isProductionEnvironment()) return;
+
+  getPublicOrigins().forEach((origin) =>
+    assertHttpsOrigin('FRONTEND_URL', origin),
+  );
+
+  for (const envName of [
+    'PUBLIC_SITE_URL',
+    'VITE_PUBLIC_SITE_URL',
+    'VITE_API_URL',
+  ]) {
+    const value = process.env[envName];
+    if (value) {
+      parseOriginList(value).forEach((origin) =>
+        assertHttpsOrigin(envName, origin),
+      );
+    }
+  }
+}
 
 function parseCookies(cookieHeader?: string): Record<string, string> {
   if (!cookieHeader) return {};
@@ -50,6 +126,47 @@ function readSingleHeader(
 ): string | null {
   if (!header || Array.isArray(header)) return null;
   return header;
+}
+
+function readForwardedValue(
+  value: string | string[] | undefined,
+): string | null {
+  const header = readSingleHeader(value);
+  if (!header) return null;
+  return header.split(',')[0]?.trim() || null;
+}
+
+function isHttpsRequest(req: Request): boolean {
+  return (
+    req.secure ||
+    readForwardedValue(req.headers['x-forwarded-proto']) === 'https'
+  );
+}
+
+function shouldBypassInternalHttp(req: Request): boolean {
+  return (
+    !readForwardedValue(req.headers['x-forwarded-proto']) && req.path === '/api'
+  );
+}
+
+function enforceHttps(req: Request, res: Response, next: NextFunction): void {
+  if (
+    !isProductionEnvironment() ||
+    isHttpsRequest(req) ||
+    shouldBypassInternalHttp(req)
+  ) {
+    next();
+    return;
+  }
+
+  const host =
+    readForwardedValue(req.headers['x-forwarded-host']) ?? req.headers.host;
+  if (!host || Array.isArray(host)) {
+    res.status(400).send('Missing Host header');
+    return;
+  }
+
+  res.redirect(308, `https://${host}${req.originalUrl}`);
 }
 
 function csrfProtection(req: Request, res: Response, next: NextFunction): void {
@@ -85,10 +202,18 @@ function csrfProtection(req: Request, res: Response, next: NextFunction): void {
 }
 
 async function bootstrap() {
+  validateTransportSecurityConfig();
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false, // configured manually below with explicit size limits
   });
   const logger = new Logger('Bootstrap');
+
+  if (isProductionEnvironment()) {
+    app.set('trust proxy', 1);
+  }
+
+  app.use(enforceHttps);
 
   // Body parsers with explicit size limits (must come before other middleware)
   app.use(json({ limit: '10mb' }));
@@ -119,16 +244,20 @@ async function bootstrap() {
             'blob:',
             'https://images.unsplash.com',
           ],
-          'connect-src': [
-            "'self'",
-            process.env.FRONTEND_URL || 'http://localhost:5173',
-          ],
+          'connect-src': ["'self'", ...getPublicOrigins()],
           'frame-src': ["'self'", 'https://accounts.google.com'],
           ...(process.env.NODE_ENV === 'production'
             ? { 'upgrade-insecure-requests': [] }
             : {}),
         },
       },
+      strictTransportSecurity: isProductionEnvironment()
+        ? {
+            maxAge: 31536000,
+            includeSubDomains: true,
+            preload: true,
+          }
+        : false,
       crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow Google OAuth popup
       crossOriginEmbedderPolicy: false, // Disable for Google scripts
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
@@ -169,10 +298,7 @@ async function bootstrap() {
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: process.env.FRONTEND_URL || [
-      'http://localhost:5173',
-      'http://localhost:5174',
-    ],
+    origin: getPublicOrigins(),
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   });
@@ -226,6 +352,7 @@ async function bootstrap() {
   logger.log(`🚀 Application is running on: http://0.0.0.0:${port}`);
   logger.log(`📚 API endpoints: http://0.0.0.0:${port}/api`);
   logger.log(`📚 Swagger docs: http://0.0.0.0:${port}/api/docs`);
+  logger.log(`🔐 Public HTTPS origin: ${getPrimaryPublicOrigin()}`);
   logger.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.log(`🔒 Security: Helmet enabled`);
   logger.log(`📦 Compression: enabled`);

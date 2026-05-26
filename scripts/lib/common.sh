@@ -12,6 +12,7 @@ BACKEND_PATH="$PROJECT_ROOT/Back"
 FRONTEND_PATH="$PROJECT_ROOT/View"
 DOCS_PATH="$PROJECT_ROOT/docs"
 ENV_FILE="$BACKEND_PATH/.env"
+PRODUCTION_ENV_FILE="$PROJECT_ROOT/.env.production"
 
 # Docker container names (match docker-compose.yml)
 POSTGRES_CONTAINER="vite-gourmand-db-1"
@@ -23,6 +24,17 @@ if docker compose version >/dev/null 2>&1; then
 else
     DC="docker-compose"
 fi
+
+docker_compose_with_production_env() {
+    local args=()
+    local env_file="${COMPOSE_ENV_FILE:-$PRODUCTION_ENV_FILE}"
+
+    if [[ -f "$env_file" ]]; then
+        args+=(--env-file "$env_file")
+    fi
+
+    $DC "${args[@]}" "$@"
+}
 
 # Colors
 RED='\033[0;31m'

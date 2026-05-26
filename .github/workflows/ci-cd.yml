@@ -180,6 +180,28 @@ jobs:
             exit 1
           fi
 
+      - name: Check production HTTPS transport policy
+        run: |
+          set -euo pipefail
+          grep -q "force_https = true" infrastructure/services/fly/config/fly.toml
+          grep -q "enforceHttps" Back/src/main.ts
+          grep -q "strictTransportSecurity" Back/src/main.ts
+          test -f infrastructure/services/fly/Dockerfile
+          test -f infrastructure/contracts/transport-security.md
+          bash -n scripts/deploy/fly-certificates.sh
+          bash -n scripts/security/verify-production-https.sh
+          bash -n infrastructure/services/fly/scripts/deploy.sh
+          bash -n infrastructure/services/fly/scripts/certificates.sh
+          bash -n infrastructure/services/fly/scripts/status.sh
+          bash -n infrastructure/services/fly/scripts/logs.sh
+          bash -n infrastructure/services/fly/scripts/verify-production-https.sh
+          insecure_urls="$(grep -RInE "(FRONTEND_URL|PUBLIC_SITE_URL|VITE_PUBLIC_SITE_URL|VITE_API_URL)[^[:alnum:]_].*http://" .github Back View docker-compose*.yml infrastructure .env*.example 2>/dev/null | grep -vE "localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]" || true)"
+          if [ -n "$insecure_urls" ]; then
+            echo "Production public origins must use https://"
+            echo "$insecure_urls"
+            exit 1
+          fi
+
       - name: Upload frontend security audit
         if: always()
         uses: actions/upload-artifact@v4

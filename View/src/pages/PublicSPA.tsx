@@ -23,7 +23,21 @@ const AiAssistantWidget = lazy(() =>
   import('../components/ui/AiAssistantWidget').then((m) => ({ default: m.AiAssistantWidget })),
 );
 
-const SITE_ORIGIN = import.meta.env.VITE_PUBLIC_SITE_URL || 'https://vite-gourmand.fr';
+function getSecureSiteOrigin(): string {
+  const origin = import.meta.env.VITE_PUBLIC_SITE_URL || 'https://vite-gourmand.fr';
+
+  if (!import.meta.env.PROD) return origin;
+
+  const url = new URL(origin);
+  if (url.protocol === 'https:') return url.origin;
+  if (url.protocol === 'http:' && ['localhost', '127.0.0.1', '::1'].includes(url.hostname)) {
+    return url.origin;
+  }
+
+  throw new Error(`VITE_PUBLIC_SITE_URL must use https:// in production. Received: ${origin}`);
+}
+
+const SITE_ORIGIN = getSecureSiteOrigin();
 
 interface PublicSPAProps {
   user?: UserType | null;

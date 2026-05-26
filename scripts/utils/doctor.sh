@@ -68,7 +68,7 @@ check_file() {
 
 check_file "Back/package.json" "Backend package.json" yes
 check_file "Back/src/Model/prisma/schema.prisma" "Prisma schema" yes
-check_file "fly.toml" "Fly.io config" yes
+check_file "infrastructure/services/fly/config/fly.toml" "Fly.io config" yes
 check_file "Dockerfile" "Dockerfile" yes
 
 # Check for .env in either location (optional - can use env vars)

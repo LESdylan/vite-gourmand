@@ -8,16 +8,45 @@ This document details all security measures implemented in the Vite Gourmand bac
 ┌─────────────────────────────────────────────────────────────┐
 │                     SECURITY LAYERS                          │
 ├─────────────────────────────────────────────────────────────┤
-│  1. Helmet.js          → Security Headers                   │
-│  2. CORS               → Cross-Origin Protection            │
-│  3. Rate Limiting      → DDoS Protection                    │
-│  4. JWT Authentication → Identity Verification              │
-│  5. Role-Based Access  → Authorization                      │
-│  6. Input Validation   → Data Sanitization                  │
-│  7. Password Hashing   → bcrypt (12 rounds)                 │
-│  8. Error Masking      → No Internal Data Leakage           │
+│  1. CA-backed HTTPS    → Encrypted transport, HSTS          │
+│  2. Helmet.js          → Security Headers                   │
+│  3. CORS               → Cross-Origin Protection            │
+│  4. Rate Limiting      → DDoS Protection                    │
+│  5. JWT Authentication → Identity Verification              │
+│  6. Role-Based Access  → Authorization                      │
+│  7. Input Validation   → Data Sanitization                  │
+│  8. Password Hashing   → bcrypt (12 rounds)                 │
+│  9. Error Masking      → No Internal Data Leakage           │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+## 0. CA-Backed HTTPS Transport
+
+**Location**: `src/main.ts`, `infrastructure/services/fly/config/fly.toml`, `.env.production.example`
+
+Production public traffic must use a browser-trusted CA certificate and `https://` URLs only. Localhost HTTP is allowed only for development and CI.
+
+**Controls**:
+
+- `infrastructure/services/fly/config/fly.toml` keeps `force_https = true`.
+- Production enables Express `trust proxy` so `X-Forwarded-Proto` is honored.
+- Requests reported as `http` by the proxy receive a permanent `308` redirect to `https`.
+- Helmet sends `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` in production.
+- Production public origin env vars are rejected if they use public `http://` values.
+- CI fails if HTTPS enforcement, HSTS, or Fly HTTPS forcing is removed.
+
+**Required production variables**:
+
+```properties
+NODE_ENV=production
+COOKIE_SECURE=true
+FRONTEND_URL=https://vite-gourmand.fr
+PUBLIC_SITE_URL=https://vite-gourmand.fr
+VITE_PUBLIC_SITE_URL=https://vite-gourmand.fr
+VITE_API_URL=
+```
+
+If `VITE_API_URL` is set for a separate API host, it must also use `https://`.
 
 ## 1. Helmet.js - Security Headers
 
@@ -36,7 +65,7 @@ app.use(helmet());
 | `X-Content-Type-Options` | `nosniff` | Prevent MIME sniffing |
 | `X-Frame-Options` | `DENY` | Prevent clickjacking |
 | `X-XSS-Protection` | `1; mode=block` | XSS filter |
-| `Strict-Transport-Security` | `max-age=15552000` | Force HTTPS |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` | Force HTTPS |
 | `Content-Security-Policy` | (default policy) | Prevent XSS, injection |
 | `X-Download-Options` | `noopen` | IE download protection |
 | `X-Permitted-Cross-Domain-Policies` | `none` | Flash/PDF protection |
@@ -48,7 +77,7 @@ app.use(helmet());
 
 ```typescript
 app.enableCors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: getPublicOrigins(),
   credentials: true,
 });
 ```
@@ -56,7 +85,7 @@ app.enableCors({
 **Settings**:
 - Restricts origins to frontend URL only
 - Allows credentials (cookies, auth headers)
-- In production, set `FRONTEND_URL` to your domain
+- In production, public origins must be CA-backed `https://` URLs
 
 ## 3. Rate Limiting (Throttler)
 

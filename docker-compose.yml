@@ -1,8 +1,8 @@
-version: "3.8"
-
 services:
   db:
-    image: postgres:15-alpine
+    build:
+      context: .
+      dockerfile: infrastructure/services/postgres/Dockerfile
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -21,7 +21,9 @@ services:
     # Resource limits are handled by the host system
 
   mongo:
-    image: mongo:7
+    build:
+      context: .
+      dockerfile: infrastructure/services/mongo/Dockerfile
     container_name: vite-gourmand-mongo-1
     restart: unless-stopped
     environment:
@@ -32,7 +34,7 @@ services:
       - "27017:27017"
     volumes:
       - ./data/mongo:/data/db
-      - ./data/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./infrastructure/services/mongo/config/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -45,7 +47,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: infrastructure/services/app/Dockerfile
     depends_on:
       db:
         condition: service_healthy
@@ -53,6 +55,9 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
     # env_file is NOT listed here to avoid parse errors on fresh clones
     # (Back/.env may not exist yet). Pass it at runtime instead:
     #   docker-compose --profile production run --env-file ./Back/.env app
@@ -63,7 +68,7 @@ services:
   secrets:
     build:
       context: .
-      dockerfile: Dockerfile.bw
+      dockerfile: infrastructure/services/secrets/Dockerfile
     environment:
       - BW_SESSION
     volumes:
@@ -78,7 +83,7 @@ services:
   dev:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: infrastructure/services/dev/Dockerfile
     container_name: vite-gourmand-dev
     working_dir: /app
     stdin_open: true     # Keep STDIN open for interactive commands
@@ -92,6 +97,7 @@ services:
       - ./Back:/app/Back
       - ./View:/app/View
       - ./scripts:/app/scripts
+      - ./infrastructure:/app/infrastructure
       - ./Makefile:/app/Makefile
       - ./docs:/app/docs:ro
       # Persist node_modules in named volumes (much faster than bind mounts)
@@ -108,8 +114,31 @@ services:
       - dev
     # No healthcheck needed for dev container
 
+  # ── Fly.io CLI (Dockerized Deployment Tooling) ────────
+  fly:
+    build:
+      context: .
+      dockerfile: infrastructure/services/fly/Dockerfile
+    working_dir: /workspace
+    environment:
+      - FLY_ACCESS_TOKEN
+      - FLY_API_TOKEN
+      - FLY_APP=vite-gourmand-withered-glitter-7902
+      - FLY_CONFIG=infrastructure/services/fly/config/fly.toml
+      - HOSTS
+      - CREATE_CERTS
+      - PAGES
+      - MIN_CERT_DAYS
+      - PROJECT_ROOT=/workspace
+    volumes:
+      - .:/workspace
+      - fly-data:/root/.fly
+    profiles:
+      - tools
+
 volumes:
   bw-data:
   back-node-modules:
   view-node-modules:
   npm-cache:
+  fly-data:
