@@ -8,7 +8,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar, { type Page, type UserType } from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import PromoBanner from '../components/layout/PromoBanner';
-import NotificationPanel from '../components/layout/NotificationPanel';
 import { PublicDataProvider } from '../contexts/PublicDataContext';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import { fetchActivePromotions, type ActivePromotion } from '../services/public';
@@ -19,6 +18,7 @@ const MenusPage = lazy(() => import('./Menus'));
 const ContactPage = lazy(() => import('./Contact'));
 const LegalPage = lazy(() => import('./LegalPage'));
 const OrderPage = lazy(() => import('./OrderPage'));
+const NotificationPanel = lazy(() => import('../components/layout/NotificationPanel'));
 const AiAssistantWidget = lazy(() =>
   import('../components/ui/AiAssistantWidget').then((m) => ({ default: m.AiAssistantWidget })),
 );
@@ -127,12 +127,12 @@ function PageFallback() {
 /** Redirect component to avoid side-effects during render */
 function RedirectToDashboard() {
   useEffect(() => {
-    window.location.href = '/dashboard';
+    globalThis.location.href = '/dashboard';
   }, []);
   return null;
 }
 
-export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
+export default function PublicSPA({ user = null, onLogout }: Readonly<PublicSPAProps>) {
   const location = useLocation();
   const navigate = useNavigate();
   const initialPage = pageFromPath(location.pathname);
@@ -166,14 +166,14 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
 
   // Handle newsletter confirm/unsubscribe from URL query params
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(globalThis.location.search);
     const action = params.get('newsletter');
     const token = params.get('token');
 
     if (!action || !token) return;
 
     // Clean URL
-    window.history.replaceState({}, '', window.location.pathname);
+    globalThis.history.replaceState({}, '', globalThis.location.pathname);
 
     if (action === 'confirm') {
       confirmNewsletter(token)
@@ -204,7 +204,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
   // Fetch active promotions well after the first interaction window; the banner is not needed for LCP.
   useEffect(() => {
     let cancelled = false;
-    const timer = window.setTimeout(() => {
+    const timer = globalThis.setTimeout(() => {
       fetchActivePromotions()
         .then((items) => {
           if (!cancelled) setPromotions(items);
@@ -216,7 +216,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
+      globalThis.clearTimeout(timer);
     };
   }, []);
 
@@ -225,8 +225,8 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
       setShowAssistant(false);
       return;
     }
-    const timer = window.setTimeout(() => setShowAssistant(true), 9000);
-    return () => window.clearTimeout(timer);
+    const timer = globalThis.setTimeout(() => setShowAssistant(true), 9000);
+    return () => globalThis.clearTimeout(timer);
   }, [currentPage]);
 
   // Smooth page transition: fade out → switch → fade in
@@ -239,11 +239,11 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
       if (newPage === currentPageRef.current && location.pathname === PAGE_PATHS[newPage]) return;
       currentPageRef.current = newPage;
       setIsTransitioning(true);
-      window.setTimeout(() => {
+      globalThis.setTimeout(() => {
         setCurrentPage(newPage);
         setDisplayedPage(newPage);
         navigate(PAGE_PATHS[newPage]);
-        window.scrollTo({ top: 0 });
+        globalThis.scrollTo({ top: 0 });
         requestAnimationFrame(() => {
           setIsTransitioning(false);
         });
@@ -321,9 +321,13 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
 
   // Total fixed header height = banner + navbar (h-14 = 56px, sm:h-16 = 64px)
   const navHeight = 56; // matches h-14, sm uses 64 but 56 is safe minimum
+  const mainContentStyle =
+    currentPage === 'home' ? undefined : { paddingTop: `${bannerHeight + navHeight}px` };
+  const assistantPageContext =
+    currentPage === 'menu' || currentPage === 'order' ? currentPage : 'home';
 
   return (
-    <NotificationProvider>
+    <NotificationProvider enabled={Boolean(user)}>
       <PublicDataProvider>
         <div className="min-h-screen bg-[#FFF8F0]">
           <a
@@ -350,7 +354,11 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
           />
 
           {/* Floating notification panel — below navbar */}
-          <NotificationPanel topOffset={bannerHeight + navHeight} />
+          {user && (
+            <Suspense fallback={null}>
+              <NotificationPanel topOffset={bannerHeight + navHeight} />
+            </Suspense>
+          )}
 
           {/* Main content with smooth transition */}
           <main
@@ -360,9 +368,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
             className={`transition-opacity duration-150 ease-in-out ${
               isTransitioning ? 'opacity-0' : 'opacity-100'
             }`}
-            style={
-              currentPage !== 'home' ? { paddingTop: `${bannerHeight + navHeight}px` } : undefined
-            }
+            style={mainContentStyle}
           >
             {renderPage()}
           </main>
@@ -371,9 +377,7 @@ export default function PublicSPA({ user = null, onLogout }: PublicSPAProps) {
           {showAssistant && currentPage !== 'contact' && (
             <Suspense fallback={null}>
               <AiAssistantWidget
-                pageContext={
-                  currentPage === 'menu' ? 'menu' : currentPage === 'order' ? 'order' : 'home'
-                }
+                pageContext={assistantPageContext}
                 onNavigateToContact={() => handlePageChange('contact')}
               />
             </Suspense>

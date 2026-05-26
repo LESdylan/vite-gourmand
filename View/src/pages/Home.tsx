@@ -204,7 +204,7 @@ function AboutSection({
           >
             <div className="relative z-10 overflow-hidden sm:overflow-visible">
               <img
-                src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800"
+                src="/home-team-800.webp"
                 alt="Julie et José - Notre équipe"
                 className="rounded-2xl sm:rounded-3xl shadow-2xl w-full h-[280px] sm:h-[350px] lg:h-[450px] object-cover"
                 loading="lazy"
@@ -315,19 +315,19 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
     {
       title: 'Mariages',
       description: "De l'apéritif au dessert, un menu sur mesure pour le plus beau jour.",
-      image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600',
+      image: '/service-wedding-600.webp',
       persons: '30 - 300 personnes',
     },
     {
       title: "Événements d'entreprise",
       description: 'Séminaires, cocktails, team building... Impressionnez vos collaborateurs.',
-      image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600',
+      image: '/service-corporate-600.webp',
       persons: '10 - 200 personnes',
     },
     {
       title: 'Réceptions privées',
       description: 'Anniversaires, baptêmes, communions... Des moments de partage inoubliables.',
-      image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600',
+      image: '/service-private-600.webp',
       persons: '10 - 100 personnes',
     },
   ];
@@ -743,7 +743,7 @@ function ValuesSection() {
             style={{ transitionDelay: '300ms' }}
           >
             <img
-              src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=600"
+              src="/produce-local-600.webp"
               alt="Produits frais et locaux"
               className="rounded-2xl sm:rounded-3xl shadow-xl w-full h-[280px] sm:h-[350px] lg:h-[400px] object-cover"
               loading="lazy"

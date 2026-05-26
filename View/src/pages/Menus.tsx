@@ -78,8 +78,7 @@ const THEME_ICONS: Record<string, string> = {
   Cocktail: '🍸',
 };
 
-const FALLBACK_IMG =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=480&q=60&auto=format&fit=crop';
+const FALLBACK_IMG = '/menu-fallback-640.webp';
 
 function optimizeCardImageUrl(url: string, width: number) {
   try {
@@ -98,11 +97,13 @@ function optimizeCardImageUrl(url: string, width: number) {
 
 function useDesktopMenuImages() {
   const [showImages, setShowImages] = useState(() =>
-    typeof window === 'undefined' ? false : window.matchMedia('(min-width: 640px)').matches,
+    globalThis.window === undefined
+      ? false
+      : globalThis.matchMedia('(min-width: 640px)').matches,
   );
 
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 640px)');
+    const media = globalThis.matchMedia('(min-width: 640px)');
     const update = () => setShowImages(media.matches);
     update();
     media.addEventListener('change', update);

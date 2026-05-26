@@ -126,8 +126,7 @@ interface ApiWrapperResponse<T> {
 }
 
 // Default fallback image
-const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=640&q=70&auto=format&fit=crop';
+const FALLBACK_IMAGE = '/menu-fallback-640.webp';
 
 function isSafeImageUrl(url: string): boolean {
   if (url.startsWith('/')) return true;
@@ -212,7 +211,7 @@ function transformMenu(apiMenu: MenuFromAPI): Menu {
     pricePerPerson: Number(apiMenu.price_per_person),
     image: imageUrl,
     images,
-    allergens: [...allergenSet].sort(),
+    allergens: [...allergenSet].sort((a, b) => a.localeCompare(b, 'fr')),
     deliveryNotes: apiMenu.conditions || undefined,
     stockQuantity: apiMenu.remaining_qty,
     dishes: {
@@ -237,7 +236,7 @@ export async function getMenus(
   if (filters.themeId) params.set('themeId', filters.themeId.toString());
 
   const queryString = params.toString();
-  const endpoint = `/api/menus${queryString ? `?${queryString}` : ''}`;
+  const endpoint = queryString ? `/api/menus?${queryString}` : '/api/menus';
 
   // API returns wrapped response: { success, data: { items, meta } }
   const response = await apiRequest<ApiWrapperResponse<MenuListResponse>>(endpoint);

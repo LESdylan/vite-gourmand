@@ -11,6 +11,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -23,6 +24,7 @@ import {
   deleteNotification,
   type Notification,
 } from '../services/notifications';
+import { isAuthenticated } from '../services/api';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -84,7 +86,13 @@ export function useNotifications(): NotificationState {
 
 const POLL_INTERVAL = 30_000; // 30 seconds
 
-export function NotificationProvider({ children }: { children: ReactNode }) {
+export function NotificationProvider({
+  children,
+  enabled = true,
+}: Readonly<{
+  children: ReactNode;
+  enabled?: boolean;
+}>) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -104,7 +112,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   // ── Fetch from backend ──
   const refresh = useCallback(async () => {
-    if (stoppedRef.current) return;
+    if (!enabled || stoppedRef.current || !isAuthenticated()) return;
     try {
       const [notifs, count] = await Promise.all([getNotifications(30), getUnreadCount()]);
       setNotifications(notifs);
@@ -121,10 +129,18 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       }
       // Other errors: silently ignore (network blip, server down, etc.)
     }
-  }, [stopPolling]);
+  }, [enabled, stopPolling]);
 
   // ── Polling ──
   useEffect(() => {
+    if (!enabled || !isAuthenticated()) {
+      stopPolling();
+      setNotifications([]);
+      setUnreadCount(0);
+      setIsOpen(false);
+      return;
+    }
+
     stoppedRef.current = false;
 
     // Initial fetch
@@ -134,10 +150,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [refresh]);
+  }, [enabled, refresh, stopPolling]);
 
   // ── Actions ──
-  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+  const toggle = useCallback(() => {
+    if (!enabled || !isAuthenticated()) return;
+    setIsOpen((prev) => !prev);
+  }, [enabled]);
   const close = useCallback(() => setIsOpen(false), []);
 
   const dismiss = useCallback((id: number) => {
@@ -145,6 +164,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const read = useCallback(async (id: number) => {
+    if (!enabled || !isAuthenticated()) return;
     try {
       await markAsRead(id);
       setNotifications((prev) =>
@@ -156,9 +176,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore
     }
-  }, []);
+  }, [enabled]);
 
   const readAll = useCallback(async () => {
+    if (!enabled || !isAuthenticated()) return;
     try {
       await markAllAsRead();
       setNotifications((prev) =>
@@ -168,10 +189,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore
     }
-  }, []);
+  }, [enabled]);
 
   const remove = useCallback(
     async (id: number) => {
+      if (!enabled || !isAuthenticated()) return;
       try {
         await deleteNotification(id);
         setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -181,25 +203,40 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         // ignore
       }
     },
-    [dismiss],
+    [dismiss, enabled],
+  );
+
+  const value = useMemo<NotificationState>(
+    () => ({
+      notifications,
+      unreadCount,
+      isOpen,
+      dismissedIds,
+      toggle,
+      close,
+      dismiss,
+      read,
+      readAll,
+      remove,
+      refresh,
+    }),
+    [
+      notifications,
+      unreadCount,
+      isOpen,
+      dismissedIds,
+      toggle,
+      close,
+      dismiss,
+      read,
+      readAll,
+      remove,
+      refresh,
+    ],
   );
 
   return (
-    <NotificationCtx.Provider
-      value={{
-        notifications,
-        unreadCount,
-        isOpen,
-        dismissedIds,
-        toggle,
-        close,
-        dismiss,
-        read,
-        readAll,
-        remove,
-        refresh,
-      }}
-    >
+    <NotificationCtx.Provider value={value}>
       {children}
     </NotificationCtx.Provider>
   );

@@ -20,8 +20,7 @@ interface LazyImageProps {
   fetchPriority?: 'high' | 'low' | 'auto';
 }
 
-const DEFAULT_FALLBACK =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=480&q=60&auto=format&fit=crop';
+const DEFAULT_FALLBACK = '/menu-fallback-640.webp';
 
 export default function LazyImage({
   src,

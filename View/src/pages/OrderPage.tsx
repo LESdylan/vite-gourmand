@@ -235,9 +235,9 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
 
   /* ── Check auth & load profile silently (no redirect) ── */
   useEffect(() => {
-    if (isAuthenticated()) {
-      setLoggedIn(true);
-    }
+    if (!isAuthenticated()) return;
+
+    setLoggedIn(true);
     getProfile()
       .then((loadedProfile) => {
         setProfile(loadedProfile);

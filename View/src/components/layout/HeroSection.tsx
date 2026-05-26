@@ -3,11 +3,9 @@ import { ArrowRight, Phone, Star, Award, Users, Calendar, Sparkles } from 'lucid
 import { Button } from '../ui/button';
 import type { ReviewStats, SiteInfo } from '../../services/public';
 
-const HERO_IMAGE_BASE =
-  'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&crop=entropy&q=80';
-const HERO_IMAGE_SRC = `${HERO_IMAGE_BASE}&w=1280`;
+const HERO_IMAGE_SRC = '/hero-catering-1280.webp';
 const HERO_IMAGE_SRCSET = [960, 1280, 1920]
-  .map((width) => `${HERO_IMAGE_BASE}&w=${width} ${width}w`)
+  .map((width) => `/hero-catering-${width}.webp ${width}w`)
   .join(', ');
 
 interface HeroSectionProps {
@@ -32,7 +30,7 @@ export default function HeroSection({
   onContact,
   siteInfo,
   reviewStats,
-}: HeroSectionProps) {
+}: Readonly<HeroSectionProps>) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -165,9 +163,9 @@ export default function HeroSection({
             >
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-2.5">
-                  {['JD', 'ML', 'PB', 'AS'].map((initials, i) => (
+                  {['JD', 'ML', 'PB', 'AS'].map((initials) => (
                     <div
-                      key={i}
+                      key={initials}
                       className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#1A1A1A] bg-gradient-to-br from-[#D4AF37]/90 to-[#722F37] flex items-center justify-center text-white text-xs font-medium shadow-lg"
                     >
                       {initials}
@@ -176,10 +174,10 @@ export default function HeroSection({
                 </div>
                 <div>
                   <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
+                    {[1, 2, 3, 4, 5].map((starValue) => (
                       <Star
-                        key={i}
-                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
+                        key={starValue}
+                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${starValue <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
                       />
                     ))}
                     <span className="text-white/80 text-sm ml-1.5">
@@ -245,10 +243,10 @@ export default function HeroSection({
                 {/* Testimonial card */}
                 <div className="group bg-gradient-to-br from-[#722F37] to-[#5a252c] rounded-2xl p-5 mt-8 shadow-xl shadow-[#722F37]/25 hover:shadow-[#722F37]/40 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
                   <div className="flex items-center gap-1 mb-2">
-                    {[1, 2, 3, 4, 5].map((i) => (
+                    {[1, 2, 3, 4, 5].map((starValue) => (
                       <Star
-                        key={i}
-                        className={`w-3 h-3 ${i <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
+                        key={starValue}
+                        className={`w-3 h-3 ${starValue <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
                       />
                     ))}
                   </div>
@@ -286,11 +284,11 @@ export default function HeroSection({
               label: 'Satisfaits',
               icon: Users,
             },
-          ].map((stat, index) => {
+          ].map((stat) => {
             const Icon = stat.icon;
             return (
               <div
-                key={index}
+                key={stat.label}
                 className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10"
               >
                 <Icon className="w-5 h-5 text-[#D4AF37] mx-auto mb-2" />

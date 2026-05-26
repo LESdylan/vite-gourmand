@@ -47,8 +47,7 @@ export interface Menu {
 }
 
 // Default fallback image
-export const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&auto=format';
+export const FALLBACK_IMAGE = '/menu-fallback-640.webp';
 
 /**
  * Empty menus array - data comes from API

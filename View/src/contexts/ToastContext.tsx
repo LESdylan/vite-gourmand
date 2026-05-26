@@ -4,7 +4,15 @@
  * Provides addToast() globally for ephemeral action confirmations
  * (e.g. "Email envoyé", "Inscription réussie", "Commande validée").
  */
-import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from 'react';
 import { X, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 
 /* ── Types ── */
@@ -22,6 +30,15 @@ interface ToastContextValue {
   addToast: (message: string, type?: ToastType, duration?: number) => void;
 }
 
+type ToastProviderProps = Readonly<{
+  children: ReactNode;
+}>;
+
+type ToastItemProps = Readonly<{
+  toast: Toast;
+  onDismiss: (id: string) => void;
+}>;
+
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 /* ── Hook ── */
@@ -33,7 +50,7 @@ export function useToast(): ToastContextValue {
 }
 
 /* ── Provider ── */
-export function ToastProvider({ children }: { children: ReactNode }) {
+export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const counterRef = useRef(0);
 
@@ -53,11 +70,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [removeToast],
   );
 
+  const value = useMemo(() => ({ addToast }), [addToast]);
+
   return (
-    <ToastContext.Provider value={{ addToast }}>
+    <ToastContext.Provider value={value}>
       {children}
       {/* Toast container — bottom-right, stacked */}
-      <div
+      <section
         aria-live="polite"
         aria-label="Notifications"
         className="fixed bottom-4 right-4 z-[100] flex flex-col-reverse gap-2 pointer-events-none max-w-sm w-full"
@@ -65,7 +84,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onDismiss={removeToast} />
         ))}
-      </div>
+      </section>
     </ToastContext.Provider>
   );
 }
@@ -86,7 +105,7 @@ const STYLE: Record<ToastType, { bg: string; icon: typeof CheckCircle2; iconColo
   info: { bg: 'bg-blue-50 border-blue-300 text-blue-900', icon: Info, iconColor: 'text-blue-600' },
 };
 
-function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
+function ToastItem({ toast, onDismiss }: ToastItemProps) {
   const style = STYLE[toast.type];
   const Icon = style.icon;
 
