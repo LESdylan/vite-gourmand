@@ -596,7 +596,12 @@
           ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "vg_access_token=; vg_csrf_token="
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/auth/me",
               "host": [
@@ -711,6 +716,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "vg_access_token=; vg_csrf_token="
               }
             ],
             "body": {
@@ -910,6 +919,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "vg_access_token=; vg_csrf_token="
               }
             ],
             "body": {
@@ -1197,6 +1210,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "vg_access_token=; vg_csrf_token="
               }
             ],
             "body": {
@@ -1881,6 +1898,12 @@
           ],
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "vg_access_token=; vg_csrf_token="
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/auth/me",
               "host": [
@@ -1920,6 +1943,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "vg_access_token=; vg_csrf_token="
               }
             ],
             "body": {
@@ -2210,6 +2237,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "vg_access_token=; vg_csrf_token="
               }
             ],
             "body": {
@@ -2645,6 +2676,12 @@
           ],
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "vg_access_token=; vg_csrf_token="
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/auth/me",
               "host": [

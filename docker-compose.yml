@@ -5,7 +5,7 @@ services:
       dockerfile: infrastructure/services/postgres/Dockerfile
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: vite_gourmand
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: vite_gourmand
     ports:
       - "27017:27017"

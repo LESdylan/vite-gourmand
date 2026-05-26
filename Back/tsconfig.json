@@ -27,7 +27,6 @@
     "alwaysStrict": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "jest"],
     "paths": {
       "@generated/*": ["./generated/*"]
     }

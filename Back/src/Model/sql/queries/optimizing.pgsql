@@ -2,9 +2,9 @@
 -- OPTIMIZATION & MAINTENANCE QUERIES
 -- ============================================
 
--- Refresh materialized views (run via cron)
-REFRESH MATERIALIZED VIEW "mv_orders_by_status";
-REFRESH MATERIALIZED VIEW "mv_monthly_revenue";
+-- Refresh cached reporting data (run via cron)
+SELECT refresh_mv_orders_by_status();
+SELECT refresh_mv_monthly_revenue();
 
 -- Check index usage
 SELECT

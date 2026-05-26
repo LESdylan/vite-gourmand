@@ -20,6 +20,7 @@
     "test:debug": "node --max-old-space-size=384 --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "node --max-old-space-size=2048 node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --runInBand",
     "test:custom": "tsx src/test/run-custom-tests.ts",
+    "test:postman:convert": "tsx src/test/convert-postman-results.ts",
     "test:summary": "tsx src/test/summarize-ci-tests.ts",
     "test:orders": "node --max-old-space-size=384 node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --testPathPattern=order --runInBand",
     "test:flows": "node --max-old-space-size=384 node_modules/.bin/jest --config ./src/test/e2e/jest-e2e.json --testPathPattern=api-flows --runInBand",

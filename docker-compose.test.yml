@@ -8,7 +8,7 @@ services:
       dockerfile: infrastructure/services/postgres/Dockerfile
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD}
       POSTGRES_DB: postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
@@ -40,9 +40,9 @@ services:
     environment:
       - NODE_ENV=test
       - PORT=3000
-      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
+      - DATABASE_URL=${TEST_DATABASE_URL}
       - MONGODB_URI=${MONGODB_URI:-mongodb://mongo:27017/vite_gourmand}
-      - JWT_SECRET=test-secret-key
+      - JWT_SECRET=${TEST_JWT_SECRET}
     ports:
       - "3000:3000"
     depends_on:

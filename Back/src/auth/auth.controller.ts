@@ -185,11 +185,12 @@ export class AuthController {
   }
 
   private completeBrowserSession(res: Response, authResult: AuthResult) {
-    this.setAuthCookie(res, authResult.accessToken);
-    this.setCsrfCookie(res, this.createCsrfToken());
     if (process.env.NODE_ENV === 'test') {
       return authResult;
     }
+
+    this.setAuthCookie(res, authResult.accessToken);
+    this.setCsrfCookie(res, this.createCsrfToken());
     return { user: authResult.user };
   }
 

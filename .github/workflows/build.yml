@@ -38,6 +38,10 @@ jobs:
         if: always() && env.SONAR_TOKEN != ''
         run: bash infrastructure/sonarcloud/fetch-results.sh infrastructure/sonarcloud/results
 
+      - name: Summarize SonarQube Cloud results
+        if: always() && env.SONAR_TOKEN != ''
+        run: node infrastructure/sonarcloud/summarize-results.js infrastructure/sonarcloud/results
+
       - name: Upload SonarQube Cloud JSON results
         if: always()
         uses: actions/upload-artifact@v5

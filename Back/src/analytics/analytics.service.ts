@@ -30,6 +30,10 @@ export class AnalyticsService implements OnModuleInit {
   }
 
   private async connect(): Promise<void> {
+    if (this.isDisabled()) {
+      return;
+    }
+
     const uri = this.config.get<string>('MONGODB_URI');
     if (!uri) {
       this.logger.warn('MongoDB URI not configured, analytics disabled');
@@ -44,6 +48,14 @@ export class AnalyticsService implements OnModuleInit {
     } catch (error) {
       this.logger.error('Failed to connect to MongoDB', error);
     }
+  }
+
+  private isDisabled(): boolean {
+    return (
+      process.env.NODE_ENV === 'test' ||
+      this.config.get<string>('ANALYTICS_ENABLED') === 'false' ||
+      this.config.get<string>('ANALYTICS_DISABLED') === 'true'
+    );
   }
 
   private getCollection<T extends object>(name: string): Collection<T> | null {
