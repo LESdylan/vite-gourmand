@@ -3,17 +3,13 @@
 .PHONY: docker-build-dev docker-bootstrap docker-shell docker-stop docker-restart
 
 docker-build-dev: ## Build the development Docker image (Node.js 22 Alpine)
-	@if ! docker info >/dev/null 2>&1; then \
+	@docker info >/dev/null 2>&1 || { \
 		printf 'Cannot connect to Docker daemon.\n'; \
 		printf 'Fix: sudo usermod -aG docker $$USER && newgrp docker\n'; \
 		printf 'Or if Docker is not running: sudo systemctl start docker\n'; \
 		exit 1; \
-	fi
-	@tmpfile=$$(mktemp); \
-	 $(DOCKER_COMPOSE) --profile dev build dev >"$$tmpfile" 2>&1; BUILD_EXIT=$$?; \
-	 grep -v "DEPRECATED\|Install the buildx\|https://docs.docker.com/go/buildx\|attribute .version. is obsolete\|configured to build using Bake" "$$tmpfile" || true; \
-	 rm -f "$$tmpfile"; \
-	 test $$BUILD_EXIT -eq 0 || { printf 'Docker build failed (exit %s). Check output above.\n' $$BUILD_EXIT; exit 1; }
+	}
+	@$(DOCKER_COMPOSE) --profile dev build dev 2>&1
 	@printf 'Development container image built.\n'
 
 docker-bootstrap: ## Full containerized bootstrap: build image, fetch secrets, install, compile, start

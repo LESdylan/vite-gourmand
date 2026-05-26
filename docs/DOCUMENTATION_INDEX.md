@@ -66,6 +66,13 @@ Bienvenue dans la documentation complète de Vite & Gourmand !
 - Sécurité et RBAC
 - Performance
 
+### Bilan DWWM RNCP 5 - Qualité, sécurité et infrastructure
+➡️ **[DOSSIER_DWWM_RNCP5_BILAN_QUALITE_SECURITE_INFRASTRUCTURE.md](./DOSSIER_DWWM_RNCP5_BILAN_QUALITE_SECURITE_INFRASTRUCTURE.md)**
+- Synthèse des améliorations Lighthouse 90+
+- Sécurité frontend/backend et archives de failles
+- Refactorisation Docker, Fly et Makefile
+- Explication adaptée au dossier professionnel DWWM
+
 ### Documentation API
 ➡️ **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**
 - 30+ endpoints documentés

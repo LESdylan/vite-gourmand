@@ -149,6 +149,19 @@ Bienvenue dans la documentation complète du **Système Kanban & Suivi Temps Ré
 
 ---
 
+#### 🧾 [DOSSIER_DWWM_RNCP5_BILAN_QUALITE_SECURITE_INFRASTRUCTURE.md](./DOSSIER_DWWM_RNCP5_BILAN_QUALITE_SECURITE_INFRASTRUCTURE.md)
+**Pour qui** : DWWM, jury, formateur, développeurs
+**Durée de lecture** : 20 minutes
+**Contenu** :
+- ✅ Synthèse des travaux Lighthouse, sécurité, CI et infrastructure
+- ✅ Explication des choix techniques et de leurs bénéfices
+- ✅ Correspondance avec les compétences RNCP niveau 5
+- ✅ Preuves et commandes de validation
+
+**Quand le lire** : Pour préparer le dossier professionnel ou l'entretien technique
+
+---
+
 ### 4. Documentation Générale
 
 #### 📘 [README.md](./README.md)

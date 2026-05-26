@@ -15,8 +15,6 @@ SHELL := /usr/bin/bash
 # Auto-detect docker compose v2 plugin or v1 standalone
 DOCKER_COMPOSE := $(shell docker compose version >/dev/null 2>&1 && echo 'docker compose' || echo 'docker-compose')
 
-# Disable BuildKit (legacy builder; the deprecation warning is harmless)
-export DOCKER_BUILDKIT := 0
 
 BACKEND_PATH  = ./Back
 FRONTEND_PATH = ./View
