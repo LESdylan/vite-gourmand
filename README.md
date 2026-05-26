@@ -134,31 +134,33 @@ This is my ECF (Évaluation en Cours de Formation) project for the *Titre Profes
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Browser                                                         │
-│  React 19 + TypeScript · Vite 6 · Tailwind CSS v4 · Radix UI    │
-│  TanStack Query · React Router · Recharts                        │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │ HTTPS / REST + Cookie Auth
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  NestJS 11 + TypeScript                                          │
-│  ├── Guards (JWT, RBAC: user / employee / admin)                 │
-│  ├── Interceptors (logging, response transform)                  │
-│  ├── Controllers → Services → PrismaService                      │
-│  ├── WebSockets (real-time orders & chat)                        │
-│  ├── Swagger (OpenAPI 3.0)                                       │
-│  └── CSRF protection · Helmet · compression                      │
-└──────────────┬────────────────────────────┬────────────────────-┘
-               │ Prisma ORM                 │ Mongoose
-               ▼                            ▼
-┌──────────────────────┐      ┌─────────────────────────┐
-│  PostgreSQL 15       │      │  MongoDB 7               │
-│  Core domain data    │      │  Analytics, logs,        │
-│  (orders, menus,     │      │  activity streams        │
-│   users, staff…)     │      │                          │
-└──────────────────────┘      └─────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Browser["Browser"]
+        FE["React 19 + TypeScript<br/>Vite 6 · Tailwind CSS v4 · Radix UI<br/>TanStack Query · React Router · Recharts"]
+    end
+
+    subgraph Server["NestJS 11 — API Server"]
+        direction TB
+        SEC["Helmet · CSRF · compression"]
+        G["Guards — JWT, RBAC<br/>user / employee / admin"]
+        I["Interceptors — logging, transform"]
+        C["Controllers"]
+        S["Services"]
+        P["PrismaService"]
+        WS["WebSockets<br/>real-time orders + chat"]
+        DOC["Swagger — OpenAPI 3.0"]
+
+        SEC --> G --> I --> C --> S --> P
+        S -.-> WS
+    end
+
+    PG[("PostgreSQL 15<br/>46 domain models")]
+    MG[("MongoDB 7<br/>analytics, logs, activity")]
+
+    Browser -- "HTTPS / REST + Cookie Auth" --> Server
+    P -- "Prisma ORM" --> PG
+    S -- "Mongoose" --> MG
 ```
 
 ### Stack at a glance
