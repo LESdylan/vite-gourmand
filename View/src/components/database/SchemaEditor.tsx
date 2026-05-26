@@ -252,7 +252,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Re
                 aria-label="Colonne de référence"
                 value={col.foreignKey.column}
                 onChange={(e) =>
-                  onChange('foreignKey', { ...col.foreignKey!, column: e.target.value })
+                  onChange('foreignKey', { ...col.foreignKey, column: e.target.value })
                 }
               >
                 {tables

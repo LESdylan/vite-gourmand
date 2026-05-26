@@ -35,8 +35,8 @@ export const FoodCardScenario: React.FC = () => {
         margin: '0 auto',
       }}
     >
-      {menus.map((menu, idx) => (
-        <FoodCard key={idx} {...menu} />
+      {menus.map((menu) => (
+        <FoodCard key={menu.name} {...menu} />
       ))}
     </div>
   );

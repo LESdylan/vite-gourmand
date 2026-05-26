@@ -53,8 +53,10 @@ async function login(context: APIRequestContext, email: string, password: string
 async function csrfToken(context: APIRequestContext): Promise<string> {
   const state = await context.storageState();
   const csrf = state.cookies.find((cookie) => cookie.name === 'vg_csrf_token');
-  expect(csrf?.value).toBeTruthy();
-  return csrf!.value;
+  if (!csrf?.value) {
+    throw new Error('Missing CSRF token cookie');
+  }
+  return csrf.value;
 }
 
 async function postCrud<T>(context: APIRequestContext, endpoint: string, data: unknown): Promise<T> {

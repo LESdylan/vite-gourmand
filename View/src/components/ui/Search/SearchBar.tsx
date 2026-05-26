@@ -30,6 +30,8 @@ export function SearchBar({
   const { user: currentUser } = usePortalAuth();
   const showResults = loading === false && results.length > 0;
   const showEmpty = loading === false && results.length === 0;
+  const resultCountText = `${results.length} résultat${results.length > 1 ? 's' : ''}`;
+  const emptyMessage = `Aucun utilisateur trouvé pour "${query}"`;
 
   // Debounced search
   useEffect(() => {
@@ -166,6 +168,11 @@ export function SearchBar({
     }
   };
 
+  const getResultItemClassName = (index: number) =>
+    index === focusedIndex ? 'search-result-item search-result-item--focused' : 'search-result-item';
+
+  const getRoleClassName = (role: string) => `search-result-role search-result-role--${role}`;
+
   return (
     <div className="search-bar">
       <div className="search-bar-input-wrapper">
@@ -206,23 +213,22 @@ export function SearchBar({
         <div ref={dropdownRef} className="search-dropdown" id="search-results">
           {loading && (
             <div className="search-loading">
-              <span className="search-loading-spinner" /> Recherche...
+              <span className="search-loading-spinner" />
+              <span>Recherche...</span>
             </div>
           )}
           {showResults && (
-            <>
+            <div className="search-results-group">
               <div className="search-dropdown-header">
                 <span className="search-dropdown-title">Utilisateurs</span>
-                <span className="search-dropdown-count">
-                  {results.length} résultat{results.length > 1 ? 's' : ''}
-                </span>
+                <span className="search-dropdown-count">{resultCountText}</span>
               </div>
               <div className="search-results-list">
                 {results.map((user, index) => (
                   <button
                     type="button"
                     key={user.id}
-                    className={`search-result-item ${index === focusedIndex ? 'search-result-item--focused' : ''}`}
+                    className={getResultItemClassName(index)}
                     onClick={() => handleSelectUser(user)}
                     onMouseEnter={() => setFocusedIndex(index)}
                   >
@@ -231,21 +237,19 @@ export function SearchBar({
                       <div className="search-result-name">{highlightMatch(user.name, query)}</div>
                       <div className="search-result-meta">
                         <span>@{highlightMatch(user.username, query)}</span>
-                        <span className={`search-result-role search-result-role--${user.role}`}>
-                          {user.role}
-                        </span>
+                        <span className={getRoleClassName(user.role)}>{user.role}</span>
                       </div>
                     </div>
                     <span className="search-result-arrow">→</span>
                   </button>
                 ))}
               </div>
-            </>
+            </div>
           )}
           {showEmpty && (
             <div className="search-empty">
               <div className="search-empty-icon">🔍</div>
-              <p className="search-empty-text">Aucun utilisateur trouvé pour "{query}"</p>
+              <p className="search-empty-text">{emptyMessage}</p>
             </div>
           )}
         </div>

@@ -462,24 +462,22 @@ export default function LegalPage({ section, setCurrentPage }: Readonly<LegalPag
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
                   <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
                     4
-                  </span>{' '}
-                  Cookies
+                  </span>
+                  <span>Cookies</span>
                 </h2>
 
                 <p className="text-[#1A1A1A]/75 leading-relaxed mb-4">
-                  Lorsque vous visitez notre site, nous utilisons des petits fichiers appelés{' '}
-                  <strong>cookies</strong> (et un stockage local équivalent). Certains sont
-                  indispensables pour que le site fonctionne, d'autres demandent votre accord. Vous
-                  pouvez modifier votre choix à tout moment en cliquant sur{' '}
-                  <em>« Gérer mes cookies »</em> en bas de page.
+                  Lorsque vous visitez notre site, nous utilisons des petits fichiers appelés <strong>cookies</strong>{' '}
+                  (et un stockage local équivalent). Certains sont indispensables pour que le site
+                  fonctionne, d'autres demandent votre accord. Vous pouvez modifier votre choix à
+                  tout moment en cliquant sur <em>« Gérer mes cookies »</em> en bas de page.
                 </p>
 
                 <p className="text-[#1A1A1A]/75 leading-relaxed mb-6">
-                  Nous n'utilisons{' '}
-                  <strong>aucun outil de publicité ni de profilage commercial</strong> (pas de
-                  Google Analytics, pas de Meta Pixel, pas de tracking publicitaire). Vos mots de
-                  passe ne sont jamais stockés dans des cookies — seuls des{' '}
-                  <strong>jetons de session signés</strong> permettent de vous garder connecté(e).
+                  Nous n'utilisons <strong>aucun outil de publicité ni de profilage commercial</strong>{' '}
+                  (pas de Google Analytics, pas de Meta Pixel, pas de tracking publicitaire). Vos
+                  mots de passe ne sont jamais stockés dans des cookies — seuls des <strong>jetons de session signés</strong>{' '}
+                  permettent de vous garder connecté(e).
                 </p>
 
                 {/* Tableau récapitulatif */}
@@ -516,9 +514,8 @@ export default function LegalPage({ section, setCurrentPage }: Readonly<LegalPag
                           vg_csrf_token
                         </td>
                         <td className="px-4 py-3 text-[#1A1A1A]/75">
-                          Protège vos formulaires contre les attaques de type{' '}
-                          <em>cross-site request forgery</em> (un faux site qui essaierait d'agir en
-                          votre nom).
+                          Protège vos formulaires contre les attaques de type <em>cross-site request forgery</em>{' '}
+                          (un faux site qui essaierait d'agir en votre nom).
                         </td>
                         <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">
                           15 minutes

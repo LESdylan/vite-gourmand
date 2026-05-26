@@ -86,9 +86,7 @@ export function CookiePreferences() {
 
         <div className="vg-cookie-modal__body">
           <p className="vg-cookie-modal__intro">
-            Vous contrôlez précisément quelles catégories de cookies sont utilisées. Les cookies{' '}
-            <strong>nécessaires</strong> au fonctionnement du site sont toujours actifs et ne
-            peuvent pas être désactivés.
+            Vous contrôlez précisément quelles catégories de cookies sont utilisées. Les cookies <strong>nécessaires</strong> au fonctionnement du site sont toujours actifs et ne peuvent pas être désactivés.
           </p>
 
           <div className="vg-cookie-row vg-cookie-row--locked">

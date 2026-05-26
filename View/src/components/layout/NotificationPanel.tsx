@@ -9,6 +9,7 @@
 import { useEffect, useRef } from 'react';
 import { X, Bell, ShoppingCart, Star, Megaphone, Settings, CheckCheck } from 'lucide-react';
 import { useNotifications } from '../../contexts/NotificationContext';
+import './NotificationPanel.css';
 
 /* ── Type-based styling ── */
 
@@ -83,10 +84,9 @@ export default function NotificationPanel({ topOffset }: Readonly<NotificationPa
   return (
     <section
       ref={panelRef}
-      className="fixed right-4 sm:right-6 z-[55] w-[min(380px,calc(100vw-2rem))]"
+      className="notification-panel-shell fixed right-4 sm:right-6 z-[55] w-[min(380px,calc(100vw-2rem))]"
       style={{
         top: `${topOffset + 8}px`,
-        animation: 'notifPanelIn 200ms ease-out both',
       }}
       aria-label="Notifications"
     >
@@ -187,13 +187,6 @@ export default function NotificationPanel({ topOffset }: Readonly<NotificationPa
           )}
         </div>
       </div>
-
-      <style>{`
-        @keyframes notifPanelIn {
-          from { opacity: 0; transform: translateY(-8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </section>
   );
 }
