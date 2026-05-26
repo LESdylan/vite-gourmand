@@ -19,8 +19,10 @@ const trendIcons = {
   stable: '→',
 };
 
-export function MetricWidget({ label, value, unit, trend = 'stable', change }: MetricWidgetProps) {
+export function MetricWidget({ label, value, unit, trend = 'stable', change }: Readonly<MetricWidgetProps>) {
   const trendClass = `metric-widget-trend--${trend}`;
+  const hasChange = typeof change === 'number';
+  const showTrend = hasChange || trend !== 'stable';
 
   return (
     <article className="metric-widget">
@@ -29,9 +31,9 @@ export function MetricWidget({ label, value, unit, trend = 'stable', change }: M
         <span className="metric-widget-value">{value}</span>
         {unit && <span className="metric-widget-unit">{unit}</span>}
       </div>
-      {(change !== undefined || trend !== 'stable') && (
+      {showTrend && (
         <span className={`metric-widget-trend ${trendClass}`}>
-          {trendIcons[trend]} {change !== undefined ? `${Math.abs(change)}%` : ''}
+          {trendIcons[trend]} {hasChange ? `${Math.abs(change)}%` : ''}
         </span>
       )}
     </article>

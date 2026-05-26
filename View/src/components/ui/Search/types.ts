@@ -7,7 +7,7 @@ export interface SearchResult {
   name: string;
   username: string;
   email: string;
-  role: string;
+  role: UserVisibility;
   avatar?: string;
   createdAt?: string;
 }

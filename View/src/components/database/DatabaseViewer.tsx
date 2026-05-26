@@ -28,7 +28,7 @@ interface DatabaseViewerProps {
   initialTable?: string;
 }
 
-export function DatabaseViewer({ initialTable }: DatabaseViewerProps) {
+export function DatabaseViewer({ initialTable }: Readonly<DatabaseViewerProps>) {
   const db = useDatabase();
   const [modal, setModal] = useState<ModalType>(null);
   const [columns, setColumns] = useState<TableColumn[]>([]);

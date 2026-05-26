@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { usePortalAuth } from './PortalAuthContext';
+import { useConsent } from '../contexts/ConsentContext';
 import { getGoogleConfig } from '../services/auth';
 import {
   Eye,
@@ -93,7 +94,7 @@ export function PortalLoginForm() {
 
   /* ── Handlers ── */
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLocalError('');
     try {
@@ -103,7 +104,7 @@ export function PortalLoginForm() {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLocalError('');
 
@@ -142,7 +143,7 @@ export function PortalLoginForm() {
     }
   };
 
-  const handleForgot = async (e: React.FormEvent) => {
+  const handleForgot = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLocalError('');
     if (!forgotEmail.trim()) {
@@ -160,6 +161,16 @@ export function PortalLoginForm() {
   /* ── Google Identity Services (GSI) ── */
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const [googleReady, setGoogleReady] = useState(false);
+  // Tracks whether google.accounts.id.initialize() has already been called.
+  // The GSI SDK warns when initialize() is invoked more than once, and the
+  // React effect that hosts it can re-run (StrictMode, dep changes).
+  const gsiInitialized = useRef(false);
+  // CNIL: don't load Google's GSI script (which sets g_state cookie) until
+  // the user has either accepted "functional" cookies OR explicitly clicked
+  // "Activer la connexion Google" on this page.
+  const { choice, openPreferences } = useConsent();
+  const [googleOptIn, setGoogleOptIn] = useState(false);
+  const googleScriptAllowed = choice?.functional === true || googleOptIn;
 
   const onGoogleCredential = useCallback(
     async (response: { credential: string }) => {
@@ -173,7 +184,10 @@ export function PortalLoginForm() {
   );
 
   // Step 1: Load GSI script + initialize google.accounts.id
+  // Gated on user consent — Google's GSI script sets the g_state cookie,
+  // so loading it before consent would violate CNIL guidelines.
   useEffect(() => {
+    if (!googleScriptAllowed) return;
     let cancelled = false;
 
     async function initGoogle() {
@@ -193,7 +207,7 @@ export function PortalLoginForm() {
           };
           document.head.appendChild(script);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } else if ((window as any).google?.accounts) {
+        } else if ((globalThis as any).google?.accounts) {
           initGsiClient(clientId);
         }
       } catch {
@@ -203,14 +217,19 @@ export function PortalLoginForm() {
 
     function initGsiClient(clientId: string) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const google = (window as any).google;
+      const google = (globalThis as any).google;
       if (!google?.accounts) return;
 
-      google.accounts.id.initialize({
-        client_id: clientId,
-        callback: onGoogleCredential,
-        auto_select: false,
-      });
+      // Guard against double initialization (the SDK warns and only the
+      // last init "wins", which silently breaks the callback).
+      if (!gsiInitialized.current) {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: onGoogleCredential,
+          auto_select: false,
+        });
+        gsiInitialized.current = true;
+      }
       if (!cancelled) setGoogleReady(true);
     }
 
@@ -218,13 +237,13 @@ export function PortalLoginForm() {
     return () => {
       cancelled = true;
     };
-  }, [onGoogleCredential]);
+  }, [onGoogleCredential, googleScriptAllowed]);
 
   // Step 2: Render the Google button once GSI is ready AND the ref div is mounted
   useEffect(() => {
     if (!googleReady || !googleBtnRef.current) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const google = (window as any).google;
+    const google = (globalThis as any).google;
     if (!google?.accounts) return;
 
     googleBtnRef.current.replaceChildren();
@@ -285,7 +304,7 @@ export function PortalLoginForm() {
         {mode === 'login' && (
           <form onSubmit={handleLogin} className="pf-form" noValidate>
             {/* Remember me banner */}
-            {rememberMeData && email === rememberMeData.email && (
+            {email === rememberMeData?.email && (
               <div className="pf-remember-banner">
                 <span>👋 Bon retour, {rememberMeData.name} !</span>
                 <button
@@ -373,11 +392,36 @@ export function PortalLoginForm() {
             <div className="pf-divider">
               <span>ou</span>
             </div>
-            <div
-              ref={googleBtnRef}
-              className="pf-google-wrap"
-              style={googleReady ? undefined : { display: 'none' }}
-            />
+            {googleScriptAllowed ? (
+              <div
+                ref={googleBtnRef}
+                className="pf-google-wrap"
+                style={googleReady ? undefined : { display: 'none' }}
+              />
+            ) : (
+              <div className="pf-google-placeholder">
+                <p className="pf-google-placeholder__text">
+                  La connexion via Google nécessite votre accord (un cookie sera déposé
+                  par Google).
+                </p>
+                <div className="pf-google-placeholder__actions">
+                  <button
+                    type="button"
+                    className="pf-google-placeholder__btn pf-google-placeholder__btn--primary"
+                    onClick={() => setGoogleOptIn(true)}
+                  >
+                    Activer la connexion Google
+                  </button>
+                  <button
+                    type="button"
+                    className="pf-google-placeholder__btn pf-google-placeholder__btn--ghost"
+                    onClick={openPreferences}
+                  >
+                    Gérer mes cookies
+                  </button>
+                </div>
+              </div>
+            )}
           </form>
         )}
 
@@ -647,23 +691,13 @@ export function PortalLoginForm() {
 
       {/* ── RGPD Modal Overlay ── */}
       {showRgpdModal && (
-        <div
+        <dialog
           className="pf-rgpd-overlay"
-          role="dialog"
-          aria-modal="true"
           aria-label="Politique de confidentialité RGPD"
-          onClick={() => setShowRgpdModal(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setShowRgpdModal(false);
-          }}
-          tabIndex={-1}
+          onCancel={() => setShowRgpdModal(false)}
+          open
         >
-          <div
-            className="pf-rgpd-modal"
-            role="document"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-          >
+          <div className="pf-rgpd-modal">
             <div className="pf-rgpd-header">
               <h2 className="pf-rgpd-title">🔒 Politique de Confidentialité &amp; RGPD</h2>
               <button
@@ -950,7 +984,7 @@ export function PortalLoginForm() {
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   );
@@ -958,7 +992,7 @@ export function PortalLoginForm() {
 
 /* ── Small components ── */
 
-function PwCheck({ ok, label }: { ok: boolean; label: string }) {
+function PwCheck({ ok, label }: Readonly<{ ok: boolean; label: string }>) {
   return (
     <li className={`pf-pw-check ${ok ? 'pf-pw-check--ok' : ''}`}>
       {ok ? <CheckCircle size={12} /> : <AlertCircle size={12} />}

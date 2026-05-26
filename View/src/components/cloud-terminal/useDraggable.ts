@@ -9,7 +9,9 @@ interface Position {
   y: number;
 }
 
-export function useDraggable(initialPos: Position = { x: 100, y: 100 }) {
+const DEFAULT_POSITION: Position = { x: 100, y: 100 };
+
+export function useDraggable(initialPos: Position = DEFAULT_POSITION) {
   const [position, setPosition] = useState(initialPos);
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -38,11 +40,11 @@ export function useDraggable(initialPos: Position = { x: 100, y: 100 }) {
 
     const onUp = () => setIsDragging(false);
 
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    globalThis.addEventListener('mousemove', onMove);
+    globalThis.addEventListener('mouseup', onUp);
     return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      globalThis.removeEventListener('mousemove', onMove);
+      globalThis.removeEventListener('mouseup', onUp);
     };
   }, [isDragging]);
 

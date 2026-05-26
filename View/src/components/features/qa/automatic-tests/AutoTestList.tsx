@@ -11,7 +11,7 @@ interface AutoTestListProps {
   tests: AutoTest[];
 }
 
-export function AutoTestList({ tests }: AutoTestListProps) {
+export function AutoTestList({ tests }: Readonly<AutoTestListProps>) {
   // Show empty state when no tests available
   if (tests.length === 0) {
     return (

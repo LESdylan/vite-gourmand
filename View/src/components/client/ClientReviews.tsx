@@ -46,7 +46,7 @@ export function ClientReviews() {
     fetchDelivered();
   }, []);
 
-  async function handleSubmitReview(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmitReview(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!selectedOrder || form.note < 1 || form.note > 5) return;
     setSubmitting(true);

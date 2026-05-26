@@ -25,7 +25,7 @@ export function TextArea({
   disabled = false,
   required = false,
   error,
-}: TextAreaProps) {
+}: Readonly<TextAreaProps>) {
   const textareaClasses = buildTextAreaClasses(error);
 
   return (
@@ -59,11 +59,11 @@ function TextAreaLabel({
   htmlFor,
   required,
   label,
-}: {
+}: Readonly<{
   htmlFor: string;
   required: boolean;
   label: string;
-}) {
+}>) {
   return (
     <label htmlFor={htmlFor} className="textarea-label">
       {label}
@@ -77,12 +77,12 @@ function TextAreaFooter({
   maxLength,
   error,
   id,
-}: {
+}: Readonly<{
   value: string;
   maxLength?: number;
   error?: string;
   id: string;
-}) {
+}>) {
   return (
     <div className="textarea-footer">
       {error && (

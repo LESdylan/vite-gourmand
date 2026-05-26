@@ -24,7 +24,7 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-export function MobileMenu(props: MobileMenuProps) {
+export function MobileMenu(props: Readonly<MobileMenuProps>) {
   const {
     isOpen,
     onClose,
@@ -40,8 +40,8 @@ export function MobileMenu(props: MobileMenuProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="mobile-menu-overlay" onClick={onClose}>
-      <nav className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+    <dialog className="mobile-menu-overlay" onCancel={onClose} aria-label="Mobile navigation" open>
+      <nav className="mobile-menu">
         <NavSection items={navItems} active={activeSection} onSelect={onNavChange} />
         <hr className="mobile-menu-divider" />
         <CategorySection
@@ -53,7 +53,7 @@ export function MobileMenu(props: MobileMenuProps) {
           }}
         />
       </nav>
-    </div>
+    </dialog>
   );
 }
 
@@ -61,11 +61,11 @@ function NavSection<T extends string>({
   items,
   active,
   onSelect,
-}: {
+}: Readonly<{
   items: { id: T; label: string; icon: React.ReactNode }[];
   active: T;
   onSelect: (id: T) => void;
-}) {
+}>) {
   return (
     <div className="mobile-menu-section">
       <h3 className="mobile-menu-title">Navigation</h3>
@@ -87,11 +87,11 @@ function CategorySection({
   categories,
   active,
   onSelect,
-}: {
+}: Readonly<{
   categories: CategoryData[];
   active: TestCategory;
   onSelect: (cat: TestCategory) => void;
-}) {
+}>) {
   const main = categories.filter((c) => c.group === 'main');
   const utility = categories.filter((c) => c.group === 'utility');
 
@@ -113,11 +113,11 @@ function CatBtn({
   cat,
   active,
   onSelect,
-}: {
+}: Readonly<{
   cat: CategoryData;
   active: TestCategory;
   onSelect: (c: TestCategory) => void;
-}) {
+}>) {
   return (
     <button
       className={`mobile-menu-item ${active === cat.id ? 'mobile-menu-item--active' : ''}`}

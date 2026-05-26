@@ -6,7 +6,7 @@ interface LogViewerProps {
   onClear: () => void;
 }
 
-export function LogViewer({ logs, connected, onClear }: LogViewerProps) {
+export function LogViewer({ logs, connected, onClear }: Readonly<LogViewerProps>) {
   return (
     <section className="devboard-log-viewer" aria-label="Live logs">
       <div className="devboard-log-viewer__toolbar">

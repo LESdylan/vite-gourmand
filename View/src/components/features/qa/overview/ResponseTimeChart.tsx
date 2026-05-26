@@ -11,7 +11,7 @@ interface ResponseTimeChartProps {
   totalTime: number;
 }
 
-export function ResponseTimeChart({ avgTime, totalTime }: ResponseTimeChartProps) {
+export function ResponseTimeChart({ avgTime, totalTime }: Readonly<ResponseTimeChartProps>) {
   // Generate mock time distribution data
 
   const timeData = useMemo(() => {

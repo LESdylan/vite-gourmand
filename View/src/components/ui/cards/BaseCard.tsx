@@ -12,7 +12,7 @@ export function BaseCard({
   padding = 'md',
   onClick,
   className = '',
-}: CardBaseProps) {
+}: Readonly<CardBaseProps>) {
   const cardClasses = buildCardClasses(variant, padding, onClick, className);
   const Tag = onClick ? 'button' : 'div';
 

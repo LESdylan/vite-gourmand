@@ -25,7 +25,7 @@ export function TestActions({
   onFail,
   onBlock,
   disabled,
-}: TestActionsProps) {
+}: Readonly<TestActionsProps>) {
   return (
     <div className="test-actions">
       <TextArea

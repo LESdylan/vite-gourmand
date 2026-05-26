@@ -11,7 +11,7 @@ interface ErrorRateWidgetProps {
   changePercent?: number;
 }
 
-export function ErrorRateWidget({ errorPercent, trend, changePercent }: ErrorRateWidgetProps) {
+export function ErrorRateWidget({ errorPercent, trend, changePercent }: Readonly<ErrorRateWidgetProps>) {
   return (
     <MetricWidget
       label="Error Rate"

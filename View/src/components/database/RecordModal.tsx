@@ -93,7 +93,16 @@ function formatValueForInput(value: unknown, inputType: string): string {
     return '';
   }
 
-  return String(value);
+  if (typeof value === 'object') return JSON.stringify(value);
+  return stringifyFormValue(value);
+}
+
+function stringifyFormValue(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
+  }
+  return JSON.stringify(value);
 }
 
 function getPlaceholder(col: TableColumn, inputType: string, isEdit: boolean): string {
@@ -110,7 +119,7 @@ function parseValueFromInput(value: string, inputType: string, checked?: boolean
   return value;
 }
 
-export function RecordModal({ columns, record, onSave, onClose }: Props) {
+export function RecordModal({ columns, record, onSave, onClose }: Readonly<Props>) {
   const [form, setForm] = useState<Record<string, unknown>>({});
   const isEdit = !!record;
   const primaryColumns = columns.filter((c) => c.isPrimary);
@@ -137,7 +146,7 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
     }
   }, [record, columns]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     const cleanedData: Record<string, unknown> = {};
     Object.entries(form).forEach(([key, value]) => {
@@ -153,7 +162,7 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
         cleanedData[key] = value;
       }
     });
-    onSave(cleanedData as Partial<TableRecord>);
+    onSave(cleanedData);
   };
 
   const handleChange = (col: TableColumn, value: string, checked?: boolean) => {
@@ -176,10 +185,10 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
   });
 
   return (
-    <div className="record-modal-overlay" onClick={onClose}>
-      <div className="record-modal" onClick={(e) => e.stopPropagation()}>
+    <dialog className="record-modal-overlay" onCancel={onClose} aria-labelledby="record-modal-title" open>
+      <div className="record-modal">
         <header className="record-modal-header">
-          <h3>{isEdit ? "✏️ Modifier l'enregistrement" : '➕ Nouvel enregistrement'}</h3>
+          <h3 id="record-modal-title">{isEdit ? "✏️ Modifier l'enregistrement" : '➕ Nouvel enregistrement'}</h3>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
@@ -246,6 +255,6 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
           </div>
         </form>
       </div>
-    </div>
+    </dialog>
   );
 }

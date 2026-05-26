@@ -13,7 +13,7 @@ interface CountBadgeProps {
   max?: number;
 }
 
-export function CountBadge({ count, variant = 'default', max = 99 }: CountBadgeProps) {
+export function CountBadge({ count, variant = 'default', max = 99 }: Readonly<CountBadgeProps>) {
   const displayValue = formatCount(count, max);
   const classes = buildClasses(variant);
 

@@ -21,16 +21,9 @@ interface OverviewProps {
   isRunning?: boolean;
 }
 
-export function Overview({ metrics, isRunning }: OverviewProps) {
+export function Overview({ metrics, isRunning }: Readonly<OverviewProps>) {
   // Derive health status (-1 means no data yet / tests pending)
-  const health =
-    metrics.passRate < 0
-      ? 'healthy'
-      : metrics.passRate >= 95
-        ? 'healthy'
-        : metrics.passRate >= 80
-          ? 'warning'
-          : 'critical';
+  const health = getHealthStatus(metrics.passRate);
 
   return (
     <div className="overview">
@@ -55,4 +48,11 @@ export function Overview({ metrics, isRunning }: OverviewProps) {
       />
     </div>
   );
+}
+
+function getHealthStatus(passRate: number): 'healthy' | 'warning' | 'critical' {
+  if (passRate < 0) return 'healthy';
+  if (passRate >= 95) return 'healthy';
+  if (passRate >= 80) return 'warning';
+  return 'critical';
 }

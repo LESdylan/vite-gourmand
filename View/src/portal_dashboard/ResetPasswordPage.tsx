@@ -87,7 +87,7 @@ export function ResetPasswordPage() {
     checkToken();
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError('');
 
@@ -349,7 +349,7 @@ export function ResetPasswordPage() {
 }
 
 /* ── Password check component ── */
-function PwCheck({ ok, label }: { ok: boolean; label: string }) {
+function PwCheck({ ok, label }: Readonly<{ ok: boolean; label: string }>) {
   return (
     <li className={`pf-pw-check ${ok ? 'pf-pw-check--ok' : ''}`}>
       {ok ? <CheckCircle size={12} /> : <AlertCircle size={12} />}

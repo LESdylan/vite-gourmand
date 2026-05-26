@@ -16,7 +16,7 @@ interface TestCardItemProps {
   onView?: () => void;
 }
 
-export function TestCardItem({ test, onRun, onView }: TestCardItemProps) {
+export function TestCardItem({ test, onRun, onView }: Readonly<TestCardItemProps>) {
   const navigate = useNavigate();
   const isRunning = test.status === 'running';
 

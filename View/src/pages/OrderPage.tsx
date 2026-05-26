@@ -55,6 +55,7 @@ const STEPS = [
   { label: 'Détails', icon: Users },
   { label: 'Récapitulatif', icon: Check },
 ] as const;
+const MENU_CARD_SKELETONS = ['order-menu-skeleton-1', 'order-menu-skeleton-2', 'order-menu-skeleton-3', 'order-menu-skeleton-4', 'order-menu-skeleton-5', 'order-menu-skeleton-6'] as const;
 
 /* ── Props ── */
 interface OrderPageProps {
@@ -70,11 +71,11 @@ function formatDate(d: Date): string {
 
 function useDesktopMenuImages() {
   const [showImages, setShowImages] = useState(() =>
-    typeof window === 'undefined' ? false : window.matchMedia('(min-width: 640px)').matches,
+    globalThis.window === undefined ? false : globalThis.matchMedia('(min-width: 640px)').matches,
   );
 
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 640px)');
+    const media = globalThis.matchMedia('(min-width: 640px)');
     const update = () => setShowImages(media.matches);
     update();
     media.addEventListener('change', update);
@@ -99,7 +100,7 @@ function getMaxDate(): string {
 /* ══════════════════════════════════════════════════════════
    Step Indicator
    ══════════════════════════════════════════════════════════ */
-function StepIndicator({ currentStep }: { currentStep: number }) {
+function StepIndicator({ currentStep }: Readonly<{ currentStep: number }>) {
   return (
     <div className="flex items-center justify-center gap-0 sm:gap-1">
       {STEPS.map((step, i) => {
@@ -107,23 +108,17 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
         const isActive = i === currentStep;
         const isCompleted = i < currentStep;
         return (
-          <div key={i} className="flex items-center">
+          <div key={step.label} className="flex items-center">
             <div className="flex flex-col items-center gap-1">
               <div
                 className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all text-sm font-bold
-                  ${
-                    isCompleted
-                      ? 'bg-[#556B2F] text-white'
-                      : isActive
-                        ? 'bg-[#722F37] text-white shadow-lg shadow-[#722F37]/30'
-                        : 'bg-[#1A1A1A]/8 text-[#1A1A1A]/65'
-                  }`}
+                  ${getStepCircleClass(isCompleted, isActive)}`}
               >
                 {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
               </div>
               <span
                 className={`text-[10px] sm:text-xs font-medium transition-colors
-                  ${isActive ? 'text-[#F2D47A]' : isCompleted ? 'text-[#B8D17C]' : 'text-white/75'}`}
+                  ${getStepLabelClass(isCompleted, isActive)}`}
               >
                 {step.label}
               </span>
@@ -142,6 +137,18 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   );
 }
 
+function getStepCircleClass(isCompleted: boolean, isActive: boolean): string {
+  if (isCompleted) return 'bg-[#556B2F] text-white';
+  if (isActive) return 'bg-[#722F37] text-white shadow-lg shadow-[#722F37]/30';
+  return 'bg-[#1A1A1A]/8 text-[#1A1A1A]/65';
+}
+
+function getStepLabelClass(isCompleted: boolean, isActive: boolean): string {
+  if (isActive) return 'text-[#F2D47A]';
+  if (isCompleted) return 'text-[#B8D17C]';
+  return 'text-white/75';
+}
+
 /* ══════════════════════════════════════════════════════════
    Mini Menu Card (for selection in step 1)
    ══════════════════════════════════════════════════════════ */
@@ -150,12 +157,12 @@ function MiniMenuCard({
   selected,
   onSelect,
   showImage,
-}: {
+}: Readonly<{
   menu: Menu;
   selected: boolean;
   onSelect: (m: Menu) => void;
   showImage: boolean;
-}) {
+}>) {
   return (
     <button
       type="button"
@@ -198,7 +205,7 @@ function MiniMenuCard({
 /* ══════════════════════════════════════════════════════════
    Main OrderPage Component
    ══════════════════════════════════════════════════════════ */
-export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPageProps) {
+export default function OrderPage({ setCurrentPage, preSelectedMenuId }: Readonly<OrderPageProps>) {
   const { addToast } = useToast();
   const showMenuImages = useDesktopMenuImages();
 
@@ -291,11 +298,9 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
           /^([01]\d|2[0-3]):[0-5]\d$/.test(deliveryHour)
         );
       case 2:
-        return isCustomRequest
-          ? personCount >= 1
-          : selectedMenu
-            ? personCount >= selectedMenu.minPersons
-            : false;
+        if (isCustomRequest) return personCount >= 1;
+        if (selectedMenu) return personCount >= selectedMenu.minPersons;
+        return false;
       case 3:
         return true;
       default:
@@ -311,6 +316,13 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
     deliveryHour,
     personCount,
   ]);
+  const activeToggleClass = 'bg-white text-[#722F37] shadow-sm';
+  const inactiveToggleClass = 'text-[#1A1A1A]/65 hover:text-[#1A1A1A]/60';
+  const existingMenuButtonClass = isCustomRequest ? inactiveToggleClass : activeToggleClass;
+  const customMenuButtonClass = isCustomRequest ? activeToggleClass : inactiveToggleClass;
+  const showExistingMenuPicker = isCustomRequest === false;
+  const showMenuEmpty = menusLoading === false && allMenus.length === 0;
+  const showMenuGrid = menusLoading === false && allMenus.length > 0;
 
   /* ── Handle "Send Request" — requires account ── */
   const handleSendRequest = async () => {
@@ -326,6 +338,9 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
     try {
       if (isCustomRequest) {
         // For custom requests, create an order with special instructions
+        const instructionsText = specialInstructions.trim()
+          ? `Instructions: ${specialInstructions}`
+          : '';
         const data: CreateOrderData = {
           deliveryDate,
           deliveryHour,
@@ -333,8 +348,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
           personNumber: personCount,
           menuPrice: 0,
           totalPrice: 0,
-          specialInstructions:
-            `[DEMANDE PERSONNALISÉE]\n${customMenuDescription}\n\n${specialInstructions.trim() ? `Instructions: ${specialInstructions}` : ''}`.trim(),
+          specialInstructions: `[DEMANDE PERSONNALISÉE]\n${customMenuDescription}\n\n${instructionsText}`.trim(),
         };
         const order = await createOrder(data);
         setOrderSuccess(order.order_number);
@@ -373,7 +387,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
             <CheckCircle2 className="h-10 w-10 text-[#556B2F]" />
           </div>
           <h2 className="text-2xl font-black text-[#1A1A1A] mb-2">Demande envoyée !</h2>
-          <p className="text-[#1A1A1A]/60 mb-2">
+          <p className="text-[#5c5c5c] mb-2">
             Référence :{' '}
             <span className="font-mono font-bold text-[#722F37] bg-[#722F37]/5 px-2 py-0.5 rounded">
               {orderSuccess}
@@ -384,24 +398,24 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
               <MessageSquare className="h-5 w-5 text-[#722F37] shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-semibold text-[#1A1A1A] mb-1">Et maintenant ?</p>
-                <ul className="text-xs text-[#1A1A1A]/60 space-y-1.5">
+                <ul className="text-xs text-[#5c5c5c] space-y-1.5">
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                       1
                     </span>
-                    Notre équipe reçoit votre demande et l'examine.
+                    {' '}Notre équipe reçoit votre demande et l'examine.
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                       2
                     </span>
-                    Nous vous contactons pour confirmer les détails.
+                    {' '}Nous vous contactons pour confirmer les détails.
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="w-4 h-4 rounded-full bg-[#722F37]/10 text-[#722F37] text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                       3
                     </span>
-                    Aucun paiement en ligne — tout se règle à la livraison.
+                    {' '}Aucun paiement en ligne — tout se règle à la livraison.
                   </li>
                 </ul>
               </div>
@@ -479,11 +493,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       setSelectedMenu(null);
                     }}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all
-                      ${
-                        !isCustomRequest
-                          ? 'bg-white text-[#722F37] shadow-sm'
-                          : 'text-[#1A1A1A]/65 hover:text-[#1A1A1A]/60'
-                      }`}
+                      ${existingMenuButtonClass}`}
                   >
                     <Utensils className="h-4 w-4 inline mr-1.5" />
                     Menu existant
@@ -495,24 +505,20 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       setSelectedMenu(null);
                     }}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all
-                      ${
-                        isCustomRequest
-                          ? 'bg-white text-[#722F37] shadow-sm'
-                          : 'text-[#1A1A1A]/65 hover:text-[#1A1A1A]/60'
-                      }`}
+                      ${customMenuButtonClass}`}
                   >
                     <Sparkles className="h-4 w-4 inline mr-1.5" />
                     Menu personnalisé
                   </button>
                 </div>
 
-                {!isCustomRequest ? (
+                {showExistingMenuPicker && (
                   <>
-                    {menusLoading ? (
+                    {menusLoading && (
                       <div className="grid gap-3 sm:grid-cols-2">
-                        {Array.from({ length: 6 }).map((_, index) => (
+                        {MENU_CARD_SKELETONS.map((skeletonKey) => (
                           <div
-                            key={index}
+                            key={skeletonKey}
                             className={`${showMenuImages ? 'h-[106px]' : 'h-[92px]'} rounded-xl border-2 border-[#1A1A1A]/10 bg-white p-3 flex gap-3`}
                           >
                             {showMenuImages && (
@@ -527,12 +533,14 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         ))}
                         <span className="sr-only">Chargement des menus...</span>
                       </div>
-                    ) : allMenus.length === 0 ? (
+                    )}
+                    {showMenuEmpty && (
                       <div className="text-center py-12">
                         <ChefHat className="h-10 w-10 text-[#1A1A1A]/20 mx-auto mb-3" />
                         <p className="text-[#1A1A1A]/65">Aucun menu disponible pour le moment.</p>
                       </div>
-                    ) : (
+                    )}
+                    {showMenuGrid && (
                       <div className="grid gap-3 sm:grid-cols-2">
                         {allMenus
                           .filter((m) => m.stockQuantity > 0)
@@ -556,7 +564,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                         <p className="text-xs text-[#1A1A1A]/65 line-clamp-2">
                           {selectedMenu.description}
                         </p>
-                        <div className="flex flex-wrap gap-4 mt-3 text-xs text-[#1A1A1A]/60">
+                        <div className="flex flex-wrap gap-4 mt-3 text-xs text-[#5c5c5c]">
                           <span className="flex items-center gap-1">
                             <Users className="h-3.5 w-3.5 text-[#722F37]" /> Min.{' '}
                             {selectedMenu.minPersons} pers.
@@ -575,7 +583,8 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       </div>
                     )}
                   </>
-                ) : (
+                )}
+                {isCustomRequest && (
                   /* AI-powered custom menu composer */
                   <Suspense
                     fallback={
@@ -733,7 +742,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                       <h3 className="text-xs font-bold text-[#1A1A1A]/65 uppercase tracking-wide mb-2">
                         Estimation indicative
                       </h3>
-                      <div className="flex justify-between text-sm text-[#1A1A1A]/60 mb-1">
+                      <div className="flex justify-between text-sm text-[#5c5c5c] mb-1">
                         <span>
                           {selectedMenu.pricePerPerson.toFixed(2)} € × {personCount} pers.
                         </span>
@@ -935,7 +944,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                                 specialInstructions,
                               }),
                             );
-                            window.location.href = '/portal';
+                            globalThis.location.href = '/portal';
                           }}
                           className="flex-1 h-11"
                         >
@@ -957,7 +966,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
                                 specialInstructions,
                               }),
                             );
-                            window.location.href = '/portal';
+                            globalThis.location.href = '/portal';
                           }}
                           variant="outline"
                           className="flex-1 h-11 border-[#722F37]/20 text-[#722F37] hover:bg-[#722F37]/5"
@@ -987,7 +996,7 @@ export default function OrderPage({ setCurrentPage, preSelectedMenuId }: OrderPa
               }}
               variant="ghost"
               disabled={step === 0}
-              className="text-[#1A1A1A]/60"
+              className="text-[#5c5c5c]"
             >
               <ArrowLeft className="h-4 w-4 mr-1" /> Retour
             </Button>

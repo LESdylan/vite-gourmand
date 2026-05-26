@@ -25,18 +25,18 @@ const STATUS_CONFIG: Record<
   pending: { label: 'En suspens', Icon: CircleIcon },
 };
 
-export function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
+export function StatusBadge({ status, size = 'md' }: Readonly<StatusBadgeProps>) {
   const config = STATUS_CONFIG[status];
   const classes = buildClasses(status, size);
   const iconSize = size === 'sm' ? 10 : 12;
 
   return (
-    <span className={classes} role="status">
+    <output className={classes} aria-live="polite">
       <span className="status-badge-icon" aria-hidden="true">
         <config.Icon size={iconSize} />
       </span>
       <span className="status-badge-label">{config.label}</span>
-    </span>
+    </output>
   );
 }
 

@@ -15,7 +15,7 @@ export function GhostButton({
   type = 'button',
   onClick,
   ariaLabel,
-}: ButtonBaseProps) {
+}: Readonly<ButtonBaseProps>) {
   const classNames = buildClassNames(size, fullWidth, loading);
 
   return (

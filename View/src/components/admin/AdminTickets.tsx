@@ -451,21 +451,11 @@ function TicketCard({
   });
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect(ticket)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSelect(ticket);
-        }
-      }}
+    <article
       style={{
         background: 'white',
         borderRadius: 10,
         padding: 12,
-        cursor: 'pointer',
         border: '1px solid #e8e8e8',
         boxShadow: '0 1px 3px rgba(0,0,0,.04)',
         transition: 'box-shadow .15s, transform .15s',
@@ -510,17 +500,24 @@ function TicketCard({
       </div>
 
       {/* Subject */}
-      <p
+      <button
+        type="button"
+        onClick={() => onSelect(ticket)}
         style={{
           margin: '0 0 8px',
+          padding: 0,
+          border: 'none',
+          background: 'transparent',
           fontSize: 13,
           fontWeight: 600,
           color: '#1A1A1A',
           lineHeight: 1.35,
+          textAlign: 'left',
+          cursor: 'pointer',
         }}
       >
         {ticket.subject}
-      </p>
+      </button>
 
       {/* Meta: category + date */}
       <div
@@ -622,7 +619,7 @@ function TicketCard({
           )}
         </div>
       )}
-    </div>
+    </article>
   );
 }
 
@@ -836,14 +833,18 @@ function TicketDetail({
   const assignee = ticket.User_SupportTicket_assigned_toToUser;
 
   return (
-    <div
-      role="presentation"
-      onClick={onClose}
+    <dialog
+      onCancel={onClose}
+      aria-label={`Ticket ${ticket.ticket_number}`}
+      open
       style={{
         position: 'fixed',
         inset: 0,
         background: 'rgba(0,0,0,.45)',
         zIndex: 9999,
+        border: 0,
+        color: 'inherit',
+        margin: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -851,8 +852,6 @@ function TicketDetail({
       }}
     >
       <div
-        role="presentation"
-        onClick={(e) => e.stopPropagation()}
         style={{
           background: 'white',
           borderRadius: 20,
@@ -885,6 +884,7 @@ function TicketDetail({
             </span>
             <button
               onClick={onClose}
+              aria-label="Fermer le ticket"
               style={{
                 background: 'rgba(255,255,255,.15)',
                 border: 'none',
@@ -1076,7 +1076,7 @@ function TicketDetail({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 

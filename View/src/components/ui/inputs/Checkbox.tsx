@@ -14,7 +14,7 @@ interface CheckboxProps {
   disabled?: boolean;
 }
 
-export function Checkbox({ id, name, label, checked, onChange, disabled = false }: CheckboxProps) {
+export function Checkbox({ id, name, label, checked, onChange, disabled = false }: Readonly<CheckboxProps>) {
   return (
     <label className="checkbox-wrapper" htmlFor={id}>
       <input

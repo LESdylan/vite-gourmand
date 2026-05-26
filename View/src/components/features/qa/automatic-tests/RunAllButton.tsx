@@ -13,7 +13,7 @@ interface RunAllButtonProps {
   onRun?: () => void;
 }
 
-export function RunAllButton({ count, isRunning, onRun }: RunAllButtonProps) {
+export function RunAllButton({ count, isRunning, onRun }: Readonly<RunAllButtonProps>) {
   // Show count only if we have results, otherwise just "Run All"
   const label = count && count > 0 ? `▶ Run All (${count})` : '▶ Run All Tests';
 

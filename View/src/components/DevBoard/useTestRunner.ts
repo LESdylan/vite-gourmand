@@ -183,7 +183,7 @@ export function useTestRunner(): UseTestRunnerReturn {
 
     try {
       // Run the appropriate test type
-      const response = await runTests(testType as TestConfigId, { verbose: true });
+      const response = await runTests(testType, { verbose: true });
       setResults(response);
       if (response.rawOutput) setRawOutput(response.rawOutput);
     } catch (err) {
@@ -209,7 +209,7 @@ export function useTestRunner(): UseTestRunnerReturn {
     setRawOutput(null);
 
     try {
-      const response = await runTests(type as TestConfigId, { verbose: true });
+      const response = await runTests(type, { verbose: true });
       setResults(response);
       if (response.rawOutput) setRawOutput(response.rawOutput);
     } catch (err) {

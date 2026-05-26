@@ -31,7 +31,7 @@ const TYPE_CONFIG: Record<
   scenario: { label: 'Scénario', Icon: ScenariosIcon },
 };
 
-export function TypeBadge({ type, size = 'md' }: TypeBadgeProps) {
+export function TypeBadge({ type, size = 'md' }: Readonly<TypeBadgeProps>) {
   const config = TYPE_CONFIG[type];
   const classes = buildClasses(type, size);
   const iconSize = size === 'sm' ? 10 : 12;

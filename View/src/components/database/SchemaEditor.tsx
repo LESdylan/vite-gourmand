@@ -29,6 +29,12 @@ const COLUMN_TYPES = [
   { value: 'UUID', label: 'UUID' },
 ];
 
+function getSaveButtonText(loading: boolean, mode: Props['mode']): string {
+  if (loading) return '⏳ En cours...';
+  if (mode === 'createTable') return '✓ Créer la table';
+  return '✓ Ajouter la colonne';
+}
+
 interface ColumnDef {
   name: string;
   type: string;
@@ -49,7 +55,7 @@ const emptyColumn = (): ColumnDef => ({
   foreignKey: null,
 });
 
-export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Props) {
+export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Readonly<Props>) {
   const [newTableName, setNewTableName] = useState('');
   const [columns, setColumns] = useState<ColumnDef[]>([emptyColumn()]);
   const [loading, setLoading] = useState(false);
@@ -152,8 +158,9 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
     <div key={index} className="column-form">
       <div className="column-form-row">
         <div className="form-field">
-          <label>Nom de la colonne *</label>
+          <label htmlFor={`column-name-${index}`}>Nom de la colonne *</label>
           <input
+            id={`column-name-${index}`}
             type="text"
             value={col.name}
             onChange={(e) => onChange('name', e.target.value)}
@@ -161,8 +168,12 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
           />
         </div>
         <div className="form-field">
-          <label>Type *</label>
-          <select value={col.type} onChange={(e) => onChange('type', e.target.value)}>
+          <label htmlFor={`column-type-${index}`}>Type *</label>
+          <select
+            id={`column-type-${index}`}
+            value={col.type}
+            onChange={(e) => onChange('type', e.target.value)}
+          >
             {COLUMN_TYPES.map((t) => (
               <option key={t.value} value={t.value}>
                 {t.label}
@@ -174,8 +185,9 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
 
       <div className="column-form-row">
         <div className="form-field">
-          <label>Valeur par défaut</label>
+          <label htmlFor={`column-default-${index}`}>Valeur par défaut</label>
           <input
+            id={`column-default-${index}`}
             type="text"
             value={col.defaultValue}
             onChange={(e) => onChange('defaultValue', e.target.value)}
@@ -188,7 +200,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
               type="checkbox"
               checked={!col.nullable}
               onChange={(e) => onChange('nullable', !e.target.checked)}
-            />
+            />{' '}
             NOT NULL
           </label>
           <label className="checkbox-label">
@@ -196,7 +208,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
               type="checkbox"
               checked={col.isUnique}
               onChange={(e) => onChange('isUnique', e.target.checked)}
-            />
+            />{' '}
             UNIQUE
           </label>
           {mode === 'createTable' && (
@@ -205,7 +217,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
                 type="checkbox"
                 checked={col.isPrimary}
                 onChange={(e) => onChange('isPrimary', e.target.checked)}
-              />
+              />{' '}
               PRIMARY KEY
             </label>
           )}
@@ -214,16 +226,17 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
 
       <div className="column-form-row">
         <div className="form-field">
-          <label>Clé étrangère (optionnel)</label>
+          <label htmlFor={`column-fk-table-${index}`}>Clé étrangère (optionnel)</label>
           <div className="fk-select">
             <select
+              id={`column-fk-table-${index}`}
               value={col.foreignKey?.table || ''}
               onChange={(e) => {
                 const table = e.target.value;
-                if (!table) {
-                  onChange('foreignKey', null);
-                } else {
+                if (table) {
                   onChange('foreignKey', { table, column: 'id' });
+                } else {
+                  onChange('foreignKey', null);
                 }
               }}
             >
@@ -236,6 +249,7 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
             </select>
             {col.foreignKey && (
               <select
+                aria-label="Colonne de référence"
                 value={col.foreignKey.column}
                 onChange={(e) =>
                   onChange('foreignKey', { ...col.foreignKey!, column: e.target.value })
@@ -262,10 +276,10 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
   );
 
   return (
-    <div className="schema-editor-overlay" onClick={onClose}>
-      <div className="schema-editor" onClick={(e) => e.stopPropagation()}>
+    <dialog className="schema-editor-overlay" onCancel={onClose} aria-labelledby="schema-editor-title" open>
+      <div className="schema-editor">
         <header className="schema-editor-header">
-          <h3>
+          <h3 id="schema-editor-title">
             {mode === 'createTable'
               ? '🗂️ Créer une nouvelle table'
               : `➕ Ajouter une colonne à "${tableName}"`}
@@ -281,8 +295,9 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
           {mode === 'createTable' && (
             <>
               <div className="form-field table-name-field">
-                <label>Nom de la table *</label>
+                <label htmlFor="schema-table-name">Nom de la table *</label>
                 <input
+                  id="schema-table-name"
                   type="text"
                   value={newTableName}
                   onChange={(e) => setNewTableName(e.target.value)}
@@ -337,14 +352,10 @@ export function SchemaEditor({ mode, tableName, tables, onSuccess, onClose }: Pr
             onClick={mode === 'createTable' ? handleCreateTable : handleAddColumn}
             disabled={loading}
           >
-            {loading
-              ? '⏳ En cours...'
-              : mode === 'createTable'
-                ? '✓ Créer la table'
-                : '✓ Ajouter la colonne'}
+            {getSaveButtonText(loading, mode)}
           </button>
         </footer>
       </div>
-    </div>
+    </dialog>
   );
 }

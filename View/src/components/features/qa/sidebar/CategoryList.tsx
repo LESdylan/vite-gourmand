@@ -19,7 +19,7 @@ export function CategoryList({
   activeCategory,
   collapsed,
   onSelect,
-}: CategoryListProps) {
+}: Readonly<CategoryListProps>) {
   // Group categories by their group property
   const mainCategories = categories.filter((c) => c.group === 'main');
   const utilityCategories = categories.filter((c) => c.group === 'utility');

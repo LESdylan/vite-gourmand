@@ -8,7 +8,7 @@ interface Props {
   lines: string[];
 }
 
-export function ShellOutput({ lines }: Props) {
+export function ShellOutput({ lines }: Readonly<Props>) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -17,8 +17,8 @@ export function ShellOutput({ lines }: Props) {
 
   return (
     <div className="shell-output" ref={ref}>
-      {lines.map((line, i) => (
-        <pre key={i}>{line}</pre>
+      {lines.map((line) => (
+        <pre key={line}>{line}</pre>
       ))}
     </div>
   );

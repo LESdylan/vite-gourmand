@@ -11,7 +11,7 @@ interface Props {
   onSelect: (table: string) => void;
 }
 
-export function TableSelector({ tables, active, onSelect }: Props) {
+export function TableSelector({ tables, active, onSelect }: Readonly<Props>) {
   return (
     <div className="table-selector">
       <label htmlFor="table-select">Table:</label>

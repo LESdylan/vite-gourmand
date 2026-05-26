@@ -19,7 +19,7 @@ interface Settings {
   notifications: boolean;
 }
 
-export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+export function SettingsModal({ isOpen, onClose }: Readonly<SettingsModalProps>) {
   const [settings, setSettings] = useState<Settings>({
     autoRefresh: false,
     refreshInterval: 30,
@@ -41,10 +41,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
 
   return (
-    <div className="settings-overlay" onClick={onClose}>
-      <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+    <dialog className="settings-overlay" onCancel={onClose} aria-labelledby="settings-modal-title" open>
+      <div className="settings-modal">
         <header className="settings-header">
-          <h2>⚙️ Paramètres</h2>
+          <h2 id="settings-modal-title">⚙️ Paramètres</h2>
           <button className="settings-close" onClick={onClose}>
             ×
           </button>
@@ -128,6 +128,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </button>
         </footer>
       </div>
-    </div>
+    </dialog>
   );
 }

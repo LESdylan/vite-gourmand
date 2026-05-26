@@ -6,6 +6,9 @@
 .confirm-dialog-overlay {
   position: fixed;
   inset: 0;
+  border: 0;
+  color: inherit;
+  margin: 0;
   background: var(--color-bg-overlay);
   display: flex;
   align-items: center;

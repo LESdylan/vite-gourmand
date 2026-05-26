@@ -75,13 +75,13 @@ function DevBoardInner() {
   // Keyboard shortcut: Ctrl+` to open terminal (desktop only, dev view only)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === '`' && window.innerWidth > 768 && currentView === 'dev') {
+      if (e.ctrlKey && e.key === '`' && globalThis.innerWidth > 768 && currentView === 'dev') {
         e.preventDefault();
         setIsShellOpen((prev) => !prev);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    globalThis.addEventListener('keydown', handleKeyDown);
+    return () => globalThis.removeEventListener('keydown', handleKeyDown);
   }, [currentView]);
 
   return (

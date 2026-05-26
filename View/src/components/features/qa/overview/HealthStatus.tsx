@@ -30,7 +30,7 @@ const statusConfig = {
   },
 };
 
-export function HealthStatus({ status, passRate, testsRunning }: HealthStatusProps) {
+export function HealthStatus({ status, passRate, testsRunning }: Readonly<HealthStatusProps>) {
   const config = statusConfig[status];
 
   return (

@@ -107,7 +107,7 @@ export function ClientProfile() {
     fetchProfile();
   }, [fetchProfile]);
 
-  async function handleSave(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSave(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setSaving(true);
     setError('');
@@ -155,28 +155,13 @@ export function ClientProfile() {
     );
   }
 
-  const displayName =
-    profile?.firstName || profile?.lastName
-      ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
-      : user?.name || 'Client';
-
-  const memberSince = profile?.createdAt
-    ? new Date(profile.createdAt).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
-    : null;
-
-  const lastLogin = profile?.lastLoginAt
-    ? new Date(profile.lastLoginAt).toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : null;
+  const displayName = getDisplayName(profile, user?.name);
+  const memberSince = formatProfileDate(profile?.createdAt, 'long');
+  const lastLogin = formatProfileDate(profile?.lastLoginAt, 'datetime');
+  const activeStatus = getBooleanDisplay(profile?.isActive, '✅', '❌', 'Actif', 'Inactif');
+  const emailStatus = getBooleanDisplay(profile?.isEmailVerified, '✅', '⏳', 'Vérifié', 'Non vérifié');
+  const gdprStatus = getBooleanDisplay(profile?.gdprConsent, '✅', '❌', 'Accepté', 'Non accepté');
+  const marketingStatus = getBooleanDisplay(profile?.marketingConsent, '✅', '❌', 'Activé', 'Désactivé');
 
   return (
     <div className="client-widget">
@@ -200,7 +185,7 @@ export function ClientProfile() {
               )}
               {profile?.role && (
                 <span className="profile-role-badge">
-                  {profile.role === 'customer' ? '👤 Client' : profile.role}
+                  {formatProfileRole(profile.role)}
                 </span>
               )}
             </div>
@@ -413,22 +398,14 @@ export function ClientProfile() {
                     <span className="profile-meta-card-value">{lastLogin || '—'}</span>
                   </div>
                   <div className="profile-meta-card">
-                    <span className="profile-meta-card-icon">
-                      {profile?.isActive ? '✅' : '❌'}
-                    </span>
+                    <span className="profile-meta-card-icon">{activeStatus.icon}</span>
                     <span className="profile-meta-card-label">Statut</span>
-                    <span className="profile-meta-card-value">
-                      {profile?.isActive ? 'Actif' : 'Inactif'}
-                    </span>
+                    <span className="profile-meta-card-value">{activeStatus.label}</span>
                   </div>
                   <div className="profile-meta-card">
-                    <span className="profile-meta-card-icon">
-                      {profile?.isEmailVerified ? '✅' : '⏳'}
-                    </span>
+                    <span className="profile-meta-card-icon">{emailStatus.icon}</span>
                     <span className="profile-meta-card-label">Email vérifié</span>
-                    <span className="profile-meta-card-value">
-                      {profile?.isEmailVerified ? 'Vérifié' : 'Non vérifié'}
-                    </span>
+                    <span className="profile-meta-card-value">{emailStatus.label}</span>
                   </div>
                   <div className="profile-meta-card">
                     <span className="profile-meta-card-icon">🔖</span>
@@ -506,9 +483,9 @@ export function ClientProfile() {
                   </span>
                 </div>
                 <span
-                  className={`profile-consent-badge ${profile?.gdprConsent ? 'profile-consent-badge--yes' : 'profile-consent-badge--no'}`}
+                  className={`profile-consent-badge ${gdprStatus.className}`}
                 >
-                  {profile?.gdprConsent ? '✅ Accepté' : '❌ Non accepté'}
+                  {gdprStatus.icon} {gdprStatus.label}
                 </span>
               </div>
               <div className="profile-consent-item">
@@ -519,9 +496,9 @@ export function ClientProfile() {
                   </span>
                 </div>
                 <span
-                  className={`profile-consent-badge ${profile?.marketingConsent ? 'profile-consent-badge--yes' : 'profile-consent-badge--no'}`}
+                  className={`profile-consent-badge ${marketingStatus.className}`}
                 >
-                  {profile?.marketingConsent ? '✅ Activé' : '❌ Désactivé'}
+                  {marketingStatus.icon} {marketingStatus.label}
                 </span>
               </div>
             </div>
@@ -576,11 +553,11 @@ function ProfileField({
   icon,
   label,
   value,
-}: {
+}: Readonly<{
   icon: string;
   label: string;
   value?: string | null;
-}) {
+}>) {
   return (
     <div className="profile-field-card">
       <span className="profile-field-icon">{icon}</span>
@@ -605,6 +582,38 @@ function getInitials(first?: string | null, last?: string | null, name?: string)
       .toUpperCase()
       .slice(0, 2);
   return '👤';
+}
+
+function getDisplayName(profile: UserProfile | null, fallbackName?: string): string {
+  const profileName = `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim();
+  if (profileName) return profileName;
+  return fallbackName || 'Client';
+}
+
+function formatProfileDate(value: string | null | undefined, format: 'long' | 'datetime'): string | null {
+  if (!value) return null;
+  const options: Intl.DateTimeFormatOptions = format === 'long'
+    ? { day: 'numeric', month: 'long', year: 'numeric' }
+    : { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+  return new Date(value).toLocaleDateString('fr-FR', options);
+}
+
+function formatProfileRole(role: string): string {
+  if (role === 'customer') return '👤 Client';
+  return role;
+}
+
+function getBooleanDisplay(
+  value: boolean | null | undefined,
+  yesIcon: string,
+  noIcon: string,
+  yesLabel: string,
+  noLabel: string,
+) {
+  if (value) {
+    return { icon: yesIcon, label: yesLabel, className: 'profile-consent-badge--yes' };
+  }
+  return { icon: noIcon, label: noLabel, className: 'profile-consent-badge--no' };
 }
 
 function formatLanguage(lang?: string | null): string {

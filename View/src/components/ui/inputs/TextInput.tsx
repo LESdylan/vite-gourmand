@@ -24,7 +24,7 @@ export function TextInput({
   required = false,
   error,
   size = 'md',
-}: TextInputProps) {
+}: Readonly<TextInputProps>) {
   const inputClasses = buildInputClasses(size, error);
 
   return (
@@ -58,11 +58,11 @@ function InputLabel({
   htmlFor,
   required,
   label,
-}: {
+}: Readonly<{
   htmlFor: string;
   required: boolean;
   label: string;
-}) {
+}>) {
   return (
     <label htmlFor={htmlFor} className="input-label">
       {label}
@@ -71,7 +71,7 @@ function InputLabel({
   );
 }
 
-function InputError({ id, message }: { id: string; message: string }) {
+function InputError({ id, message }: Readonly<{ id: string; message: string }>) {
   return (
     <span id={id} className="input-error" role="alert">
       {message}

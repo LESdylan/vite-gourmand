@@ -71,7 +71,7 @@ export function useActivityData(): UseActivityDataReturn {
     setError(null);
 
     try {
-      // TODO: Replace with real API call when backend endpoint exists
+      // Replace with real API call when the backend endpoint exists.
       // const response = await fetch('/api/activity');
       // const data = await response.json();
 

@@ -77,9 +77,7 @@ export class DatabaseService {
   static async getSchema(): Promise<SchemaModel[]> {
     try {
       logDatabaseDebug('[DatabaseService] Fetching schema from', `${BASE}/schema`);
-      const response = (await apiRequest(`${BASE}/schema`)) as
-        | { data?: SchemaModel[] }
-        | SchemaModel[];
+      const response = await apiRequest<{ data?: SchemaModel[] } | SchemaModel[]>(`${BASE}/schema`);
       logDatabaseDebug('[DatabaseService] Raw schema response:', response);
 
       // Handle wrapped response { success, data } or direct array
@@ -100,16 +98,17 @@ export class DatabaseService {
   static async getCounts(): Promise<Record<string, number>> {
     try {
       logDatabaseDebug('[DatabaseService] Fetching counts from', `${BASE}/counts`);
-      const response = (await apiRequest(`${BASE}/counts`)) as
-        | { data?: Record<string, number> }
-        | Record<string, number>;
+      const response = await apiRequest<unknown>(`${BASE}/counts`);
       logDatabaseDebug('[DatabaseService] Raw counts response:', response);
 
       // Handle wrapped response { success, data } or direct object
-      if (response && typeof response === 'object' && 'data' in response) {
-        return (response.data || {}) as Record<string, number>;
+      if (isWrappedCountsResponse(response)) {
+        return response.data ?? {};
       }
-      return response as Record<string, number>;
+      if (isNumberRecord(response)) {
+        return response;
+      }
+      return {};
     } catch (error) {
       logDatabaseWarning('[DatabaseService] Failed to fetch counts:', error);
       return {};
@@ -126,7 +125,7 @@ export class DatabaseService {
     const tables = schema
       .filter((model) => MODEL_TO_ENDPOINT[model.name]) // Only include models with endpoints
       .map((model) => ({
-        name: model.name as TableMeta['name'],
+        name: model.name,
         columns: model.columns
           .filter((col) => !col.isRelation && !col.isList) // Exclude relations
           .map((col) => ({
@@ -163,10 +162,17 @@ export class DatabaseService {
     }
 
     const params = this.buildQueryParams(filters, pagination);
-    const url = `${BASE}/${endpoint}${params ? `?${params}` : ''}`;
+    const queryString = params ? `?${params}` : '';
+    const url = `${BASE}/${endpoint}${queryString}`;
 
     try {
-      const response = (await apiRequest(url)) as unknown;
+      type RecordsResponse =
+        | TableRecord[]
+        | {
+            data?: TableRecord[] | { data?: TableRecord[]; total?: number; meta?: { total?: number } };
+            total?: number;
+          };
+      const response = await apiRequest<RecordsResponse>(url);
       logDatabaseDebug(`[DatabaseService] Response for ${table}:`, response);
 
       // Handle various response formats:
@@ -176,22 +182,20 @@ export class DatabaseService {
       // 4. Direct array: []
 
       if (Array.isArray(response)) {
-        return { data: response as TableRecord[], total: response.length };
+        return { data: response, total: response.length };
       }
 
-      const res = response as { data?: unknown; total?: number };
-
       // Check if data is the inner paginated object
-      if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
-        const inner = res.data as { data?: TableRecord[]; total?: number; meta?: { total?: number } };
+      if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
+        const inner = response.data;
         if (inner.data) {
           return { data: inner.data, total: inner.total || inner.meta?.total || inner.data.length };
         }
       }
 
       // Check if data is an array directly
-      if (Array.isArray(res.data)) {
-        return { data: res.data as TableRecord[], total: res.total || res.data.length };
+      if (Array.isArray(response.data)) {
+        return { data: response.data, total: response.total || response.data.length };
       }
 
       return { data: [], total: 0 };
@@ -205,20 +209,20 @@ export class DatabaseService {
   static async create(table: string, data: Partial<TableRecord>): Promise<TableRecord> {
     const endpoint = MODEL_TO_ENDPOINT[table];
     if (!endpoint) throw new Error(`No endpoint for table: ${table}`);
-    return apiRequest(`${BASE}/${endpoint}`, {
+    return apiRequest<TableRecord>(`${BASE}/${endpoint}`, {
       method: 'POST',
       body: data,
-    }) as Promise<TableRecord>;
+    });
   }
 
   /** Update an existing record */
   static async update(table: string, key: string, data: Partial<TableRecord>): Promise<TableRecord> {
     const endpoint = MODEL_TO_ENDPOINT[table];
     if (!endpoint) throw new Error(`No endpoint for table: ${table}`);
-    return apiRequest(`${BASE}/${endpoint}/${key}`, {
+    return apiRequest<TableRecord>(`${BASE}/${endpoint}/${key}`, {
       method: 'PUT',
       body: data,
-    }) as Promise<TableRecord>;
+    });
   }
 
   /** Delete a record */
@@ -265,10 +269,10 @@ export class DatabaseService {
   ): Promise<{ success: boolean; message: string }> {
     try {
       logDatabaseDebug('[DatabaseService] Creating table:', tableName, columns);
-      const response = (await apiRequest(`${BASE}/schema/table`, {
+      const response = await apiRequest<{ success: boolean; message: string }>(`${BASE}/schema/table`, {
         method: 'POST',
         body: { tableName, columns },
-      })) as { success: boolean; message: string };
+      });
       logDatabaseDebug('[DatabaseService] Create table response:', response);
       return response;
     } catch (error) {
@@ -291,10 +295,10 @@ export class DatabaseService {
   ): Promise<{ success: boolean; message: string }> {
     try {
       logDatabaseDebug('[DatabaseService] Adding column to', tableName, ':', column);
-      const response = (await apiRequest(`${BASE}/schema/column`, {
+      const response = await apiRequest<{ success: boolean; message: string }>(`${BASE}/schema/column`, {
         method: 'POST',
         body: { tableName, column },
-      })) as { success: boolean; message: string };
+      });
       logDatabaseDebug('[DatabaseService] Add column response:', response);
       return response;
     } catch (error) {
@@ -306,7 +310,7 @@ export class DatabaseService {
   /** Get all tables from PostgreSQL (including dynamically created) */
   static async getAllTables(): Promise<string[]> {
     try {
-      const response = (await apiRequest(`${BASE}/schema/tables`)) as string[] | { data: string[] };
+      const response = await apiRequest<string[] | { data: string[] }>(`${BASE}/schema/tables`);
       if (Array.isArray(response)) {
         return response;
       }
@@ -341,11 +345,13 @@ export class DatabaseService {
       }>;
     }>;
     try {
-      const response = await apiRequest(`${BASE}/schema/full`);
+      const response = await apiRequest<FullSchemaResult | { data?: FullSchemaResult }>(
+        `${BASE}/schema/full`,
+      );
       if (Array.isArray(response)) {
-        return response as FullSchemaResult;
+        return response;
       }
-      return (response as { data?: FullSchemaResult }).data || [];
+      return response.data || [];
     } catch (error) {
       logDatabaseWarning('[DatabaseService] Failed to get full schema:', error);
       return [];
@@ -368,14 +374,28 @@ export class DatabaseService {
       referencedColumn: string;
     }>;
     try {
-      const response = await apiRequest(`${BASE}/schema/foreign-keys`);
+      const response = await apiRequest<ForeignKeyResult | { data?: ForeignKeyResult }>(
+        `${BASE}/schema/foreign-keys`,
+      );
       if (Array.isArray(response)) {
-        return response as ForeignKeyResult;
+        return response;
       }
-      return (response as { data?: ForeignKeyResult }).data || [];
+      return response.data || [];
     } catch (error) {
       logDatabaseWarning('[DatabaseService] Failed to get foreign keys:', error);
       return [];
     }
   }
+}
+
+function isWrappedCountsResponse(value: unknown): value is { data?: Record<string, number> } {
+  return typeof value === 'object' && value !== null && 'data' in value && isNumberRecord(value.data);
+}
+
+function isNumberRecord(value: unknown): value is Record<string, number> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Object.values(value).every((entry) => typeof entry === 'number')
+  );
 }

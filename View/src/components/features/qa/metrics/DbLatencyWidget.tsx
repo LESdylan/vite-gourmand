@@ -11,7 +11,7 @@ interface DbLatencyWidgetProps {
   changePercent?: number;
 }
 
-export function DbLatencyWidget({ avgMs, trend, changePercent }: DbLatencyWidgetProps) {
+export function DbLatencyWidget({ avgMs, trend, changePercent }: Readonly<DbLatencyWidgetProps>) {
   return (
     <MetricWidget label="DB Latency" value={avgMs} unit="ms" trend={trend} change={changePercent} />
   );

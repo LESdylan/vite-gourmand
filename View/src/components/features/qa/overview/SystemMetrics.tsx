@@ -13,7 +13,7 @@ interface SystemMetricsProps {
   lastRun: Date | null;
 }
 
-export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: SystemMetricsProps) {
+export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: Readonly<SystemMetricsProps>) {
   const formatTime = (date: Date | null) => {
     if (!date) return 'Never';
     return date.toLocaleTimeString('fr-FR', {
@@ -35,15 +35,14 @@ export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: Sys
       label: 'Reliability',
       value: `${passRate < 0 ? '--' : passRate}`,
       unit: '%',
-      status:
-        passRate < 0 ? 'good' : passRate >= 95 ? 'good' : passRate >= 80 ? 'warning' : 'critical',
+      status: getReliabilityStatus(passRate),
       Icon: TargetIcon,
     },
     {
       label: 'Performance',
       value: `${avgDuration}`,
       unit: 'ms avg',
-      status: avgDuration < 100 ? 'good' : avgDuration < 300 ? 'warning' : 'critical',
+      status: getPerformanceStatus(avgDuration),
       Icon: PerformanceIcon,
     },
     {
@@ -80,4 +79,17 @@ export function SystemMetrics({ testCount, passRate, avgDuration, lastRun }: Sys
       </div>
     </div>
   );
+}
+
+function getReliabilityStatus(passRate: number): 'good' | 'warning' | 'critical' {
+  if (passRate < 0) return 'good';
+  if (passRate >= 95) return 'good';
+  if (passRate >= 80) return 'warning';
+  return 'critical';
+}
+
+function getPerformanceStatus(avgDuration: number): 'good' | 'warning' | 'critical' {
+  if (avgDuration < 100) return 'good';
+  if (avgDuration < 300) return 'warning';
+  return 'critical';
 }

@@ -37,7 +37,7 @@ export function Header({
   categories = [],
   activeCategory = 'overview',
   onCategoryChange,
-}: HeaderProps) {
+}: Readonly<HeaderProps>) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { currentView } = useRoleView();
   const isClient = currentView === 'client';
@@ -99,7 +99,7 @@ export function Header({
   );
 }
 
-function Brand({ isClient }: { isClient?: boolean }) {
+function Brand({ isClient }: Readonly<{ isClient?: boolean }>) {
   return (
     <div className="header-brand">
       <div className="header-logo">

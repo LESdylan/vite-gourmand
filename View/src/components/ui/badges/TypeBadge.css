@@ -47,13 +47,13 @@
 }
 
 .type-badge-database {
-  background: var(--color-warning-50, var(--color-bg-secondary)beb);
+  background: var(--color-warning-50, #fffbeb);
   color: var(--color-warning-700, var(--color-amber-700));
   border: 1px solid var(--color-warning-200, var(--color-amber-200));
 }
 
 .type-badge-security {
-  background: var(--color-danger-50, var(--color-bg-secondary)1f2);
+  background: var(--color-danger-50, #fff1f2);
   color: var(--color-danger-700, var(--color-danger-700));
   border: 1px solid var(--color-danger-200, var(--color-rose-200));
 }

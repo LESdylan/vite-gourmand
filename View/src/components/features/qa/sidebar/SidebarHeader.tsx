@@ -10,7 +10,7 @@ interface SidebarHeaderProps {
   onToggle?: () => void;
 }
 
-export function SidebarHeader({ collapsed = false, onToggle }: SidebarHeaderProps) {
+export function SidebarHeader({ collapsed = false, onToggle }: Readonly<SidebarHeaderProps>) {
   return (
     <div className="sidebar-header">
       <Logo collapsed={collapsed} />
@@ -19,7 +19,7 @@ export function SidebarHeader({ collapsed = false, onToggle }: SidebarHeaderProp
   );
 }
 
-function Logo({ collapsed }: { collapsed: boolean }) {
+function Logo({ collapsed }: Readonly<{ collapsed: boolean }>) {
   return (
     <div className="sidebar-logo">
       <span className="sidebar-logo-icon">🧪</span>
@@ -28,7 +28,7 @@ function Logo({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function CollapseToggle({ collapsed, onClick }: { collapsed: boolean; onClick: () => void }) {
+function CollapseToggle({ collapsed, onClick }: Readonly<{ collapsed: boolean; onClick: () => void }>) {
   return (
     <button
       type="button"

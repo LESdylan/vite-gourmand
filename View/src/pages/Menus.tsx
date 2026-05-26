@@ -43,6 +43,8 @@ import {
 } from '../components/ui/select';
 import { useMenus } from '../services/useMenus';
 import type { Menu, MenuImage, Dish } from '../services/menus';
+
+const MENU_LOADING_SKELETONS = ['menu-skeleton-1', 'menu-skeleton-2', 'menu-skeleton-3', 'menu-skeleton-4', 'menu-skeleton-5', 'menu-skeleton-6'] as const;
 import LazyImage from '../components/ui/LazyImage';
 import { useToast } from '../contexts/ToastContext';
 import type { Page } from './Home';
@@ -120,11 +122,11 @@ function InlineGallery({
   images,
   alt,
   priority = false,
-}: {
+}: Readonly<{
   images: MenuImage[];
   alt: string;
   priority?: boolean;
-}) {
+}>) {
   const [idx, setIdx] = useState(0);
   const srcs =
     images.length > 0
@@ -159,9 +161,9 @@ function InlineGallery({
         <>
           {/* dots */}
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-            {srcs.map((_, i) => (
+            {srcs.map((src, i) => (
               <button
-                key={i}
+                key={`${src.id}-${src.image_url}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setIdx(i);
@@ -205,7 +207,7 @@ function InlineGallery({
 /* ══════════════════════════════════════════════════════════
    Full Image Gallery (in detail modal)
    ══════════════════════════════════════════════════════════ */
-function FullGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
+function FullGallery({ images, alt }: Readonly<{ images: MenuImage[]; alt: string }>) {
   const [idx, setIdx] = useState(0);
   const srcs =
     images.length > 0
@@ -248,9 +250,9 @@ function FullGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
             <ChevronRight className="h-5 w-5 text-[#1A1A1A]" />
           </button>
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {srcs.map((_, i) => (
+            {srcs.map((src, i) => (
               <button
-                key={i}
+                key={`${src.id}-${src.image_url}`}
                 onClick={() => setIdx(i)}
                 className={`w-2 h-2 rounded-full transition-all ${i === idx ? 'bg-white scale-125' : 'bg-white/50'}`}
                 aria-label={`Image ${i + 1}`}
@@ -270,7 +272,7 @@ function FullGallery({ images, alt }: { images: MenuImage[]; alt: string }) {
 /* ══════════════════════════════════════════════════════════
    Dish Item (used inside detail modal) — refined design
    ══════════════════════════════════════════════════════════ */
-function DishItem({ dish, accentColor }: { dish: Dish; accentColor: string }) {
+function DishItem({ dish, accentColor }: Readonly<{ dish: Dish; accentColor: string }>) {
   const allergens = dish.DishAllergen?.map((da) => da.Allergen?.name).filter(Boolean) || [];
   return (
     <div className="flex items-start gap-4 py-3 px-4 rounded-xl bg-white border border-[#1A1A1A]/5 hover:border-[#D4AF37]/30 hover:shadow-sm transition-all group/dish">
@@ -324,12 +326,11 @@ function MenuDetailModal({
   menu,
   onClose,
   onOrder,
-}: {
+}: Readonly<{
   menu: Menu;
   onClose: () => void;
   onOrder: (menu: Menu) => void;
-}) {
-  const backdropRef = useRef<HTMLDivElement>(null);
+}>) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
@@ -346,10 +347,10 @@ function MenuDetailModal({
 
   // Check for mobile on mount and resize
   useEffect(() => {
-    const check = () => setIsFullscreen(window.innerWidth < 640);
+    const check = () => setIsFullscreen(globalThis.innerWidth < 640);
     check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    globalThis.addEventListener('resize', check);
+    return () => globalThis.removeEventListener('resize', check);
   }, []);
 
   const totalMinPrice = (menu.pricePerPerson * menu.minPersons).toFixed(0);
@@ -357,15 +358,11 @@ function MenuDetailModal({
     menu.dishes.entrees.length + menu.dishes.mains.length + menu.dishes.desserts.length;
 
   return (
-    <div
-      ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
-      onClick={(e) => {
-        if (e.target === backdropRef.current) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      className="fixed inset-0 z-50 m-0 flex max-h-none max-w-none items-end justify-center border-0 bg-black/60 p-0 backdrop-blur-md animate-in fade-in duration-200 sm:items-center"
+      onCancel={onClose}
       aria-label={`Détails du menu ${menu.name}`}
+      open
     >
       <div
         className={`bg-[#FFF8F0] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-4 duration-300
@@ -670,7 +667,7 @@ function MenuDetailModal({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -682,20 +679,17 @@ function MenuCard({
   onDetailClick,
   priority = false,
   showImage = true,
-}: {
+}: Readonly<{
   menu: Menu;
   onDetailClick: (m: Menu) => void;
   priority?: boolean;
   showImage?: boolean;
-}) {
+}>) {
   const isLowStock = menu.stockQuantity > 0 && menu.stockQuantity <= 5;
   const isSoldOut = menu.stockQuantity === 0;
 
   return (
-    <article
-      className="group bg-white rounded-2xl border border-[#1A1A1A]/5 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-[#722F37]/8 hover:-translate-y-0.5 cursor-pointer"
-      onClick={() => onDetailClick(menu)}
-    >
+    <article className="group bg-white rounded-2xl border border-[#1A1A1A]/5 overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-[#722F37]/8 hover:-translate-y-0.5">
       {showImage && (
         <div className="relative">
           <InlineGallery images={menu.images} alt={menu.name} priority={priority} />
@@ -802,11 +796,11 @@ function CategoryNav({
   themes,
   selected,
   onSelect,
-}: {
+}: Readonly<{
   themes: { id: number; name: string }[];
   selected: string;
   onSelect: (t: string) => void;
-}) {
+}>) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -823,10 +817,10 @@ function CategoryNav({
     const el = scrollRef.current;
     if (!el) return;
     el.addEventListener('scroll', checkScroll, { passive: true });
-    window.addEventListener('resize', checkScroll);
+    globalThis.addEventListener('resize', checkScroll);
     return () => {
       el.removeEventListener('scroll', checkScroll);
-      window.removeEventListener('resize', checkScroll);
+      globalThis.removeEventListener('resize', checkScroll);
     };
   }, [checkScroll, themes]);
 
@@ -888,7 +882,7 @@ function CategoryNav({
 /* ══════════════════════════════════════════════════════════
    Main Menus Page
    ══════════════════════════════════════════════════════════ */
-export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProps) {
+export default function MenusPage({ setCurrentPage, onOrderMenu }: Readonly<MenusPageProps>) {
   const { menus, themes, diets, isLoading, error, refetch } = useMenus({ limit: 6 });
   const { addToast } = useToast();
   const showMenuImages = useDesktopMenuImages();
@@ -915,8 +909,8 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
           m.theme.toLowerCase().includes(q),
       );
     }
-    if (priceMax) filtered = filtered.filter((m) => m.pricePerPerson <= parseFloat(priceMax));
-    if (priceMin) filtered = filtered.filter((m) => m.pricePerPerson >= parseFloat(priceMin));
+    if (priceMax) filtered = filtered.filter((m) => m.pricePerPerson <= Number.parseFloat(priceMax));
+    if (priceMin) filtered = filtered.filter((m) => m.pricePerPerson >= Number.parseFloat(priceMin));
     if (selectedTheme) filtered = filtered.filter((m) => m.theme === selectedTheme);
     if (selectedDietary && selectedDietary !== 'all')
       filtered = filtered.filter((m) => m.dietary.includes(selectedDietary));
@@ -1035,7 +1029,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
             <div className="overflow-hidden">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-[#1A1A1A]/5">
                 <div>
-                  <Label htmlFor="fPriceMin" className="text-xs text-[#1A1A1A]/60 mb-1.5 block">
+                  <Label htmlFor="fPriceMin" className="text-xs text-[#5c5c5c] mb-1.5 block">
                     Prix min. (€/pers.)
                   </Label>
                   <Input
@@ -1049,7 +1043,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
                   />
                 </div>
                 <div>
-                  <Label htmlFor="fPriceMax" className="text-xs text-[#1A1A1A]/60 mb-1.5 block">
+                  <Label htmlFor="fPriceMax" className="text-xs text-[#5c5c5c] mb-1.5 block">
                     Prix max. (€/pers.)
                   </Label>
                   <Input
@@ -1063,7 +1057,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
                   />
                 </div>
                 <div>
-                  <Label htmlFor="fDiet" className="text-xs text-[#1A1A1A]/60 mb-1.5 block">
+                  <Label htmlFor="fDiet" className="text-xs text-[#5c5c5c] mb-1.5 block">
                     Régime alimentaire
                   </Label>
                   <Select value={selectedDietary} onValueChange={setSelectedDietary}>
@@ -1083,7 +1077,7 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="fPeople" className="text-xs text-[#1A1A1A]/60 mb-1.5 block">
+                  <Label htmlFor="fPeople" className="text-xs text-[#5c5c5c] mb-1.5 block">
                     Nb personnes max.
                   </Label>
                   <Input
@@ -1111,9 +1105,9 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
         {/* Loading state */}
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 py-6">
-            {Array.from({ length: 6 }).map((_, index) => (
+            {MENU_LOADING_SKELETONS.map((skeletonKey) => (
               <div
-                key={index}
+                key={skeletonKey}
                 className={`${showMenuImages ? 'h-[360px]' : 'min-h-[224px]'} rounded-2xl bg-white border border-[#1A1A1A]/5 shadow-sm overflow-hidden`}
               >
                 {showMenuImages && <div className="h-44 sm:h-48 bg-[#1A1A1A]/5" />}
@@ -1148,8 +1142,8 @@ export default function MenusPage({ setCurrentPage, onOrderMenu }: MenusPageProp
             <div className="flex items-center justify-between mb-5 px-1">
               <p className="text-sm text-[#1A1A1A]/70">
                 <span className="font-bold text-[#1A1A1A]">{filteredMenus.length}</span> menu
-                {filteredMenus.length !== 1 ? 's' : ''} disponible
-                {filteredMenus.length !== 1 ? 's' : ''}
+                {filteredMenus.length === 1 ? '' : 's'} disponible
+                {filteredMenus.length === 1 ? '' : 's'}
               </p>
               {activeFilterCount > 0 && (
                 <p className="text-xs text-[#722F37] flex items-center gap-1">

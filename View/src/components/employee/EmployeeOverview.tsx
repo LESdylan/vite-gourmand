@@ -61,7 +61,7 @@ interface QuickStatProps {
   highlight?: boolean;
 }
 
-function QuickStat({ icon, label, value, highlight }: QuickStatProps) {
+function QuickStat({ icon, label, value, highlight }: Readonly<QuickStatProps>) {
   return (
     <div className={`quick-stat ${highlight ? 'quick-stat--highlight' : ''}`}>
       <div className="quick-stat-icon">{icon}</div>
@@ -78,7 +78,7 @@ interface UrgentOrderProps {
   items: number;
 }
 
-function UrgentOrder({ id, table, time, items }: UrgentOrderProps) {
+function UrgentOrder({ id, table, time, items }: Readonly<UrgentOrderProps>) {
   return (
     <div className="urgent-order">
       <div className="urgent-order-icon">⚡</div>
@@ -101,7 +101,7 @@ interface TaskItemProps {
   priority: 'high' | 'medium' | 'low';
 }
 
-function TaskItem({ label, done, priority }: TaskItemProps) {
+function TaskItem({ label, done, priority }: Readonly<TaskItemProps>) {
   return (
     <div className={`task-item ${done ? 'task-item--done' : ''}`}>
       <div className="task-checkbox">{done ? '✓' : ''}</div>

@@ -3,7 +3,7 @@
  * Allows switching between dev/admin/employee views without routing
  */
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react';
 import type { RoleView } from '../DevBoard/constants';
 
 interface RoleViewContextValue {
@@ -18,16 +18,16 @@ interface RoleViewProviderProps {
   defaultView?: RoleView;
 }
 
-export function RoleViewProvider({ children, defaultView = 'dev' }: RoleViewProviderProps) {
+export function RoleViewProvider({ children, defaultView = 'dev' }: Readonly<RoleViewProviderProps>) {
   const [currentView, setCurrentView] = useState<RoleView>(defaultView);
 
   const setView = useCallback((view: RoleView) => {
     setCurrentView(view);
   }, []);
 
-  return (
-    <RoleViewContext.Provider value={{ currentView, setView }}>{children}</RoleViewContext.Provider>
-  );
+  const value = useMemo(() => ({ currentView, setView }), [currentView, setView]);
+
+  return <RoleViewContext.Provider value={value}>{children}</RoleViewContext.Provider>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

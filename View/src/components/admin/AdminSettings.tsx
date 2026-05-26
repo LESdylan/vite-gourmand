@@ -65,21 +65,23 @@ export function AdminSettings() {
   );
 }
 
-function SettingInput({ label, value, type }: { label: string; value: string; type: string }) {
+function SettingInput({ label, value, type }: Readonly<{ label: string; value: string; type: string }>) {
+  const inputId = `setting-${label.toLowerCase().replaceAll(' ', '-')}`;
+
   return (
     <div className="setting-row">
-      <label className="setting-label">{label}</label>
-      <input className="setting-input" type={type} defaultValue={value} />
+      <label className="setting-label" htmlFor={inputId}>{label}</label>
+      <input id={inputId} className="setting-input" type={type} defaultValue={value} />
     </div>
   );
 }
 
-function SettingToggle({ label, checked }: { label: string; checked: boolean }) {
+function SettingToggle({ label, checked }: Readonly<{ label: string; checked: boolean }>) {
   return (
     <div className="setting-row">
-      <label className="setting-label">{label}</label>
+      <span className="setting-label">{label}</span>
       <label className="toggle">
-        <input type="checkbox" defaultChecked={checked} />
+        <input type="checkbox" defaultChecked={checked} aria-label={label} />
         <span className="toggle-slider"></span>
       </label>
     </div>

@@ -13,7 +13,7 @@ interface GridProps {
   gap?: 'sm' | 'md' | 'lg';
 }
 
-export function Grid({ children, columns = 'auto', gap = 'md' }: GridProps) {
+export function Grid({ children, columns = 'auto', gap = 'md' }: Readonly<GridProps>) {
   const classes = buildClasses(columns, gap);
 
   return <div className={classes}>{children}</div>;

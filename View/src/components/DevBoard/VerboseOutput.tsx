@@ -9,7 +9,7 @@ interface VerboseOutputProps {
   isVisible?: boolean; // kept for compatibility but not used
 }
 
-export function VerboseOutput({ output }: VerboseOutputProps) {
+export function VerboseOutput({ output }: Readonly<VerboseOutputProps>) {
   if (!output) return null;
 
   return (

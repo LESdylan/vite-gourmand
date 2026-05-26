@@ -6,7 +6,7 @@
 import type { ProfileWidgetProps } from '../types';
 import { WidgetCard } from './WidgetCard';
 
-export function SecurityWidget({ profile }: ProfileWidgetProps) {
+export function SecurityWidget({ profile }: Readonly<ProfileWidgetProps>) {
   return (
     <WidgetCard icon="🔒" title="Sécurité & RGPD">
       <div className="up-field-list">
@@ -22,7 +22,7 @@ export function SecurityWidget({ profile }: ProfileWidgetProps) {
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div className="up-field">
       <span className="up-field-label">{label}</span>

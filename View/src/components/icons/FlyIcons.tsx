@@ -9,7 +9,7 @@ interface IconProps {
 }
 
 /** Settings gear icon */
-export function SettingsIcon({ className = '', size = 16 }: IconProps) {
+export function SettingsIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -34,7 +34,7 @@ export function SettingsIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Metrics/Monitoring icon - circles pattern */
-export function MetricsIcon({ className = '', size = 16 }: IconProps) {
+export function MetricsIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -54,7 +54,7 @@ export function MetricsIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Logs/Archive icon */
-export function LogsIcon({ className = '', size = 16 }: IconProps) {
+export function LogsIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -80,7 +80,7 @@ export function LogsIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Dashboard/Overview icon - grid pattern */
-export function OverviewIcon({ className = '', size = 16 }: IconProps) {
+export function OverviewIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -99,7 +99,7 @@ export function OverviewIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Activity/Toggle icon */
-export function ActivityIcon({ className = '', size = 16 }: IconProps) {
+export function ActivityIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -121,7 +121,7 @@ export function ActivityIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Tests/Automation icon - checkmark in box */
-export function TestsIcon({ className = '', size = 16 }: IconProps) {
+export function TestsIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -143,7 +143,7 @@ export function TestsIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Scenarios/Play icon - theater masks or clapperboard */
-export function ScenariosIcon({ className = '', size = 16 }: IconProps) {
+export function ScenariosIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -164,7 +164,7 @@ export function ScenariosIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Machine/Compute icon */
-export function MachineIcon({ className = '', size = 16 }: IconProps) {
+export function MachineIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -187,7 +187,7 @@ export function MachineIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** ChevronDown icon for dropdowns */
-export function ChevronDownIcon({ className = '', size = 16 }: IconProps) {
+export function ChevronDownIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -207,7 +207,7 @@ export function ChevronDownIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Collapse/Sidebar toggle icon */
-export function CollapseIcon({ className = '', size = 16 }: IconProps) {
+export function CollapseIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -227,7 +227,7 @@ export function CollapseIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Check/Success icon */
-export function CheckIcon({ className = '', size = 16 }: IconProps) {
+export function CheckIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -247,7 +247,7 @@ export function CheckIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** X/Error/Close icon */
-export function XIcon({ className = '', size = 16 }: IconProps) {
+export function XIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -267,7 +267,7 @@ export function XIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Warning/Alert icon */
-export function WarningIcon({ className = '', size = 16 }: IconProps) {
+export function WarningIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -287,7 +287,7 @@ export function WarningIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Lightning/Bolt icon for auto/fast */
-export function BoltIcon({ className = '', size = 16 }: IconProps) {
+export function BoltIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -303,7 +303,7 @@ export function BoltIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Performance/Lightning bolt */
-export function PerformanceIcon({ className = '', size = 16 }: IconProps) {
+export function PerformanceIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -319,7 +319,7 @@ export function PerformanceIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Clock/Time icon */
-export function ClockIcon({ className = '', size = 16 }: IconProps) {
+export function ClockIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -340,7 +340,7 @@ export function ClockIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Chart/Analytics icon */
-export function ChartIcon({ className = '', size = 16 }: IconProps) {
+export function ChartIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -360,7 +360,7 @@ export function ChartIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Target/Bullseye icon */
-export function TargetIcon({ className = '', size = 16 }: IconProps) {
+export function TargetIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -385,7 +385,7 @@ export function TargetIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Play icon for running tests */
-export function PlayIcon({ className = '', size = 16 }: IconProps) {
+export function PlayIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -401,7 +401,7 @@ export function PlayIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** User/Person icon */
-export function UserIcon({ className = '', size = 16 }: IconProps) {
+export function UserIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -421,7 +421,7 @@ export function UserIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Eye/View icon */
-export function EyeIcon({ className = '', size = 16 }: IconProps) {
+export function EyeIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -446,7 +446,7 @@ export function EyeIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Flask/Test tube icon */
-export function FlaskIcon({ className = '', size = 16 }: IconProps) {
+export function FlaskIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -466,7 +466,7 @@ export function FlaskIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Info circle icon */
-export function InfoIcon({ className = '', size = 16 }: IconProps) {
+export function InfoIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -486,7 +486,7 @@ export function InfoIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Refresh/Sync icon */
-export function RefreshIcon({ className = '', size = 16 }: IconProps) {
+export function RefreshIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -506,7 +506,7 @@ export function RefreshIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Circle icon (for status dots) */
-export function CircleIcon({ className = '', size = 16 }: IconProps) {
+export function CircleIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -522,7 +522,7 @@ export function CircleIcon({ className = '', size = 16 }: IconProps) {
 }
 
 /** Database icon - cylinder */
-export function DatabaseIcon({ className = '', size = 16 }: IconProps) {
+export function DatabaseIcon({ className = '', size = 16 }: Readonly<IconProps>) {
   return (
     <svg
       viewBox="0 0 16 16"

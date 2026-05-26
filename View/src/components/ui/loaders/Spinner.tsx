@@ -10,11 +10,11 @@ interface SpinnerProps {
   label?: string;
 }
 
-export function Spinner({ size = 'md', label = 'Chargement...' }: SpinnerProps) {
+export function Spinner({ size = 'md', label = 'Chargement...' }: Readonly<SpinnerProps>) {
   const classes = buildClasses(size);
 
   return (
-    <div className={classes} role="status" aria-label={label}>
+    <output className={classes} aria-label={label} aria-live="polite">
       <svg className="spinner-svg" viewBox="0 0 24 24" fill="none">
         <circle className="spinner-track" cx="12" cy="12" r="10" strokeWidth="3" />
         <circle
@@ -26,7 +26,7 @@ export function Spinner({ size = 'md', label = 'Chargement...' }: SpinnerProps) 
           strokeLinecap="round"
         />
       </svg>
-    </div>
+    </output>
   );
 }
 

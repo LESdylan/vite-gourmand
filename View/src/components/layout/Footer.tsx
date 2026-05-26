@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChefHat, Clock, Mail, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import { usePublicData } from '../../contexts/PublicDataContext';
 import { subscribeNewsletter } from '../../services/newsletter';
+import { useConsent } from '../../contexts/ConsentContext';
 
 type Page = 'home' | 'menu' | 'contact' | 'legal-mentions' | 'legal-cgv' | 'user-profile';
 
@@ -19,8 +20,9 @@ const FALLBACK_HOURS = [
   { id: 7, day: 'Dimanche', opening: '10:00', closing: '14:00' },
 ];
 
-export default function Footer({ setCurrentPage }: FooterProps) {
+export default function Footer({ setCurrentPage }: Readonly<FooterProps>) {
   const { siteInfo, workingHours } = usePublicData();
+  const { openPreferences } = useConsent();
   const hours = workingHours.length > 0 ? workingHours : FALLBACK_HOURS;
 
   // Newsletter state
@@ -31,10 +33,10 @@ export default function Footer({ setCurrentPage }: FooterProps) {
 
   const handleNavClick = (page: Page) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    globalThis.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!nlEmail.trim()) return;
     setNlLoading(true);
@@ -52,9 +54,6 @@ export default function Footer({ setCurrentPage }: FooterProps) {
     }
   };
 
-  const linkStyle = { color: 'rgba(255,255,255,0.82)' };
-  const mutedStyle = { color: 'rgba(255,255,255,0.68)' };
-
   return (
     <footer className="bg-[#1A1A1A]">
       <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
@@ -67,13 +66,12 @@ export default function Footer({ setCurrentPage }: FooterProps) {
             >
               <ChefHat className="h-5 w-5 text-[#D4AF37]" />
               <span
-                style={{ color: '#ffffff' }}
-                className="font-bold text-sm group-hover:text-[#D4AF37] transition-colors"
+                className="text-white font-bold text-sm group-hover:text-[#D4AF37] transition-colors"
               >
                 Vite&nbsp;&&nbsp;Gourmand
               </span>
             </button>
-            <p style={mutedStyle} className="text-[11px] leading-relaxed">
+            <p className="text-white/70 text-[11px] leading-relaxed">
               Traiteur d'exception pour tous vos événements.
               <br />
               Bordeaux &amp; alentours.
@@ -81,17 +79,17 @@ export default function Footer({ setCurrentPage }: FooterProps) {
             <div className="flex flex-col gap-1">
               <a
                 href={`tel:${siteInfo?.phone || '+33556000000'}`}
-                style={linkStyle}
+                style={{ color: 'rgba(255, 255, 255, 0.85)' }}
                 className="min-h-6 flex items-center hover:!text-white transition-colors"
               >
-                📞 {siteInfo?.phone || '05 56 00 00 00'}
+                <span aria-hidden="true">📞</span>&nbsp;{siteInfo?.phone || '05 56 00 00 00'}
               </a>
               <a
                 href={`mailto:${siteInfo?.email || 'contact@vite-gourmand.fr'}`}
-                style={linkStyle}
+                style={{ color: 'rgba(255, 255, 255, 0.85)' }}
                 className="min-h-6 flex items-center hover:!text-white transition-colors"
               >
-                ✉️ {siteInfo?.email || 'contact@vite-gourmand.fr'}
+                <span aria-hidden="true">✉️</span>&nbsp;{siteInfo?.email || 'contact@vite-gourmand.fr'}
               </a>
             </div>
           </div>
@@ -100,15 +98,15 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Clock className="h-4 w-4 text-[#D4AF37]" />
-              <span style={{ color: '#ffffff' }} className="font-semibold text-[13px]">
+              <span className="text-white font-semibold text-[13px]">
                 Horaires
               </span>
             </div>
             <ul className="space-y-0.5">
               {hours.map(({ day, opening, closing }) => (
                 <li key={day} className="flex justify-between gap-4">
-                  <span style={linkStyle}>{day}</span>
-                  <span style={mutedStyle}>
+                  <span className="text-white/80">{day}</span>
+                  <span className="text-white/70">
                     {opening} – {closing}
                   </span>
                 </li>
@@ -118,7 +116,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
 
           {/* Col 3 — Navigation + Legal */}
           <div>
-            <span style={{ color: '#ffffff' }} className="font-semibold text-[13px] block mb-3">
+            <span className="text-white font-semibold text-[13px] block mb-3">
               Navigation
             </span>
             <ul className="space-y-0 sm:space-y-1.5">
@@ -130,8 +128,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                 <li key={page}>
                   <button
                     onClick={() => handleNavClick(page)}
-                    style={linkStyle}
-                    className="hover:!text-white transition-colors min-h-6 py-2 sm:py-0"
+                    className="text-white/80 hover:text-white transition-colors min-h-6 py-2 sm:py-0"
                   >
                     {label}
                   </button>
@@ -142,17 +139,21 @@ export default function Footer({ setCurrentPage }: FooterProps) {
             <div className="mt-4 pt-3 border-t border-white/10 space-y-0 sm:space-y-1.5">
               <button
                 onClick={() => handleNavClick('legal-mentions')}
-                style={linkStyle}
-                className="hover:!text-white transition-colors block min-h-6 py-2 sm:py-0"
+                className="text-white/80 hover:text-white transition-colors block min-h-6 py-2 sm:py-0"
               >
                 Mentions légales
               </button>
               <button
                 onClick={() => handleNavClick('legal-cgv')}
-                style={linkStyle}
-                className="hover:!text-white transition-colors block min-h-6 py-2 sm:py-0"
+                className="text-white/80 hover:text-white transition-colors block min-h-6 py-2 sm:py-0"
               >
                 Conditions générales de vente
+              </button>
+              <button
+                onClick={openPreferences}
+                className="text-white/80 hover:text-white transition-colors block min-h-6 py-2 sm:py-0"
+              >
+                Gérer mes cookies
               </button>
             </div>
           </div>
@@ -161,11 +162,11 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Mail className="h-4 w-4 text-[#D4AF37]" />
-              <span style={{ color: '#ffffff' }} className="font-semibold text-[13px]">
+              <span className="text-white font-semibold text-[13px]">
                 Newsletter
               </span>
             </div>
-            <p style={mutedStyle} className="text-[11px] leading-relaxed mb-3">
+            <p className="text-white/70 text-[11px] leading-relaxed mb-3">
               Recevez nos menus, promotions et actualités gourmandes directement dans votre boîte
               mail.
             </p>
@@ -177,7 +178,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
                 onChange={(e) => setNlEmail(e.target.value)}
                 placeholder="votre@email.fr"
                 required
-                className="flex-1 min-w-0 bg-white/10 border border-white/10 rounded-md px-3 py-2 text-white text-[12px] placeholder:text-white/30 focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
+                className="flex-1 min-w-0 bg-white/10 border border-white/10 rounded-md px-3 py-2 text-white text-[12px] placeholder:text-white/60 focus:outline-none focus:border-[#D4AF37]/50 transition-colors"
               />
               <button
                 type="submit"
@@ -202,7 +203,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
               </div>
             )}
 
-            <p style={mutedStyle} className="text-[10px] mt-2 leading-relaxed">
+            <p className="text-white/70 text-[10px] mt-2 leading-relaxed">
               En vous inscrivant, vous acceptez de recevoir nos communications. Désinscription
               possible à tout moment.
             </p>
@@ -211,7 +212,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
 
         {/* Copyright */}
         <div className="mt-6 pt-4 border-t border-white/10 text-center">
-          <p style={mutedStyle} className="text-[11px]">
+          <p className="text-white/70 text-[11px]">
             © {new Date().getFullYear()} Vite &amp; Gourmand — Tous droits réservés
           </p>
         </div>

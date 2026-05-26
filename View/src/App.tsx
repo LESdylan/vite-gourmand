@@ -1,6 +1,8 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './contexts/ToastContext';
+import { ConsentProvider } from './contexts/ConsentContext';
+import { CookieBanner } from './components/legal/CookieBanner';
 import './App.css';
 
 // Lazy load components
@@ -54,9 +56,10 @@ function LoadingSpinner() {
 function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
+      <ConsentProvider>
+        <ToastProvider>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
             {/* Public SPA - crawlable public routes with preserved in-app navigation */}
             <Route path="/" element={<PublicSPA />} />
             <Route path="/menus" element={<PublicSPA />} />
@@ -86,9 +89,11 @@ function App() {
             <Route path="/scenario/kanban" element={<KanbanScenario />} />
             <Route path="/scenario/minitalk" element={<MinitalkScenario />} />
             <Route path="/scenario/auth" element={<AuthScenario />} />
-          </Routes>
-        </Suspense>
-      </ToastProvider>
+            </Routes>
+          </Suspense>
+          <CookieBanner />
+        </ToastProvider>
+      </ConsentProvider>
     </BrowserRouter>
   );
 }

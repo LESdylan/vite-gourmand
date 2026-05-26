@@ -32,6 +32,17 @@ type NavbarProps = {
   topOffset?: number;
 };
 
+interface DesktopAuthActionsProps {
+  user: UserType | null;
+  isDemoMode: boolean;
+  solid: boolean;
+  unreadCount: number;
+  notificationLabel: string;
+  onToggleNotifications: () => void;
+  onOpenProfile: () => void;
+  onLogout?: () => void;
+}
+
 export default function Navbar({
   currentPage,
   setCurrentPage,
@@ -39,20 +50,23 @@ export default function Navbar({
   onLogout,
   isDemoMode = false,
   topOffset = 0,
-}: NavbarProps) {
+}: Readonly<NavbarProps>) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const { unreadCount, toggle: toggleNotifications } = useNotifications();
 
   // On non-home pages, always show solid navbar
   const isHome = currentPage === 'home';
-  const solid = hasScrolled || !isHome;
+  const solid = hasScrolled || isHome === false;
+  const notificationLabel = unreadCount > 0
+    ? `Notifications (${unreadCount} non lues)`
+    : 'Notifications';
 
   useEffect(() => {
-    const handleScroll = () => setHasScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    const handleScroll = () => setHasScrolled(globalThis.scrollY > 20);
+    globalThis.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => globalThis.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -75,12 +89,7 @@ export default function Navbar({
   const handleNavClick = (page: Page) => {
     setCurrentPage(page);
     setMobileMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const getRoleLabel = () => {
-    if (!user) return '';
-    return user.role === 'admin' ? 'Admin' : user.role === 'employee' ? 'Employé' : 'Client';
+    globalThis.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -98,7 +107,7 @@ export default function Navbar({
             <button
               onClick={() => handleNavClick('home')}
               className="flex items-center gap-2 group"
-              aria-label="Retourner a l'accueil"
+              aria-label="Retourner à l'accueil"
             >
               <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#722F37] rounded-lg flex items-center justify-center">
                 <ChefHat className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
@@ -120,15 +129,7 @@ export default function Navbar({
                   key={item.page}
                   onClick={() => handleNavClick(item.page)}
                   aria-current={currentPage === item.page ? 'page' : undefined}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    currentPage === item.page
-                      ? solid
-                        ? 'bg-[#722F37]/10 text-[#722F37]'
-                        : 'bg-white/20 text-white'
-                      : solid
-                        ? 'text-[#1A1A1A]/70 hover:text-[#722F37] hover:bg-[#722F37]/5'
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${getDesktopNavItemClass(currentPage === item.page, solid)}`}
                 >
                   {item.label}
                 </button>
@@ -136,68 +137,16 @@ export default function Navbar({
 
               <div className={`w-px h-5 mx-2 ${solid ? 'bg-black/10' : 'bg-white/20'}`} />
 
-              {user ? (
-                <div className="flex items-center gap-2">
-                  {isDemoMode && (
-                    <Badge className="bg-[#722F37] text-white text-[10px] px-2 py-0.5">
-                      {getRoleLabel()}
-                    </Badge>
-                  )}
-                  {(user.role === 'admin' || user.role === 'employee') && (
-                    <button
-                      onClick={() => (window.location.href = '/dashboard')}
-                      className={`text-xs px-2 py-1 rounded ${solid ? 'text-[#722F37] hover:bg-[#722F37]/10' : 'text-white hover:bg-white/10'}`}
-                      aria-label="Ouvrir le dashboard"
-                    >
-                      Dashboard
-                    </button>
-                  )}
-                  {/* Notification bell */}
-                  <button
-                    data-notification-bell
-                    onClick={toggleNotifications}
-                    className={`relative w-9 h-9 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-colors ${
-                      solid
-                        ? 'text-[#1A1A1A]/60 hover:bg-[#722F37]/10 hover:text-[#722F37]'
-                        : 'text-white/70 hover:bg-white/20 hover:text-white'
-                    }`}
-                    aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
-                  >
-                    <Bell className="h-4 w-4" />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 bg-[#722F37] text-white text-[9px] font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 ring-2 ring-white">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => handleNavClick('user-profile')}
-                    className={`w-9 h-9 sm:w-7 sm:h-7 rounded-full flex items-center justify-center ${
-                      solid ? 'bg-[#FFF8F0] text-[#722F37]' : 'bg-white/20 text-white'
-                    }`}
-                    aria-label="Ouvrir mon profil"
-                  >
-                    <UserIcon className="h-3.5 w-3.5" />
-                  </button>
-                  {onLogout && (
-                    <button
-                      onClick={onLogout}
-                      className={`p-2.5 sm:p-1.5 rounded ${solid ? 'text-[#1A1A1A]/40 hover:text-red-600' : 'text-white/60 hover:text-white'}`}
-                      aria-label="Se deconnecter"
-                    >
-                      <LogOut className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <Button
-                  onClick={() => (window.location.href = '/portal')}
-                  size="sm"
-                  className="h-8 px-3 text-xs"
-                >
-                  Connexion
-                </Button>
-              )}
+              <DesktopAuthActions
+                user={user}
+                isDemoMode={isDemoMode}
+                solid={solid}
+                unreadCount={unreadCount}
+                notificationLabel={notificationLabel}
+                onToggleNotifications={toggleNotifications}
+                onOpenProfile={() => handleNavClick('user-profile')}
+                onLogout={onLogout}
+              />
             </div>
 
             {/* Mobile menu button */}
@@ -292,7 +241,7 @@ export default function Navbar({
                 )}
               </div>
             ) : (
-              <Button onClick={() => (window.location.href = '/portal')} className="w-full">
+              <Button onClick={() => (globalThis.location.href = '/portal')} className="w-full">
                 Connexion
               </Button>
             )}
@@ -301,4 +250,98 @@ export default function Navbar({
       )}
     </>
   );
+}
+
+function DesktopAuthActions({
+  user,
+  isDemoMode,
+  solid,
+  unreadCount,
+  notificationLabel,
+  onToggleNotifications,
+  onOpenProfile,
+  onLogout,
+}: Readonly<DesktopAuthActionsProps>) {
+  if (!user) {
+    return (
+      <Button
+        onClick={() => (globalThis.location.href = '/portal')}
+        size="sm"
+        className="h-8 px-3 text-xs"
+      >
+        Connexion
+      </Button>
+    );
+  }
+
+  const canOpenDashboard = user.role === 'admin' || user.role === 'employee';
+  return (
+    <div className="flex items-center gap-2">
+      {isDemoMode && (
+        <Badge className="bg-[#722F37] text-white text-[10px] px-2 py-0.5">
+          {getRoleLabel(user.role)}
+        </Badge>
+      )}
+      {canOpenDashboard && (
+        <button
+          onClick={() => (globalThis.location.href = '/dashboard')}
+          className={`text-xs px-2 py-1 rounded ${solid ? 'text-[#722F37] hover:bg-[#722F37]/10' : 'text-white hover:bg-white/10'}`}
+          aria-label="Ouvrir le dashboard"
+        >
+          Dashboard
+        </button>
+      )}
+      <button
+        data-notification-bell
+        onClick={onToggleNotifications}
+        className={`relative w-9 h-9 sm:w-7 sm:h-7 rounded-full flex items-center justify-center transition-colors ${
+          solid
+            ? 'text-[#1A1A1A]/60 hover:bg-[#722F37]/10 hover:text-[#722F37]'
+            : 'text-white/70 hover:bg-white/20 hover:text-white'
+        }`}
+        aria-label={notificationLabel}
+      >
+        <Bell className="h-4 w-4" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 bg-[#722F37] text-white text-[9px] font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 ring-2 ring-white">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+      <button
+        onClick={onOpenProfile}
+        className={`w-9 h-9 sm:w-7 sm:h-7 rounded-full flex items-center justify-center ${
+          solid ? 'bg-[#FFF8F0] text-[#722F37]' : 'bg-white/20 text-white'
+        }`}
+        aria-label="Ouvrir mon profil"
+      >
+        <UserIcon className="h-3.5 w-3.5" />
+      </button>
+      {onLogout && (
+        <button
+          onClick={onLogout}
+          className={`p-2.5 sm:p-1.5 rounded ${solid ? 'text-[#1A1A1A]/40 hover:text-red-600' : 'text-white/60 hover:text-white'}`}
+          aria-label="Se deconnecter"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function getRoleLabel(role: UserType['role']): string {
+  const labels: Record<UserType['role'], string> = {
+    admin: 'Admin',
+    employee: 'Employé',
+    user: 'Client',
+  };
+  return labels[role];
+}
+
+function getDesktopNavItemClass(isCurrentPage: boolean, solid: boolean): string {
+  if (isCurrentPage && solid) return 'bg-[#722F37]/10 text-[#722F37]';
+  if (isCurrentPage) return 'bg-white/20 text-white';
+  if (solid) return 'text-[#1A1A1A]/70 hover:text-[#722F37] hover:bg-[#722F37]/5';
+  return 'text-white/80 hover:text-white hover:bg-white/10';
 }

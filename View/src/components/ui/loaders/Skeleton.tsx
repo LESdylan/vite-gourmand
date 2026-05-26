@@ -12,7 +12,7 @@ interface SkeletonProps {
   lines?: number;
 }
 
-export function Skeleton({ variant = 'text', width, height, lines = 1 }: SkeletonProps) {
+export function Skeleton({ variant = 'text', width, height, lines = 1 }: Readonly<SkeletonProps>) {
   const style = buildStyle(width, height);
 
   if (variant === 'text' && lines > 1) {
@@ -29,7 +29,7 @@ function buildStyle(width?: string, height?: string): React.CSSProperties {
   };
 }
 
-function SkeletonLines({ count }: { count: number }) {
+function SkeletonLines({ count }: Readonly<{ count: number }>) {
   return (
     <div className="skeleton-lines">
       {Array.from({ length: count }, (_, i) => (

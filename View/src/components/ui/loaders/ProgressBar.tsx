@@ -17,21 +17,19 @@ export function ProgressBar({
   max = 100,
   showLabel = false,
   variant = 'default',
-}: ProgressBarProps) {
+}: Readonly<ProgressBarProps>) {
   const percentage = calculatePercentage(value, max);
   const classes = buildClasses(variant);
 
   return (
     <div className="progress-bar-container">
-      <div
+      <progress
         className={classes}
-        role="progressbar"
-        aria-valuenow={value}
-        aria-valuemin={0}
-        aria-valuemax={max}
+        value={value}
+        max={max}
       >
         <div className="progress-bar-fill" style={{ width: `${percentage}%` }} />
-      </div>
+      </progress>
       {showLabel && <span className="progress-bar-label">{percentage}%</span>}
     </div>
   );

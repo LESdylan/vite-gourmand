@@ -100,6 +100,12 @@ const AI_SCENARIOS = [
   },
 ];
 
+function getScenarioSubjectLabel(titleLower: string): string {
+  if (titleLower === 'sur mesure') return 'un événement sur mesure';
+  if (titleLower === 'entreprise') return "un événement d'entreprise";
+  return `un ${titleLower}`;
+}
+
 /* ── AI Smart Tips by subject ── */
 const SMART_TIPS: Record<string, string[]> = {
   mariage: [
@@ -258,12 +264,7 @@ ${formData.message}
     (scenario: (typeof AI_SCENARIOS)[number]) => {
       setActiveScenario(scenario.title);
       const titleLower = scenario.title.toLowerCase();
-      const subjectLabel =
-        titleLower === 'sur mesure'
-          ? 'un événement sur mesure'
-          : titleLower === 'entreprise'
-            ? "un événement d'entreprise"
-            : `un ${titleLower}`;
+      const subjectLabel = getScenarioSubjectLabel(titleLower);
       setFormData((prev) => ({
         ...prev,
         subject: prev.subject || `Devis pour ${subjectLabel}`,
@@ -276,7 +277,7 @@ ${formData.message}
     [sendAiMessage],
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
@@ -404,7 +405,7 @@ ${formData.message}
             </div>
             <div>
               <h2 className="font-bold text-[#1A1A1A] text-sm">
-                🪄 Assistant IA — Quel est votre événement ?
+                <span aria-hidden="true">🪄</span> Assistant IA — Quel est votre événement ?
               </h2>
               <p className="text-[#1A1A1A]/65 text-[10px]">
                 Cliquez pour démarrer une conversation guidée avec notre IA
@@ -434,7 +435,7 @@ ${formData.message}
                     <Icon className="h-5 w-5" style={{ color: scenario.color }} />
                   </div>
                   <span className="font-bold text-[#1A1A1A] text-xs leading-tight">
-                    {scenario.emoji} {scenario.title}
+                    <span aria-hidden="true">{scenario.emoji}</span> {scenario.title}
                   </span>
                   <span className="text-[9px] text-[#1A1A1A]/65 leading-tight hidden sm:block">
                     {scenario.subtitle}
@@ -729,7 +730,7 @@ ${formData.message}
                     {showSmartTips && (
                       <div className="mt-2 flex items-start gap-2 p-2.5 bg-gradient-to-r from-[#D4AF37]/5 to-transparent border border-[#D4AF37]/10 rounded-lg animate-in slide-in-from-bottom-1 duration-200">
                         <Lightbulb className="h-3.5 w-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-[#1A1A1A]/60 leading-relaxed transition-opacity duration-300">
+                        <p className="text-[11px] text-[#5c5c5c] leading-relaxed transition-opacity duration-300">
                           {SMART_TIPS[getSmartTipsKey()][currentTipIndex]}
                         </p>
                       </div>
@@ -737,7 +738,7 @@ ${formData.message}
 
                     <div className="flex items-center justify-between mt-1.5">
                       <p className="text-[10px] text-[#1A1A1A]/65">
-                        💡 Soyez aussi précis que possible pour un devis plus rapide
+                        <span aria-hidden="true">💡</span> Soyez aussi précis que possible pour un devis plus rapide
                       </p>
                       <p className="text-[10px] text-[#1A1A1A]/65">
                         {formData.message.length} car.
@@ -884,7 +885,7 @@ ${formData.message}
                       ].map((row) => (
                         <div
                           key={row.day}
-                          className={`flex justify-between items-center py-2.5 px-3 rounded-lg transition-colors ${!row.open ? 'bg-red-50/70' : 'hover:bg-white/60'}`}
+                          className={`flex justify-between items-center py-2.5 px-3 rounded-lg transition-colors ${row.open ? 'hover:bg-white/60' : 'bg-red-50/70'}`}
                         >
                           <div className="flex items-center gap-2">
                             <div
@@ -920,7 +921,7 @@ ${formData.message}
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#556B2F] border-2 border-[#722F37] animate-pulse" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm">🪄 Concierge Événementiel IA</h3>
+                      <h3 className="font-bold text-sm"><span aria-hidden="true">🪄</span> Concierge Événementiel IA</h3>
                       <p className="text-white/75 text-[11px] mt-0.5">
                         Planifiez • Inspirez-vous • Demandez un devis
                       </p>
@@ -1143,19 +1144,19 @@ ${formData.message}
                   <ul className="space-y-1 text-[10px] text-[#1A1A1A]/65 leading-relaxed">
                     <li className="flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
-                      Cliquez un type d'événement ci-dessus
+                      {' '}Cliquez un type d'événement ci-dessus
                     </li>
                     <li className="flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
-                      L'IA vous guide pas à pas
+                      {' '}L'IA vous guide pas à pas
                     </li>
                     <li className="flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
-                      Copiez la proposition dans le formulaire
+                      {' '}Copiez la proposition dans le formulaire
                     </li>
                     <li className="flex items-center gap-1.5">
                       <span className="w-1 h-1 rounded-full bg-[#D4AF37]" />
-                      Votre message est amélioré ✨
+                      {' '}Votre message est amélioré ✨
                     </li>
                   </ul>
                 </div>

@@ -18,7 +18,7 @@ export function ProtectedRoute({
   children,
   allowedRoles,
   requiredPermission,
-}: ProtectedRouteProps) {
+}: Readonly<ProtectedRouteProps>) {
   const { isAuthenticated, isLoading, user } = usePortalAuth();
 
   if (isLoading) {

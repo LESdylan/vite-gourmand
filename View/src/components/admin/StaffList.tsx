@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react';
 import { UserProfile } from '../ui/UserProfile';
 import { searchUsers, canViewUser } from '../ui/Search';
 import type { SearchResult } from '../ui/Search';
-import type { UserVisibility } from '../ui/Search/types';
 import { usePortalAuth } from '../../portal_dashboard/PortalAuthContext';
 import './AdminWidgets.css';
 
@@ -34,11 +33,9 @@ export function StaffList() {
 
         // Filter based on visibility rules
         const viewerRole = currentUser?.role;
-        const visibleStaff = results.filter((user) =>
-          canViewUser(viewerRole as UserVisibility, user.role as UserVisibility),
-        );
+        const visibleStaff = results.filter((user) => canViewUser(viewerRole, user.role));
 
-        setStaff(visibleStaff as StaffMember[]);
+        setStaff(visibleStaff);
       } catch (error) {
         console.error('Failed to load staff:', error);
       } finally {
@@ -53,6 +50,8 @@ export function StaffList() {
     if (filter === 'all') return true;
     return member.role === filter;
   });
+  const showEmptyState = loading === false && filteredStaff.length === 0;
+  const showStaffTable = loading === false && filteredStaff.length > 0;
 
   const getInitials = (name: string) => {
     return name
@@ -83,6 +82,15 @@ export function StaffList() {
       default:
         return 'inline-status--info';
     }
+  };
+
+  const getStatusLabel = (status?: StaffMember['status']) => {
+    const labels: Record<NonNullable<StaffMember['status']>, string> = {
+      active: 'Actif',
+      away: 'Absent',
+      inactive: 'Inactif',
+    };
+    return status ? labels[status] : 'Inactif';
   };
 
   return (
@@ -127,17 +135,19 @@ export function StaffList() {
           </div>
         </div>
 
-        {loading ? (
+        {loading && (
           <div className="fly-table-empty">
             <div className="fly-table-empty-icon">⏳</div>
             <p className="fly-table-empty-text">Chargement...</p>
           </div>
-        ) : filteredStaff.length === 0 ? (
+        )}
+        {showEmptyState && (
           <div className="fly-table-empty">
             <div className="fly-table-empty-icon">👥</div>
             <p className="fly-table-empty-text">Aucun membre trouvé</p>
           </div>
-        ) : (
+        )}
+        {showStaffTable && (
           <>
             {/* Table Header */}
             <div
@@ -155,11 +165,7 @@ export function StaffList() {
             {/* Table Body */}
             <div className="fly-table-body">
               {filteredStaff.map((member) => (
-                <div
-                  key={member.id}
-                  className="user-list-row"
-                  onClick={() => setSelectedUserId(member.id)}
-                >
+                <div key={member.id} className="user-list-row">
                   <div className="user-list-avatar">
                     {member.avatar ? (
                       <img src={member.avatar} alt={member.name} />
@@ -186,11 +192,7 @@ export function StaffList() {
                   <div>
                     <span className={`inline-status ${getStatusColor(member.status)}`}>
                       <span className="inline-status-dot"></span>
-                      {member.status === 'active'
-                        ? 'Actif'
-                        : member.status === 'away'
-                          ? 'Absent'
-                          : 'Inactif'}
+                      {getStatusLabel(member.status)}
                     </span>
                   </div>
 

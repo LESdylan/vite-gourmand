@@ -24,7 +24,7 @@ export function IconButton({
   variant = 'ghost',
   size = 'md',
   disabled = false,
-}: IconButtonProps) {
+}: Readonly<IconButtonProps>) {
   const classes = buildClasses(variant, size);
 
   return (

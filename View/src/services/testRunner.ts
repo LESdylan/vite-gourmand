@@ -162,31 +162,39 @@ export async function getTestStatus(): Promise<{ running: boolean; currentTest?:
 export function parseJestOutput(output: string): TestResult[] {
   const results: TestResult[] = [];
   const lines = output.split('\n');
+  const suitePattern = /^\s*(PASS|FAIL)\s+(.+\.spec\.ts)/;
+  const testPattern = /^\s*([✓✕○])\s+(.+?)\s*(?:\((\d+)\s*ms\))?$/;
 
   let currentSuite = '';
 
   for (const line of lines) {
     // Match test suite
-    const suiteMatch = line.match(/^\s*(PASS|FAIL)\s+(.+\.spec\.ts)/);
+    const suiteMatch = suitePattern.exec(line);
     if (suiteMatch) {
       currentSuite = suiteMatch[2];
     }
 
     // Match individual test
-    const testMatch = line.match(/^\s*(✓|✕|○)\s+(.+?)\s*(?:\((\d+)\s*ms\))?$/);
+    const testMatch = testPattern.exec(line);
     if (testMatch) {
       const [, icon, name, duration] = testMatch;
       results.push({
         id: `${currentSuite}-${name}`.replace(/\s+/g, '-').toLowerCase(),
         name,
         suite: currentSuite,
-        status: icon === '✓' ? 'passed' : icon === '✕' ? 'failed' : 'idle',
+        status: getParsedTestStatus(icon),
         duration: duration ? Number.parseInt(duration, 10) : undefined,
       });
     }
   }
 
   return results;
+}
+
+function getParsedTestStatus(icon: string): TestResult['status'] {
+  if (icon === '✓') return 'passed';
+  if (icon === '✕') return 'failed';
+  return 'idle';
 }
 
 /**

@@ -3,7 +3,7 @@
  * Provides authentication state across the dashboard
  */
 
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
 import * as authService from '../services/auth';
 import type { RegisterData } from '../services/auth';
 import { getRememberMe, saveRememberMe, clearRememberMe } from './rememberMe';
@@ -20,7 +20,7 @@ interface PortalAuthContextValue extends PortalAuthState {
 
 const PortalAuthContext = createContext<PortalAuthContextValue | null>(null);
 
-export function PortalAuthProvider({ children }: { children: ReactNode }) {
+export function PortalAuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [state, setState] = useState<PortalAuthState>({
     user: null,
     isAuthenticated: false,
@@ -126,18 +126,21 @@ export function PortalAuthProvider({ children }: { children: ReactNode }) {
     setState({ user: null, isAuthenticated: false, isLoading: false, error: null });
   }, []);
 
+  const value = useMemo(
+    () => ({
+      ...state,
+      login,
+      register: registerUser,
+      forgotPassword,
+      loginWithGoogle,
+      logout,
+      rememberMeData,
+    }),
+    [state, login, registerUser, forgotPassword, loginWithGoogle, logout, rememberMeData],
+  );
+
   return (
-    <PortalAuthContext.Provider
-      value={{
-        ...state,
-        login,
-        register: registerUser,
-        forgotPassword,
-        loginWithGoogle,
-        logout,
-        rememberMeData,
-      }}
-    >
+    <PortalAuthContext.Provider value={value}>
       {children}
     </PortalAuthContext.Provider>
   );

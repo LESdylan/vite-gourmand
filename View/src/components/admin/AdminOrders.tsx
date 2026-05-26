@@ -62,7 +62,7 @@ interface OrderCardProps {
   time: string;
 }
 
-function OrderCard({ id, table, status, items, total, time }: OrderCardProps) {
+function OrderCard({ id, table, status, items, total, time }: Readonly<OrderCardProps>) {
   const statusConfig: Record<string, { label: string; className: string }> = {
     'en-attente': { label: 'En attente', className: 'order-card-badge--pending' },
     'en-cours': { label: 'En préparation', className: 'order-card-badge--progress' },
@@ -83,8 +83,8 @@ function OrderCard({ id, table, status, items, total, time }: OrderCardProps) {
           <span>🕐 {time}</span>
         </div>
         <ul className="order-card-items">
-          {items.map((item, i) => (
-            <li key={i}>
+          {items.map((item) => (
+            <li key={item}>
               <span className="order-card-item-name">{item}</span>
               <span className="order-card-item-qty">x1</span>
             </li>

@@ -22,7 +22,7 @@ interface ApiUser {
   id: number;
   email: string;
   firstName: string;
-  role: string;
+  role: UserVisibility;
   telephoneNumber?: string;
   city?: string;
 }

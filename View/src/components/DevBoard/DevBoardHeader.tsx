@@ -20,7 +20,7 @@ export function DevBoardHeader({
   categories,
   activeCategory,
   onCategoryChange,
-}: DevBoardHeaderProps) {
+}: Readonly<DevBoardHeaderProps>) {
   return (
     <Header
       activeSection={activeSection}

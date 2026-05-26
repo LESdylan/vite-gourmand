@@ -10,7 +10,7 @@ interface SidebarProps {
   collapsed?: boolean;
 }
 
-export function Sidebar({ children, collapsed = false }: SidebarProps) {
+export function Sidebar({ children, collapsed = false }: Readonly<SidebarProps>) {
   const classes = buildClasses(collapsed);
 
   return <aside className={classes}>{children}</aside>;

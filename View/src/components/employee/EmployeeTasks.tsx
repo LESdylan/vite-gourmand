@@ -73,7 +73,7 @@ interface TaskCardProps {
   done?: boolean;
 }
 
-function TaskCard({ title, priority, dueTime, done }: TaskCardProps) {
+function TaskCard({ title, priority, dueTime, done }: Readonly<TaskCardProps>) {
   return (
     <div className={`task-item ${done ? 'task-item--done' : ''}`}>
       <div className="task-checkbox">{done ? '✓' : ''}</div>

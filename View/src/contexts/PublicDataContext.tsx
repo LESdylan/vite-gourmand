@@ -62,7 +62,7 @@ function logPublicDataWarning(message: string, err: unknown) {
   }
 }
 
-export function PublicDataProvider({ children }: { children: ReactNode }) {
+export function PublicDataProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [data, setData] = useState<PublicData>(defaultValue);
 
   useEffect(() => {
@@ -110,13 +110,13 @@ export function PublicDataProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const heroTimer = window.setTimeout(loadHeroData, 5000);
-    const deferredTimer = window.setTimeout(loadDeferredData, 8000);
+    const heroTimer = globalThis.setTimeout(loadHeroData, 5000);
+    const deferredTimer = globalThis.setTimeout(loadDeferredData, 8000);
 
     return () => {
       cancelled = true;
-      window.clearTimeout(heroTimer);
-      window.clearTimeout(deferredTimer);
+      globalThis.clearTimeout(heroTimer);
+      globalThis.clearTimeout(deferredTimer);
     };
   }, []); // fetch once on mount
 

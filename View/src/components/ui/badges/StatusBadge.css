@@ -51,7 +51,7 @@
 }
 
 .status-badge-failed {
-  background: var(--color-danger-50, var(--color-bg-secondary)1f2);
+  background: var(--color-danger-50, #fff1f2);
   color: var(--color-danger-700, var(--color-danger-700));
   border: 1px solid var(--color-danger-200, var(--color-rose-200));
 }

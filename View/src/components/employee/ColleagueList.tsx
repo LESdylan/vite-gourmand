@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react';
 import { UserProfile } from '../ui/UserProfile';
 import { searchUsers, canViewUser } from '../ui/Search';
 import type { SearchResult } from '../ui/Search';
-import type { UserVisibility } from '../ui/Search/types';
 import { usePortalAuth } from '../../portal_dashboard/PortalAuthContext';
 import '../admin/AdminWidgets.css'; // Reuse admin table styles
 import './EmployeeWidgets.css';
@@ -25,6 +24,8 @@ export function ColleagueList() {
   const [colleagues, setColleagues] = useState<Colleague[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const showEmptyState = loading === false && colleagues.length === 0;
+  const showColleagueGrid = loading === false && colleagues.length > 0;
 
   useEffect(() => {
     async function loadColleagues() {
@@ -35,11 +36,9 @@ export function ColleagueList() {
 
         // Filter based on visibility rules (employees can only see employees)
         const viewerRole = currentUser?.role;
-        const visibleColleagues = results.filter((user) =>
-          canViewUser(viewerRole as UserVisibility, user.role as UserVisibility),
-        );
+        const visibleColleagues = results.filter((user) => canViewUser(viewerRole, user.role));
 
-        setColleagues(visibleColleagues as Colleague[]);
+        setColleagues(visibleColleagues);
       } catch (error) {
         console.error('Failed to load colleagues:', error);
       } finally {
@@ -102,20 +101,23 @@ export function ColleagueList() {
           </h3>
         </div>
 
-        {loading ? (
+        {loading && (
           <div className="fly-table-empty">
             <div className="fly-table-empty-icon">⏳</div>
             <p className="fly-table-empty-text">Chargement...</p>
           </div>
-        ) : colleagues.length === 0 ? (
+        )}
+        {showEmptyState && (
           <div className="fly-table-empty">
             <div className="fly-table-empty-icon">👥</div>
             <p className="fly-table-empty-text">Aucun collègue trouvé</p>
           </div>
-        ) : (
+        )}
+        {showColleagueGrid && (
           <div className="colleague-grid">
             {colleagues.map((colleague) => (
-              <div
+              <button
+                type="button"
                 key={colleague.id}
                 className="colleague-card"
                 onClick={() => setSelectedUserId(colleague.id)}
@@ -147,7 +149,7 @@ export function ColleagueList() {
                     <span className="colleague-card-shift">🕐 {colleague.shift}</span>
                   )}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}

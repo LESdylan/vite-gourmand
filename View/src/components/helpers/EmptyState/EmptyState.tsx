@@ -12,7 +12,7 @@ interface EmptyStateProps {
   action?: React.ReactNode;
 }
 
-export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+export function EmptyState({ icon, title, description, action }: Readonly<EmptyStateProps>) {
   return (
     <div className="empty-state">
       {icon && <EmptyStateIcon icon={icon} />}
@@ -22,11 +22,11 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
   );
 }
 
-function EmptyStateIcon({ icon }: { icon: React.ReactNode }) {
+function EmptyStateIcon({ icon }: Readonly<{ icon: React.ReactNode }>) {
   return <div className="empty-state-icon">{icon}</div>;
 }
 
-function EmptyStateContent({ title, description }: { title: string; description?: string }) {
+function EmptyStateContent({ title, description }: Readonly<{ title: string; description?: string }>) {
   return (
     <div className="empty-state-content">
       <h3 className="empty-state-title">{title}</h3>
@@ -35,6 +35,6 @@ function EmptyStateContent({ title, description }: { title: string; description?
   );
 }
 
-function EmptyStateAction({ action }: { action: React.ReactNode }) {
+function EmptyStateAction({ action }: Readonly<{ action: React.ReactNode }>) {
   return <div className="empty-state-action">{action}</div>;
 }

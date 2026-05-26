@@ -126,15 +126,268 @@ const QUICK_STARTERS = [
   { icon: '🥗', text: 'Menu végétarien' },
 ];
 
+function applyAutoExtractedBrief(previous: BriefData, userMsg: string, aiMsg: string): BriefData {
+  const combined = `${userMsg} ${aiMsg}`.toLowerCase();
+  const aiProposal = extractAiProposal(aiMsg) || previous.aiProposal;
+
+  return {
+    ...previous,
+    eventType: previous.eventType || extractEventType(combined),
+    guestCount: previous.guestCount || extractGuestCount(combined),
+    budget: previous.budget || extractBudget(combined),
+    date: previous.date || extractDate(combined),
+    dietaryNeeds: previous.dietaryNeeds || extractDietaryNeeds(combined),
+    allergies: previous.allergies || extractAllergies(combined),
+    aiProposal,
+  };
+}
+
+function extractEventType(text: string): string {
+  const match = /(mariage|anniversaire|s[eé]minaire|bapt[eê]me|communion|f[eê]te|gala|soir[eé]e|cocktail|enterrement de vie|team.?building|repas d'affaire)/i.exec(text);
+  return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1) : '';
+}
+
+function extractGuestCount(text: string): string {
+  const match = /(\d+)\s*(personnes|convives|invit[eé]s|pers\b|couverts)/i.exec(text);
+  return match ? `${match[1]} personnes` : '';
+}
+
+function extractBudget(text: string): string {
+  const perPersonMatch = /(\d+)\s*[€e](?:uros?)?\s*(?:\/|par)\s*(?:pers|personne|convive)/i.exec(text);
+  const budgetMatch = /budget\s*(?:de\s*)?(\d+)\s*[€e]/i.exec(text);
+  const amount = perPersonMatch?.[1] || budgetMatch?.[1];
+  return amount ? `${amount}€/personne` : '';
+}
+
+function extractDate(text: string): string {
+  const match = /(\d{1,2}\s+(?:janvier|f[eé]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[eé]cembre)\s*\d{0,4})/i.exec(text);
+  return match?.[1] ?? '';
+}
+
+function extractDietaryNeeds(text: string): string {
+  const match = /(v[eé]g[eé]tarien|v[eé]gan|sans gluten|halal|casher|pescetarien)/i.exec(text);
+  return match?.[1] ?? '';
+}
+
+function extractAllergies(text: string): string {
+  const match = /allerg\w+\s+(?:aux?\s+)?([^,.]+)/i.exec(text);
+  return match?.[1].trim() ?? '';
+}
+
+function extractAiProposal(aiMsg: string): string {
+  const includesMenuStructure = aiMsg.includes('MENU') &&
+    (aiMsg.includes('ENTRÉE') || aiMsg.includes('PLAT') || aiMsg.includes('convives'));
+  return includesMenuStructure ? aiMsg : '';
+}
+
+function getBriefFieldIconClass(filled: boolean, required: boolean): string {
+  if (filled) return 'text-[#556B2F]';
+  if (required) return 'text-[#722F37]/50';
+  return 'text-[#1A1A1A]/25';
+}
+
+function formatBriefText(brief: BriefData): string {
+  const lines = [
+    '═══ DEMANDE DE MENU PERSONNALISÉ ═══',
+    '',
+    `🎉 Événement : ${brief.eventType || 'Non précisé'}`,
+    `👥 Convives : ${brief.guestCount || 'Non précisé'}`,
+    `💰 Budget : ${brief.budget || 'Non précisé'}`,
+    `📅 Date : ${brief.date || 'Non précisée'}`,
+    `🥗 Régimes : ${brief.dietaryNeeds || 'Aucun'}`,
+    `⚠️ Allergies : ${brief.allergies || 'Aucune'}`,
+    `🎨 Préférences : ${brief.preferences || 'Aucune'}`,
+  ];
+
+  if (brief.aiProposal) {
+    lines.push('', '─── PROPOSITION IA ───', '', brief.aiProposal);
+  }
+
+  if (brief.additionalNotes) {
+    lines.push('', '─── NOTES ADDITIONNELLES ───', '', brief.additionalNotes);
+  }
+
+  return lines.join('\n');
+}
+
+function SubmittedTicket({
+  ticketNumber,
+  contactEmail,
+}: Readonly<{ ticketNumber: string | null; contactEmail: string }>) {
+  return (
+    <div className="bg-gradient-to-br from-[#FFF8F0] to-white rounded-2xl border border-[#556B2F]/20 p-8 text-center">
+      <div className="w-16 h-16 rounded-full bg-[#556B2F]/10 flex items-center justify-center mx-auto mb-4">
+        <CheckCircle className="h-8 w-8 text-[#556B2F]" />
+      </div>
+      <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Demande envoyée !</h3>
+      <p className="text-sm text-[#5c5c5c] mb-4">
+        Notre équipe a reçu votre brief et vous répondra sous 24h avec une proposition
+        personnalisée.
+      </p>
+      {ticketNumber && (
+        <div className="inline-flex items-center gap-2 bg-white border border-[#D4AF37]/30 rounded-xl px-5 py-3 mb-4">
+          <span className="text-[10px] text-[#888] uppercase tracking-wider font-semibold">
+            Ticket
+          </span>
+          <span className="font-black text-lg text-[#1A1A1A] tracking-wide">{ticketNumber}</span>
+        </div>
+      )}
+      <p className="text-xs text-[#888]">
+        Un email de confirmation a été envoyé à {contactEmail}.
+      </p>
+    </div>
+  );
+}
+
+function useResizableSplit(initialRatio = 0.55) {
+  const [splitRatio, setSplitRatio] = useState(initialRatio);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+
+  const handleMouseDown = useCallback(() => {
+    isDragging.current = true;
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!isDragging.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const ratio = Math.max(0.3, Math.min(0.7, x / rect.width));
+      setSplitRatio(ratio);
+    };
+    const handleMouseUp = () => {
+      isDragging.current = false;
+    };
+    globalThis.addEventListener('mousemove', handleMouseMove);
+    globalThis.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      globalThis.removeEventListener('mousemove', handleMouseMove);
+      globalThis.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
+
+  return { splitRatio, setSplitRatio, containerRef, handleMouseDown };
+}
+
+interface BriefSubmitAreaProps {
+  showContactForm: boolean;
+  setShowContactForm: (show: boolean) => void;
+  isBriefReady: boolean;
+  filledRequired: number;
+  requiredCount: number;
+  contactName: string;
+  setContactName: (value: string) => void;
+  contactEmail: string;
+  setContactEmail: (value: string) => void;
+  contactPhone: string;
+  setContactPhone: (value: string) => void;
+  submitError: string | null;
+  submitting: boolean;
+  onSubmitTicket: () => void;
+}
+
+function BriefSubmitArea({
+  showContactForm,
+  setShowContactForm,
+  isBriefReady,
+  filledRequired,
+  requiredCount,
+  contactName,
+  setContactName,
+  contactEmail,
+  setContactEmail,
+  contactPhone,
+  setContactPhone,
+  submitError,
+  submitting,
+  onSubmitTicket,
+}: Readonly<BriefSubmitAreaProps>) {
+  if (showContactForm) {
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[11px] font-bold text-[#5c5c5c]">Vos coordonnées</span>
+          <button
+            type="button"
+            onClick={() => setShowContactForm(false)}
+            className="text-[#888] hover:text-[#5c5c5c]"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <input
+          type="text"
+          value={contactName}
+          onChange={(e) => setContactName(e.target.value)}
+          placeholder="Votre nom *"
+          className="w-full text-[12px] border border-[#1A1A1A]/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#722F37]"
+        />
+        <input
+          type="email"
+          value={contactEmail}
+          onChange={(e) => setContactEmail(e.target.value)}
+          placeholder="Votre email *"
+          className="w-full text-[12px] border border-[#1A1A1A]/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#722F37]"
+        />
+        <input
+          type="tel"
+          value={contactPhone}
+          onChange={(e) => setContactPhone(e.target.value)}
+          placeholder="Téléphone (optionnel)"
+          className="w-full text-[12px] border border-[#1A1A1A]/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#722F37]"
+        />
+        {submitError && (
+          <p className="text-[10px] text-red-500 flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3" /> {submitError}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={onSubmitTicket}
+          disabled={!contactName.trim() || !contactEmail.trim() || submitting}
+          className="w-full py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#556B2F] to-[#6B8E3D] text-white shadow-lg shadow-[#556B2F]/20 hover:shadow-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Envoi en cours…
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4" /> Envoyer à l'équipe
+            </>
+          )}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setShowContactForm(true)}
+      disabled={!isBriefReady}
+      className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+        isBriefReady
+          ? 'bg-gradient-to-r from-[#722F37] to-[#8B3A42] text-white shadow-lg shadow-[#722F37]/20 hover:shadow-xl hover:shadow-[#722F37]/30'
+          : 'bg-[#1A1A1A]/5 text-[#1A1A1A]/25 cursor-not-allowed'
+      }`}
+    >
+      <Send className="h-4 w-4" />
+      {isBriefReady ? 'Envoyer la demande' : `Complétez le brief (${filledRequired}/${requiredCount})`}
+    </button>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════
    Component
    ══════════════════════════════════════════════════════════ */
 export default function AiMenuComposer({
   onBriefReady,
-}: {
+}: Readonly<{
   /** Callback when a brief is submitted — parent can use it to advance the order flow */
   onBriefReady?: (brief: string) => void;
-}) {
+}>) {
   /* ── Chat state ── */
   const [messages, setMessages] = useState<AiMessage[]>([]);
   const [input, setInput] = useState('');
@@ -147,9 +400,7 @@ export default function AiMenuComposer({
   const [briefExpanded, setBriefExpanded] = useState(false);
 
   /* ── Resizable panels ── */
-  const [splitRatio, setSplitRatio] = useState(0.55); // chat takes 55%
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isDragging = useRef(false);
+  const { splitRatio, setSplitRatio, containerRef, handleMouseDown } = useResizableSplit();
 
   /* ── Submission state ── */
   const [submitting, setSubmitting] = useState(false);
@@ -165,32 +416,9 @@ export default function AiMenuComposer({
 
   /* ── Auto-scroll chat ── */
   useEffect(() => {
-    if (chatScrollRef.current) chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    const chatScroll = chatScrollRef.current;
+    chatScroll?.scrollTo({ top: chatScroll.scrollHeight });
   }, [messages, loading]);
-
-  /* ── Drag resize ── */
-  const handleMouseDown = useCallback(() => {
-    isDragging.current = true;
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging.current || !containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const ratio = Math.max(0.3, Math.min(0.7, x / rect.width));
-      setSplitRatio(ratio);
-    };
-    const handleMouseUp = () => {
-      isDragging.current = false;
-    };
-    globalThis.addEventListener('mousemove', handleMouseMove);
-    globalThis.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      globalThis.removeEventListener('mousemove', handleMouseMove);
-      globalThis.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
 
   /* ── Send AI message ── */
   const sendMessage = useCallback(
@@ -231,67 +459,7 @@ export default function AiMenuComposer({
 
   /* ── Auto-extract brief fields from conversation ── */
   function autoExtractBrief(userMsg: string, aiMsg: string): void {
-    const combined = (userMsg + ' ' + aiMsg).toLowerCase();
-
-    setBrief((prev) => {
-      const next = { ...prev };
-
-      if (!next.eventType) {
-        const re =
-          /(mariage|anniversaire|s[eé]minaire|bapt[eê]me|communion|f[eê]te|gala|soir[eé]e|cocktail|enterrement de vie|team.?building|repas d'affaire)/i;
-        const evtMatch = re.exec(combined);
-        if (evtMatch) next.eventType = evtMatch[1].charAt(0).toUpperCase() + evtMatch[1].slice(1);
-      }
-
-      if (!next.guestCount) {
-        const guestMatch = /(\d+)\s*(personnes|convives|invit[eé]s|pers\b|couverts)/i.exec(
-          combined,
-        );
-        if (guestMatch) next.guestCount = guestMatch[1] + ' personnes';
-      }
-
-      if (!next.budget) {
-        const budgetMatch = /(\d+)\s*[€e](?:uros?)?\s*(?:\/|par)\s*(?:pers|personne|convive)/i.exec(
-          combined,
-        );
-        if (budgetMatch) {
-          next.budget = budgetMatch[1] + '€/personne';
-        } else {
-          const budgetMatch2 = /budget\s*(?:de\s*)?(\d+)\s*[€e]/i.exec(combined);
-          if (budgetMatch2) next.budget = budgetMatch2[1] + '€/personne';
-        }
-      }
-
-      if (!next.date) {
-        const dateMatch =
-          /(\d{1,2}\s+(?:janvier|f[eé]vrier|mars|avril|mai|juin|juillet|ao[uû]t|septembre|octobre|novembre|d[eé]cembre)\s*\d{0,4})/i.exec(
-            combined,
-          );
-        if (dateMatch) next.date = dateMatch[1];
-      }
-
-      if (!next.dietaryNeeds) {
-        const dietMatch = /(v[eé]g[eé]tarien|v[eé]gan|sans gluten|halal|casher|pescetarien)/i.exec(
-          combined,
-        );
-        if (dietMatch) next.dietaryNeeds = dietMatch[1];
-      }
-
-      if (!next.allergies) {
-        const allergyMatch = /allerg\w+\s+(?:aux?\s+)?([^,.]+)/i.exec(combined);
-        if (allergyMatch) next.allergies = allergyMatch[1].trim();
-      }
-
-      // AI proposal — capture structured menu proposals
-      if (
-        aiMsg.includes('MENU') &&
-        (aiMsg.includes('ENTRÉE') || aiMsg.includes('PLAT') || aiMsg.includes('convives'))
-      ) {
-        next.aiProposal = aiMsg;
-      }
-
-      return next;
-    });
+    setBrief((prev) => applyAutoExtractedBrief(prev, userMsg, aiMsg));
   }
 
   /* ── Copy AI message to brief ── */
@@ -307,27 +475,7 @@ export default function AiMenuComposer({
 
   /* ── Build full brief text ── */
   const buildBriefText = useCallback(() => {
-    const lines = [
-      '═══ DEMANDE DE MENU PERSONNALISÉ ═══',
-      '',
-      `🎉 Événement : ${brief.eventType || 'Non précisé'}`,
-      `👥 Convives : ${brief.guestCount || 'Non précisé'}`,
-      `💰 Budget : ${brief.budget || 'Non précisé'}`,
-      `📅 Date : ${brief.date || 'Non précisée'}`,
-      `🥗 Régimes : ${brief.dietaryNeeds || 'Aucun'}`,
-      `⚠️ Allergies : ${brief.allergies || 'Aucune'}`,
-      `🎨 Préférences : ${brief.preferences || 'Aucune'}`,
-    ];
-
-    if (brief.aiProposal) {
-      lines.push('', '─── PROPOSITION IA ───', '', brief.aiProposal);
-    }
-
-    if (brief.additionalNotes) {
-      lines.push('', '─── NOTES ADDITIONNELLES ───', '', brief.additionalNotes);
-    }
-
-    return lines.join('\n');
+    return formatBriefText(brief);
   }, [brief]);
 
   /* ── Submit ticket ── */
@@ -368,29 +516,7 @@ export default function AiMenuComposer({
 
   // Success screen after ticket submission
   if (submitted) {
-    return (
-      <div className="bg-gradient-to-br from-[#FFF8F0] to-white rounded-2xl border border-[#556B2F]/20 p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-[#556B2F]/10 flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="h-8 w-8 text-[#556B2F]" />
-        </div>
-        <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Demande envoyée !</h3>
-        <p className="text-sm text-[#1A1A1A]/60 mb-4">
-          Notre équipe a reçu votre brief et vous répondra sous 24h avec une proposition
-          personnalisée.
-        </p>
-        {ticketNumber && (
-          <div className="inline-flex items-center gap-2 bg-white border border-[#D4AF37]/30 rounded-xl px-5 py-3 mb-4">
-            <span className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider font-semibold">
-              Ticket
-            </span>
-            <span className="font-black text-lg text-[#1A1A1A] tracking-wide">{ticketNumber}</span>
-          </div>
-        )}
-        <p className="text-xs text-[#1A1A1A]/40">
-          Un email de confirmation a été envoyé à {contactEmail}.
-        </p>
-      </div>
-    );
+    return <SubmittedTicket ticketNumber={ticketNumber} contactEmail={contactEmail} />;
   }
 
   return (
@@ -544,9 +670,8 @@ export default function AiMenuComposer({
         </div>
 
         {/* ══ DRAG HANDLE ══ */}
-        <div
-          role="separator"
-          tabIndex={0}
+        <button
+          type="button"
           aria-label="Redimensionner les panneaux"
           onMouseDown={handleMouseDown}
           onKeyDown={(e) => {
@@ -557,7 +682,7 @@ export default function AiMenuComposer({
           title="Glisser pour redimensionner"
         >
           <GripVertical className="h-5 w-5 text-[#1A1A1A]/15 group-hover:text-[#D4AF37] transition-colors" />
-        </div>
+        </button>
 
         {/* ══ RIGHT — Live Brief / Document ══ */}
         <div
@@ -599,7 +724,7 @@ export default function AiMenuComposer({
                 <div key={field.key} className="group">
                   <label className="flex items-center gap-1.5 mb-1">
                     <Icon
-                      className={`h-3 w-3 ${filled ? 'text-[#556B2F]' : field.required ? 'text-[#722F37]/50' : 'text-[#1A1A1A]/25'}`}
+                      className={`h-3 w-3 ${getBriefFieldIconClass(filled, field.required)}`}
                     />
                     <span
                       className={`text-[11px] font-semibold ${filled ? 'text-[#1A1A1A]/70' : 'text-[#1A1A1A]/40'}`}
@@ -658,90 +783,32 @@ export default function AiMenuComposer({
 
           {/* Submit area */}
           <div className="border-t border-[#D4AF37]/10 p-3 bg-white shrink-0">
-            {!showContactForm ? (
-              <button
-                type="button"
-                onClick={() => setShowContactForm(true)}
-                disabled={!isBriefReady}
-                className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
-                  isBriefReady
-                    ? 'bg-gradient-to-r from-[#722F37] to-[#8B3A42] text-white shadow-lg shadow-[#722F37]/20 hover:shadow-xl hover:shadow-[#722F37]/30'
-                    : 'bg-[#1A1A1A]/5 text-[#1A1A1A]/25 cursor-not-allowed'
-                }`}
-              >
-                <Send className="h-4 w-4" />
-                {isBriefReady
-                  ? 'Envoyer la demande'
-                  : `Complétez le brief (${filledRequired}/${requiredFields.length})`}
-              </button>
-            ) : (
-              /* Contact info form */
-              <div className="space-y-2">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-bold text-[#1A1A1A]/60">Vos coordonnées</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowContactForm(false)}
-                    className="text-[#1A1A1A]/30 hover:text-[#1A1A1A]/60"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  value={contactName}
-                  onChange={(e) => setContactName(e.target.value)}
-                  placeholder="Votre nom *"
-                  className="w-full text-[12px] border border-[#1A1A1A]/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#722F37]"
-                />
-                <input
-                  type="email"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  placeholder="Votre email *"
-                  className="w-full text-[12px] border border-[#1A1A1A]/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#722F37]"
-                />
-                <input
-                  type="tel"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="Téléphone (optionnel)"
-                  className="w-full text-[12px] border border-[#1A1A1A]/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#722F37]"
-                />
-                {submitError && (
-                  <p className="text-[10px] text-red-500 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" /> {submitError}
-                  </p>
-                )}
-                <button
-                  type="button"
-                  onClick={handleSubmitTicket}
-                  disabled={!contactName.trim() || !contactEmail.trim() || submitting}
-                  className="w-full py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-[#556B2F] to-[#6B8E3D] text-white shadow-lg shadow-[#556B2F]/20 hover:shadow-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Envoi en cours…
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4" /> Envoyer à l'équipe
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
+            <BriefSubmitArea
+              showContactForm={showContactForm}
+              setShowContactForm={setShowContactForm}
+              isBriefReady={isBriefReady}
+              filledRequired={filledRequired}
+              requiredCount={requiredFields.length}
+              contactName={contactName}
+              setContactName={setContactName}
+              contactEmail={contactEmail}
+              setContactEmail={setContactEmail}
+              contactPhone={contactPhone}
+              setContactPhone={setContactPhone}
+              submitError={submitError}
+              submitting={submitting}
+              onSubmitTicket={handleSubmitTicket}
+            />
           </div>
         </div>
       </div>
 
       {/* Fullscreen overlay backdrop */}
       {briefExpanded && (
-        <div
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           aria-label="Fermer le plein écran"
-          className="fixed inset-0 bg-black/40 z-40"
+          className="fixed inset-0 bg-black/40 z-40 border-0 p-0"
           onClick={() => setBriefExpanded(false)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === 'Escape') setBriefExpanded(false);

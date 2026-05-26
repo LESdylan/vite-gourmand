@@ -10,7 +10,7 @@ interface ActivityItemProps {
   activity: Activity;
 }
 
-export function ActivityItem({ activity }: ActivityItemProps) {
+export function ActivityItem({ activity }: Readonly<ActivityItemProps>) {
   const icon = getTypeIcon(activity.type);
   const severityClass = `activity-item--${activity.severity}`;
 

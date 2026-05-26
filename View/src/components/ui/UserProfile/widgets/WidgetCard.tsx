@@ -14,7 +14,7 @@ interface WidgetCardProps {
   wide?: boolean;
 }
 
-export function WidgetCard({ icon, title, children, className = '', wide }: WidgetCardProps) {
+export function WidgetCard({ icon, title, children, className = '', wide }: Readonly<WidgetCardProps>) {
   return (
     <div className={`up-widget ${wide ? 'up-widget--wide' : ''} ${className}`}>
       <div className="up-widget-header">

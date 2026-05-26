@@ -55,7 +55,7 @@ interface AiAssistantWidgetProps {
 export function AiAssistantWidget({
   pageContext = 'home',
   onNavigateToContact,
-}: AiAssistantWidgetProps) {
+}: Readonly<AiAssistantWidgetProps>) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -188,34 +188,11 @@ export function AiAssistantWidget({
 
           {/* Messages area */}
           <div ref={scrollRef} className="ai-widget-messages">
-            {!hasMessages ? (
-              <div className="ai-widget-welcome">
-                <div className="ai-widget-welcome__icon">
-                  <Bot size={40} />
-                </div>
-                <h4>Bonjour ! 👋</h4>
-                <p>
-                  Je suis votre assistant virtuel. Je peux vous renseigner sur nos menus, nos
-                  promotions, ou vous aider à préparer votre demande de devis.
-                </p>
-                <div className="ai-widget-suggestions">
-                  {QUICK_SUGGESTIONS.map((sug, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleQuickSuggestion(sug.prompt)}
-                      className="ai-widget-suggestion"
-                    >
-                      <span className="ai-widget-suggestion__icon">{sug.icon}</span>
-                      {sug.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
+            {hasMessages ? (
               <>
-                {messages.map((msg, i) => (
+                {messages.map((msg) => (
                   <div
-                    key={i}
+                    key={`${msg.role}-${msg.content}`}
                     className={`ai-widget-message ${msg.role === 'user' ? 'ai-widget-message--user' : 'ai-widget-message--bot'}`}
                   >
                     {msg.role === 'assistant' && (
@@ -238,6 +215,29 @@ export function AiAssistantWidget({
                   </div>
                 )}
               </>
+            ) : (
+              <div className="ai-widget-welcome">
+                <div className="ai-widget-welcome__icon">
+                  <Bot size={40} />
+                </div>
+                <h4>Bonjour ! 👋</h4>
+                <p>
+                  Je suis votre assistant virtuel. Je peux vous renseigner sur nos menus, nos
+                  promotions, ou vous aider à préparer votre demande de devis.
+                </p>
+                <div className="ai-widget-suggestions">
+                  {QUICK_SUGGESTIONS.map((sug) => (
+                    <button
+                      key={sug.prompt}
+                      onClick={() => handleQuickSuggestion(sug.prompt)}
+                      className="ai-widget-suggestion"
+                    >
+                      <span className="ai-widget-suggestion__icon">{sug.icon}</span>
+                      {sug.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 

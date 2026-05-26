@@ -17,7 +17,7 @@ interface TestCardProps {
   onClick?: () => void;
 }
 
-export function TestCard({ name, description, type, status, onClick }: TestCardProps) {
+export function TestCard({ name, description, type, status, onClick }: Readonly<TestCardProps>) {
   return (
     <BaseCard onClick={onClick} className="test-card">
       <TestCardHeader name={name} status={status} />
@@ -27,7 +27,7 @@ export function TestCard({ name, description, type, status, onClick }: TestCardP
   );
 }
 
-function TestCardHeader({ name, status }: { name: string; status: TestStatus }) {
+function TestCardHeader({ name, status }: Readonly<{ name: string; status: TestStatus }>) {
   return (
     <div className="test-card-header">
       <h3 className="test-card-name">{name}</h3>
@@ -36,11 +36,11 @@ function TestCardHeader({ name, status }: { name: string; status: TestStatus }) 
   );
 }
 
-function TestCardBody({ description }: { description: string }) {
+function TestCardBody({ description }: Readonly<{ description: string }>) {
   return <p className="test-card-description">{description}</p>;
 }
 
-function TestCardFooter({ type }: { type: TestType }) {
+function TestCardFooter({ type }: Readonly<{ type: TestType }>) {
   const typeLabel = type === 'automatic' ? '⚡ Automatique' : '👤 Manuel';
   return (
     <div className="test-card-footer">
@@ -49,7 +49,7 @@ function TestCardFooter({ type }: { type: TestType }) {
   );
 }
 
-function StatusIndicator({ status }: { status: TestStatus }) {
+function StatusIndicator({ status }: Readonly<{ status: TestStatus }>) {
   return (
     <span
       className={`test-card-status test-card-status-${status}`}

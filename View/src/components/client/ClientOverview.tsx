@@ -182,11 +182,11 @@ function QuickAction({
   icon,
   label,
   description,
-}: {
+}: Readonly<{
   icon: string;
   label: string;
   description: string;
-}) {
+}>) {
   return (
     <div className="client-action-card">
       <span className="client-action-icon">{icon}</span>

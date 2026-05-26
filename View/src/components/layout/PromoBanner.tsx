@@ -15,7 +15,7 @@ interface PromoBannerProps {
   onHeightChange?: (height: number) => void;
 }
 
-export default function PromoBanner({ promotions, onDismiss, onHeightChange }: PromoBannerProps) {
+export default function PromoBanner({ promotions, onDismiss, onHeightChange }: Readonly<PromoBannerProps>) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dismissed, setDismissed] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -146,9 +146,9 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
           {/* Dots indicator (when multiple promotions) */}
           {promotions.length > 1 && (
             <div className="hidden sm:flex items-center gap-1 ml-2 flex-shrink-0">
-              {promotions.map((_, i) => (
+              {promotions.map((promotion, i) => (
                 <button
-                  key={i}
+                  key={promotion.id}
                   onClick={() => setCurrentIndex(i)}
                   className="w-1.5 h-1.5 rounded-full transition-all duration-300"
                   style={{
@@ -156,7 +156,7 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
                     opacity: i === currentIndex ? 1 : 0.3,
                     transform: i === currentIndex ? 'scale(1.3)' : 'scale(1)',
                   }}
-                  aria-label={`Promotion ${i + 1}`}
+                  aria-label={`Voir la promotion : ${promotion.title}`}
                 />
               ))}
             </div>
@@ -192,7 +192,7 @@ export default function PromoBanner({ promotions, onDismiss, onHeightChange }: P
 
 /** Darken or lighten a hex color by a percentage */
 function adjustBrightness(hex: string, percent: number): string {
-  const num = parseInt(hex.replace('#', ''), 16);
+  const num = Number.parseInt(hex.replace('#', ''), 16);
   const r = Math.min(255, Math.max(0, (num >> 16) + percent));
   const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00ff) + percent));
   const b = Math.min(255, Math.max(0, (num & 0x0000ff) + percent));

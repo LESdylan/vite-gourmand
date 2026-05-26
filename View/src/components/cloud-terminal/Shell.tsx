@@ -14,22 +14,25 @@ interface Props {
   onResizeStart?: (e: React.MouseEvent) => void;
 }
 
-export function Shell({ onClose, style, onHeaderMouseDown, onResizeStart }: Props) {
+export function Shell({ onClose, style, onHeaderMouseDown, onResizeStart }: Readonly<Props>) {
   const sh = useShell();
 
-  const handleClick = () => {
-    document.querySelector<HTMLInputElement>('.shell-input input')?.focus();
-  };
-
   return (
-    <div className="shell" style={style} onClick={handleClick}>
-      <header className="shell-header" onMouseDown={onHeaderMouseDown}>
+    <div className="shell" style={style}>
+      <header className="shell-header">
         <div className="shell-dots">
-          <span className="dot red" onClick={onClose} />
-          <span className="dot yellow" onClick={sh.clear} />
-          <span className="dot green" />
+          <button className="dot red" onClick={onClose} aria-label="Close terminal" type="button" />
+          <button className="dot yellow" onClick={sh.clear} aria-label="Clear terminal" type="button" />
+          <span className="dot green" aria-hidden="true" />
         </div>
-        <span className="shell-title">cloud-shell — {sh.cwd}</span>
+        <button
+          className="shell-title shell-drag-handle"
+          onMouseDown={onHeaderMouseDown}
+          type="button"
+          aria-label="Move terminal"
+        >
+          cloud-shell — {sh.cwd}
+        </button>
         <div className="shell-actions">
           <button onClick={sh.clear} title="Clear">
             ⌫
@@ -52,7 +55,14 @@ export function Shell({ onClose, style, onHeaderMouseDown, onResizeStart }: Prop
           onNavigate={sh.navigateHistory}
         />
       </div>
-      {onResizeStart && <div className="shell-resize-handle" onMouseDown={onResizeStart} />}
+      {onResizeStart && (
+        <button
+          className="shell-resize-handle"
+          onMouseDown={onResizeStart}
+          type="button"
+          aria-label="Resize terminal"
+        />
+      )}
     </div>
   );
 }

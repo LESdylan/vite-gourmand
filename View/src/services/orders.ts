@@ -83,9 +83,8 @@ export async function getOrders(query?: OrderQuery): Promise<PaginatedOrders> {
   if (query?.toDate) params.set('toDate', query.toDate);
 
   const queryString = params.toString();
-  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(
-    `/api/orders${queryString ? `?${queryString}` : ''}`,
-  );
+  const endpoint = queryString ? `/api/orders?${queryString}` : '/api/orders';
+  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(endpoint);
   return resp.data;
 }
 
@@ -96,9 +95,8 @@ export async function getMyOrders(query?: OrderQuery): Promise<PaginatedOrders> 
   if (query?.page) params.set('page', String(query.page));
   if (query?.limit) params.set('limit', String(query.limit));
   const queryString = params.toString();
-  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(
-    `/api/orders/my${queryString ? `?${queryString}` : ''}`,
-  );
+  const endpoint = queryString ? `/api/orders/my?${queryString}` : '/api/orders/my';
+  const resp = await apiRequest<ApiWrapper<PaginatedOrders>>(endpoint);
   return resp.data;
 }
 

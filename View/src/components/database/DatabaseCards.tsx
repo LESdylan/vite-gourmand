@@ -23,7 +23,7 @@ export function DatabaseCards({
   onDelete,
   canUpdate = true,
   canDelete = true,
-}: Props) {
+}: Readonly<Props>) {
   if (records.length === 0) {
     return <EmptyState />;
   }
@@ -52,14 +52,14 @@ function RecordCard({
   canDelete,
   onEdit,
   onDelete,
-}: {
+}: Readonly<{
   record: TableRecord;
   columns: TableColumn[];
   canUpdate: boolean;
   canDelete: boolean;
   onEdit: () => void;
   onDelete: () => void;
-}) {
+}>) {
   const titleField = findTitleField(columns, record);
   const displayFields = columns.filter((c) => !c.isPrimary).slice(0, 4);
 
@@ -86,7 +86,7 @@ function RecordCard({
   );
 }
 
-function FieldDisplay({ column, value }: { column: TableColumn; value: unknown }) {
+function FieldDisplay({ column, value }: Readonly<{ column: TableColumn; value: unknown }>) {
   return (
     <div className="db-card-field">
       <span className="db-card-label">{column.name}</span>
@@ -102,12 +102,12 @@ function CardActions({
   onDelete,
   canUpdate,
   canDelete,
-}: {
+}: Readonly<{
   onEdit: () => void;
   onDelete: () => void;
   canUpdate: boolean;
   canDelete: boolean;
-}) {
+}>) {
   return (
     <footer className="db-card-actions">
       {canUpdate && (
@@ -135,9 +135,13 @@ function EmptyState() {
 
 /* === Helpers === */
 function findTitleField(columns: TableColumn[], record: TableRecord): string | null {
-  const nameFields = ['name', 'title', 'label', 'email', 'username'];
-  const titleCol = columns.find((c) => nameFields.includes(c.name.toLowerCase()));
-  return titleCol ? String(record[titleCol.name] || '') : null;
+  const nameFields = new Set(['name', 'title', 'label', 'email', 'username']);
+  const titleCol = columns.find((c) => nameFields.has(c.name.toLowerCase()));
+  if (!titleCol) return null;
+  const value = record[titleCol.name];
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return formatPrimitiveValue(value);
 }
 
 function getValueClass(col: TableColumn, value: unknown): string {
@@ -154,6 +158,16 @@ function formatValue(value: unknown, col: TableColumn): string {
   if (typeof value === 'string' && col.type === 'DateTime') {
     return new Date(value).toLocaleString();
   }
-  const str = String(value);
+  if (typeof value === 'object') return JSON.stringify(value);
+  const str = formatPrimitiveValue(value);
   return str.length > 50 ? str.slice(0, 47) + '...' : str;
+}
+
+function formatPrimitiveValue(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return value.toString();
+  }
+  if (typeof value === 'symbol') return value.description ?? '';
+  return JSON.stringify(value) ?? '';
 }

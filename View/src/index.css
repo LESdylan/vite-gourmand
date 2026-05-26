@@ -6,6 +6,9 @@
 @import './styles/graphical_chart_part2.css';
 @import './styles/graphical_chart_part3.css';
 
+/* Enter/exit + scroll-reveal animation utilities */
+@import './styles/animations.css';
+
 @layer base {
   *,
   *::before,
@@ -157,13 +160,32 @@ a:focus-visible {
   }
 }
 
+/*
+ * Soft `prefers-reduced-motion` handling.
+ *
+ * Firefox on Linux mirrors the GTK "enable animations" setting and reports
+ * `prefers-reduced-motion: reduce` even when the user hasn't explicitly
+ * asked for it — the previous rule killed every transition/animation
+ * globally with `!important`, which broke modals, hover states and
+ * scroll reveals across the site.
+ *
+ * Modern a11y guidance: only disable *decorative*, auto-looping motion.
+ * Short user-driven transitions (hover, focus, modal pop-in) stay on.
+ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
+  }
+
+  /* Kill obvious decorative loops (spinning rings, pulses, shimmers) */
+  .lazy-image-shimmer,
+  [class*="animate-spin"],
+  [class*="animate-pulse"],
+  [class*="animate-bounce"],
+  [class*="animate-ping"] {
+    animation: none !important;
   }
 }

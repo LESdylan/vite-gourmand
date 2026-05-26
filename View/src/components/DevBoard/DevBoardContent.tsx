@@ -105,7 +105,7 @@ export function DevBoardContent({
   activeCategory,
   testRunner,
   roleView = 'dev',
-}: DevBoardContentProps) {
+}: Readonly<DevBoardContentProps>) {
   const { tests } = useMockData(activeCategory);
   const { autoTests, suites, metrics, isRunning, runAll, runSuite, runType, rawOutput, error } =
     testRunner;
@@ -185,9 +185,9 @@ export function DevBoardContent({
         )}
 
         <div className="devboard-cards-container">
-          {renderContent(
+          {renderContent({
             roleView,
-            activeCategory,
+            category: activeCategory,
             tests,
             suites,
             logs,
@@ -197,7 +197,7 @@ export function DevBoardContent({
             isRunning,
             runSuite,
             runType,
-          )}
+          })}
         </div>
 
         {showCliOutput && <VerboseOutput output={rawOutput} isVisible={true} />}
@@ -206,19 +206,24 @@ export function DevBoardContent({
   );
 }
 
-function renderContent(
-  roleView: RoleView,
-  category: TestCategory,
-  tests: ReturnType<typeof useMockData>['tests'],
-  suites: ReturnType<typeof useTestRunner>['suites'],
-  logs: ReturnType<typeof useRealLogs>['logs'],
-  connected: boolean,
-  clear: () => void,
-  metrics: ReturnType<typeof useTestRunner>['metrics'],
-  isRunning: boolean,
-  runSuite: ReturnType<typeof useTestRunner>['runSuite'],
-  runType: ReturnType<typeof useTestRunner>['runType'],
-) {
+interface RenderContentContext {
+  roleView: RoleView;
+  category: TestCategory;
+  tests: ReturnType<typeof useMockData>['tests'];
+  suites: ReturnType<typeof useTestRunner>['suites'];
+  logs: ReturnType<typeof useRealLogs>['logs'];
+  connected: boolean;
+  clear: () => void;
+  metrics: ReturnType<typeof useTestRunner>['metrics'];
+  isRunning: boolean;
+  runSuite: ReturnType<typeof useTestRunner>['runSuite'];
+  runType: ReturnType<typeof useTestRunner>['runType'];
+}
+
+type RenderDevContentContext = Omit<RenderContentContext, 'roleView'>;
+
+function renderContent(context: RenderContentContext) {
+  const { roleView, category } = context;
   // Route to role-specific content
   switch (roleView) {
     case 'admin':
@@ -228,33 +233,22 @@ function renderContent(
     case 'client':
       return renderClientContent(category);
     default:
-      return renderDevContent(
-        category,
-        tests,
-        suites,
-        logs,
-        connected,
-        clear,
-        metrics,
-        isRunning,
-        runSuite,
-        runType,
-      );
+      return renderDevContent(context);
   }
 }
 
-function renderDevContent(
-  category: TestCategory,
-  tests: ReturnType<typeof useMockData>['tests'],
-  suites: ReturnType<typeof useTestRunner>['suites'],
-  logs: ReturnType<typeof useRealLogs>['logs'],
-  connected: boolean,
-  clear: () => void,
-  metrics: ReturnType<typeof useTestRunner>['metrics'],
-  isRunning: boolean,
-  runSuite: ReturnType<typeof useTestRunner>['runSuite'],
-  runType: ReturnType<typeof useTestRunner>['runType'],
-) {
+function renderDevContent({
+  category,
+  tests,
+  suites,
+  logs,
+  connected,
+  clear,
+  metrics,
+  isRunning,
+  runSuite,
+  runType,
+}: RenderDevContentContext) {
   switch (category) {
     case 'overview':
       return <Overview metrics={metrics} isRunning={isRunning} />;

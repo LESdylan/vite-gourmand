@@ -11,7 +11,7 @@ interface CoverageWidgetProps {
   changePercent?: number;
 }
 
-export function CoverageWidget({ coveragePercent, trend, changePercent }: CoverageWidgetProps) {
+export function CoverageWidget({ coveragePercent, trend, changePercent }: Readonly<CoverageWidgetProps>) {
   return (
     <MetricWidget
       label="Test Coverage"

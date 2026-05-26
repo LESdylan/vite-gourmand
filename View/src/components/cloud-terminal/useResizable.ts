@@ -9,7 +9,9 @@ interface Size {
   height: number;
 }
 
-export function useResizable(initialSize: Size = { width: 700, height: 400 }) {
+const DEFAULT_SIZE: Size = { width: 700, height: 400 };
+
+export function useResizable(initialSize: Size = DEFAULT_SIZE) {
   const [size, setSize] = useState(initialSize);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -39,11 +41,11 @@ export function useResizable(initialSize: Size = { width: 700, height: 400 }) {
 
     const onUp = () => setIsResizing(false);
 
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    globalThis.addEventListener('mousemove', onMove);
+    globalThis.addEventListener('mouseup', onUp);
     return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      globalThis.removeEventListener('mousemove', onMove);
+      globalThis.removeEventListener('mouseup', onUp);
     };
   }, [isResizing, size]);
 

@@ -26,7 +26,7 @@ export function ManualTestPage({
   onFail,
   onBlock,
   onBack,
-}: ManualTestPageProps) {
+}: Readonly<ManualTestPageProps>) {
   const isCompleted = test.result !== 'pending';
 
   return (

@@ -3,10 +3,10 @@
  * Visible: all roles
  */
 
-import type { ProfileWidgetProps } from '../types';
+import type { Milestone, ProfileWidgetProps } from '../types';
 import { WidgetCard } from './WidgetCard';
 
-export function MilestonesWidget({ profile }: ProfileWidgetProps) {
+export function MilestonesWidget({ profile }: Readonly<ProfileWidgetProps>) {
   return (
     <WidgetCard icon="🏆" title="Étapes & Succès" wide>
       <div className="up-milestones-list">
@@ -21,9 +21,7 @@ export function MilestonesWidget({ profile }: ProfileWidgetProps) {
   );
 }
 
-import type { Milestone } from '../types';
-
-function MilestoneItem({ milestone }: { milestone: Milestone }) {
+function MilestoneItem({ milestone }: Readonly<{ milestone: Milestone }>) {
   return (
     <div className={`up-milestone ${milestone.achieved ? 'up-milestone--achieved' : ''}`}>
       <span className="up-milestone-icon">{milestone.icon}</span>

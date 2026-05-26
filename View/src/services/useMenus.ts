@@ -88,7 +88,7 @@ export function useMenus(initialFilters: MenuFilters = {}, initialDelayMs = 0): 
       setMenus(menuResult.menus);
       setMeta(menuResult.meta);
 
-      window.setTimeout(() => {
+      globalThis.setTimeout(() => {
         void Promise.all([
           menuService
             .getThemes()
@@ -110,8 +110,8 @@ export function useMenus(initialFilters: MenuFilters = {}, initialDelayMs = 0): 
 
   // Initial fetch — stable refetch reference, no re-runs
   useEffect(() => {
-    const timer = window.setTimeout(refetch, initialDelayMs);
-    return () => window.clearTimeout(timer);
+    const timer = globalThis.setTimeout(refetch, initialDelayMs);
+    return () => globalThis.clearTimeout(timer);
   }, [initialDelayMs, refetch]);
 
   return {

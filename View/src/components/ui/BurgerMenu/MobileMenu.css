@@ -5,6 +5,10 @@
 .mobile-menu-overlay {
   position: fixed;
   inset: 0;
+  border: 0;
+  color: inherit;
+  margin: 0;
+  padding: 0;
   background: var(--color-black-50);
   backdrop-filter: blur(4px);
   z-index: var(--z-modal-backdrop);

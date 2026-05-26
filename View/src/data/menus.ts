@@ -56,14 +56,6 @@ export const FALLBACK_IMAGE = '/menu-fallback-640.webp';
 export const menus: Menu[] = [];
 
 /**
- * Get menu by ID (fallback, prefer API)
- * @deprecated Use menuService.getMenuById() instead
- */
-export function getMenuById(id: string): Menu | undefined {
-  return menus.find((menu) => menu.id === id);
-}
-
-/**
  * Get all themes (fallback, prefer API)
  * @deprecated Use menuService.getThemes() instead
  */
@@ -87,18 +79,3 @@ export function getAllDietaryTypes(): DietaryType[] {
   ];
 }
 
-/**
- * Filter menus by theme (fallback)
- * @deprecated Use API filters instead
- */
-export function getMenusByTheme(theme: string): Menu[] {
-  return menus.filter((menu) => menu.theme === theme);
-}
-
-/**
- * Filter menus by dietary type (fallback)
- * @deprecated Use API filters instead
- */
-export function getMenusByDietary(dietary: DietaryType): Menu[] {
-  return menus.filter((menu) => menu.dietary.includes(dietary));
-}

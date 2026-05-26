@@ -19,7 +19,7 @@ const FILTER_OPTIONS: { type: ActivityType; label: string; icon: string }[] = [
   { type: 'alert', label: 'Alertes', icon: '🚨' },
 ];
 
-export function ActivityFilter({ activeFilters, onFilterChange }: ActivityFilterProps) {
+export function ActivityFilter({ activeFilters, onFilterChange }: Readonly<ActivityFilterProps>) {
   const handleToggle = (type: ActivityType) => {
     const newFilters = activeFilters.includes(type)
       ? activeFilters.filter((t) => t !== type)

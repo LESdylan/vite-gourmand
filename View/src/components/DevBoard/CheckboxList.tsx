@@ -302,7 +302,7 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
   disabled = false,
   showCount = false,
   singleSelect = false,
-}: CheckboxListProps<T>) {
+}: Readonly<CheckboxListProps<T>>) {
   const [searchTerm, setSearchTerm] = React.useState('');
 
   // Filter items based on search
@@ -359,6 +359,9 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
   const someSelected = useMemo(() => {
     return selected.length > 0 && !allSelected;
   }, [selected, allSelected]);
+  const showEmptyList = filteredItems.length === 0;
+  const showGroupedList = showEmptyList === false && Boolean(groupBy);
+  const showFlatList = showEmptyList === false && Boolean(groupBy) === false;
 
   // Render a single checkbox item
   const renderCheckboxItem = (item: T) => {
@@ -388,28 +391,21 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
     };
 
     return (
-      <div
-        key={item.id}
-        style={itemStyle}
-        onClick={() => !isDisabled && toggleItem(item.id)}
-        role="checkbox"
-        aria-checked={checked}
-        aria-disabled={isDisabled}
-        tabIndex={isDisabled ? -1 : 0}
-        onKeyDown={(e) => {
-          if (e.key === ' ' || e.key === 'Enter') {
-            e.preventDefault();
-            if (!isDisabled) toggleItem(item.id);
-          }
-        }}
-      >
-        <div style={checkboxStyle}>
+      <label key={item.id} style={itemStyle}>
+        <input
+          type={singleSelect ? 'radio' : 'checkbox'}
+          checked={checked}
+          disabled={isDisabled}
+          onChange={() => toggleItem(item.id)}
+          style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+        />
+        <span style={checkboxStyle} aria-hidden="true">
           {checked && (
             <div style={styles.checkmark}>
               <CheckIcon />
             </div>
           )}
-        </div>
+        </span>
 
         {item.icon && <div style={{ flexShrink: 0 }}>{item.icon}</div>}
 
@@ -419,7 +415,7 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
         </div>
 
         {item.badge !== undefined && <span style={styles.badge}>{item.badge}</span>}
-      </div>
+      </label>
     );
   };
 
@@ -461,7 +457,14 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
                 ...(disabled && { cursor: 'not-allowed', opacity: 0.5 }),
               }}
             >
-              <div
+              <input
+                type="checkbox"
+                checked={allSelected}
+                disabled={disabled}
+                onChange={toggleAll}
+                style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+              />
+              <span
                 style={{
                   ...styles.checkbox,
                   width: '16px',
@@ -472,7 +475,7 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
                     borderColor: accentColor,
                   }),
                 }}
-                onClick={toggleAll}
+                aria-hidden="true"
               >
                 {(allSelected || someSelected) && (
                   <div style={{ ...styles.checkmark, width: '8px', height: '8px' }}>
@@ -483,8 +486,8 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
                     )}
                   </div>
                 )}
-              </div>
-              <span onClick={toggleAll}>{selectAllLabel}</span>
+              </span>
+              <span>{selectAllLabel}</span>
             </label>
           )}
           {showCount && (
@@ -497,19 +500,21 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
 
       {/* Items list */}
       <div style={{ ...styles.list, ...(maxHeight && { maxHeight, overflowY: 'auto' }) }}>
-        {filteredItems.length === 0 ? (
+        {showEmptyList && (
           <div style={styles.empty}>
             <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📭</span>
             <span>{emptyMessage}</span>
           </div>
-        ) : groupBy ? (
+        )}
+        {showGroupedList && (
           Object.entries(groupedItems).map(([group, groupItems]) => (
             <React.Fragment key={group}>
               {group && <div style={styles.groupHeader}>{group}</div>}
               {groupItems.map(renderCheckboxItem)}
             </React.Fragment>
           ))
-        ) : (
+        )}
+        {showFlatList && (
           filteredItems.map(renderCheckboxItem)
         )}
       </div>

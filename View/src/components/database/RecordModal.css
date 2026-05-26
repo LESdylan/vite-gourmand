@@ -3,6 +3,10 @@
 .record-modal-overlay {
   position: fixed;
   inset: 0;
+  border: 0;
+  color: inherit;
+  margin: 0;
+  padding: 0;
   background: var(--color-bg-overlay-strong);
   backdrop-filter: blur(4px);
   display: flex;

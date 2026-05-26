@@ -490,17 +490,17 @@
 
 .ranking-item:nth-child(1) .ranking-position {
   background: linear-gradient(135deg, #ffd700, #ffb300);
-  color: white;
+  color: #1A1A1A;
 }
 
 .ranking-item:nth-child(2) .ranking-position {
   background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
-  color: white;
+  color: #1A1A1A;
 }
 
 .ranking-item:nth-child(3) .ranking-position {
   background: linear-gradient(135deg, #cd7f32, #b87333);
-  color: white;
+  color: #1A1A1A;
 }
 
 .ranking-name {

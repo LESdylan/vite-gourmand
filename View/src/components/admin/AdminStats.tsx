@@ -58,10 +58,11 @@ interface StatCardProps {
   variant?: 'success' | 'warning' | 'error';
 }
 
-function StatCard({ label, value, change, icon, variant }: StatCardProps) {
+function StatCard({ label, value, change, icon, variant }: Readonly<StatCardProps>) {
   const isPositive = change.startsWith('+');
+  const variantClass = variant ? `stat-card--${variant}` : '';
   return (
-    <div className={`stat-card ${variant ? `stat-card--${variant}` : ''}`}>
+    <div className={`stat-card ${variantClass}`}>
       <div className="stat-icon">{icon}</div>
       <div className="stat-content">
         <span className="stat-value">{value}</span>
@@ -77,12 +78,12 @@ function RankingItem({
   name,
   count,
   maxCount,
-}: {
+}: Readonly<{
   rank: number;
   name: string;
   count: number;
   maxCount: number;
-}) {
+}>) {
   const percentage = (count / maxCount) * 100;
   return (
     <div className="ranking-item">

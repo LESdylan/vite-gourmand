@@ -218,7 +218,7 @@ export function ClientLoyalty() {
 
 /* ─── Sub-components ─── */
 
-function TierOverview({ currentTier }: { currentTier: string }) {
+function TierOverview({ currentTier }: Readonly<{ currentTier: string }>) {
   const tiers = [
     {
       id: 'bronze',
@@ -282,15 +282,16 @@ function RewardsView({
   points,
   onRedeem,
   redeemLoading,
-}: {
+}: Readonly<{
   points: number;
   onRedeem: (id: string, cost: number) => void;
   redeemLoading: string | null;
-}) {
+}>) {
   return (
     <div className="loyalty-rewards-grid">
       {REWARDS_CATALOG.map((reward) => {
         const canAfford = points >= reward.pointsCost;
+        const buttonLabel = getRewardButtonLabel(redeemLoading === reward.id, canAfford);
         return (
           <div
             key={reward.id}
@@ -306,7 +307,7 @@ function RewardsView({
                 disabled={!canAfford || redeemLoading === reward.id}
                 onClick={() => onRedeem(reward.id, reward.pointsCost)}
               >
-                {redeemLoading === reward.id ? '…' : canAfford ? 'Échanger' : '🔒'}
+                {buttonLabel}
               </button>
             </div>
           </div>
@@ -316,7 +317,13 @@ function RewardsView({
   );
 }
 
-function TransactionHistory({ transactions }: { transactions: LoyaltyTransaction[] }) {
+function getRewardButtonLabel(isLoading: boolean, canAfford: boolean): string {
+  if (isLoading) return '…';
+  if (canAfford) return 'Échanger';
+  return '🔒';
+}
+
+function TransactionHistory({ transactions }: Readonly<{ transactions: LoyaltyTransaction[] }>) {
   if (transactions.length === 0) {
     return (
       <div className="client-empty">

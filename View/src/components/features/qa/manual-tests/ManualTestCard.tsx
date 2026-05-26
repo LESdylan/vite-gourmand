@@ -13,7 +13,7 @@ interface ManualTestCardProps {
   onSelect?: () => void;
 }
 
-export function ManualTestCard({ test, onSelect }: ManualTestCardProps) {
+export function ManualTestCard({ test, onSelect }: Readonly<ManualTestCardProps>) {
   const statusMap: Record<string, BadgeStatus> = {
     pending: 'pending',
     passed: 'success',

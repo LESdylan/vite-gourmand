@@ -10,7 +10,7 @@ import { getUserProfile, canViewDetailedProfile } from '../Search/searchService'
 import type { UserProfileData, UserProfileProps } from './types';
 import './UserProfile.css';
 
-export function UserProfile({ userId, onClose, isModal = false }: UserProfileProps) {
+export function UserProfile({ userId, onClose, isModal = false }: Readonly<UserProfileProps>) {
   const { user: currentUser } = usePortalAuth();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,10 +34,10 @@ export function UserProfile({ userId, onClose, isModal = false }: UserProfilePro
         }
 
         // Check visibility permissions
-        const viewerRole = currentUser?.role as UserProfileData['role'] | undefined;
+        const viewerRole = currentUser?.role;
         const canView = canViewDetailedProfile(
           viewerRole,
-          data.role as UserProfileData['role'],
+          data.role,
           isSelf,
         );
 
@@ -255,16 +255,15 @@ export function UserProfile({ userId, onClose, isModal = false }: UserProfilePro
 function ProfileWrapper({
   children,
   isModal,
-  onClose,
-}: {
+}: Readonly<{
   children: React.ReactNode;
   isModal: boolean;
   onClose?: () => void;
-}) {
+}>) {
   if (isModal) {
     return (
       <>
-        <div className="user-profile-backdrop" onClick={onClose} />
+        <div className="user-profile-backdrop" />
         <div className="user-profile user-profile--modal">{children}</div>
       </>
     );

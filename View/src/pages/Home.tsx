@@ -54,7 +54,7 @@ type Review = {
 // ========================================
 // FEATURES SECTION
 // ========================================
-function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
+function FeaturesSection({ yearsOfExperience }: Readonly<{ yearsOfExperience: number }>) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -121,7 +121,7 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
           <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-[#1A1A1A] mb-4 sm:mb-5 leading-tight">
             Pourquoi choisir <span className="text-[#722F37]">Vite & Gourmand</span> ?
           </h2>
-          <p className="text-[clamp(0.875rem,1.5vw,1rem)] text-[#1A1A1A]/60 leading-relaxed">
+          <p className="text-[clamp(0.875rem,1.5vw,1rem)] text-[#5c5c5c] leading-relaxed">
             Notre passion pour la gastronomie et notre engagement envers l'excellence font de chaque
             événement un moment unique.
           </p>
@@ -133,7 +133,7 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
             const Icon = feature.icon;
             return (
               <Card
-                key={index}
+                key={feature.title}
                 className={`group bg-white border-0 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1 overflow-hidden rounded-2xl ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
@@ -149,7 +149,7 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
                   <h3 className="text-lg sm:text-xl font-bold text-[#1A1A1A] mb-2 sm:mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-[#1A1A1A]/60 leading-relaxed">{feature.description}</p>
+                  <p className="text-sm text-[#5c5c5c] leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             );
@@ -166,10 +166,10 @@ function FeaturesSection({ yearsOfExperience }: { yearsOfExperience: number }) {
 function AboutSection({
   setCurrentPage,
   siteInfo,
-}: {
+}: Readonly<{
   setCurrentPage: (page: Page) => void;
   siteInfo: SiteInfo | null;
-}) {
+}>) {
   const ownerNames = siteInfo?.owners?.map((o) => o.firstName).join(' et ') || 'Julie et José';
   const years = siteInfo?.yearsOfExperience ?? 25;
   const [isVisible, setIsVisible] = useState(false);
@@ -220,7 +220,7 @@ function AboutSection({
                   </div>
                   <span className="text-2xl sm:text-3xl font-bold text-[#722F37]">{years}</span>
                 </div>
-                <p className="text-xs sm:text-sm text-[#1A1A1A]/60">Années d'expérience</p>
+                <p className="text-xs sm:text-sm text-[#5c5c5c]">Années d'expérience</p>
               </div>
             </div>
             {/* Decorative elements */}
@@ -290,7 +290,7 @@ function AboutSection({
 // ========================================
 // SERVICES SECTION
 // ========================================
-function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => void }) {
+function ServicesSection({ setCurrentPage }: Readonly<{ setCurrentPage: (page: Page) => void }>) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -358,7 +358,7 @@ function ServicesSection({ setCurrentPage }: { setCurrentPage: (page: Page) => v
           {services.map((service, index) => (
             <button
               type="button"
-              key={index}
+              key={service.title}
               className={`group relative overflow-hidden rounded-2xl sm:rounded-3xl cursor-pointer transition-all duration-700 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D4AF37] ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
@@ -407,11 +407,11 @@ function TestimonialsSection({
   reviews,
   loading,
   stats,
-}: {
+}: Readonly<{
   reviews: Review[];
   loading: boolean;
   stats: ReviewStats | null;
-}) {
+}>) {
   const [isVisible, setIsVisible] = useState(false);
   const isPausedRef = useRef(false);
   const carouselVisibleRef = useRef(false);
@@ -434,7 +434,7 @@ function TestimonialsSection({
   // Infinite scroll via requestAnimationFrame — runs once, reads isPausedRef
   useEffect(() => {
     if (!trackRef.current || reviews.length === 0) return;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const reducedMotion = globalThis.matchMedia('(prefers-reduced-motion: reduce)');
     if (reducedMotion.matches) return;
 
     let offset = 0;
@@ -473,6 +473,8 @@ function TestimonialsSection({
   const avgRating = stats?.averageRating ?? 0;
   const reviewCount = stats?.reviewCount ?? 0;
   const satisfaction = stats?.satisfactionPercent ?? 0;
+  const showReviews = loading === false && reviews.length > 0;
+  const showEmptyReviews = loading === false && reviews.length === 0;
 
   return (
     <section ref={sectionRef} className="py-12 sm:py-16 lg:py-20 bg-[#FFF8F0] overflow-hidden">
@@ -512,13 +514,7 @@ function TestimonialsSection({
                   {[1, 2, 3, 4, 5].map((i) => (
                     <Star
                       key={i}
-                      className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                        i <= Math.round(avgRating)
-                          ? 'text-[#D4AF37] fill-[#D4AF37]'
-                          : i - 0.5 <= avgRating
-                            ? 'text-[#D4AF37] fill-[#D4AF37]/50'
-                            : 'text-[#1A1A1A]/10'
-                      }`}
+                      className={`w-5 h-5 sm:w-6 sm:h-6 ${getAverageStarClass(i, avgRating)}`}
                     />
                   ))}
                 </div>
@@ -552,12 +548,13 @@ function TestimonialsSection({
       </div>
 
       {/* ── Infinite scroll carousel ── */}
-      {loading ? (
+      {loading && (
         <div className="flex justify-center py-12">
           <div className="w-10 h-10 border-4 border-[#722F37]/20 border-t-[#722F37] rounded-full animate-spin" />
         </div>
-      ) : reviews.length > 0 ? (
-        <div
+      )}
+      {showReviews && (
+        <section
           className={`relative transition-all duration-700 ${
             isVisible ? 'opacity-100' : 'opacity-0'
           }`}
@@ -568,7 +565,6 @@ function TestimonialsSection({
           onMouseLeave={() => {
             isPausedRef.current = false;
           }}
-          role="region"
           aria-label="Avis clients — survolez pour mettre en pause le défilement"
         >
           {/* Gradient fade edges */}
@@ -590,11 +586,11 @@ function TestimonialsSection({
                   {/* Top row: rating + badge */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-0.5">
-                      {[...Array(5)].map((_, i) => (
+                      {[1, 2, 3, 4, 5].map((star) => (
                         <Star
-                          key={i}
+                          key={star}
                           className={`w-4 h-4 transition-colors ${
-                            i < review.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-[#1A1A1A]/8'
+                            star <= review.rating ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-[#1A1A1A]/8'
                           }`}
                         />
                       ))}
@@ -633,14 +629,21 @@ function TestimonialsSection({
               </article>
             ))}
           </div>
-        </div>
-      ) : (
+        </section>
+      )}
+      {showEmptyReviews && (
         <div className="text-center py-12">
           <p className="text-[#1A1A1A]/65 text-sm">Aucun avis pour le moment.</p>
         </div>
       )}
     </section>
   );
+}
+
+function getAverageStarClass(starIndex: number, avgRating: number): string {
+  if (starIndex <= Math.round(avgRating)) return 'text-[#D4AF37] fill-[#D4AF37]';
+  if (starIndex - 0.5 <= avgRating) return 'text-[#D4AF37] fill-[#D4AF37]/50';
+  return 'text-[#1A1A1A]/10';
 }
 
 // ========================================
@@ -712,7 +715,7 @@ function ValuesSection() {
                 const Icon = value.icon;
                 return (
                   <div
-                    key={index}
+                    key={value.title}
                     className={`flex gap-4 transition-all duration-700 ${
                       isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
                     }`}
@@ -725,7 +728,7 @@ function ValuesSection() {
                       <h3 className="font-semibold text-[#1A1A1A] text-base sm:text-lg mb-1">
                         {value.title}
                       </h3>
-                      <p className="text-sm text-[#1A1A1A]/60 leading-relaxed">
+                      <p className="text-sm text-[#5c5c5c] leading-relaxed">
                         {value.description}
                       </p>
                     </div>
@@ -769,7 +772,7 @@ function ValuesSection() {
 // ========================================
 // MAIN HOMEPAGE COMPONENT
 // ========================================
-export default function HomePage({ setCurrentPage }: HomePageProps) {
+export default function HomePage({ setCurrentPage }: Readonly<HomePageProps>) {
   const { siteInfo, reviews: rawReviews, reviewStats, loading } = usePublicData();
 
   // Map DB reviews to the component format

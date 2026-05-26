@@ -12,8 +12,8 @@ interface Props {
   onClose: () => void;
 }
 
-export function ShellModal({ isOpen, onClose }: Props) {
-  const drag = useDraggable({ x: window.innerWidth / 2 - 350, y: 80 });
+export function ShellModal({ isOpen, onClose }: Readonly<Props>) {
+  const drag = useDraggable({ x: globalThis.innerWidth / 2 - 350, y: 80 });
   const resize = useResizable({ width: 700, height: 420 });
 
   if (!isOpen) return null;

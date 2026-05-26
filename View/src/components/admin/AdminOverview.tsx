@@ -60,10 +60,11 @@ interface StatCardProps {
   variant?: 'warning' | 'success' | 'error';
 }
 
-function StatCard({ icon, label, value, trend, variant }: StatCardProps) {
+function StatCard({ icon, label, value, trend, variant }: Readonly<StatCardProps>) {
   const isPositive = trend.startsWith('+');
+  const variantClass = variant ? `stat-card--${variant}` : '';
   return (
-    <div className={`stat-card ${variant ? `stat-card--${variant}` : ''}`}>
+    <div className={`stat-card ${variantClass}`}>
       <div className="stat-icon">{icon}</div>
       <div className="stat-content">
         <span className="stat-value">{value}</span>
@@ -79,12 +80,12 @@ function OrderRow({
   status,
   table,
   total,
-}: {
+}: Readonly<{
   id: string;
   status: string;
   table: string;
   total: string;
-}) {
+}>) {
   const statusConfig: Record<string, { label: string; className: string }> = {
     'en-cours': { label: 'En préparation', className: 'order-card-badge--progress' },
     prêt: { label: 'Prêt', className: 'order-card-badge--ready' },

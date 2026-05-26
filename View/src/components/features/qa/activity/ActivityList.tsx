@@ -13,7 +13,7 @@ interface ActivityListProps {
   error: string | null;
 }
 
-export function ActivityList({ activities, loading, error }: ActivityListProps) {
+export function ActivityList({ activities, loading, error }: Readonly<ActivityListProps>) {
   if (loading) {
     return <div className="activity-list__loading">Chargement...</div>;
   }

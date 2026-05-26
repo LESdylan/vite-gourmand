@@ -11,7 +11,7 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
-export function Pagination({ page, pageSize, total, onPageChange }: Props) {
+export function Pagination({ page, pageSize, total, onPageChange }: Readonly<Props>) {
   const totalPages = Math.ceil(total / pageSize);
   if (totalPages <= 1 && total <= pageSize) return null;
 
@@ -37,16 +37,16 @@ export function Pagination({ page, pageSize, total, onPageChange }: Props) {
         >
           ←
         </button>
-        {pages.map((p, i) =>
-          p === '...' ? (
-            <span key={`ellipsis-${i}`} className="db-pagination-ellipsis">
+        {pages.map((p) =>
+          typeof p === 'string' ? (
+            <span key={p} className="db-pagination-ellipsis">
               …
             </span>
           ) : (
             <button
               key={p}
               className={p === page ? 'active' : ''}
-              onClick={() => onPageChange(p as number)}
+              onClick={() => onPageChange(p)}
             >
               {p}
             </button>
@@ -65,10 +65,12 @@ export function Pagination({ page, pageSize, total, onPageChange }: Props) {
   );
 }
 
-function buildPageNumbers(current: number, total: number): (number | string)[] {
+type PageToken = number | 'start-ellipsis' | 'end-ellipsis';
+
+function buildPageNumbers(current: number, total: number): PageToken[] {
   if (total <= 0) return [1];
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  if (current <= 3) return [1, 2, 3, 4, '...', total];
-  if (current >= total - 2) return [1, '...', total - 3, total - 2, total - 1, total];
-  return [1, '...', current - 1, current, current + 1, '...', total];
+  if (current <= 3) return [1, 2, 3, 4, 'end-ellipsis', total];
+  if (current >= total - 2) return [1, 'start-ellipsis', total - 3, total - 2, total - 1, total];
+  return [1, 'start-ellipsis', current - 1, current, current + 1, 'end-ellipsis', total];
 }

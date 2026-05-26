@@ -245,7 +245,7 @@ const ORDER_STEPS = [
   'delivered',
 ];
 
-function OrderProgress({ status }: { status: string }) {
+function OrderProgress({ status }: Readonly<{ status: string }>) {
   const currentIdx = ORDER_STEPS.indexOf(status);
   return (
     <div className="client-progress-tracker">

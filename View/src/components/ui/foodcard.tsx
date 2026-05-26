@@ -12,11 +12,9 @@ export interface FoodCardProps {
 export const FoodCard: React.FC<FoodCardProps> = ({ name, description, price, imageUrl }) => {
   const [randomImage, setRandomImage] = useState<string | null>(null);
 
-  {
-    useEffect(() => {
-      if (!imageUrl) setRandomImage(FALLBACK_IMAGE_URL);
-    }, [imageUrl]);
-  }
+  useEffect(() => {
+    if (!imageUrl) setRandomImage(FALLBACK_IMAGE_URL);
+  }, [imageUrl]);
   return (
     <div className={styles.card}>
       <div className={styles.imageWrapper}>

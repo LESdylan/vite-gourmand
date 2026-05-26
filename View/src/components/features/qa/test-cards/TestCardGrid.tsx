@@ -13,7 +13,7 @@ interface TestCardGridProps {
   onViewTest?: (id: string) => void;
 }
 
-export function TestCardGrid({ tests, onRunTest, onViewTest }: TestCardGridProps) {
+export function TestCardGrid({ tests, onRunTest, onViewTest }: Readonly<TestCardGridProps>) {
   if (tests.length === 0) {
     return (
       <div className="test-card-grid-empty">

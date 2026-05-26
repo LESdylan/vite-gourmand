@@ -6,7 +6,7 @@
 import type { ProfileWidgetProps } from '../types';
 import { WidgetCard } from './WidgetCard';
 
-export function StatsWidget({ profile }: ProfileWidgetProps) {
+export function StatsWidget({ profile }: Readonly<ProfileWidgetProps>) {
   const s = profile.stats;
   return (
     <WidgetCard icon="📊" title="Statistiques">
@@ -21,7 +21,7 @@ export function StatsWidget({ profile }: ProfileWidgetProps) {
   );
 }
 
-function Stat({ label, value, icon }: { label: string; value: string | number; icon: string }) {
+function Stat({ label, value, icon }: Readonly<{ label: string; value: string | number; icon: string }>) {
   return (
     <div className="up-stat">
       <span className="up-stat-icon">{icon}</span>

@@ -103,6 +103,8 @@ export function MetricsDashboard({
     );
   }
 
+  const passRateTrend = getPassRateTrend(passRate);
+
   return (
     <section className="metrics-dashboard">
       <MetricWidget label="Total Tests" value={totalTests} trend="stable" />
@@ -116,8 +118,14 @@ export function MetricsDashboard({
         label="Pass Rate"
         value={passRate}
         unit="%"
-        trend={passRate >= 90 ? 'down' : passRate >= 70 ? 'stable' : 'up'}
+        trend={passRateTrend}
       />
     </section>
   );
+}
+
+function getPassRateTrend(passRate: number): 'up' | 'down' | 'stable' {
+  if (passRate >= 90) return 'down';
+  if (passRate >= 70) return 'stable';
+  return 'up';
 }

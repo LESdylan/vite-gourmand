@@ -72,7 +72,7 @@ interface EmployeeOrderCardProps {
   time: string;
 }
 
-function EmployeeOrderCard({ id, table, status, items, time }: EmployeeOrderCardProps) {
+function EmployeeOrderCard({ id, table, status, items, time }: Readonly<EmployeeOrderCardProps>) {
   const isReady = status === 'ready';
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 

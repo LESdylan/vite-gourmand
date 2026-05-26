@@ -11,7 +11,7 @@ interface PageLayoutProps {
   actions?: React.ReactNode;
 }
 
-export function PageLayout({ children, title, actions }: PageLayoutProps) {
+export function PageLayout({ children, title, actions }: Readonly<PageLayoutProps>) {
   return (
     <div className="page-layout">
       {(title || actions) && <PageHeader title={title} actions={actions} />}
@@ -20,7 +20,7 @@ export function PageLayout({ children, title, actions }: PageLayoutProps) {
   );
 }
 
-function PageHeader({ title, actions }: { title?: string; actions?: React.ReactNode }) {
+function PageHeader({ title, actions }: Readonly<{ title?: string; actions?: React.ReactNode }>) {
   return (
     <div className="page-header">
       {title && <h2 className="page-title">{title}</h2>}

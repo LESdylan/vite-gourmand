@@ -33,7 +33,7 @@ export default function LazyImage({
   height,
   loading = 'lazy',
   fetchPriority = 'auto',
-}: LazyImageProps) {
+}: Readonly<LazyImageProps>) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 

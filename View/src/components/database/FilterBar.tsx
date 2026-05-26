@@ -12,7 +12,7 @@ interface Props {
   onClear: () => void;
 }
 
-export function FilterBar({ columns, searchTerm, onSearch, onClear }: Props) {
+export function FilterBar({ columns, searchTerm, onSearch, onClear }: Readonly<Props>) {
   return (
     <div className="filter-bar">
       <div className="filter-bar-search">

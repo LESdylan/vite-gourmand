@@ -10,7 +10,7 @@ interface TestInstructionsProps {
   steps: ManualTestStep[];
 }
 
-export function TestInstructions({ steps }: TestInstructionsProps) {
+export function TestInstructions({ steps }: Readonly<TestInstructionsProps>) {
   return (
     <ol className="test-instructions">
       {steps.map((step, index) => (

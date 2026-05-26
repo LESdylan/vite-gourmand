@@ -13,7 +13,7 @@ interface Props {
   onNavigate: (dir: 'up' | 'down') => void;
 }
 
-export function ShellInput({ value, prompt, loading, onChange, onSubmit, onNavigate }: Props) {
+export function ShellInput({ value, prompt, loading, onChange, onSubmit, onNavigate }: Readonly<Props>) {
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

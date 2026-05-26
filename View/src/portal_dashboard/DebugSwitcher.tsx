@@ -54,7 +54,7 @@ interface DebugPanelProps {
   onClose: () => void;
 }
 
-function DebugPanel({ activeBot, onSelect, onExit, onClose }: DebugPanelProps) {
+function DebugPanel({ activeBot, onSelect, onExit, onClose }: Readonly<DebugPanelProps>) {
   const bots = Object.entries(DEBUG_BOTS) as [BotId, DashboardUser][];
 
   return (
@@ -89,7 +89,7 @@ interface BotButtonProps {
   onClick: () => void;
 }
 
-function BotButton({ bot, isActive, onClick }: BotButtonProps) {
+function BotButton({ bot, isActive, onClick }: Readonly<BotButtonProps>) {
   const icons: Record<string, string> = {
     admin: '👔',
     employee: '👷',

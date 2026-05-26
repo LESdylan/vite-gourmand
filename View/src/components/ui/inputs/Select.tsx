@@ -29,7 +29,7 @@ export function Select({
   required = false,
   error,
   size = 'md',
-}: SelectProps) {
+}: Readonly<SelectProps>) {
   const selectClasses = buildSelectClasses(size, error);
 
   return (
@@ -70,11 +70,11 @@ function SelectLabel({
   htmlFor,
   required,
   label,
-}: {
+}: Readonly<{
   htmlFor: string;
   required: boolean;
   label: string;
-}) {
+}>) {
   return (
     <label htmlFor={htmlFor} className="select-label">
       {label}
@@ -83,7 +83,7 @@ function SelectLabel({
   );
 }
 
-function SelectError({ message }: { message: string }) {
+function SelectError({ message }: Readonly<{ message: string }>) {
   return (
     <span className="select-error-msg" role="alert">
       {message}

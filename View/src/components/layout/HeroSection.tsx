@@ -15,6 +15,31 @@ interface HeroSectionProps {
   reviewStats?: ReviewStats | null;
 }
 
+function getHeroDisplayData(siteInfo?: SiteInfo | null, reviewStats?: ReviewStats | null) {
+  const years = siteInfo?.yearsOfExperience ?? 25;
+  const eventCount = siteInfo?.eventCount ?? 0;
+  const avgRating = reviewStats?.averageRating ?? 0;
+  const reviewCount = reviewStats?.reviewCount ?? 0;
+  const satisfaction = reviewStats?.satisfactionPercent ?? 0;
+  const ownerNames = siteInfo?.owners?.map((owner) => owner.firstName).join(' et ') || 'Julie et José';
+
+  return {
+    years,
+    eventCount,
+    avgRating,
+    reviewCount,
+    satisfaction,
+    ownerNames,
+    eventValue: eventCount > 0 ? `${eventCount}+` : '–',
+    satisfactionValue: satisfaction > 0 ? `${satisfaction}%` : '–',
+    ratingValue: avgRating > 0 ? `${avgRating.toFixed(1)}/5` : '–',
+    reviewLabel: reviewCount > 0 ? `${reviewCount} avis clients vérifiés` : 'Avis clients vérifiés',
+    testimonialText: reviewCount > 0
+      ? 'Découvrez les avis de nos clients satisfaits !'
+      : 'Soyez le premier à laisser un avis !',
+  };
+}
+
 /**
  * HeroSection - Premium landing section with smooth animations
  *
@@ -37,12 +62,7 @@ export default function HeroSection({
     setMounted(true);
   }, []);
 
-  const years = siteInfo?.yearsOfExperience ?? 25;
-  const eventCount = siteInfo?.eventCount ?? 0;
-  const avgRating = reviewStats?.averageRating ?? 0;
-  const reviewCount = reviewStats?.reviewCount ?? 0;
-  const satisfaction = reviewStats?.satisfactionPercent ?? 0;
-  const ownerNames = siteInfo?.owners?.map((o) => o.firstName).join(' et ') || 'Julie et José';
+  const hero = getHeroDisplayData(siteInfo, reviewStats);
 
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden bg-[#1A1A1A]">
@@ -123,8 +143,8 @@ export default function HeroSection({
               }`}
               style={{ transitionDelay: '300ms' }}
             >
-              {ownerNames} mettent leur{' '}
-              <span className="text-[#D4AF37] font-medium">{years} années d'expertise</span> au
+              {hero.ownerNames} mettent leur{' '}
+              <span className="text-[#D4AF37] font-medium">{hero.years} années d'expertise</span> au
               service de vos événements. Une cuisine raffinée, des moments inoubliables.
             </p>
 
@@ -177,17 +197,15 @@ export default function HeroSection({
                     {[1, 2, 3, 4, 5].map((starValue) => (
                       <Star
                         key={starValue}
-                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${starValue <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
+                        className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${starValue <= Math.round(hero.avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
                       />
                     ))}
                     <span className="text-white/80 text-sm ml-1.5">
-                      {avgRating > 0 ? `${avgRating.toFixed(1)}/5` : '–'}
+                      {hero.ratingValue}
                     </span>
                   </div>
                   <p className="text-white/50 text-xs sm:text-sm">
-                    {reviewCount > 0
-                      ? `${reviewCount} avis clients vérifiés`
-                      : 'Avis clients vérifiés'}
+                    {hero.reviewLabel}
                   </p>
                 </div>
               </div>
@@ -214,7 +232,7 @@ export default function HeroSection({
                   <div className="w-11 h-11 bg-[#D4AF37]/20 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
                     <Award className="w-5 h-5 text-[#D4AF37]" />
                   </div>
-                  <div className="text-3xl font-bold text-white mb-0.5">{years}+</div>
+                  <div className="text-3xl font-bold text-white mb-0.5">{hero.years}+</div>
                   <p className="text-white/50 text-sm">Années d'expérience</p>
                 </div>
 
@@ -224,7 +242,7 @@ export default function HeroSection({
                     <Calendar className="w-5 h-5 text-[#FFF8F0]" />
                   </div>
                   <div className="text-3xl font-bold text-white mb-0.5">
-                    {eventCount > 0 ? `${eventCount}+` : '–'}
+                    {hero.eventValue}
                   </div>
                   <p className="text-white/50 text-sm">Événements réalisés</p>
                 </div>
@@ -235,7 +253,7 @@ export default function HeroSection({
                     <Users className="w-5 h-5 text-[#8fad6a]" />
                   </div>
                   <div className="text-3xl font-bold text-white mb-0.5">
-                    {satisfaction > 0 ? `${satisfaction}%` : '–'}
+                    {hero.satisfactionValue}
                   </div>
                   <p className="text-white/50 text-sm">Clients satisfaits</p>
                 </div>
@@ -246,22 +264,20 @@ export default function HeroSection({
                     {[1, 2, 3, 4, 5].map((starValue) => (
                       <Star
                         key={starValue}
-                        className={`w-3 h-3 ${starValue <= Math.round(avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
+                        className={`w-3 h-3 ${starValue <= Math.round(hero.avgRating) ? 'text-[#D4AF37] fill-[#D4AF37]' : 'text-white/20'}`}
                       />
                     ))}
                   </div>
                   <p className="text-white/90 text-sm mb-3 leading-relaxed line-clamp-3">
                     "
-                    {reviewCount > 0
-                      ? 'Découvrez les avis de nos clients satisfaits !'
-                      : 'Soyez le premier à laisser un avis !'}
+                    {hero.testimonialText}
                     "
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-[#D4AF37]/30 flex items-center justify-center text-white text-xs font-medium">
                       <Star className="w-3 h-3 fill-current" />
                     </div>
-                    <span className="text-white/60 text-xs">{reviewCount} avis vérifiés</span>
+                    <span className="text-white/60 text-xs">{hero.reviewCount} avis vérifiés</span>
                   </div>
                 </div>
               </div>
@@ -277,10 +293,10 @@ export default function HeroSection({
           style={{ transitionDelay: '700ms' }}
         >
           {[
-            { value: `${years}+`, label: 'Années', icon: Award },
-            { value: eventCount > 0 ? `${eventCount}+` : '–', label: 'Événements', icon: Calendar },
+            { value: `${hero.years}+`, label: 'Années', icon: Award },
+            { value: hero.eventValue, label: 'Événements', icon: Calendar },
             {
-              value: satisfaction > 0 ? `${satisfaction}%` : '–',
+              value: hero.satisfactionValue,
               label: 'Satisfaits',
               icon: Users,
             },
@@ -307,7 +323,7 @@ export default function HeroSection({
         }`}
         style={{ transitionDelay: '800ms' }}
       >
-        <span className="text-white/30 text-[10px] tracking-[0.2em] uppercase">Scroll</span>
+        <span className="text-white/60 text-[10px] tracking-[0.2em] uppercase">Scroll</span>
         <div className="w-5 h-8 border border-white/20 rounded-full flex justify-center">
           <div className="w-1 h-2.5 bg-[#D4AF37] rounded-full mt-1.5 animate-bounce" />
         </div>

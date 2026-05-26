@@ -10,7 +10,7 @@ interface BurgerIconProps {
   className?: string;
 }
 
-export function BurgerIcon({ isOpen, onClick, className = '' }: BurgerIconProps) {
+export function BurgerIcon({ isOpen, onClick, className = '' }: Readonly<BurgerIconProps>) {
   return (
     <button
       type="button"

@@ -13,7 +13,7 @@ interface AutoTestRowProps {
   isEven?: boolean;
 }
 
-export function AutoTestRow({ test, isEven }: AutoTestRowProps) {
+export function AutoTestRow({ test, isEven }: Readonly<AutoTestRowProps>) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const statusMap = {

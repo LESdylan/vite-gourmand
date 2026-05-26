@@ -28,7 +28,7 @@ export function CategoryItem({
   isActive,
   collapsed = false,
   onClick,
-}: CategoryItemProps) {
+}: Readonly<CategoryItemProps>) {
   const classes = buildClasses(isActive);
 
   return (
@@ -50,7 +50,7 @@ function buildClasses(isActive: boolean): string {
   return classes.join(' ');
 }
 
-function CategoryIcon({ iconType }: { iconType: string }) {
+function CategoryIcon({ iconType }: Readonly<{ iconType: string }>) {
   const iconProps = { size: 18, className: 'category-svg-icon' };
 
   switch (iconType) {
@@ -75,10 +75,10 @@ function CategoryIcon({ iconType }: { iconType: string }) {
   }
 }
 
-function CategoryLabel({ label }: { label: string }) {
+function CategoryLabel({ label }: Readonly<{ label: string }>) {
   return <span className="category-label">{label}</span>;
 }
 
-function CategoryCount({ count }: { count: number }) {
+function CategoryCount({ count }: Readonly<{ count: number }>) {
   return <span className="category-count">{count}</span>;
 }

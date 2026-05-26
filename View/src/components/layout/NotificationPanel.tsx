@@ -43,8 +43,8 @@ interface NotificationPanelProps {
   topOffset: number;
 }
 
-export default function NotificationPanel({ topOffset }: NotificationPanelProps) {
-  const { notifications, unreadCount, isOpen, dismissedIds, close, dismiss, read, readAll } =
+export default function NotificationPanel({ topOffset }: Readonly<NotificationPanelProps>) {
+  const { notifications, unreadCount, isOpen, dismissedIds, close, dismiss, readAll } =
     useNotifications();
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -78,14 +78,13 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
   if (!isOpen) return null;
 
   return (
-    <div
+    <section
       ref={panelRef}
       className="fixed right-4 sm:right-6 z-[55] w-[min(380px,calc(100vw-2rem))]"
       style={{
         top: `${topOffset + 8}px`,
         animation: 'notifPanelIn 200ms ease-out both',
       }}
-      role="region"
       aria-label="Notifications"
     >
       <div className="bg-white rounded-xl shadow-2xl shadow-black/10 border border-[#1A1A1A]/5 overflow-hidden">
@@ -132,20 +131,14 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
             visible.map((notif) => {
               const cfg = getTypeConfig(notif.type);
               const Icon = cfg.icon;
+              const unreadClass = notif.is_read ? '' : 'bg-[#722F37]/[0.02]';
+              const titleClass = notif.is_read
+                ? 'font-medium text-[#1A1A1A]/70'
+                : 'font-semibold text-[#1A1A1A]';
               return (
-                <div
+                <article
                   key={notif.id}
-                  className={`group relative flex gap-3 px-4 py-3 border-b border-[#1A1A1A]/[0.03] transition-colors hover:bg-[#FFF8F0]/60 ${
-                    !notif.is_read ? 'bg-[#722F37]/[0.02]' : ''
-                  }`}
-                  onClick={() => {
-                    if (!notif.is_read) read(notif.id);
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !notif.is_read) read(notif.id);
-                  }}
+                  className={`group relative flex gap-3 px-4 py-3 border-b border-[#1A1A1A]/[0.03] transition-colors hover:bg-[#FFF8F0]/60 ${unreadClass}`}
                 >
                   {/* Icon */}
                   <div
@@ -157,9 +150,7 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     {notif.title && (
-                      <p
-                        className={`text-sm leading-tight ${!notif.is_read ? 'font-semibold text-[#1A1A1A]' : 'font-medium text-[#1A1A1A]/70'}`}
-                      >
+                      <p className={`text-sm leading-tight ${titleClass}`}>
                         {notif.title}
                       </p>
                     )}
@@ -189,7 +180,7 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
                   >
                     <X className="w-3.5 h-3.5 sm:w-3 sm:h-3 text-[#1A1A1A]/30" />
                   </button>
-                </div>
+                </article>
               );
             })
           )}
@@ -202,6 +193,6 @@ export default function NotificationPanel({ topOffset }: NotificationPanelProps)
           to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-    </div>
+    </section>
   );
 }

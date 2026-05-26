@@ -6,7 +6,7 @@
 import type { ProfileWidgetProps } from '../types';
 import { WidgetCard } from './WidgetCard';
 
-export function RoleInfoWidget({ profile }: ProfileWidgetProps) {
+export function RoleInfoWidget({ profile }: Readonly<ProfileWidgetProps>) {
   return (
     <WidgetCard icon="🛠️" title="Informations professionnelles">
       <div className="up-field-list">
@@ -19,7 +19,7 @@ export function RoleInfoWidget({ profile }: ProfileWidgetProps) {
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div className="up-field">
       <span className="up-field-label">{label}</span>

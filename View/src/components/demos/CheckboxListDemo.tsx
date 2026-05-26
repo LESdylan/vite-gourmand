@@ -148,7 +148,8 @@ export function CustomRenderDemo() {
         selected={selected}
         onChange={setSelected}
         renderItem={(item, checked, toggle) => (
-          <div
+          <button
+            type="button"
             key={item.id}
             onClick={toggle}
             style={{
@@ -166,7 +167,7 @@ export function CustomRenderDemo() {
             <span style={{ fontSize: 24 }}>{item.icon as string}</span>
             <span style={{ fontWeight: 600 }}>{item.label}</span>
             {checked && <span style={{ marginLeft: 'auto', color: '#3b82f6' }}>✓</span>}
-          </div>
+          </button>
         )}
       />
     </div>

@@ -22,7 +22,7 @@ export function DataTable({
   onDelete,
   canUpdate = true,
   canDelete = true,
-}: Props) {
+}: Readonly<Props>) {
   if (records.length === 0) {
     return <div className="data-table-empty">Aucun enregistrement trouvé</div>;
   }
@@ -121,13 +121,22 @@ function formatCell(value: unknown, col: TableColumn): string {
   }
 
   // Default - truncate long strings
-  const str = String(value);
+  const str = stringifyDisplayValue(value);
   return str.length > 50 ? str.slice(0, 47) + '…' : str;
 }
 
 function formatCellTitle(value: unknown, col: TableColumn): string {
   if (value === null || value === undefined || isSensitiveColumn(col.name)) return '';
-  return String(value);
+  if (typeof value === 'object') return JSON.stringify(value);
+  return stringifyDisplayValue(value);
+}
+
+function stringifyDisplayValue(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
+  }
+  return JSON.stringify(value);
 }
 
 function isSensitiveColumn(name: string): boolean {

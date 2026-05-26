@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePortalAuth } from '../../../portal_dashboard/PortalAuthContext';
-import type { SearchResult, UserVisibility } from './types';
+import type { SearchResult } from './types';
 import { searchUsers, canViewUser } from './searchService';
 import './SearchBar.css';
 
@@ -18,7 +18,7 @@ interface SearchBarProps {
 export function SearchBar({
   placeholder = 'Rechercher un utilisateur...',
   onSelectUser,
-}: SearchBarProps) {
+}: Readonly<SearchBarProps>) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,6 +28,8 @@ export function SearchBar({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { user: currentUser } = usePortalAuth();
+  const showResults = loading === false && results.length > 0;
+  const showEmpty = loading === false && results.length === 0;
 
   // Debounced search
   useEffect(() => {
@@ -43,7 +45,7 @@ export function SearchBar({
         const searchResults = await searchUsers(query);
         // Filter results based on visibility rules
         const visibleResults = searchResults.filter((user: SearchResult) =>
-          canViewUser(currentUser?.role as UserVisibility, user.role as UserVisibility),
+          canViewUser(currentUser?.role, user.role),
         );
         setResults(visibleResults);
         setIsOpen(true);
@@ -135,9 +137,9 @@ export function SearchBar({
     if (!query) return text;
     const regex = new RegExp(`(${query})`, 'gi');
     const parts = text.split(regex);
-    return parts.map((part, i) =>
+    return parts.map((part) =>
       regex.test(part) ? (
-        <mark key={i} className="search-result-highlight">
+        <mark key={part} className="search-result-highlight">
           {part}
         </mark>
       ) : (
@@ -176,7 +178,6 @@ export function SearchBar({
           onKeyDown={handleKeyDown}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
           aria-label="Rechercher des utilisateurs"
-          aria-expanded={isOpen}
           aria-controls="search-results"
           autoComplete="off"
         />
@@ -199,13 +200,14 @@ export function SearchBar({
       </div>
 
       {isOpen && (
-        <div ref={dropdownRef} className="search-dropdown" id="search-results" role="listbox">
-          {loading ? (
+        <div ref={dropdownRef} className="search-dropdown" id="search-results">
+          {loading && (
             <div className="search-loading">
-              <span className="search-loading-spinner" />
+              <span className="search-loading-spinner" />{' '}
               Recherche...
             </div>
-          ) : results.length > 0 ? (
+          )}
+          {showResults && (
             <>
               <div className="search-dropdown-header">
                 <span className="search-dropdown-title">Utilisateurs</span>
@@ -215,13 +217,12 @@ export function SearchBar({
               </div>
               <div className="search-results-list">
                 {results.map((user, index) => (
-                  <div
+                  <button
+                    type="button"
                     key={user.id}
                     className={`search-result-item ${index === focusedIndex ? 'search-result-item--focused' : ''}`}
                     onClick={() => handleSelectUser(user)}
                     onMouseEnter={() => setFocusedIndex(index)}
-                    role="option"
-                    aria-selected={index === focusedIndex}
                   >
                     <div className="search-result-avatar">{getRoleEmoji(user.role)}</div>
                     <div className="search-result-info">
@@ -234,11 +235,12 @@ export function SearchBar({
                       </div>
                     </div>
                     <span className="search-result-arrow">→</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </>
-          ) : (
+          )}
+          {showEmpty && (
             <div className="search-empty">
               <div className="search-empty-icon">🔍</div>
               <p className="search-empty-text">Aucun utilisateur trouvé pour "{query}"</p>
@@ -250,7 +252,7 @@ export function SearchBar({
   );
 }
 
-function SearchIcon({ className }: { className?: string }) {
+function SearchIcon({ className }: Readonly<{ className?: string }>) {
   return (
     <svg
       className={className}

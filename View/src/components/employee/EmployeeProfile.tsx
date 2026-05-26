@@ -82,7 +82,7 @@ export function EmployeeProfile() {
   );
 }
 
-function ProfileField({ label, value }: { label: string; value: string }) {
+function ProfileField({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div className="task-item">
       <span className="task-label" style={{ minWidth: '120px', color: 'var(--color-text-muted)' }}>
@@ -93,12 +93,12 @@ function ProfileField({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SettingToggle({ label, checked }: { label: string; checked: boolean }) {
+function SettingToggle({ label, checked }: Readonly<{ label: string; checked: boolean }>) {
   return (
     <div className="task-item">
       <span className="task-label">{label}</span>
       <label className="toggle" style={{ marginLeft: 'auto' }}>
-        <input type="checkbox" defaultChecked={checked} />
+        <input type="checkbox" defaultChecked={checked} aria-label={label} />
         <span className="toggle-slider"></span>
       </label>
     </div>

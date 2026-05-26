@@ -18,7 +18,7 @@ const ROLE_CONFIG: Record<string, { label: string; emoji: string; color: string 
   customer: { label: 'Client', emoji: '👤', color: 'var(--up-role-customer)' },
 };
 
-export function ProfileHeader({ profile, isSelf, onClose }: ProfileHeaderProps) {
+export function ProfileHeader({ profile, isSelf, onClose }: Readonly<ProfileHeaderProps>) {
   const roleConf = ROLE_CONFIG[profile.role] ?? ROLE_CONFIG.customer;
   const initials = profile.name
     .split(' ')
@@ -104,11 +104,11 @@ function QuickStat({
   value,
   label,
   icon,
-}: {
+}: Readonly<{
   value: string | number;
   label: string;
   icon: string;
-}) {
+}>) {
   return (
     <div className="up-qstat">
       <span className="up-qstat-icon">{icon}</span>

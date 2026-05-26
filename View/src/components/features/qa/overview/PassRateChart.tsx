@@ -11,7 +11,7 @@ interface PassRateChartProps {
   total: number;
 }
 
-export function PassRateChart({ passed, failed, total }: PassRateChartProps) {
+export function PassRateChart({ passed, failed, total }: Readonly<PassRateChartProps>) {
   const hasData = total > 0;
   const passPercent = hasData ? Math.round((passed / total) * 100) : 0;
 

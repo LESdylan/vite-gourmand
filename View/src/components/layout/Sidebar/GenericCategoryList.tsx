@@ -18,7 +18,7 @@ export function GenericCategoryList<T extends string>({
   activeCategory,
   collapsed,
   onSelect,
-}: GenericCategoryListProps<T>) {
+}: Readonly<GenericCategoryListProps<T>>) {
   return (
     <nav className="generic-category-list" aria-label="Navigation">
       {categories.map((category) => (
@@ -41,7 +41,7 @@ interface CategoryItemProps {
   onClick: () => void;
 }
 
-function CategoryItem({ category, isActive, collapsed, onClick }: CategoryItemProps) {
+function CategoryItem({ category, isActive, collapsed, onClick }: Readonly<CategoryItemProps>) {
   const classes = buildClasses(isActive, collapsed);
 
   return (

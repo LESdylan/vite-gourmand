@@ -25,11 +25,11 @@ export function ConfirmDialog({
   variant = 'default',
   onConfirm,
   onCancel,
-}: ConfirmDialogProps) {
+}: Readonly<ConfirmDialogProps>) {
   if (!isOpen) return null;
 
   return (
-    <div className="confirm-dialog-overlay" onClick={onCancel}>
+    <dialog className="confirm-dialog-overlay" onCancel={onCancel} aria-labelledby="confirm-dialog-title" open>
       <DialogContent
         title={title}
         message={message}
@@ -39,7 +39,7 @@ export function ConfirmDialog({
         onConfirm={onConfirm}
         onCancel={onCancel}
       />
-    </div>
+    </dialog>
   );
 }
 
@@ -53,19 +53,17 @@ interface DialogContentProps {
   onCancel: () => void;
 }
 
-function DialogContent(props: DialogContentProps) {
-  const handleClick = (e: React.MouseEvent) => e.stopPropagation();
-
+function DialogContent(props: Readonly<DialogContentProps>) {
   return (
-    <div className="confirm-dialog" role="dialog" aria-modal="true" onClick={handleClick}>
-      <h2 className="confirm-dialog-title">{props.title}</h2>
+    <div className="confirm-dialog">
+      <h2 id="confirm-dialog-title" className="confirm-dialog-title">{props.title}</h2>
       <p className="confirm-dialog-message">{props.message}</p>
       <DialogActions {...props} />
     </div>
   );
 }
 
-function DialogActions(props: DialogContentProps) {
+function DialogActions(props: Readonly<DialogContentProps>) {
   const confirmClass = props.variant === 'danger' ? 'confirm-btn-danger' : 'confirm-btn-primary';
 
   return (

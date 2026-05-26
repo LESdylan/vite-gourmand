@@ -78,7 +78,7 @@ interface RoleSwitcherProps {
   collapsed?: boolean;
 }
 
-export function RoleSwitcher({ collapsed }: RoleSwitcherProps) {
+export function RoleSwitcher({ collapsed }: Readonly<RoleSwitcherProps>) {
   const { user } = usePortalAuth();
   const { currentView, setView } = useRoleView();
   const [isOpen, setIsOpen] = useState(false);

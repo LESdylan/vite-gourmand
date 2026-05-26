@@ -21,7 +21,7 @@ export function DevBoardSidebar({
   collapsed,
   onSelectCategory,
   onToggleCollapse,
-}: DevBoardSidebarProps) {
+}: Readonly<DevBoardSidebarProps>) {
   return (
     <Sidebar collapsed={collapsed}>
       <SidebarHeader collapsed={collapsed} onToggle={onToggleCollapse} />
