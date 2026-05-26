@@ -35,18 +35,14 @@ export function UserProfile({ userId, onClose, isModal = false }: Readonly<UserP
 
         // Check visibility permissions
         const viewerRole = currentUser?.role;
-        const canView = canViewDetailedProfile(
-          viewerRole,
-          data.role,
-          isSelf,
-        );
+        const canView = canViewDetailedProfile(viewerRole, data.role, isSelf);
 
         if (!canView) {
           setAccessDenied(true);
           return;
         }
 
-        setProfile(data as UserProfileData);
+        setProfile(data);
       } catch (err) {
         setError('Impossible de charger le profil');
         console.error('Load profile error:', err);

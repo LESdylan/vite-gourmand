@@ -21,14 +21,14 @@ const CATEGORIES: CategoryDef[] = [
   },
   {
     key: 'analytics',
-    title: 'Mesure d\'audience',
-    desc: 'Nous aident à comprendre comment le site est utilisé pour l\'améliorer (statistiques agrégées, anonymisées).',
+    title: "Mesure d'audience",
+    desc: "Nous aident à comprendre comment le site est utilisé pour l'améliorer (statistiques agrégées, anonymisées).",
     examples: 'Pages visitées, temps passé, parcours utilisateur — données anonymisées.',
   },
   {
     key: 'marketing',
     title: 'Publicité & marketing',
-    desc: 'Personnalisent les contenus promotionnels et mesurent l\'efficacité de nos campagnes.',
+    desc: "Personnalisent les contenus promotionnels et mesurent l'efficacité de nos campagnes.",
     examples: 'Suivi de conversion, retargeting, audiences personnalisées.',
   },
 ];
@@ -40,7 +40,7 @@ export function CookiePreferences() {
     analytics: choice?.analytics ?? false,
     marketing: choice?.marketing ?? false,
   });
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -64,21 +64,14 @@ export function CookiePreferences() {
   }, [closePreferences]);
 
   return (
-    <div
+    <dialog
+      open
+      ref={modalRef}
+      tabIndex={-1}
       className="vg-cookie-modal-overlay"
-      role="dialog"
-      aria-modal="true"
       aria-labelledby="vg-cookie-pref-title"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) closePreferences();
-      }}
     >
-      <div
-        ref={modalRef}
-        tabIndex={-1}
-        className="vg-cookie-modal"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="vg-cookie-modal">
         <header className="vg-cookie-modal__header">
           <h2 id="vg-cookie-pref-title">🍪 Préférences de cookies</h2>
           <button
@@ -93,21 +86,28 @@ export function CookiePreferences() {
 
         <div className="vg-cookie-modal__body">
           <p className="vg-cookie-modal__intro">
-            Vous contrôlez précisément quelles catégories de cookies sont utilisées.
-            Les cookies <strong>nécessaires</strong> au fonctionnement du site sont
-            toujours actifs et ne peuvent pas être désactivés.
+            Vous contrôlez précisément quelles catégories de cookies sont utilisées. Les cookies{' '}
+            <strong>nécessaires</strong> au fonctionnement du site sont toujours actifs et ne
+            peuvent pas être désactivés.
           </p>
 
           <div className="vg-cookie-row vg-cookie-row--locked">
             <div className="vg-cookie-row__main">
-              <h3>Nécessaires <span className="vg-cookie-badge">Toujours actif</span></h3>
+              <h3>
+                Nécessaires <span className="vg-cookie-badge">Toujours actif</span>
+              </h3>
               <p>
-                Indispensables au fonctionnement du site : authentification, panier,
-                sécurité (CSRF), session. Sans eux, le site ne peut pas fonctionner.
+                Indispensables au fonctionnement du site : authentification, panier, sécurité
+                (CSRF), session. Sans eux, le site ne peut pas fonctionner.
               </p>
               <small>Exemples : jeton de session JWT, cookie CSRF, préférence de langue.</small>
             </div>
-            <input type="checkbox" checked disabled aria-label="Cookies nécessaires (toujours actif)" />
+            <input
+              type="checkbox"
+              checked
+              disabled
+              aria-label="Cookies nécessaires (toujours actif)"
+            />
           </div>
 
           {CATEGORIES.map((cat) => (
@@ -141,11 +141,15 @@ export function CookiePreferences() {
           >
             Enregistrer mes choix
           </button>
-          <button type="button" className="vg-cookie-btn vg-cookie-btn--primary" onClick={acceptAll}>
+          <button
+            type="button"
+            className="vg-cookie-btn vg-cookie-btn--primary"
+            onClick={acceptAll}
+          >
             Tout accepter
           </button>
         </footer>
       </div>
-    </div>
+    </dialog>
   );
 }

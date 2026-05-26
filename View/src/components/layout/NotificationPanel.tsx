@@ -52,9 +52,12 @@ export default function NotificationPanel({ topOffset }: Readonly<NotificationPa
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+
+      if (panelRef.current && !panelRef.current.contains(target)) {
         // Don't close if clicking the bell button (it toggles)
-        const bell = (e.target as HTMLElement).closest('[data-notification-bell]');
+        const bell = target instanceof Element ? target.closest('[data-notification-bell]') : null;
         if (!bell) close();
       }
     };
@@ -150,9 +153,7 @@ export default function NotificationPanel({ topOffset }: Readonly<NotificationPa
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     {notif.title && (
-                      <p className={`text-sm leading-tight ${titleClass}`}>
-                        {notif.title}
-                      </p>
+                      <p className={`text-sm leading-tight ${titleClass}`}>{notif.title}</p>
                     )}
                     {notif.body && (
                       <p className="text-xs text-[#1A1A1A]/50 leading-relaxed mt-0.5 line-clamp-2">

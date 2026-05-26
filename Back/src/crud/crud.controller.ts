@@ -87,11 +87,15 @@ type MenuDishPrisma = {
         Dish: Array<{ id: number; title: string }>;
       }>
     >;
-    findUnique: (args: Record<string, unknown>) => Promise<{ id: number; title: string } | null>;
+    findUnique: (
+      args: Record<string, unknown>,
+    ) => Promise<{ id: number; title: string } | null>;
     update: (args: Record<string, unknown>) => Promise<unknown>;
   };
   dish: {
-    findUnique: (args: Record<string, unknown>) => Promise<{ id: number; title: string } | null>;
+    findUnique: (
+      args: Record<string, unknown>,
+    ) => Promise<{ id: number; title: string } | null>;
   };
 };
 
@@ -108,12 +112,16 @@ const READONLY_TIMESTAMPS = new Set([
 function model(
   name: string,
   columns: SchemaColumn[],
-  options: Partial<Pick<SchemaModel, 'canCreate' | 'canUpdate' | 'canDelete'>> = {},
+  options: Partial<
+    Pick<SchemaModel, 'canCreate' | 'canUpdate' | 'canDelete'>
+  > = {},
 ): SchemaModel {
   return {
     name,
     columns,
-    primaryKey: columns.filter((column) => column.isId).map((column) => column.name),
+    primaryKey: columns
+      .filter((column) => column.isId)
+      .map((column) => column.name),
     canCreate: options.canCreate ?? true,
     canUpdate: options.canUpdate ?? true,
     canDelete: options.canDelete ?? true,
@@ -125,7 +133,13 @@ const SCHEMA_MODELS: SchemaModel[] = [
   model(
     'User',
     [
-      { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+      {
+        name: 'id',
+        type: 'integer',
+        isId: true,
+        isRequired: true,
+        isReadOnly: true,
+      },
       { name: 'email', type: 'string', isRequired: true },
       { name: 'first_name', type: 'string', isRequired: true },
       { name: 'last_name', type: 'string' },
@@ -144,7 +158,13 @@ const SCHEMA_MODELS: SchemaModel[] = [
   model(
     'Role',
     [
-      { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+      {
+        name: 'id',
+        type: 'integer',
+        isId: true,
+        isRequired: true,
+        isReadOnly: true,
+      },
       { name: 'name', type: 'string', isRequired: true },
       { name: 'description', type: 'string' },
       { name: 'created_at', type: 'datetime', isReadOnly: true },
@@ -154,7 +174,13 @@ const SCHEMA_MODELS: SchemaModel[] = [
   model(
     'Order',
     [
-      { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+      {
+        name: 'id',
+        type: 'integer',
+        isId: true,
+        isRequired: true,
+        isReadOnly: true,
+      },
       { name: 'order_number', type: 'string', isRequired: true },
       { name: 'user_id', type: 'integer', isRequired: true },
       { name: 'order_date', type: 'datetime', isReadOnly: true },
@@ -174,7 +200,13 @@ const SCHEMA_MODELS: SchemaModel[] = [
     { canCreate: false, canUpdate: false, canDelete: false },
   ),
   model('Menu', [
-    { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+    {
+      name: 'id',
+      type: 'integer',
+      isId: true,
+      isRequired: true,
+      isReadOnly: true,
+    },
     { name: 'title', type: 'string', isRequired: true },
     { name: 'description', type: 'string' },
     { name: 'conditions', type: 'string' },
@@ -193,7 +225,13 @@ const SCHEMA_MODELS: SchemaModel[] = [
     { name: 'published_at', type: 'datetime' },
   ]),
   model('MenuImage', [
-    { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+    {
+      name: 'id',
+      type: 'integer',
+      isId: true,
+      isRequired: true,
+      isReadOnly: true,
+    },
     { name: 'menu_id', type: 'integer', isRequired: true },
     { name: 'image_url', type: 'string', isRequired: true },
     { name: 'alt_text', type: 'string' },
@@ -212,7 +250,13 @@ const SCHEMA_MODELS: SchemaModel[] = [
     { canUpdate: false },
   ),
   model('Dish', [
-    { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+    {
+      name: 'id',
+      type: 'integer',
+      isId: true,
+      isRequired: true,
+      isReadOnly: true,
+    },
     { name: 'title', type: 'string', isRequired: true },
     { name: 'description', type: 'string' },
     { name: 'photo_url', type: 'string' },
@@ -220,7 +264,13 @@ const SCHEMA_MODELS: SchemaModel[] = [
     { name: 'created_at', type: 'datetime', isReadOnly: true },
   ]),
   model('Ingredient', [
-    { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+    {
+      name: 'id',
+      type: 'integer',
+      isId: true,
+      isRequired: true,
+      isReadOnly: true,
+    },
     { name: 'name', type: 'string', isRequired: true },
     { name: 'unit', type: 'string' },
     { name: 'current_stock', type: 'decimal' },
@@ -249,31 +299,57 @@ const SCHEMA_MODELS: SchemaModel[] = [
     { canUpdate: false },
   ),
   model('Diet', [
-    { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+    {
+      name: 'id',
+      type: 'integer',
+      isId: true,
+      isRequired: true,
+      isReadOnly: true,
+    },
     { name: 'name', type: 'string', isRequired: true },
     { name: 'description', type: 'string' },
     { name: 'icon_url', type: 'string' },
   ]),
   model('Theme', [
-    { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+    {
+      name: 'id',
+      type: 'integer',
+      isId: true,
+      isRequired: true,
+      isReadOnly: true,
+    },
     { name: 'name', type: 'string', isRequired: true },
     { name: 'description', type: 'string' },
     { name: 'icon_url', type: 'string' },
   ]),
   model('Allergen', [
-    { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+    {
+      name: 'id',
+      type: 'integer',
+      isId: true,
+      isRequired: true,
+      isReadOnly: true,
+    },
     { name: 'name', type: 'string', isRequired: true },
     { name: 'icon_url', type: 'string' },
   ]),
   model('WorkingHours', [
-    { name: 'id', type: 'integer', isId: true, isRequired: true, isReadOnly: true },
+    {
+      name: 'id',
+      type: 'integer',
+      isId: true,
+      isRequired: true,
+      isReadOnly: true,
+    },
     { name: 'day', type: 'string', isRequired: true },
     { name: 'opening', type: 'string', isRequired: true },
     { name: 'closing', type: 'string', isRequired: true },
   ]),
 ];
 
-const MODEL_BY_NAME = new Map(SCHEMA_MODELS.map((schema) => [schema.name, schema]));
+const MODEL_BY_NAME = new Map(
+  SCHEMA_MODELS.map((schema) => [schema.name, schema]),
+);
 
 function getSchema(name: string): SchemaModel {
   const schema = MODEL_BY_NAME.get(name);
@@ -285,7 +361,8 @@ function writableFields(schema: SchemaModel): string[] {
   const hasCompositePrimaryKey = schema.primaryKey.length > 1;
   return schema.columns
     .filter((column) => {
-      if (column.isReadOnly || READONLY_TIMESTAMPS.has(column.name)) return false;
+      if (column.isReadOnly || READONLY_TIMESTAMPS.has(column.name))
+        return false;
       if (column.isId && !hasCompositePrimaryKey) return false;
       return true;
     })
@@ -298,7 +375,13 @@ const TABLE_POLICIES: TablePolicy[] = [
     modelName: 'user',
     schema: getSchema('User'),
     primaryKey: ['id'],
-    searchableFields: ['email', 'first_name', 'last_name', 'city', 'postal_code'],
+    searchableFields: [
+      'email',
+      'first_name',
+      'last_name',
+      'city',
+      'postal_code',
+    ],
     writableFields: [],
     sensitiveFields: ['password'],
     defaultOrderBy: { id: 'asc' },
@@ -317,7 +400,12 @@ const TABLE_POLICIES: TablePolicy[] = [
     modelName: 'order',
     schema: getSchema('Order'),
     primaryKey: ['id'],
-    searchableFields: ['order_number', 'status', 'delivery_address', 'delivery_city'],
+    searchableFields: [
+      'order_number',
+      'status',
+      'delivery_address',
+      'delivery_city',
+    ],
     writableFields: [],
     defaultOrderBy: { id: 'desc' },
   },
@@ -428,7 +516,9 @@ const TABLE_POLICIES: TablePolicy[] = [
   },
 ];
 
-const POLICIES_BY_ENDPOINT = new Map(TABLE_POLICIES.map((policy) => [policy.endpoint, policy]));
+const POLICIES_BY_ENDPOINT = new Map(
+  TABLE_POLICIES.map((policy) => [policy.endpoint, policy]),
+);
 
 @Controller('crud')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -471,12 +561,15 @@ export class CrudController {
       return this.findMenuDishes(pagination, search);
     }
 
-    const result = await this.crudService.findAll<Record<string, unknown>>(policy.modelName, {
-      page: pagination.page,
-      limit: pagination.limit,
-      where: search ? this.buildSearchWhere(policy, search) : {},
-      orderBy: this.buildOrderBy(policy, orderBy, order),
-    });
+    const result = await this.crudService.findAll<Record<string, unknown>>(
+      policy.modelName,
+      {
+        page: pagination.page,
+        limit: pagination.limit,
+        where: search ? this.buildSearchWhere(policy, search) : {},
+        orderBy: this.buildOrderBy(policy, orderBy, order),
+      },
+    );
 
     return this.sanitizePaginated(policy, result);
   }
@@ -519,7 +612,10 @@ export class CrudController {
 
     return this.sanitizeRecord(
       policy,
-      await this.crudService.create<Record<string, unknown>>(policy.modelName, processed),
+      await this.crudService.create<Record<string, unknown>>(
+        policy.modelName,
+        processed,
+      ),
     );
   }
 
@@ -554,7 +650,10 @@ export class CrudController {
       return this.deleteMenuDish(this.parseCompositeKey(id, policy.primaryKey));
     }
 
-    return this.crudService.remove(policy.modelName, this.parseUniqueWhere(id, policy));
+    return this.crudService.remove(
+      policy.modelName,
+      this.parseUniqueWhere(id, policy),
+    );
   }
 
   private getPolicy(endpoint: string): TablePolicy {
@@ -571,7 +670,10 @@ export class CrudController {
 
     try {
       const prismaModel = (
-        this.prisma as unknown as Record<string, { count: () => Promise<number> }>
+        this.prisma as unknown as Record<
+          string,
+          { count: () => Promise<number> }
+        >
       )[policy.modelName];
       return prismaModel?.count ? await prismaModel.count() : 0;
     } catch {
@@ -591,8 +693,10 @@ export class CrudController {
       this.parseOptionalPositiveInteger(input.limit) ?? take ?? 20,
       MAX_PAGE_SIZE,
     );
-    const pageFromSkip = skip === undefined ? undefined : Math.floor(skip / limit) + 1;
-    const page = this.parseOptionalPositiveInteger(input.page) ?? pageFromSkip ?? 1;
+    const pageFromSkip =
+      skip === undefined ? undefined : Math.floor(skip / limit) + 1;
+    const page =
+      this.parseOptionalPositiveInteger(input.page) ?? pageFromSkip ?? 1;
 
     return { page, limit };
   }
@@ -602,14 +706,19 @@ export class CrudController {
     orderBy?: string,
     order?: string,
   ): Record<string, 'asc' | 'desc'> {
-    const allowedColumns = new Set(policy.schema.columns.map((column) => column.name));
+    const allowedColumns = new Set(
+      policy.schema.columns.map((column) => column.name),
+    );
     if (orderBy && allowedColumns.has(orderBy)) {
       return { [orderBy]: order === 'desc' ? 'desc' : 'asc' };
     }
     return policy.defaultOrderBy ?? {};
   }
 
-  private buildSearchWhere(policy: TablePolicy, search: string): Record<string, unknown> {
+  private buildSearchWhere(
+    policy: TablePolicy,
+    search: string,
+  ): Record<string, unknown> {
     const searchValue = search.trim();
     if (!searchValue || policy.searchableFields.length === 0) return {};
 
@@ -620,7 +729,10 @@ export class CrudController {
     };
   }
 
-  private assertCanWrite(policy: TablePolicy, action: 'create' | 'update' | 'delete'): void {
+  private assertCanWrite(
+    policy: TablePolicy,
+    action: 'create' | 'update' | 'delete',
+  ): void {
     const writePermissions = {
       create: policy.schema.canCreate,
       update: policy.schema.canUpdate,
@@ -629,7 +741,9 @@ export class CrudController {
     const allowed = writePermissions[action];
 
     if (!allowed) {
-      throw new ForbiddenException(`${policy.schema.name} is read-only in DevBoard CRUD`);
+      throw new ForbiddenException(
+        `${policy.schema.name} is read-only in DevBoard CRUD`,
+      );
     }
   }
 
@@ -639,7 +753,9 @@ export class CrudController {
     action: 'create' | 'update',
   ): Record<string, unknown> {
     const writable = new Set(policy.writableFields);
-    const columns = new Map(policy.schema.columns.map((column) => [column.name, column]));
+    const columns = new Map(
+      policy.schema.columns.map((column) => [column.name, column]),
+    );
     const processed: Record<string, unknown> = {};
 
     for (const [field, rawValue] of Object.entries(data)) {
@@ -655,7 +771,9 @@ export class CrudController {
     }
 
     if (Object.keys(processed).length === 0) {
-      throw new BadRequestException(`No writable fields provided for ${action}`);
+      throw new BadRequestException(
+        `No writable fields provided for ${action}`,
+      );
     }
 
     return processed;
@@ -663,7 +781,8 @@ export class CrudController {
 
   private coerceFieldValue(column: SchemaColumn, rawValue: unknown): unknown {
     if (rawValue === undefined) return undefined;
-    if (rawValue === '' || rawValue === null) return column.isRequired ? undefined : null;
+    if (rawValue === '' || rawValue === null)
+      return column.isRequired ? undefined : null;
 
     switch (column.type) {
       case 'integer':
@@ -681,7 +800,8 @@ export class CrudController {
   }
 
   private validateUrlValue(field: string, value: unknown): unknown {
-    if (value === null || value === undefined || !this.isUrlField(field)) return value;
+    if (value === null || value === undefined || !this.isUrlField(field))
+      return value;
 
     const urlValue = this.stringifyFieldValue(value).trim();
     if (!urlValue) return value;
@@ -708,7 +828,11 @@ export class CrudController {
 
   private stringifyFieldValue(value: unknown): string {
     if (typeof value === 'string') return value;
-    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    if (
+      typeof value === 'number' ||
+      typeof value === 'boolean' ||
+      typeof value === 'bigint'
+    ) {
       return String(value);
     }
     if (value instanceof Date) return value.toISOString();
@@ -727,10 +851,15 @@ export class CrudController {
     );
   }
 
-  private parseUniqueWhere(rawId: string, policy: TablePolicy): Record<string, unknown> {
+  private parseUniqueWhere(
+    rawId: string,
+    policy: TablePolicy,
+  ): Record<string, unknown> {
     if (policy.primaryKey.length === 1) {
       const primaryField = policy.primaryKey[0];
-      const primaryColumn = policy.schema.columns.find((column) => column.name === primaryField);
+      const primaryColumn = policy.schema.columns.find(
+        (column) => column.name === primaryField,
+      );
       if (!primaryColumn) throw new BadRequestException('Invalid primary key');
       return { [primaryField]: this.coerceFieldValue(primaryColumn, rawId) };
     }
@@ -739,7 +868,10 @@ export class CrudController {
     return { [policy.primaryKey.join('_')]: compositeValue };
   }
 
-  private parseCompositeKey(rawId: string, primaryKey: string[]): Record<string, number> {
+  private parseCompositeKey(
+    rawId: string,
+    primaryKey: string[],
+  ): Record<string, number> {
     const decoded = decodeURIComponent(rawId);
     let parsed: unknown;
 
@@ -781,10 +913,10 @@ export class CrudController {
         )
       : rows;
     const skip = (pagination.page - 1) * pagination.limit;
-    const data = filteredRows.slice(skip, skip + pagination.limit) as unknown as Record<
-      string,
-      unknown
-    >[];
+    const data = filteredRows.slice(
+      skip,
+      skip + pagination.limit,
+    ) as unknown as Record<string, unknown>[];
 
     return {
       data,
@@ -797,18 +929,32 @@ export class CrudController {
     };
   }
 
-  private async findMenuDish(key: Record<string, number>): Promise<MenuDishRow | null> {
+  private async findMenuDish(
+    key: Record<string, number>,
+  ): Promise<MenuDishRow | null> {
     const rows = await this.getMenuDishRows();
-    return rows.find((row) => row.menu_id === key.menu_id && row.dish_id === key.dish_id) ?? null;
+    return (
+      rows.find(
+        (row) => row.menu_id === key.menu_id && row.dish_id === key.dish_id,
+      ) ?? null
+    );
   }
 
-  private async createMenuDish(data: Record<string, unknown>): Promise<MenuDishRow> {
+  private async createMenuDish(
+    data: Record<string, unknown>,
+  ): Promise<MenuDishRow> {
     const menuId = this.parseRequiredInteger(data.menu_id, 'menu_id');
     const dishId = this.parseRequiredInteger(data.dish_id, 'dish_id');
     const prisma = this.prisma as unknown as MenuDishPrisma;
     const [menu, dish] = await Promise.all([
-      prisma.menu.findUnique({ where: { id: menuId }, select: { id: true, title: true } }),
-      prisma.dish.findUnique({ where: { id: dishId }, select: { id: true, title: true } }),
+      prisma.menu.findUnique({
+        where: { id: menuId },
+        select: { id: true, title: true },
+      }),
+      prisma.dish.findUnique({
+        where: { id: dishId },
+        select: { id: true, title: true },
+      }),
     ]);
 
     if (!menu) throw new BadRequestException(`Menu ${menuId} does not exist`);
@@ -863,14 +1009,21 @@ export class CrudController {
   ): PaginatedResult<Record<string, unknown>> {
     return {
       ...result,
-      data: result.data.map((record) => this.sanitizeRecord(policy, record) ?? {}),
+      data: result.data.map(
+        (record) => this.sanitizeRecord(policy, record) ?? {},
+      ),
     };
   }
 
-  private sanitizeRecord<T extends Record<string, unknown> | null>(policy: TablePolicy, record: T): T {
+  private sanitizeRecord<T extends Record<string, unknown> | null>(
+    policy: TablePolicy,
+    record: T,
+  ): T {
     if (!record) return record;
     const sensitiveFields = new Set(policy.sensitiveFields ?? []);
-    const allowedFields = new Set(policy.schema.columns.map((column) => column.name));
+    const allowedFields = new Set(
+      policy.schema.columns.map((column) => column.name),
+    );
     const sanitized: Record<string, unknown> = {};
 
     for (const [field, value] of Object.entries(record)) {
@@ -905,7 +1058,11 @@ export class CrudController {
 
   private parseRequiredDecimal(value: unknown, field: string): number | string {
     if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
+    if (
+      typeof value === 'string' &&
+      value.trim() !== '' &&
+      !Number.isNaN(Number(value))
+    ) {
       return value.trim();
     }
     throw new BadRequestException(`${field} must be a decimal number`);

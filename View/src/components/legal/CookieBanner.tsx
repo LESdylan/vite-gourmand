@@ -24,10 +24,9 @@ export function CookieBanner() {
   return (
     <>
       {shouldPrompt && !isPreferencesOpen && (
-        <div
+        <dialog
+          open
           className="vg-cookie-banner"
-          role="dialog"
-          aria-modal="false"
           aria-labelledby="vg-cookie-title"
           aria-describedby="vg-cookie-desc"
         >
@@ -37,10 +36,10 @@ export function CookieBanner() {
                 🍪 Cookies & vie privée
               </h2>
               <p id="vg-cookie-desc" className="vg-cookie-banner__desc">
-                Nous utilisons des cookies pour faire fonctionner le site, mémoriser vos
-                préférences et, si vous l'acceptez, mesurer l'audience. Les cookies non
-                essentiels ne sont déposés qu'avec votre accord. Vous pouvez modifier votre
-                choix à tout moment depuis le pied de page.{' '}
+                Nous utilisons des cookies pour faire fonctionner le site, mémoriser vos préférences
+                et, si vous l'acceptez, mesurer l'audience. Les cookies non essentiels ne sont
+                déposés qu'avec votre accord. Vous pouvez modifier votre choix à tout moment depuis
+                le pied de page.{' '}
                 <a href="/mentions-legales#cookies" className="vg-cookie-banner__link">
                   En savoir plus
                 </a>
@@ -71,7 +70,7 @@ export function CookieBanner() {
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
       {isPreferencesOpen && <CookiePreferences />}
     </>

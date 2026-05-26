@@ -19,11 +19,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import {
-  recordConsentOnServer,
-  type ConsentAction,
-  type ConsentChoice,
-} from '../services/consent';
+import { recordConsentOnServer, type ConsentAction, type ConsentChoice } from '../services/consent';
 
 const STORAGE_KEY = 'vg.consent.v1';
 const ANON_ID_KEY = 'vg.consent.anonId';
@@ -85,26 +81,43 @@ function writeStorage(choice: ConsentChoice): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     // Mirror to a cookie so SSR/edge handlers could read it
     const expires = new Date(Date.now() + MAX_AGE_MS).toUTCString();
-    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    const secure = globalThis.location.protocol === 'https:' ? '; Secure' : '';
     document.cookie = `${STORAGE_KEY}=${encodeURIComponent(JSON.stringify(choice))}; expires=${expires}; path=/; SameSite=Lax${secure}`;
   } catch {
     // localStorage might be disabled — banner will keep prompting
   }
 }
 
+function createAnonymousId(): string {
+  const cryptoApi = globalThis.crypto;
+
+  if (typeof cryptoApi?.randomUUID === 'function') {
+    return cryptoApi.randomUUID();
+  }
+
+  const bytes = new Uint8Array(16);
+  cryptoApi?.getRandomValues(bytes);
+
+  if (bytes.some((byte) => byte !== 0)) {
+    return `anon-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+  }
+
+  return `fallback-${Date.now().toString(36)}`;
+}
+
 function getOrCreateAnonId(): string {
   try {
     const existing = localStorage.getItem(ANON_ID_KEY);
     if (existing) return existing;
-    const id = crypto.randomUUID();
+    const id = createAnonymousId();
     localStorage.setItem(ANON_ID_KEY, id);
     return id;
   } catch {
-    return 'fallback-' + Math.random().toString(36).slice(2);
+    return createAnonymousId();
   }
 }
 
-export function ConsentProvider({ children }: { children: ReactNode }) {
+export function ConsentProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [choice, setChoice] = useState<ConsentChoice | null>(null);
   const [isPreferencesOpen, setPreferencesOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -119,7 +132,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
     writeStorage(next);
     setChoice(next);
     setPreferencesOpen(false);
-    void recordConsentOnServer(action, next, getOrCreateAnonId());
+    recordConsentOnServer(action, next, getOrCreateAnonId()).catch(() => undefined);
   }, []);
 
   const acceptAll = useCallback(() => commit(ALL_ACCEPTED, 'accept_all'), [commit]);
@@ -146,7 +159,16 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
       openPreferences,
       closePreferences,
     }),
-    [choice, hydrated, isPreferencesOpen, acceptAll, rejectAll, saveCustom, openPreferences, closePreferences],
+    [
+      choice,
+      hydrated,
+      isPreferencesOpen,
+      acceptAll,
+      rejectAll,
+      saveCustom,
+      openPreferences,
+      closePreferences,
+    ],
   );
 
   return <ConsentContext.Provider value={value}>{children}</ConsentContext.Provider>;

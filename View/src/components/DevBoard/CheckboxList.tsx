@@ -318,15 +318,12 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
   // Group items if groupBy is provided
   const groupedItems = useMemo(() => {
     if (!groupBy) return { '': filteredItems };
-    return filteredItems.reduce(
-      (acc, item) => {
-        const group = groupBy(item);
-        if (!acc[group]) acc[group] = [];
-        acc[group].push(item);
-        return acc;
-      },
-      {} as Record<string, T[]>,
-    );
+    return filteredItems.reduce<Record<string, T[]>>((acc, item) => {
+      const group = groupBy(item);
+      if (!acc[group]) acc[group] = [];
+      acc[group].push(item);
+      return acc;
+    }, {});
   }, [filteredItems, groupBy]);
 
   // Toggle single item
@@ -506,17 +503,14 @@ export function CheckboxList<T extends CheckboxItem = CheckboxItem>({
             <span>{emptyMessage}</span>
           </div>
         )}
-        {showGroupedList && (
+        {showGroupedList &&
           Object.entries(groupedItems).map(([group, groupItems]) => (
             <React.Fragment key={group}>
               {group && <div style={styles.groupHeader}>{group}</div>}
               {groupItems.map(renderCheckboxItem)}
             </React.Fragment>
-          ))
-        )}
-        {showFlatList && (
-          filteredItems.map(renderCheckboxItem)
-        )}
+          ))}
+        {showFlatList && filteredItems.map(renderCheckboxItem)}
       </div>
     </div>
   );

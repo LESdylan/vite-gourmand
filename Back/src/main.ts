@@ -4,7 +4,13 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
-import { json, urlencoded, type Request, type Response, type NextFunction } from 'express';
+import {
+  json,
+  urlencoded,
+  type Request,
+  type Response,
+  type NextFunction,
+} from 'express';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { ServerResponse } from 'node:http';
@@ -235,9 +241,21 @@ async function bootstrap() {
             "'unsafe-inline'",
             'https://accounts.google.com',
           ],
-          'style-src': ["'self'", "'unsafe-inline'", 'https://accounts.google.com'],
-          'style-src-elem': ["'self'", "'unsafe-inline'", 'https://accounts.google.com'],
-          'connect-src': ["'self'", ...getPublicOrigins(), 'https://accounts.google.com'],
+          'style-src': [
+            "'self'",
+            "'unsafe-inline'",
+            'https://accounts.google.com',
+          ],
+          'style-src-elem': [
+            "'self'",
+            "'unsafe-inline'",
+            'https://accounts.google.com',
+          ],
+          'connect-src': [
+            "'self'",
+            ...getPublicOrigins(),
+            'https://accounts.google.com',
+          ],
           'font-src': ["'self'", 'data:'],
           'img-src': [
             "'self'",

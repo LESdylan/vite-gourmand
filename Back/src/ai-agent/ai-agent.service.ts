@@ -409,19 +409,24 @@ ${dbContext}`;
   }
 
   private buildModePrompt(mode: string | undefined, dbContext: string): string {
-    if (mode === 'public_assistant') return this.buildPublicAssistantPrompt(dbContext);
-    if (mode === 'event_planner') return this.buildEventPlannerPrompt(dbContext);
+    if (mode === 'public_assistant')
+      return this.buildPublicAssistantPrompt(dbContext);
+    if (mode === 'event_planner')
+      return this.buildEventPlannerPrompt(dbContext);
     return this.buildSystemPrompt(dbContext);
   }
 
   private getConversationConstraints(dto: ChatMessageDto): string[] {
     const constraints: string[] = [];
     if (dto.guestCount) constraints.push(`${dto.guestCount} convives`);
-    if (dto.budgetPerPerson) constraints.push(`budget ${dto.budgetPerPerson}€/personne`);
+    if (dto.budgetPerPerson)
+      constraints.push(`budget ${dto.budgetPerPerson}€/personne`);
     if (dto.dietId) constraints.push(`régime alimentaire ID:${dto.dietId}`);
     if (dto.themeId) constraints.push(`thème ID:${dto.themeId}`);
     if (dto.excludeAllergens?.length) {
-      constraints.push(`allergènes à exclure IDs: ${dto.excludeAllergens.join(', ')}`);
+      constraints.push(
+        `allergènes à exclure IDs: ${dto.excludeAllergens.join(', ')}`,
+      );
     }
     return constraints;
   }

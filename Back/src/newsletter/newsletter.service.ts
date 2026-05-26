@@ -411,7 +411,10 @@ export class NewsletterService {
   }
 }
 
-function getNewsletterSendStatus(sentCount: number, subscriberCount: number): 'sent' | 'partial' | 'failed' {
+function getNewsletterSendStatus(
+  sentCount: number,
+  subscriberCount: number,
+): 'sent' | 'partial' | 'failed' {
   if (sentCount === subscriberCount) return 'sent';
   if (sentCount > 0) return 'partial';
   return 'failed';

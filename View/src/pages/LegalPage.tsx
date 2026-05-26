@@ -462,23 +462,23 @@ export default function LegalPage({ section, setCurrentPage }: Readonly<LegalPag
                 <h2 className="text-xl font-bold text-[#1A1A1A] mb-4 pb-2 border-b-2 border-[#D4AF37] flex items-center gap-3">
                   <span className="w-8 h-8 bg-[#722F37] rounded-lg flex items-center justify-center text-white text-sm font-bold">
                     4
-                  </span>
+                  </span>{' '}
                   Cookies
                 </h2>
 
                 <p className="text-[#1A1A1A]/75 leading-relaxed mb-4">
                   Lorsque vous visitez notre site, nous utilisons des petits fichiers appelés{' '}
                   <strong>cookies</strong> (et un stockage local équivalent). Certains sont
-                  indispensables pour que le site fonctionne, d'autres demandent votre accord.
-                  Vous pouvez modifier votre choix à tout moment en cliquant sur{' '}
+                  indispensables pour que le site fonctionne, d'autres demandent votre accord. Vous
+                  pouvez modifier votre choix à tout moment en cliquant sur{' '}
                   <em>« Gérer mes cookies »</em> en bas de page.
                 </p>
 
                 <p className="text-[#1A1A1A]/75 leading-relaxed mb-6">
                   Nous n'utilisons{' '}
-                  <strong>aucun outil de publicité ni de profilage commercial</strong>{' '}
-                  (pas de Google Analytics, pas de Meta Pixel, pas de tracking publicitaire).
-                  Vos mots de passe ne sont jamais stockés dans des cookies — seuls des{' '}
+                  <strong>aucun outil de publicité ni de profilage commercial</strong> (pas de
+                  Google Analytics, pas de Meta Pixel, pas de tracking publicitaire). Vos mots de
+                  passe ne sont jamais stockés dans des cookies — seuls des{' '}
                   <strong>jetons de session signés</strong> permettent de vous garder connecté(e).
                 </p>
 
@@ -495,70 +495,121 @@ export default function LegalPage({ section, setCurrentPage }: Readonly<LegalPag
                     </thead>
                     <tbody className="divide-y divide-[#722F37]/10">
                       <tr className="bg-white">
-                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">vg_access_token</td>
-                        <td className="px-4 py-3 text-[#1A1A1A]/75">
-                          Vous garde connecté(e) après la saisie de votre mot de passe. Ne
-                          contient pas votre mot de passe, juste une preuve de connexion signée.
+                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">
+                          vg_access_token
                         </td>
-                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">15 minutes</td>
-                        <td className="px-4 py-3"><span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">Nécessaire</span></td>
+                        <td className="px-4 py-3 text-[#1A1A1A]/75">
+                          Vous garde connecté(e) après la saisie de votre mot de passe. Ne contient
+                          pas votre mot de passe, juste une preuve de connexion signée.
+                        </td>
+                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">
+                          15 minutes
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">
+                            Nécessaire
+                          </span>
+                        </td>
                       </tr>
                       <tr className="bg-[#FFF8F0]/40">
-                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">vg_csrf_token</td>
+                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">
+                          vg_csrf_token
+                        </td>
                         <td className="px-4 py-3 text-[#1A1A1A]/75">
                           Protège vos formulaires contre les attaques de type{' '}
-                          <em>cross-site request forgery</em> (un faux site qui essaierait
-                          d'agir en votre nom).
+                          <em>cross-site request forgery</em> (un faux site qui essaierait d'agir en
+                          votre nom).
                         </td>
-                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">15 minutes</td>
-                        <td className="px-4 py-3"><span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">Nécessaire</span></td>
+                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">
+                          15 minutes
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">
+                            Nécessaire
+                          </span>
+                        </td>
                       </tr>
                       <tr className="bg-white">
-                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">accessToken<br/>refreshToken</td>
-                        <td className="px-4 py-3 text-[#1A1A1A]/75">
-                          Stockés dans la mémoire de votre navigateur, ils prolongent votre
-                          session sans vous redemander votre mot de passe à chaque page.
+                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">
+                          accessToken
+                          <br />
+                          refreshToken
                         </td>
-                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">7 jours max.</td>
-                        <td className="px-4 py-3"><span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">Nécessaire</span></td>
+                        <td className="px-4 py-3 text-[#1A1A1A]/75">
+                          Stockés dans la mémoire de votre navigateur, ils prolongent votre session
+                          sans vous redemander votre mot de passe à chaque page.
+                        </td>
+                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">
+                          7 jours max.
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">
+                            Nécessaire
+                          </span>
+                        </td>
                       </tr>
                       <tr className="bg-[#FFF8F0]/40">
-                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">vg.consent.v1</td>
+                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">
+                          vg.consent.v1
+                        </td>
                         <td className="px-4 py-3 text-[#1A1A1A]/75">
                           Mémorise votre choix de cookies pour ne pas vous redemander à chaque
                           visite.
                         </td>
                         <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">13 mois</td>
-                        <td className="px-4 py-3"><span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">Nécessaire</span></td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">
+                            Nécessaire
+                          </span>
+                        </td>
                       </tr>
                       <tr className="bg-white">
-                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">vg.consent.anonId</td>
-                        <td className="px-4 py-3 text-[#1A1A1A]/75">
-                          Identifiant aléatoire (sans nom ni email) permettant de prouver que
-                          vous avez bien donné votre consentement, en cas de contrôle CNIL.
+                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">
+                          vg.consent.anonId
                         </td>
-                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">Jusqu'à effacement</td>
-                        <td className="px-4 py-3"><span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">Nécessaire</span></td>
+                        <td className="px-4 py-3 text-[#1A1A1A]/75">
+                          Identifiant aléatoire (sans nom ni email) permettant de prouver que vous
+                          avez bien donné votre consentement, en cas de contrôle CNIL.
+                        </td>
+                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">
+                          Jusqu'à effacement
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#556B2F]/15 text-[#556B2F]">
+                            Nécessaire
+                          </span>
+                        </td>
                       </tr>
                       <tr className="bg-[#FFF8F0]/40">
-                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">vg_remember_me</td>
+                        <td className="px-4 py-3 font-mono text-xs text-[#722F37]">
+                          vg_remember_me
+                        </td>
                         <td className="px-4 py-3 text-[#1A1A1A]/75">
-                          Si vous cochez « Se souvenir de moi », mémorise votre adresse email
-                          et votre prénom pour les pré-remplir au prochain login.{' '}
+                          Si vous cochez « Se souvenir de moi », mémorise votre adresse email et
+                          votre prénom pour les pré-remplir au prochain login.{' '}
                           <strong>Ne contient jamais votre mot de passe.</strong>
                         </td>
                         <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">30 jours</td>
-                        <td className="px-4 py-3"><span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#D4AF37]/20 text-[#7c5a00]">Fonctionnel</span></td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#D4AF37]/20 text-[#7c5a00]">
+                            Fonctionnel
+                          </span>
+                        </td>
                       </tr>
                       <tr className="bg-white">
                         <td className="px-4 py-3 font-mono text-xs text-[#722F37]">g_state</td>
                         <td className="px-4 py-3 text-[#1A1A1A]/75">
-                          Posé par <strong>Google</strong> uniquement si vous activez la
-                          « Connexion via Google ». Sans cette activation, aucun cookie
-                          Google n'est déposé.
+                          Posé par <strong>Google</strong> uniquement si vous activez la « Connexion
+                          via Google ». Sans cette activation, aucun cookie Google n'est déposé.
                         </td>
-                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">Variable (Google)</td>
-                        <td className="px-4 py-3"><span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#D4AF37]/20 text-[#7c5a00]">Tiers (Google)</span></td>
+                        <td className="px-4 py-3 text-[#1A1A1A]/75 whitespace-nowrap">
+                          Variable (Google)
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-[#D4AF37]/20 text-[#7c5a00]">
+                            Tiers (Google)
+                          </span>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -571,29 +622,26 @@ export default function LegalPage({ section, setCurrentPage }: Readonly<LegalPag
                   </h3>
                   <ul className="space-y-1.5 text-sm text-[#1A1A1A]/75 list-disc pl-5">
                     <li>
-                      Cliquez sur <strong>« Gérer mes cookies »</strong> en bas de chaque page
-                      pour rouvrir le panneau de préférences.
+                      Cliquez sur <strong>« Gérer mes cookies »</strong> en bas de chaque page pour
+                      rouvrir le panneau de préférences.
                     </li>
                     <li>
                       Vous pouvez aussi supprimer tous les cookies depuis votre navigateur
                       (paramètres &gt; vie privée &gt; cookies).
                     </li>
                     <li>
-                      Votre choix expire automatiquement après 13 mois — nous vous
-                      redemanderons votre accord (recommandation CNIL).
+                      Votre choix expire automatiquement après 13 mois — nous vous redemanderons
+                      votre accord (recommandation CNIL).
                     </li>
                   </ul>
                 </div>
 
                 <div className="bg-[#556B2F]/8 border border-[#556B2F]/20 rounded-xl p-5">
-                  <h3 className="font-bold text-[#556B2F] mb-2 text-base">
-                    Vos droits
-                  </h3>
+                  <h3 className="font-bold text-[#556B2F] mb-2 text-base">Vos droits</h3>
                   <p className="text-sm text-[#1A1A1A]/75 leading-relaxed">
                     Conformément au RGPD, vous avez le droit d'accéder à vos données, de les
-                    rectifier, de les effacer, de limiter ou de vous opposer à leur
-                    traitement, et de les recevoir dans un format portable. Pour toute
-                    demande, contactez-nous à{' '}
+                    rectifier, de les effacer, de limiter ou de vous opposer à leur traitement, et
+                    de les recevoir dans un format portable. Pour toute demande, contactez-nous à{' '}
                     <a href="mailto:contact@vite-gourmand.fr" className="text-[#722F37] underline">
                       contact@vite-gourmand.fr
                     </a>
@@ -606,7 +654,7 @@ export default function LegalPage({ section, setCurrentPage }: Readonly<LegalPag
                     >
                       CNIL
                     </a>
-                    .
+                    {'.'}
                   </p>
                 </div>
               </section>

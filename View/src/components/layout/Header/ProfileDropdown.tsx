@@ -18,7 +18,8 @@ export function ProfileDropdown() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      const target = e.target;
+      if (target instanceof Node && dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsOpen(false);
       }
     };

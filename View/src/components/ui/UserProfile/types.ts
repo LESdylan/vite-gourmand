@@ -1,3 +1,5 @@
+import type { SearchResult } from '../Search/types';
+
 /**
  * UserProfile Types
  * Widget-based profile system with role-based visibility
@@ -90,7 +92,7 @@ export interface UserProfileProps {
 
 /* ───────────────── Legacy compat ───────────────── */
 
-export type UserProfileData = FullUserProfile;
+export type UserProfileData = SearchResult & Partial<Omit<FullUserProfile, keyof SearchResult>>;
 
 export interface UserStats {
   ordersHandled?: number;

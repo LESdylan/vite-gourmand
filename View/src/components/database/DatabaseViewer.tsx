@@ -45,7 +45,9 @@ export function DatabaseViewer({ initialTable }: Readonly<DatabaseViewerProps>) 
   useEffect(() => {
     if (!initialTable || db.activeTable || db.loading) return;
     if (db.tables.some((table) => table.name === initialTable)) {
-      void db.selectTable(initialTable);
+      db.selectTable(initialTable).catch((error: unknown) => {
+        console.error('Failed to select initial table:', error);
+      });
     }
   }, [db, db.activeTable, db.loading, db.tables, initialTable]);
 

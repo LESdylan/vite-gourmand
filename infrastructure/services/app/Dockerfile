@@ -31,14 +31,12 @@ RUN apk add --no-cache curl dumb-init \
   && addgroup -g 1001 -S nodejs \
     && adduser -S nestjs -u 1001 -G nodejs
 
-COPY --from=backend-builder /build/Back/dist ./dist
-COPY --from=backend-builder /build/Back/node_modules ./node_modules
-COPY --from=backend-builder /build/Back/package*.json ./
-COPY --from=backend-builder /build/Back/src ./src
-COPY --from=backend-builder /build/Back/tsconfig*.json ./
-COPY --from=frontend-builder /build/View/dist ./public
-
-RUN chown -R nestjs:nodejs /app
+COPY --chown=nestjs:nodejs --chmod=0555 --from=backend-builder /build/Back/dist ./dist
+COPY --chown=nestjs:nodejs --chmod=0555 --from=backend-builder /build/Back/node_modules ./node_modules
+COPY --chown=nestjs:nodejs --chmod=0555 --from=backend-builder /build/Back/package*.json ./
+COPY --chown=nestjs:nodejs --chmod=0555 --from=backend-builder /build/Back/src ./src
+COPY --chown=nestjs:nodejs --chmod=0555 --from=backend-builder /build/Back/tsconfig*.json ./
+COPY --chown=nestjs:nodejs --chmod=0555 --from=frontend-builder /build/View/dist ./public
 
 USER nestjs
 

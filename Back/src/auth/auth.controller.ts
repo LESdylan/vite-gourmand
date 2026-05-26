@@ -22,7 +22,11 @@ import { Public, CurrentUser, JwtPayload } from '../common';
 import { AuthGuard } from '@nestjs/passport';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { ChangePasswordDto, ForgotPasswordDto, ResetPasswordDto } from './dto/password.dto';
+import {
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto/password.dto';
 import {
   AUTH_COOKIE_MAX_AGE_MS,
   AUTH_COOKIE_NAME,

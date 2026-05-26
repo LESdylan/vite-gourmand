@@ -8,17 +8,18 @@
  * This endpoint is append-only, writes to MongoDB AuditLog with a hashed IP
  * to avoid storing PII while still allowing aggregate audit queries.
  */
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { createHash } from 'node:crypto';
-import { IsBoolean, IsIn, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { Public } from '../common/decorators/public.decorator';
 import { log as logAudit } from '../Model/nosql/services/audit-log.service';
@@ -54,7 +55,10 @@ export class AnonymousConsentDto {
 function hashIp(ip: string | undefined): string | undefined {
   if (!ip) return undefined;
   const salt = process.env.JWT_SECRET ?? 'vg-consent-salt';
-  return createHash('sha256').update(`${ip}|${salt}`).digest('hex').slice(0, 32);
+  return createHash('sha256')
+    .update(`${ip}|${salt}`)
+    .digest('hex')
+    .slice(0, 32);
 }
 
 function getClientIp(req: Request): string | undefined {
@@ -69,11 +73,10 @@ export class ConsentController {
   @Public()
   @Post('anonymous')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Record a cookie consent event for an anonymous visitor' })
-  async recordAnonymous(
-    @Body() dto: AnonymousConsentDto,
-    @Req() req: Request,
-  ): Promise<void> {
+  @ApiOperation({
+    summary: 'Record a cookie consent event for an anonymous visitor',
+  })
+  recordAnonymous(@Body() dto: AnonymousConsentDto, @Req() req: Request): void {
     const userAgent = req.headers['user-agent'];
     const ipHash = hashIp(getClientIp(req));
 

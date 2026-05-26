@@ -12,6 +12,9 @@ permissions:
   contents: read
   pull-requests: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   sonarqube:
     name: SonarQube
@@ -19,7 +22,7 @@ jobs:
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -37,7 +40,7 @@ jobs:
 
       - name: Upload SonarQube Cloud JSON results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sonarqube-cloud-results
           path: infrastructure/sonarcloud/results/*.json

@@ -8,7 +8,7 @@ app = 'vite-gourmand-withered-glitter-7902'
 primary_region = 'cdg'
 
 [build]
-  dockerfile = "infrastructure/services/app/Dockerfile"
+  dockerfile = "../../app/Dockerfile"
 
 [env]
   NODE_ENV = "production"

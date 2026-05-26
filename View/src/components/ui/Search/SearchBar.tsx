@@ -93,11 +93,14 @@ export function SearchBar({
   // Close on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node) &&
+        !dropdownRef.current.contains(target) &&
         inputRef.current &&
-        !inputRef.current.contains(e.target as Node)
+        !inputRef.current.contains(target)
       ) {
         setIsOpen(false);
       }
@@ -203,8 +206,7 @@ export function SearchBar({
         <div ref={dropdownRef} className="search-dropdown" id="search-results">
           {loading && (
             <div className="search-loading">
-              <span className="search-loading-spinner" />{' '}
-              Recherche...
+              <span className="search-loading-spinner" /> Recherche...
             </div>
           )}
           {showResults && (
