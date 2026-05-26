@@ -551,7 +551,7 @@ export class CrudController {
   @Get(':table')
   async getRecords(
     @Param('table') table: string,
-    @Query() query: CrudListQuery,
+    @Query() query: CrudListQuery = {},
   ): Promise<PaginatedResult<Record<string, unknown>>> {
     const { page, limit, skip, take, search, orderBy, order } = query;
     const policy = this.getPolicy(table);

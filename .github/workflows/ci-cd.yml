@@ -16,7 +16,7 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   NODE_ENV: test
-  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+  DATABASE_URL: postgresql://postgres@localhost:5432/postgres
   MONGODB_URI: mongodb://localhost:27017/vite_gourmand
   JWT_SECRET: ci-test-secret-not-used-in-prod
   FRONTEND_URL: http://localhost:3000
@@ -44,11 +44,11 @@ jobs:
 
       - name: Install backend deps
         working-directory: Back
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Generate Prisma client for lint
         working-directory: Back
-        run: npx prisma generate --schema=src/Model/prisma/schema.prisma
+        run: npm exec --ignore-scripts -- prisma generate --schema=src/Model/prisma/schema.prisma
 
       - name: Lint backend
         working-directory: Back
@@ -56,7 +56,9 @@ jobs:
 
       - name: Install & lint frontend
         working-directory: View
-        run: npm install && npm run lint
+        run: |
+          npm ci --ignore-scripts
+          npm run lint
 
   # ────────────────────────────────────────────────────────────────────────────
   # 2 · TEST
@@ -70,7 +72,7 @@ jobs:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
@@ -98,22 +100,22 @@ jobs:
 
       - name: Install backend deps
         working-directory: Back
-        run: npm install
+        run: npm ci --ignore-scripts
 
       # prisma db push syncs the schema to the empty CI postgres (no migrations needed)
       - name: Push Prisma schema to CI database
         working-directory: Back
-        run: npx prisma db push --schema=src/Model/prisma/schema.prisma --accept-data-loss
+        run: npm exec --ignore-scripts -- prisma db push --schema=src/Model/prisma/schema.prisma --accept-data-loss
 
       # Generates the Prisma client used by the app and the seed
       - name: Generate Prisma client
         working-directory: Back
-        run: npx prisma generate --schema=src/Model/prisma/schema.prisma
+        run: npm exec --ignore-scripts -- prisma generate --schema=src/Model/prisma/schema.prisma
 
       # Seed the minimum data the e2e tests rely on (roles + 4 test users)
       - name: Seed CI test data
         working-directory: Back
-        run: npx tsx src/test/ci-seed.ts
+        run: npm exec --ignore-scripts -- tsx src/test/ci-seed.ts
 
       # ── Unit tests (spec files) ──────────────────────────────────────────
       - name: Run unit tests
@@ -162,7 +164,7 @@ jobs:
 
       - name: Install frontend deps
         working-directory: View
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Audit frontend dependencies
         working-directory: View
@@ -226,13 +228,15 @@ jobs:
       - name: Install & build backend
         working-directory: Back
         run: |
-          npm install
-          npx prisma generate --schema=src/Model/prisma/schema.prisma
+          npm ci --ignore-scripts
+          npm exec --ignore-scripts -- prisma generate --schema=src/Model/prisma/schema.prisma
           npm run build
 
       - name: Install & build frontend
         working-directory: View
-        run: npm install && npm run build
+        run: |
+          npm ci --ignore-scripts
+          npm run build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
@@ -241,3 +245,37 @@ jobs:
           path: |
             Back/dist/
             View/dist/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # 5 · SONARCLOUD
+  # ────────────────────────────────────────────────────────────────────────────
+  sonarqube:
+    name: "5 · SonarCloud"
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995 # v8.1.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true
+
+      - name: Fetch SonarQube Cloud JSON results
+        if: always() && env.SONAR_TOKEN != ''
+        run: bash infrastructure/sonarcloud/fetch-results.sh infrastructure/sonarcloud/results
+
+      - name: Upload SonarQube Cloud JSON results
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: sonarqube-cloud-results
+          path: infrastructure/sonarcloud/results/*.json
+          if-no-files-found: ignore
