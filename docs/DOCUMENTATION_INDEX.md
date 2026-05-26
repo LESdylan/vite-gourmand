@@ -70,6 +70,7 @@ Bienvenue dans la documentation complète de Vite & Gourmand !
 ➡️ **[DOSSIER_DWWM_RNCP5_BILAN_QUALITE_SECURITE_INFRASTRUCTURE.md](./DOSSIER_DWWM_RNCP5_BILAN_QUALITE_SECURITE_INFRASTRUCTURE.md)**
 - Synthèse des améliorations Lighthouse 90+
 - Sécurité frontend/backend et archives de failles
+- Tokens CSS `:root`, DevBoard menu CRUD et validation Playwright
 - Refactorisation Docker, Fly et Makefile
 - Explication adaptée au dossier professionnel DWWM
 

@@ -3,19 +3,31 @@
  */
 
 import type { TableRecord, TableColumn } from './types';
+import { getRecordKey } from './recordKey';
 import './DataTable.css';
 
 interface Props {
   columns: TableColumn[];
   records: TableRecord[];
   onEdit: (record: TableRecord) => void;
-  onDelete: (id: number) => void;
+  onDelete: (record: TableRecord) => void;
+  canUpdate?: boolean;
+  canDelete?: boolean;
 }
 
-export function DataTable({ columns, records, onEdit, onDelete }: Props) {
+export function DataTable({
+  columns,
+  records,
+  onEdit,
+  onDelete,
+  canUpdate = true,
+  canDelete = true,
+}: Props) {
   if (records.length === 0) {
     return <div className="data-table-empty">Aucun enregistrement trouvé</div>;
   }
+
+  const hasActions = canUpdate || canDelete;
 
   return (
     <div className="data-table-wrapper">
@@ -26,14 +38,15 @@ export function DataTable({ columns, records, onEdit, onDelete }: Props) {
               <th key={c.name}>
                 {c.name}
                 {c.isPrimary && <span className="pk-badge">PK</span>}
+                {c.isReadOnly && <span className="readonly-badge">RO</span>}
               </th>
             ))}
-            <th>Actions</th>
+            {hasActions && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
           {records.map((r) => (
-            <tr key={r.id}>
+            <tr key={getRecordKey(r, columns)}>
               {columns.map((c) => {
                 const cellClass = getCellClass(c, r[c.name]);
                 return (
@@ -42,14 +55,20 @@ export function DataTable({ columns, records, onEdit, onDelete }: Props) {
                   </td>
                 );
               })}
-              <td className="data-table-actions">
-                <button onClick={() => onEdit(r)} title="Modifier">
-                  ✏️
-                </button>
-                <button className="btn-delete" onClick={() => onDelete(r.id)} title="Supprimer">
-                  🗑️
-                </button>
-              </td>
+              {hasActions && (
+                <td className="data-table-actions">
+                  {canUpdate && (
+                    <button onClick={() => onEdit(r)} title="Modifier">
+                      ✏️
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button className="btn-delete" onClick={() => onDelete(r)} title="Supprimer">
+                      🗑️
+                    </button>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

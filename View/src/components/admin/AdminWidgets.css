@@ -15,6 +15,10 @@
   margin: 0 auto;
 }
 
+.admin-widget--database {
+  max-width: 1600px;
+}
+
 /* Widget Header */
 .widget-header {
   display: flex;

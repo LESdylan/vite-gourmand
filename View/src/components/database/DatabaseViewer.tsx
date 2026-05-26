@@ -14,6 +14,7 @@ import { Pagination } from './Pagination';
 import { RecordModal } from './RecordModal';
 import { SchemaEditor } from './SchemaEditor';
 import { useIsMobile } from '../hooks';
+import { getRecordKey } from './recordKey';
 import type { TableRecord, TableColumn } from './types';
 import './DatabaseViewer.css';
 
@@ -23,11 +24,16 @@ type ModalType =
   | { type: 'createTable' }
   | null;
 
-export function DatabaseViewer() {
+interface DatabaseViewerProps {
+  initialTable?: string;
+}
+
+export function DatabaseViewer({ initialTable }: DatabaseViewerProps) {
   const db = useDatabase();
   const [modal, setModal] = useState<ModalType>(null);
   const [columns, setColumns] = useState<TableColumn[]>([]);
   const isMobile = useIsMobile();
+  const activeTableMeta = db.tables.find((t) => t.name === db.activeTable) || null;
 
   useEffect(() => {
     if (db.activeTable) {
@@ -36,11 +42,18 @@ export function DatabaseViewer() {
     }
   }, [db.activeTable, db.tables]);
 
+  useEffect(() => {
+    if (!initialTable || db.activeTable || db.loading) return;
+    if (db.tables.some((table) => table.name === initialTable)) {
+      void db.selectTable(initialTable);
+    }
+  }, [db, db.activeTable, db.loading, db.tables, initialTable]);
+
   const handleSave = async (data: Partial<TableRecord>) => {
     if (!db.activeTable) return;
     try {
       if (modal?.type === 'record' && modal.record) {
-        await DatabaseService.update(db.activeTable, modal.record.id, data);
+        await DatabaseService.update(db.activeTable, getRecordKey(modal.record, columns), data);
       } else {
         await DatabaseService.create(db.activeTable, data);
       }
@@ -51,10 +64,10 @@ export function DatabaseViewer() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (record: TableRecord) => {
     if (!db.activeTable || !confirm('Supprimer cet enregistrement ?')) return;
     try {
-      await DatabaseService.delete(db.activeTable, id);
+      await DatabaseService.delete(db.activeTable, getRecordKey(record, columns));
       db.refresh();
     } catch (e) {
       alert(`Erreur: ${e instanceof Error ? e.message : 'Échec de la suppression'}`);
@@ -73,28 +86,19 @@ export function DatabaseViewer() {
           <TableSelector tables={db.tables} active={db.activeTable} onSelect={db.selectTable} />
         </div>
         <div className="header-actions">
-          <button
-            className="btn-schema"
-            onClick={() => setModal({ type: 'createTable' })}
-            title="Créer une nouvelle table"
-          >
-            🗂️ Nouvelle Table
-          </button>
           {db.activeTable && (
             <>
-              <button
-                className="btn-schema"
-                onClick={() => setModal({ type: 'addColumn' })}
-                title="Ajouter une colonne"
-              >
-                ➕ Colonne
-              </button>
-              <button
-                className="btn-create"
-                onClick={() => setModal({ type: 'record', record: null })}
-              >
-                + Nouvel Enregistrement
-              </button>
+              {activeTableMeta?.canCreate === false && (
+                <span className="database-readonly-badge">Lecture seule</span>
+              )}
+              {activeTableMeta?.canCreate !== false && (
+                <button
+                  className="btn-create"
+                  onClick={() => setModal({ type: 'record', record: null })}
+                >
+                  + Nouvel Enregistrement
+                </button>
+              )}
             </>
           )}
         </div>
@@ -136,6 +140,8 @@ export function DatabaseViewer() {
               records={db.records}
               onEdit={(r) => setModal({ type: 'record', record: r })}
               onDelete={handleDelete}
+              canUpdate={activeTableMeta?.canUpdate !== false}
+              canDelete={activeTableMeta?.canDelete !== false}
             />
           ) : (
             <DataTable
@@ -143,6 +149,8 @@ export function DatabaseViewer() {
               records={db.records}
               onEdit={(r) => setModal({ type: 'record', record: r })}
               onDelete={handleDelete}
+              canUpdate={activeTableMeta?.canUpdate !== false}
+              canDelete={activeTableMeta?.canDelete !== false}
             />
           )}
           <Pagination

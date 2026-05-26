@@ -155,6 +155,7 @@ Bienvenue dans la documentation complète du **Système Kanban & Suivi Temps Ré
 **Contenu** :
 - ✅ Synthèse des travaux Lighthouse, sécurité, CI et infrastructure
 - ✅ Explication des choix techniques et de leurs bénéfices
+- ✅ Tokens CSS `:root`, CRUD DevBoard menu et preuves Playwright
 - ✅ Correspondance avec les compétences RNCP niveau 5
 - ✅ Preuves et commandes de validation
 

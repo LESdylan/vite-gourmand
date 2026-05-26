@@ -23,6 +23,8 @@ Les travaux ont permis de :
 - documenter chaque faille detectee dans une archive dediee ;
 - rendre l'infrastructure plus professionnelle avec des services Docker ranges par responsabilite ;
 - dockeriser l'usage de Fly afin que l'environnement local ne depende plus de `flyctl` installe sur la machine ;
+- refactoriser les tokens CSS `:root` pour rendre le design system plus coherent et maintenable ;
+- securiser et completer le DevBoard pour que les admins et employes puissent gerer menus, plats, photos et relations depuis la base ;
 - remettre les tests backend, les audits de dependances, les builds frontend/backend et les checks CI dans un etat reproductible.
 
 ## Situation de depart
@@ -39,6 +41,7 @@ Avant cette phase, plusieurs problemes limitaient la qualite du projet :
 | Fly config et Dockerfiles disperses a la racine | Maintenance difficile, responsabilites floues | Refactorisation `infrastructure/services/*` |
 | CI avec deploy Fly automatique | Risque de deploiement non souhaite a chaque push | Suppression du job de deploiement automatique |
 | Erreurs TypeScript/Jest CI | Tests backend bloques | Correction des options Node/Jest et migration TypeScript 6 (`rootDir`) |
+| CRUD DevBoard incomplet et trop generique | Gestion menu difficile, risque d'exposition de champs sensibles | Allowlist backend, tables menu ajoutees, Playwright et tests API |
 
 ## Methode de travail
 
@@ -112,6 +115,63 @@ Le score a progresse grace a plusieurs familles d'actions.
 - Verification des URL de production pour eviter le `http://` public.
 - Controle des routes avec Chrome headless et Lighthouse.
 
+## Refactorisation des tokens CSS avec `:root`
+
+### Objectif
+
+Le frontend utilisait beaucoup de styles et de couleurs reutilises dans plusieurs composants. Pour rendre l'interface plus coherente, plus facile a maintenir et plus simple a expliquer, les valeurs graphiques ont ete centralisees sous forme de tokens CSS dans des blocs `:root`.
+
+Les fichiers principaux sont :
+
+- `View/src/styles/graphical_chart.css` pour les couleurs, fonds, textes, bordures et overlays ;
+- `View/src/styles/graphical_chart_part2.css` pour la typographie, les espacements, les radius et les ombres ;
+- `View/src/styles/graphical_chart_part3.css` pour les tailles de composants, z-index, transitions, grilles et alias pratiques.
+
+### Comment fonctionne `:root`
+
+En CSS, `:root` represente l'element racine du document, donc pratiquement toute l'application. Quand on declare une propriete comme :
+
+```css
+:root {
+    --color-primary-500: #a855f7;
+    --space-4: 1rem;
+    --radius-lg: 0.5rem;
+}
+```
+
+elle devient disponible partout avec `var(...)` :
+
+```css
+.button {
+    background: var(--color-primary-500);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+}
+```
+
+La cascade CSS applique ensuite ces valeurs dans les composants. Si on change le token a la racine, tous les composants qui l'utilisent changent de facon coherente.
+
+### Ce qui a ete ameliore
+
+- Les couleurs ont ete regroupees par role : primaire, secondaire, accent, succes, warning, danger, neutres et palette restaurant.
+- Les tailles de texte ont ete normalisees pour eviter des valeurs arbitraires dans chaque composant.
+- Les espacements utilisent une echelle commune (`--space-1`, `--space-2`, `--space-4`, etc.).
+- Les radius, ombres, transitions, z-index et tailles de boutons/input/cartes sont centralises.
+- Des alias semantiques comme `--text-primary`, `--bg-primary` ou `--border-default` rendent les composants plus lisibles.
+
+### Benefices pour le projet
+
+| Benefice | Explication |
+|---|---|
+| Coherence visuelle | Les composants partagent les memes couleurs, espacements et etats. |
+| Maintenance | Une modification globale se fait dans un token au lieu de chercher des dizaines de valeurs. |
+| Accessibilite | Les contrastes, tailles et etats focus sont plus faciles a controler. |
+| Responsive | Les dimensions stables reduisent les chevauchements et les debordements. |
+| Performance projet | Moins de duplication CSS et moins de corrections dispersees. |
+| Dossier DWWM | Le design system devient explicable : on montre une organisation professionnelle, pas seulement du style au cas par cas. |
+
+Cette refactorisation a participe a la hausse Lighthouse, surtout sur l'accessibilite, les bonnes pratiques d'interface et la stabilite visuelle.
+
 ## Securite frontend et backend
 
 ### Principe general
@@ -134,6 +194,7 @@ Chaque faille importante a ete documentee avec son contexte, son risque et sa co
 | `security-breach-frontend-006-ci-security-gates.md` | Pas assez de controles en CI | Ajout de checks de securite frontend |
 | `security-breach-frontend-007-csrf-cookie-auth.md` | Cookie auth sans garde CSRF explicite | Jeton CSRF pour requetes sensibles |
 | `security-breach-frontend-008-https-ca-enforcement.md` | HTTPS/CA pas assez impose | HSTS, redirection, verif CA, scripts |
+| `security-breach-frontend-009-devboard-crud-data-exposure.md` | CRUD DevBoard trop generique | Allowlist, sanitization backend, RBAC, tests Playwright |
 
 ### Authentification
 
@@ -174,6 +235,92 @@ Corrections notables :
 - override de `@hono/node-server` vers une version corrigee pour traiter une alerte transitive liee a Prisma ;
 - audits backend et frontend revenus a `0 vulnerabilities` au niveau verifie.
 
+## DevBoard : gestion securisee des menus, plats et photos
+
+### Objectif
+
+Le besoin metier est simple : un admin ou un employe doit pouvoir enrichir la carte du traiteur depuis le DevBoard sans toucher au code. Il doit pouvoir creer un menu avec un titre, une description, des conditions, un nombre minimum de personnes, un prix par personne, une quantite disponible, une photo, puis rattacher des plats au menu.
+
+### Probleme identifie
+
+Avant la correction, le DevBoard affichait une interface de gestion menu partiellement statique. Le CRUD generique exposait bien certaines tables comme `Menu` et `Dish`, mais pas toute la logique metier necessaire : photos de menu, ingredients, allergenes, tables de liaison et relation menu-plat.
+
+La securite devait aussi etre renforcee : masquer un champ sensible dans le tableau frontend ne suffit pas si l'API renvoie encore le champ dans le JSON.
+
+### Correction backend
+
+Le controller CRUD a ete transforme en API a politiques explicites :
+
+- seules les tables autorisees sont exposees ;
+- chaque table possede une liste de champs lisibles et ecrivables ;
+- les tables systeme sensibles (`User`, `Role`, `Order`) sont en lecture seule depuis le CRUD DevBoard ;
+- le champ `password` n'est plus expose dans le schema CRUD ;
+- les resultats API sont nettoyes cote backend, pas seulement masques dans l'interface ;
+- les URL media (`image_url`, `photo_url`, `icon_url`) doivent utiliser HTTPS, sauf localhost en developpement ;
+- les ecritures sensibles restent protegees par cookie auth + CSRF ;
+- les roles `admin` et `employee` ont acces au CRUD, les clients sont bloques.
+
+### Tables metier exposees
+
+Les tables utiles a la gestion traiteur sont maintenant disponibles dans le DevBoard :
+
+| Table | Usage |
+|---|---|
+| `Menu` | Creation du menu : titre, description, conditions, prix, quantite, statut. |
+| `MenuImage` | Ajout de photos, texte alternatif, ordre d'affichage, image principale. |
+| `Dish` | Creation des plats qui composent les menus. |
+| `MenuDish` | Table virtuelle controlee pour rattacher un plat a un menu. |
+| `Ingredient` | Gestion des ingredients et stocks. |
+| `MenuIngredient` | Quantite d'ingredient par personne pour un menu. |
+| `DishIngredient` | Quantite d'ingredient dans un plat. |
+| `DishAllergen` | Association plat/allergene. |
+| `Diet`, `Theme`, `Allergen` | Classification et contraintes alimentaires. |
+
+### Correction frontend
+
+Le DevBoard admin et employe charge maintenant le vrai `DatabaseViewer` avec la table `Menu` selectionnee par defaut. L'employe voit une entree `Menus` dans son espace, et l'admin conserve `Gestion Menu`.
+
+Le viewer supporte maintenant :
+
+- les cles primaires simples et composites ;
+- les tables en lecture seule ;
+- les actions create/update/delete selon les droits de la table ;
+- les champs read-only ;
+- l'affichage des tables de liaison ;
+- la suppression et l'edition avec une cle composite encodee proprement.
+
+### Validation realisee
+
+Validation Docker live :
+
+- connexion employe avec le compte de test seed ;
+- lecture du schema CRUD ;
+- test de chaque endpoint expose : `users`, `roles`, `orders`, `menus`, `menu-images`, `menu-dishes`, `dishes`, `ingredients`, `menu-ingredients`, `dish-ingredients`, `dish-allergens`, `diets`, `themes`, `allergens`, `working-hours` ;
+- verification CSRF : une creation sans `X-CSRF-Token` retourne `403` ;
+- creation d'un plat ;
+- creation d'un menu publie ;
+- ajout d'une photo HTTPS ;
+- rattachement du plat au menu via `MenuDish` ;
+- relecture publique via `/api/menus/:id` avec `MenuImage` et `Dish` presents ;
+- verification qu'un client obtient `403` sur `/api/crud/schema` ;
+- nettoyage des donnees de test.
+
+Validation Playwright :
+
+- ajout de `@playwright/test` ;
+- ajout de `View/playwright.config.ts` ;
+- ajout du test `View/tests/e2e/devboard-menu-crud.spec.ts` ;
+- execution reussie : `1` test Playwright passe sur le workflow CRUD menu.
+
+Validation navigateur live :
+
+- ouverture de `http://localhost:5173/dashboard` ;
+- connexion employe ;
+- ouverture de la categorie `Menus` ;
+- chargement de la vue `Menus & Plats` ;
+- table `Menu` selectionnee par defaut ;
+- tables disponibles visibles, dont `MenuImage`, `MenuDish`, `Dish`, `Ingredient`, `MenuIngredient`, `DishIngredient` et `DishAllergen`.
+
 ## HTTPS, certificats CA et production
 
 ### Objectif
@@ -212,15 +359,18 @@ La CI doit verifier le projet sans deployer automatiquement en production a chaq
 - Suppression du job de deploiement Fly automatique.
 - Ajout de controles securite : HTTPS, HSTS, URL de production, scripts shell.
 - Correction TypeScript 6 `TS5011` avec `rootDir` explicite dans `Back/tsconfig.json`.
+- Ajout d'un test Playwright pour le workflow DevBoard menu CRUD.
 
 ### Resultats verifies
 
-- Tests unitaires backend : 38 suites passees, 318 tests passes.
+- Tests unitaires backend : 39 suites passees, 324 tests passes.
+- Test Playwright DevBoard menu CRUD : 1 test passe.
 - Build backend NestJS : OK.
 - Build frontend Vite : OK.
 - Audits backend/frontend : 0 vulnerabilite au niveau verifie.
 - Docker production app image : build OK.
 - `docker compose config` : OK.
+- `make docker-build-dev` : OK.
 
 ## Refactorisation infrastructure
 
@@ -336,6 +486,7 @@ Un projet professionnel ne doit pas seulement fonctionner en local : il doit aus
 | Accessibilite | Interface plus lisible et utilisable | Meilleure conformite aux bonnes pratiques web |
 | SEO | Meilleure indexation potentielle | Sitemap, robots, pages publiques propres |
 | Securite | Sessions mieux protegees | Cookies securises, CSRF, CSP, HSTS, CORS |
+| DevBoard | Menus et plats gerables par le staff | CRUD allowliste, relations menu-plat, tests Playwright |
 | CI | Moins de regressions | Tests, audits et builds automatises |
 | Infrastructure | Deploiement plus fiable | Docker Compose, services separes, Fly dockerise |
 | Maintenance | Projet plus comprehensible | Documentation, contrats, Makefile modulaire |
@@ -372,6 +523,7 @@ Elements demonstrables :
 Elements demonstrables :
 
 - tests automatises ;
+- tests Playwright sur un workflow metier ;
 - CI GitHub Actions ;
 - audits `npm audit` ;
 - controle Lighthouse ;
@@ -394,14 +546,16 @@ Elements demonstrables :
 
 Exemple de formulation :
 
-> Dans le cadre de mon projet Vite & Gourmand, j'ai realise une phase de stabilisation technique avant livraison. J'ai commence par diagnostiquer les problemes de performance, d'accessibilite, de securite et de CI. J'ai ensuite corrige les failles frontend et backend, notamment le stockage du JWT, la protection CSRF, les headers HTTP, la politique HTTPS et les erreurs TypeScript/Jest. J'ai aussi refactorise l'infrastructure en services Docker pour rendre le projet plus maintenable. Les validations ont ete realisees avec Lighthouse, Jest, npm audit, Docker Compose et les builds de production. Cette demarche a permis d'obtenir des scores Lighthouse superieurs a 90 sur les pages publiques, de revenir a 0 vulnerabilite detectee par audit au niveau verifie, et de rendre le projet plus fiable pour une livraison professionnelle.
+> Dans le cadre de mon projet Vite & Gourmand, j'ai realise une phase de stabilisation technique avant livraison. J'ai commence par diagnostiquer les problemes de performance, d'accessibilite, de securite et de CI. J'ai ensuite corrige les failles frontend et backend, notamment le stockage du JWT, la protection CSRF, les headers HTTP, la politique HTTPS, les erreurs TypeScript/Jest et le CRUD DevBoard. J'ai aussi refactorise l'infrastructure en services Docker et les tokens CSS `:root` pour rendre le projet plus maintenable. Les validations ont ete realisees avec Lighthouse, Jest, Playwright, npm audit, Docker Compose et les builds de production. Cette demarche a permis d'obtenir des scores Lighthouse superieurs a 90 sur les pages publiques, de valider 39 suites backend et un scenario Playwright metier, de revenir a 0 vulnerabilite detectee par audit au niveau verifie, et de rendre le projet plus fiable pour une livraison professionnelle.
 
 ## Preuves techniques a presenter
 
 | Preuve | Commande ou fichier |
 |---|---|
 | Scores Lighthouse | Rapport ou captures des routes publiques |
-| Tests backend | `npm test -- --json --outputFile=test-results-unit.json` |
+| Tests backend | `npm test` dans `Back/` |
+| Test Playwright menu CRUD | `PLAYWRIGHT_SKIP_WEB_SERVER=1 PLAYWRIGHT_API_URL=http://localhost:3000 npx playwright test tests/e2e/devboard-menu-crud.spec.ts` |
+| DevBoard live | `http://localhost:5173/dashboard`, compte employee, categorie `Menus` |
 | Build frontend | `npm run build` dans `View/` |
 | Build backend | `npm run build` dans `Back/` |
 | Audit dependances | `npm audit --audit-level=moderate` |

@@ -70,7 +70,7 @@ const employeeLabels: Record<TestCategory, string> = {
   overview: 'Mon Espace',
   'test-automatics': 'Tests',
   scenarios: 'Tâches',
-  database: 'Database',
+  database: 'Menus & Plats',
   settings: 'Profil',
   logs: 'Logs',
   metrics: 'Metrics',
@@ -305,6 +305,8 @@ function renderEmployeeContent(category: TestCategory) {
       return <EmployeeOverview />;
     case 'activity':
       return <EmployeeOrders />;
+    case 'database':
+      return <DatabaseViewer initialTable="Menu" />;
     case 'scenarios':
       return <EmployeeTasks />;
     case 'settings':

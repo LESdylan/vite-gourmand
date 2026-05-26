@@ -15,6 +15,12 @@ const MODEL_TO_ENDPOINT: Record<string, string> = {
   Role: 'roles',
   Order: 'orders',
   Menu: 'menus',
+  MenuImage: 'menu-images',
+  MenuDish: 'menu-dishes',
+  Ingredient: 'ingredients',
+  MenuIngredient: 'menu-ingredients',
+  DishIngredient: 'dish-ingredients',
+  DishAllergen: 'dish-allergens',
   Diet: 'diets',
   Theme: 'themes',
   Dish: 'dishes',
@@ -53,12 +59,17 @@ interface SchemaColumn {
   isRequired?: boolean;
   isList?: boolean;
   isRelation?: boolean;
+  isReadOnly?: boolean;
 }
 
 /** Schema model from backend */
 interface SchemaModel {
   name: string;
   columns: SchemaColumn[];
+  primaryKey?: string[];
+  canCreate?: boolean;
+  canUpdate?: boolean;
+  canDelete?: boolean;
 }
 
 export class DatabaseService {
@@ -123,7 +134,12 @@ export class DatabaseService {
             type: col.type.toLowerCase(),
             nullable: !col.isRequired,
             isPrimary: col.isId ?? false,
+            isReadOnly: col.isReadOnly ?? false,
           })),
+        primaryKey: model.primaryKey || model.columns.filter((col) => col.isId).map((col) => col.name),
+        canCreate: model.canCreate ?? true,
+        canUpdate: model.canUpdate ?? true,
+        canDelete: model.canDelete ?? true,
         rowCount: counts[model.name] || 0,
       }));
 
@@ -167,9 +183,9 @@ export class DatabaseService {
 
       // Check if data is the inner paginated object
       if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
-        const inner = res.data as { data?: TableRecord[]; total?: number };
+        const inner = res.data as { data?: TableRecord[]; total?: number; meta?: { total?: number } };
         if (inner.data) {
-          return { data: inner.data, total: inner.total || inner.data.length };
+          return { data: inner.data, total: inner.total || inner.meta?.total || inner.data.length };
         }
       }
 
@@ -188,6 +204,7 @@ export class DatabaseService {
   /** Create a new record */
   static async create(table: string, data: Partial<TableRecord>): Promise<TableRecord> {
     const endpoint = MODEL_TO_ENDPOINT[table];
+    if (!endpoint) throw new Error(`No endpoint for table: ${table}`);
     return apiRequest(`${BASE}/${endpoint}`, {
       method: 'POST',
       body: data,
@@ -195,20 +212,20 @@ export class DatabaseService {
   }
 
   /** Update an existing record */
-  static async update(table: string, id: number, data: Partial<TableRecord>): Promise<TableRecord> {
+  static async update(table: string, key: string, data: Partial<TableRecord>): Promise<TableRecord> {
     const endpoint = MODEL_TO_ENDPOINT[table];
-    return apiRequest(`${BASE}/${endpoint}/${id}`, {
+    if (!endpoint) throw new Error(`No endpoint for table: ${table}`);
+    return apiRequest(`${BASE}/${endpoint}/${key}`, {
       method: 'PUT',
       body: data,
     }) as Promise<TableRecord>;
   }
 
   /** Delete a record */
-  static async delete(table: string, id: number): Promise<void> {
-    await apiRequest(
-      `${MODEL_TO_ENDPOINT[table] ? `${BASE}/${MODEL_TO_ENDPOINT[table]}/${id}` : ''}`,
-      { method: 'DELETE' },
-    );
+  static async delete(table: string, key: string): Promise<void> {
+    const endpoint = MODEL_TO_ENDPOINT[table];
+    if (!endpoint) throw new Error(`No endpoint for table: ${table}`);
+    await apiRequest(`${BASE}/${endpoint}/${key}`, { method: 'DELETE' });
   }
 
   /** Build query string from filters and pagination */
@@ -217,8 +234,8 @@ export class DatabaseService {
     { page, pageSize }: PaginationState,
   ): string {
     const params = new URLSearchParams();
-    params.set('skip', String((page - 1) * pageSize));
-    params.set('take', String(pageSize));
+    params.set('page', String(page));
+    params.set('limit', String(pageSize));
 
     // Build search param from contains filters
     const searchFilter = filters.find((f) => f.operator === 'contains');

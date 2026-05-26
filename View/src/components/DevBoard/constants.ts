@@ -133,6 +133,13 @@ export const EMPLOYEE_CATEGORIES: CategoryData[] = [
     group: 'main',
     description: 'Commandes en cours',
   },
+  {
+    id: 'database',
+    label: 'Menus',
+    icon: 'database',
+    group: 'main',
+    description: 'Menus & plats',
+  },
   { id: 'scenarios', label: 'Tâches', icon: 'scenarios', group: 'main', description: 'Mes tâches' },
   {
     id: 'settings',

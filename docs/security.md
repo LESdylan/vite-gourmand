@@ -14,6 +14,7 @@ This index tracks frontend security findings, repairs, and verification evidence
 | [security-breach-frontend-006-ci-security-gates.md](security-breach-frontend-006-ci-security-gates.md) | Medium | Fixed | CI now includes frontend dependency audit and forbidden-pattern checks. |
 | [security-breach-frontend-007-csrf-cookie-auth.md](security-breach-frontend-007-csrf-cookie-auth.md) | High | Fixed | Cookie-authenticated unsafe requests now require a CSRF token header. |
 | [security-breach-frontend-008-https-ca-enforcement.md](security-breach-frontend-008-https-ca-enforcement.md) | Critical | Fixed | Production public traffic now requires CA-backed HTTPS origins, HSTS, and HTTP-to-HTTPS redirects. |
+| [security-breach-frontend-009-devboard-crud-data-exposure.md](security-breach-frontend-009-devboard-crud-data-exposure.md) | High | Fixed | DevBoard CRUD now uses backend allowlists, sanitization, RBAC, CSRF, HTTPS media checks, and Playwright coverage. |
 
 ## Final Verification Checklist
 
@@ -23,4 +24,5 @@ This index tracks frontend security findings, repairs, and verification evidence
 - Forbidden frontend patterns must remain absent: `dangerouslySetInnerHTML`, `.innerHTML =`, `eval`, `new Function`, `javascript:` URLs, browser-readable JWT persistence, and EventSource URL tokens.
 - Authenticated unsafe API requests must include `X-CSRF-Token` matching the readable `vg_csrf_token` cookie.
 - Production public origins must use CA-backed `https://` URLs; only localhost HTTP is allowed for development and CI.
+- DevBoard CRUD must expose new tables only through explicit backend policies with read/write permissions and sensitive-field sanitization.
 - Login, logout, Google login, reset password, protected dashboard routes, live logs, and admin database screens must be manually smoke-tested after deployment.

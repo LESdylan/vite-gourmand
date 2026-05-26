@@ -47,6 +47,18 @@
   vertical-align: middle;
 }
 
+.readonly-badge {
+  display: inline-block;
+  margin-left: 0.375rem;
+  padding: 0.125rem 0.375rem;
+  font-size: var(--font-size-xs1);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-neutral-200);
+  color: var(--color-text-muted, var(--color-neutral-500));
+  border-radius: var(--radius-full);
+  vertical-align: middle;
+}
+
 .data-table td {
   padding: 0.875rem 1rem;
   border-bottom: 1px solid var(--color-border, var(--color-neutral-200));

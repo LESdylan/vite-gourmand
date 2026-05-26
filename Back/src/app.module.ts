@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
+import { existsSync } from 'fs';
 import * as path from 'path';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
@@ -55,6 +56,16 @@ import {
   CustomValidationPipe,
 } from './common';
 
+function resolveI18nPath(): string {
+  const candidates = [
+    path.join(process.cwd(), 'src', 'i18n'),
+    path.join(__dirname, 'i18n'),
+    path.join(process.cwd(), 'dist', 'src', 'i18n'),
+  ];
+
+  return candidates.find((candidate) => existsSync(candidate)) ?? candidates[0];
+}
+
 @Module({
   imports: [
     // Configuration
@@ -66,7 +77,7 @@ import {
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: path.join(__dirname, '/i18n/'),
+        path: resolveI18nPath(),
         watch: true,
       },
       resolvers: [

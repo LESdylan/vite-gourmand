@@ -4,16 +4,26 @@
  */
 
 import type { TableColumn, TableRecord } from './types';
+import { getRecordKey, getRecordLabel } from './recordKey';
 import './DatabaseCards.css';
 
 interface Props {
   columns: TableColumn[];
   records: TableRecord[];
   onEdit: (record: TableRecord) => void;
-  onDelete: (id: number) => void;
+  onDelete: (record: TableRecord) => void;
+  canUpdate?: boolean;
+  canDelete?: boolean;
 }
 
-export function DatabaseCards({ columns, records, onEdit, onDelete }: Props) {
+export function DatabaseCards({
+  columns,
+  records,
+  onEdit,
+  onDelete,
+  canUpdate = true,
+  canDelete = true,
+}: Props) {
   if (records.length === 0) {
     return <EmptyState />;
   }
@@ -22,11 +32,13 @@ export function DatabaseCards({ columns, records, onEdit, onDelete }: Props) {
     <div className="db-cards">
       {records.map((record) => (
         <RecordCard
-          key={record.id}
+          key={getRecordKey(record, columns)}
           record={record}
           columns={columns}
+          canUpdate={canUpdate}
+          canDelete={canDelete}
           onEdit={() => onEdit(record)}
-          onDelete={() => onDelete(record.id as number)}
+          onDelete={() => onDelete(record)}
         />
       ))}
     </div>
@@ -36,11 +48,15 @@ export function DatabaseCards({ columns, records, onEdit, onDelete }: Props) {
 function RecordCard({
   record,
   columns,
+  canUpdate,
+  canDelete,
   onEdit,
   onDelete,
 }: {
   record: TableRecord;
   columns: TableColumn[];
+  canUpdate: boolean;
+  canDelete: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -50,7 +66,7 @@ function RecordCard({
   return (
     <article className="db-card">
       <header className="db-card-header">
-        <span className="db-card-id">#{record.id}</span>
+        <span className="db-card-id">{getRecordLabel(record, columns)}</span>
         {titleField && <h3 className="db-card-title">{titleField}</h3>}
       </header>
       <div className="db-card-fields">
@@ -58,7 +74,14 @@ function RecordCard({
           <FieldDisplay key={col.name} column={col} value={record[col.name]} />
         ))}
       </div>
-      <CardActions onEdit={onEdit} onDelete={onDelete} />
+      {(canUpdate || canDelete) && (
+        <CardActions
+          onEdit={onEdit}
+          onDelete={onDelete}
+          canUpdate={canUpdate}
+          canDelete={canDelete}
+        />
+      )}
     </article>
   );
 }
@@ -74,15 +97,29 @@ function FieldDisplay({ column, value }: { column: TableColumn; value: unknown }
   );
 }
 
-function CardActions({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
+function CardActions({
+  onEdit,
+  onDelete,
+  canUpdate,
+  canDelete,
+}: {
+  onEdit: () => void;
+  onDelete: () => void;
+  canUpdate: boolean;
+  canDelete: boolean;
+}) {
   return (
     <footer className="db-card-actions">
-      <button className="db-card-btn db-card-btn--edit" onClick={onEdit}>
-        ✏️ Edit
-      </button>
-      <button className="db-card-btn db-card-btn--delete" onClick={onDelete}>
-        🗑️
-      </button>
+      {canUpdate && (
+        <button className="db-card-btn db-card-btn--edit" onClick={onEdit}>
+          ✏️ Edit
+        </button>
+      )}
+      {canDelete && (
+        <button className="db-card-btn db-card-btn--delete" onClick={onDelete}>
+          🗑️
+        </button>
+      )}
     </footer>
   );
 }

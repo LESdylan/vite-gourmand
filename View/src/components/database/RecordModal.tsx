@@ -113,6 +113,7 @@ function parseValueFromInput(value: string, inputType: string, checked?: boolean
 export function RecordModal({ columns, record, onSave, onClose }: Props) {
   const [form, setForm] = useState<Record<string, unknown>>({});
   const isEdit = !!record;
+  const primaryColumns = columns.filter((c) => c.isPrimary);
 
   useEffect(() => {
     if (record) {
@@ -140,10 +141,11 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
     e.preventDefault();
     const cleanedData: Record<string, unknown> = {};
     Object.entries(form).forEach(([key, value]) => {
-      if (key === 'id' || (key.endsWith('_id') && columns.find((c) => c.name === key)?.isPrimary)) {
+      const col = columns.find((c) => c.name === key);
+      const isGeneratedPrimaryKey = col?.isPrimary && primaryColumns.length === 1;
+      if (isGeneratedPrimaryKey || col?.isReadOnly) {
         return;
       }
-      const col = columns.find((c) => c.name === key);
       const inputType = col ? getInputType(col) : 'text';
       // Skip password field when empty — blank means "keep existing"
       if (inputType === 'password' && value === '') return;
@@ -159,9 +161,19 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
     setForm({ ...form, [col.name]: parseValueFromInput(value, inputType, checked) });
   };
 
-  const editableColumns = columns.filter(
-    (c) => !c.isPrimary && c.name !== 'createdAt' && c.name !== 'updatedAt',
-  );
+  const editableColumns = columns.filter((c) => {
+    const normalized = c.name.toLowerCase();
+    const isGeneratedPrimaryKey = c.isPrimary && primaryColumns.length === 1;
+    return (
+      !isGeneratedPrimaryKey &&
+      !c.isReadOnly &&
+      normalized !== 'createdat' &&
+      normalized !== 'updatedat' &&
+      normalized !== 'created_at' &&
+      normalized !== 'updated_at' &&
+      normalized !== 'uploaded_at'
+    );
+  });
 
   return (
     <div className="record-modal-overlay" onClick={onClose}>
@@ -187,6 +199,7 @@ export function RecordModal({ columns, record, onSave, onClose }: Props) {
                   <label>
                     <span className="field-name">{col.name}</span>
                     <span className="field-type">{col.type}</span>
+                    {col.isPrimary && <span className="field-type">PK</span>}
                     {isRequired && <span className="required">*</span>}
                   </label>
                   {inputType === 'checkbox' ? (

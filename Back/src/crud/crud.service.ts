@@ -22,6 +22,8 @@ export interface PaginatedResult<T> {
   };
 }
 
+export type PrismaWhereUnique = Record<string, unknown>;
+
 type PrismaModel = {
   findMany: (args: Record<string, unknown>) => Promise<unknown[]>;
   findUnique: (args: Record<string, unknown>) => Promise<unknown>;
@@ -71,12 +73,12 @@ export class CrudService {
 
   async findOne<T>(
     model: string,
-    id: string,
+    where: PrismaWhereUnique,
     include?: Record<string, unknown>,
   ): Promise<T | null> {
     const prismaModel = this.getModel(model);
     return prismaModel.findUnique({
-      where: { id: parseInt(id, 10) },
+      where,
       include,
     }) as Promise<T | null>;
   }
@@ -88,24 +90,24 @@ export class CrudService {
 
   async update<T>(
     model: string,
-    id: string,
+    where: PrismaWhereUnique,
     data: Record<string, unknown>,
   ): Promise<T> {
     const prismaModel = this.getModel(model);
     return prismaModel.update({
-      where: { id: parseInt(id, 10) },
+      where,
       data,
     }) as Promise<T>;
   }
 
-  async delete(model: string, id: string): Promise<void> {
+  async delete(model: string, where: PrismaWhereUnique): Promise<void> {
     const prismaModel = this.getModel(model);
-    await prismaModel.delete({ where: { id: parseInt(id, 10) } });
+    await prismaModel.delete({ where });
   }
 
   // Alias for delete
-  async remove(model: string, id: string): Promise<void> {
-    return this.delete(model, id);
+  async remove(model: string, where: PrismaWhereUnique): Promise<void> {
+    return this.delete(model, where);
   }
 
   async exists(

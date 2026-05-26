@@ -8,16 +8,21 @@ export interface TableColumn {
   type: string;
   nullable?: boolean;
   isPrimary?: boolean;
+  isReadOnly?: boolean;
 }
 
 export interface TableRecord {
-  id: number;
+  id?: number;
   [key: string]: unknown;
 }
 
 export interface TableMeta {
   name: string;
   columns: TableColumn[];
+  primaryKey: string[];
+  canCreate: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
   rowCount: number;
 }
 

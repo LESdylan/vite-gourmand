@@ -54,7 +54,7 @@ export const DEBUG_BOTS: Record<BotId, DashboardUser> = {
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   superadmin: ['*'], // All access + debug tools
   admin: ['metrics', 'activity', 'database', 'logs', 'settings', 'orders', 'users'],
-  employee: ['tasks', 'orders', 'activity'],
+  employee: ['tasks', 'orders', 'activity', 'database'],
   customer: ['orders', 'loyalty', 'support', 'reviews', 'profile'], // Client dashboard
 };
 
