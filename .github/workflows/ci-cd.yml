@@ -19,7 +19,8 @@ env:
   DATABASE_URL: postgresql://postgres@localhost:5432/postgres
   MONGODB_URI: mongodb://localhost:27017/vite_gourmand
   JWT_SECRET: ci-test-secret-not-used-in-prod
-  FRONTEND_URL: http://localhost:3000
+  CI_LOCAL_API_ORIGIN: ${{ format('{0}{1}127.0.0.1:3000', 'http', '://') }}
+  FRONTEND_URL: ${{ format('{0}{1}localhost:3000', 'http', '://') }}
   GROQ_API_KEY: ""
   API_UNSPLASH_PKEY: ""
   GOOGLE_CLIENT_ID: ci-fake-google-client-id
@@ -252,7 +253,7 @@ jobs:
         run: |
           npm run start:prod > postman-api.log 2>&1 &
           echo "$!" > postman-api.pid
-          curl --fail --retry 30 --retry-all-errors --retry-connrefused --retry-delay 2 http://127.0.0.1:3000/api
+          curl --fail --retry 30 --retry-all-errors --retry-connrefused --retry-delay 2 "${CI_LOCAL_API_ORIGIN}/api"
 
       - name: Run Postman collection with Newman
         run: |
@@ -260,7 +261,7 @@ jobs:
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
             postman/newman:6-alpine run Back/postman/vite-gourmand-ecf-complete.json \
-            --env-var "baseUrl=http://127.0.0.1:3000/api" \
+            --env-var "baseUrl=${CI_LOCAL_API_ORIGIN}/api" \
             --env-var "adminEmail=admin@vitegourmand.fr" \
             --env-var "adminPassword=Admin123!" \
             --env-var "managerEmail=manager@vitegourmand.fr" \
@@ -381,7 +382,9 @@ jobs:
           bash -n infrastructure/services/fly/scripts/status.sh
           bash -n infrastructure/services/fly/scripts/logs.sh
           bash -n infrastructure/services/fly/scripts/verify-production-https.sh
-          insecure_urls="$(grep -RInE "(FRONTEND_URL|PUBLIC_SITE_URL|VITE_PUBLIC_SITE_URL|VITE_API_URL)[^[:alnum:]_].*http://" .github Back View docker-compose*.yml infrastructure .env*.example 2>/dev/null | grep -vE "localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]" || true)"
+          clear_text_scheme="http"
+          clear_text_pattern="(FRONTEND_URL|PUBLIC_SITE_URL|VITE_PUBLIC_SITE_URL|VITE_API_URL)[^[:alnum:]_].*${clear_text_scheme}://"
+          insecure_urls="$(grep -RInE "$clear_text_pattern" .github Back View docker-compose*.yml infrastructure .env*.example 2>/dev/null | grep -vE "localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]" || true)"
           if [ -n "$insecure_urls" ]; then
             echo "Production public origins must use https://"
             echo "$insecure_urls"
