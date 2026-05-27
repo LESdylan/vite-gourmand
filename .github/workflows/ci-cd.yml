@@ -19,8 +19,16 @@ env:
   DATABASE_URL: postgresql://postgres@localhost:5432/postgres
   MONGODB_URI: mongodb://localhost:27017/vite_gourmand
   JWT_SECRET: ci-test-secret-not-used-in-prod
-  CI_LOCAL_API_ORIGIN: ${{ format('{0}{1}127.0.0.1:3000', 'http', '://') }}
-  FRONTEND_URL: ${{ format('{0}{1}localhost:3000', 'http', '://') }}
+  # The two URLs below intentionally use http:// — they target the GitHub Actions
+  # runner's own loopback interface (127.0.0.1 / localhost), which is not reachable
+  # from any network. Setting up TLS for loopback in CI would require provisioning
+  # a self-signed cert per run with no security benefit (no sniffable network path).
+  # Production rejects http:// URLs via validateTransportSecurityConfig() in
+  # Back/src/main.ts and via the workflow step "Check production HTTPS transport
+  # policy" (line ~370) which scans every env-bearing file for clear-text URLs.
+  # See: wiki/security-breach-frontend-011-cicd-http-loopback.md
+  CI_LOCAL_API_ORIGIN: ${{ format('{0}{1}127.0.0.1:3000', 'http', '://') }}  # NOSONAR(githubactions:S5332)
+  FRONTEND_URL: ${{ format('{0}{1}localhost:3000', 'http', '://') }}  # NOSONAR(githubactions:S5332)
   GROQ_API_KEY: ""
   API_UNSPLASH_PKEY: ""
   GOOGLE_CLIENT_ID: ci-fake-google-client-id
@@ -387,7 +395,10 @@ jobs:
           insecure_urls="$(grep -RInE "$clear_text_pattern" .github Back View docker-compose*.yml infrastructure .env*.example 2>/dev/null | grep -vE "localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]" || true)"
           if [ -n "$insecure_urls" ]; then
             echo "Production public origins must use https://"
-            echo "$insecure_urls"
+            # printf '%s\n' is safer than echo: it does not interpret backslash
+            # escapes in $insecure_urls (which comes from arbitrary file content
+            # surfaced by grep). Satisfies SonarQube hotspot bash:S6588.
+            printf '%s\n' "$insecure_urls"
             exit 1
           fi
 
